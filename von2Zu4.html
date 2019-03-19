@@ -3,7 +3,13 @@
 var textur = document.getElementById('textur');
 var canvas = textur.getContext('2d');//Dimension
 
+canvas.fillStyle = "blue"
 canvas.beginPath();
 canvas.arc(100,100,55,0,Math.PI*2, false);
 canvas.fill();
+canvas.fillStyle = "red"
+canvas.beginPath();
+canvas.arc(100,100,46,0,Math.PI*2, false);
+canvas.fill();
+
 </script>
