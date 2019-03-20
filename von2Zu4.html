@@ -1,15 +1,94 @@
 <canvas id="textur" width="2570" height="800"></canvas>
 <script>
-var textur = document.getElementById('textur');
-var canvas = textur.getContext('2d');//Dimension
+  var textur = document.getElementById('textur');
+  var canvas = textur.getContext('2d'); //Dimension
+  var AblageListe = [];
+  var zählerListe = [];
+  var spielfeld = [];
+  var KoordinatenX = 145;
+  var KoordinatenY = 110;
+  var zählerListe = [];
+  var mausx = 0;
+  var mausy = 0;
 
-canvas.fillStyle = "blue"
-canvas.beginPath();
-canvas.arc(100,100,55,0,Math.PI*2, false);
-canvas.fill();
-canvas.fillStyle = "red"
-canvas.beginPath();
-canvas.arc(100,100,46,0,Math.PI*2, false);
-canvas.fill();
 
+  zahlenKreieren();
+  spielfeldKreieren();
+
+  /*canvas.fillStyle = "blue"
+  canvas.beginPath();
+  canvas.arc(110,110,99,0,Math.PI*2, false);
+  canvas.fill();
+  canvas.fillStyle = "red"
+  canvas.beginPath();
+  canvas.arc(110,110,90,0,Math.PI*2, false);
+  canvas.fill();
+  */
+
+  function spielfeldKreieren() {
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (KoordinatenY < 700) {
+      canvas.fillStyle = "blue"
+      canvas.beginPath();
+      canvas.arc(KoordinatenX, KoordinatenY, 69, 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.fillStyle = "red"
+      canvas.beginPath();
+      canvas.arc(KoordinatenX, KoordinatenY, 60, 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.font = "90px Georgia";
+      canvas.fillStyle = "black";
+      canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
+
+      KoordinatenX += 170;
+      if (KoordinatenX > 1500) {
+        KoordinatenX = 145;
+        KoordinatenY += 170;
+        zählerListe[0]++;
+        zählerListe[1] = -1;
+      }
+      zählerListe[1]++;
+    }
+  }
+
+  function zahlenKreieren() {
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+      spielfeld[zählerListe[0]] = [];
+      while (zählerListe[1] < 8) {
+        spielfeld[zählerListe[0]][zählerListe[1]] = Math.floor(Math.random() * 4);
+        spielfeld[zählerListe[0]][zählerListe[1]]++;
+        spielfeld[zählerListe[0]][zählerListe[1]] = spielfeld[zählerListe[0]][zählerListe[1]] * 2
+        zählerListe[1]++;
+      }
+      zählerListe[1] = 0;
+      zählerListe[0]++;
+    }
+  }
+
+
+  function readMouseMove(e) {
+    mausx = e.clientX;
+    mausy = e.clientY;
+    //  console.log(e.clientX);
+  }
+  document.onmousemove = readMouseMove
+
+  window.addEventListener('mousedown', function() {
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+      while (zählerListe[1] < 8) {
+        if (mausx > 145*(zählerListe[1] + 1) && mausx < 145*(zählerListe[1] + 1) + 138 &&        mausy > 110 + 145*zählerListe[0] && mausy < 110 + 145*zählerListe[0] + 138) {
+          console.log(zählerListe[0] + " - " + zählerListe[1]);
+          zählerListe[0] = 4;
+        }
+        zählerListe[1]++;
+      }
+      zählerListe[1] = 0;
+      zählerListe[0]++;
+    }
+  });
 </script>
