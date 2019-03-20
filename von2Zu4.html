@@ -10,6 +10,8 @@
   var zählerListe = [];
   var mausx = 0;
   var mausy = 0;
+  var zustände = [];
+  var felderAuswahl = [];
 
 
   zahlenKreieren();
@@ -28,8 +30,15 @@
   function spielfeldKreieren() {
     zählerListe[0] = 0;
     zählerListe[1] = 0;
+    KoordinatenX = 145;
+    KoordinatenY = 110;
     while (KoordinatenY < 700) {
-      canvas.fillStyle = "blue"
+      if (felderAuswahl.includes(zählerListe[0] + " - " + zählerListe[1]) ) {
+        canvas.fillStyle = "green";
+      }
+      else {
+        canvas.fillStyle = "blue";
+      }
       canvas.beginPath();
       canvas.arc(KoordinatenX, KoordinatenY, 69, 0, Math.PI * 2, false);
       canvas.fill();
@@ -73,22 +82,49 @@
     mausx = e.clientX;
     mausy = e.clientY;
     //  console.log(e.clientX);
+
+    if (zustände[0] == "Auswahl") {
+      klickpointCheck();
+      if (zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && spielfeld[AblageListe[0].toString().split(' - ')[0] ][AblageListe[0].toString().split(' - ')[1]] == zustände[1]) {
+        felderAuswahl[felderAuswahl.length] = AblageListe[0];
+        console.log(felderAuswahl);
+        spielfeldKreieren();
+      }
+    }
   }
   document.onmousemove = readMouseMove
 
   window.addEventListener('mousedown', function() {
-    zählerListe[0] = 0;
-    zählerListe[1] = 0;
-    while (zählerListe[0] < 4) {
-      while (zählerListe[1] < 8) {
-        if (mausx > 145*(zählerListe[1] + 1) && mausx < 145*(zählerListe[1] + 1) + 138 &&        mausy > 110 + 145*zählerListe[0] && mausy < 110 + 145*zählerListe[0] + 138) {
-          console.log(zählerListe[0] + " - " + zählerListe[1]);
-          zählerListe[0] = 4;
-        }
-        zählerListe[1]++;
+    klickpointCheck();
+    if (zählerListe[0] == 5) {
+      if (zustände[0] == "Auswahl" == false) {
+        zustände[0] = "Auswahl";
+        felderAuswahl = [];
+        felderAuswahl[0] = AblageListe[0];
+        spielfeldKreieren();
       }
-      zählerListe[1] = 0;
-      zählerListe[0]++;
     }
   });
+
+function klickpointCheck() {
+  zählerListe[0] = 0;
+  zählerListe[1] = 0;
+  while (zählerListe[0] < 4) {
+    while (zählerListe[1] < 8) {
+      if (mausx > 145*(zählerListe[1] + 1) && mausx < 145*(zählerListe[1] + 1) + 138 &&        mausy > 110 + 145*zählerListe[0] && mausy < 110 + 145*zählerListe[0] + 138) {
+        //console.log(zählerListe[0] + " - " + zählerListe[1]);
+        AblageListe[0] = zählerListe[0] + " - " + zählerListe[1]
+        if (zustände[0] == "Auswahl" == false) {
+
+        zustände[1] = spielfeld[zählerListe[0]][zählerListe[1]];
+      }
+        zählerListe[0] = 4;
+      }
+      zählerListe[1]++;
+    }
+    zählerListe[1] = 0;
+    zählerListe[0]++;
+  }
+}
+
 </script>
