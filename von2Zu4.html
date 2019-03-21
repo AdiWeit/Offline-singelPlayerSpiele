@@ -111,7 +111,7 @@ function klickpointCheck() {
   zählerListe[1] = 0;
   while (zählerListe[0] < 4) {
     while (zählerListe[1] < 8) {
-      if (mausx > 145*(zählerListe[1] + 1) && mausx < 145*(zählerListe[1] + 1) + 138 &&        mausy > 110 + 145*zählerListe[0] && mausy < 110 + 145*zählerListe[0] + 138) {
+      if (mausx > 80 + 170*zählerListe[1] && mausx < 80 + 170*zählerListe[1] + 138 &&        mausy > 50 + 170*zählerListe[0] && mausy < 50 + 170*zählerListe[0] + 138) {
         //console.log(zählerListe[0] + " - " + zählerListe[1]);
         AblageListe[0] = zählerListe[0] + " - " + zählerListe[1]
         if (zustände[0] == "Auswahl" == false) {
@@ -126,5 +126,12 @@ function klickpointCheck() {
     zählerListe[0]++;
   }
 }
+
+document.onkeydown = function(event) {
+  if (event.keyCode == 46) {
+    zustände[0] = "beendet";
+  }
+
+  };
 
 </script>
