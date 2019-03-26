@@ -1,4 +1,9 @@
-<canvas id="textur" width="2570" height="800"></canvas>
+<meta charset="utf-8">
+<script src="http://adi.nicolaiweitkemper.de/Database/js.js"></script>
+
+<button type="button" onclick="HighscoresAndereSpieler()" name="button">highscores von anderen Spielern ansehen</button>
+<button type="button" onclick="neueRunde()" name="button">Neue Runde</button>
+<canvas id="textur" width="2570" height="1800"></canvas>
 <script>
   var textur = document.getElementById('textur');
   var canvas = textur.getContext('2d'); //Dimension
@@ -12,7 +17,23 @@
   var mausy = 0;
   var zustände = [];
   var felderAuswahl = [];
-
+  zustände[2] = "inRunde";
+  var Endanimation;
+  var scores = [0, 0];
+  var zweitBesteScores = [0, 0];
+  var highscores = [0, 0];
+  var nameAndererSpieler = "";
+  var name = prompt("Wie heißen sie? Diese Information ist nötig, um deine Highscores speichern zu können.");
+  dbGet("von2Zu4", "highscores" + name, function(result) {
+    if (result == "NOPE" == false) {
+      highscores = result.toString().split(',');
+    }
+  });
+  dbGet("von2Zu4", "zweitBesteScores" + name, function(result) {
+    if (result == "NOPE" == false) {
+      zweitBesteScores = result.toString().split(',');
+    }
+  });
 
   zahlenKreieren();
   spielfeldKreieren();
@@ -26,6 +47,36 @@
   canvas.arc(110,110,90,0,Math.PI*2, false);
   canvas.fill();
   */
+
+  function HighscoresAndereSpieler() {
+    nameAndererSpieler = prompt("Wie heißt die Person, nach der sie suchen?");
+    dbGet("von2Zu4", "highscores" + nameAndererSpieler, function(result) {
+    canvas.font = "65px Georgia";
+    canvas.fillStyle = "red";
+    canvas.fillText("user: " + nameAndererSpieler, 0, 120*2 + AblageListe[3]  - 120);
+    canvas.font = "50px Georgia";
+    canvas.fillStyle = "black";
+    canvas.fillText("Punkte insgesamt: ", 0, (130 + 40)*2 - 50 + AblageListe[3]  - 120);
+    canvas.fillText("Höchste Punkte von 1 Stein: ", 0, (170 + 57)*2 - 55 + AblageListe[3]  - 120);
+    canvas.font = "30px Georgia";
+
+    canvas.fillText("highscore: " + result.toString().split(',')[0], 0, (145 + 40)*2 - 48 + AblageListe[3]  - 120);
+    canvas.fillText("highscore: " + result.toString().split(',')[1], 0, (185 + 47)*2 - 37 + AblageListe[3]  - 120);
+  });
+    dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler, function(result) {
+    canvas.fillText("zweit bester Score: " + result.toString().split(',')[0], 0, (160 + 40)*2 - 47 + AblageListe[3]  - 120);
+    canvas.fillText("zweit bester Score: " + result.toString().split(',')[1], 0, (195 + 50)*2 - 35 + AblageListe[3]  - 120);
+  });
+  AblageListe[3] += 267;
+  }
+
+  function neueRunde() {
+    zustände[2] = "inRunde";
+    zustände[0] = "beendet";
+    felderAuswahl = [];
+    zahlenKreieren();
+    spielfeldKreieren();
+  }
 
   function spielfeldKreieren() {
     canvas.fillStyle = "white"
@@ -55,21 +106,21 @@
       //    canvas.
       if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false) {
         spielfeld[zählerListe[0]][zählerListe[1]] += "";
-        canvas.font =  105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length + "px Georgia";
+        canvas.font = 105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length + "px Georgia";
         KoordinatenX += 10;
-        KoordinatenX -= 10* spielfeld[zählerListe[0]][zählerListe[1]].length;
+        KoordinatenX -= 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
         canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
         KoordinatenX -= 10;
-        KoordinatenX += 10* spielfeld[zählerListe[0]][zählerListe[1]].length;
+        KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
       } else {
         AblageListe[1] = "";
         AblageListe[1] += zustände[1] * felderAuswahl.length;
-        canvas.font =  105 - 15 * AblageListe[1].length + "px Georgia";
+        canvas.font = 105 - 15 * AblageListe[1].length + "px Georgia";
         KoordinatenX += 10;
-        KoordinatenX -= 10* AblageListe[1].length;
+        KoordinatenX -= 10 * AblageListe[1].length;
         canvas.fillText(zustände[1] * felderAuswahl.length, KoordinatenX - 23, KoordinatenY + 23);
         KoordinatenX -= 10;
-        KoordinatenX += 10* AblageListe[1].length;
+        KoordinatenX += 10 * AblageListe[1].length;
       }
       KoordinatenX += 170;
       if (KoordinatenX > 1500) {
@@ -116,15 +167,24 @@
 
 
   function readMouseMove(e) {
-    mausx = e.clientX;
-    mausy = e.clientY;
-    //  console.log(e.clientX);
+    if (zustände[2] == "inRunde") {
+      mausx = e.clientX;
+      mausy = e.clientY;
+      //  console.log(e.clientX);
+    }
 
     if (zustände[0] == "Auswahl") {
       klickpointCheck();
       if (zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1]) {
-        felderAuswahl[felderAuswahl.length] = AblageListe[0];
-        console.log(felderAuswahl);
+        if (AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) + 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString()
+            .split(' - ')[1]) || AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) - 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length -
+            1].toString().split(' - ')[1]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) + 1 && AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[
+            felderAuswahl.length - 1].toString().split(' - ')[0]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) - 1 && AblageListe[0].toString().split(' - ')[0] == JSON
+          .parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0])) {
+
+          felderAuswahl[felderAuswahl.length] = AblageListe[0];
+          console.log(felderAuswahl);
+        }
       }
       if (zählerListe[0] == 5 && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1] && AblageListe[0] == felderAuswahl[felderAuswahl.length - 2]) {
         felderAuswahl.pop();
@@ -135,6 +195,7 @@
   document.onmousemove = readMouseMove
 
   window.addEventListener('mousedown', function() {
+    if (zustände[2] == "beendet" == false) {
     klickpointCheck();
     if (zählerListe[0] == 5) {
       if (zustände[0] == "Auswahl" == false) {
@@ -152,6 +213,7 @@
         spielfeldKreieren();
       }
     }
+  }
   });
 
   function klickpointCheck() {
@@ -214,5 +276,160 @@
     zustände[0] = "beendet";
     felderAuswahl = [];
     spielfeldKreieren();
+    // SpielendeCheck
+
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+
+      while (zählerListe[1] < 8) {
+        if (zählerListe[0] == 5 == false && zählerListe[0] > 0 && spielfeld[zählerListe[0] - 1][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1]]) {
+          zählerListe[0] = 5;
+        }
+        if (zählerListe[0] == 5 == false && zählerListe[0] < 3 && spielfeld[zählerListe[0] + 1][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1]]) {
+          zählerListe[0] = 5;
+        }
+        if (zählerListe[0] == 5 == false && zählerListe[1] > 0 && spielfeld[zählerListe[0]][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1] - 1]) {
+          zählerListe[0] = 5;
+        }
+
+        if (zählerListe[0] == 5 == false && zählerListe[1] < 7 && spielfeld[zählerListe[0]][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1] + 1]) {
+          zählerListe[0] = 5;
+        }
+        zählerListe[1]++;
+      }
+      zählerListe[0]++;
+      zählerListe[1] = 0;
+    }
+    if (zählerListe[0] < 5) {
+      zustände[2] = "beendet"
+      AblageListe[2] = 69;
+      zählerListe[2] = 0;
+      Endanimation = setInterval(endanimation, 10);
+      console.log("beendet");
+    }
+
+  }
+
+  function endanimation() {
+    canvas.fillStyle = "white"
+    canvas.fillRect(0, 0, 1800, 700)
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    KoordinatenX = 145;
+    KoordinatenY = 110;
+    while (KoordinatenY < 700) {
+      if (AblageListe[2] < 1) {
+        clearInterval(Endanimation);
+        zählerListe[0] = 0;
+        zählerListe[1] = 0;
+        AblageListe[2] = spielfeld[0] + "," + spielfeld[1] + "," + spielfeld[2] + "," + spielfeld[3]
+        while (zählerListe[0] < AblageListe[2].toString().split(',').length) {
+          scores[0] += JSON.parse(AblageListe[2].toString().split(',')[zählerListe[0]])
+          zählerListe[0]++;
+        }
+        if (scores[0] > highscores[0]) {
+          zweitBesteScores[0] = highscores[0];
+          highscores[0] = scores[0];
+          if (name == null == false && name == "" == false) {
+            dbSet("von2Zu4", "highscores" + name, highscores);
+            dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+          }
+        }
+        zählerListe[0] = 0;
+        AblageListe[2] = AblageListe[2].toString().split(',')
+        while (zählerListe[0] < AblageListe[2].length) {
+          if (AblageListe[2][zählerListe[0]].length == 1) {
+            AblageListe[2][zählerListe[0]] = "0" + AblageListe[2][zählerListe[0]]
+          }
+          zählerListe[0]++;
+        }
+        zählerListe[0] = 0;
+        while (zählerListe[0] < AblageListe[2].length) {
+          if (AblageListe[2][zählerListe[0]].length == 2) {
+            AblageListe[2][zählerListe[0]] = "0" + AblageListe[2][zählerListe[0]]
+          }
+          zählerListe[0]++;
+        }
+        AblageListe[2].sort();
+        if (JSON.parse(AblageListe[2][AblageListe[2].length - 1]) > JSON.parse(highscores[1])) {
+          zweitBesteScores[1] = highscores[1];
+          highscores[1] = AblageListe[2][AblageListe[2].length - 1];
+          if (name == null == false && name == "" == false) {
+            dbSet("von2Zu4", "highscores" + name, highscores);
+            dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+          }
+        }
+        scores[1] = AblageListe[2][AblageListe[2].length - 1]
+        canvas.font = "50px Georgia";
+        canvas.fillStyle = "black";
+        canvas.fillText("Punkte insgesamt: ", 0, 0 + 70);
+        canvas.fillText("Höchste Punkte von 1 Stein: ", 0, 150 + 80);
+        canvas.font = "30px Georgia";
+        canvas.fillText("highscore: " + highscores[0], 0, 115);
+        canvas.fillText("zweit bester Score: " + zweitBesteScores[0], 0, 145);
+        canvas.fillText("score: " + scores[0], 0, 175);
+
+        canvas.fillText("highscore: " + highscores[1], 0, 270);
+        canvas.fillText("zweit bester Score: " + zweitBesteScores[1], 0, 300);
+        canvas.fillText("score: " + scores[1], 0, 330);
+        AblageListe[3] = 0;
+        /*    canvas.fillStyle = "blue";
+            canvas.fillRect(0,350,100 + 75,50);
+            canvas.fillStyle = "yellow";
+            canvas.fillRect(10,360,80 + 75,30);
+            canvas.fillStyle = "black";
+            canvas.fillText("Neue Runde", 13, 383) */
+      }
+
+      if (felderAuswahl.includes(zählerListe[0] + " - " + zählerListe[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "blue";
+      }
+      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1]) {
+        canvas.fillStyle = "red"
+      }
+
+      canvas.beginPath();
+      canvas.arc(KoordinatenX, KoordinatenY, AblageListe[2], 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.fillStyle = "yellow"
+      canvas.beginPath();
+      if (AblageListe[2] > 8) {
+        canvas.arc(KoordinatenX, KoordinatenY, AblageListe[2] - 9, 0, Math.PI * 2, false);
+        canvas.fill();
+        canvas.fillStyle = "black";
+      }
+      //    canvas.
+      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false) {
+        spielfeld[zählerListe[0]][zählerListe[1]] += "";
+        canvas.font = (105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length) - zählerListe[2] * 2 + "px Georgia";
+        KoordinatenX += 10;
+        KoordinatenX -= 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+        canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
+        KoordinatenX -= 10;
+        KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+      } else {
+        AblageListe[1] = "";
+        AblageListe[1] += zustände[1] * felderAuswahl.length;
+        canvas.font = (105 - 15 * AblageListe[1].length) - zählerListe[2] * 2 + "px Georgia";
+        KoordinatenX += 10;
+        KoordinatenX -= 10 * AblageListe[1].length;
+        canvas.fillText(zustände[1] * felderAuswahl.length, KoordinatenX - 23, KoordinatenY + 23);
+        KoordinatenX -= 10;
+        KoordinatenX += 10 * AblageListe[1].length;
+      }
+      KoordinatenX += 170;
+      if (KoordinatenX > 1500) {
+        KoordinatenX = 145;
+        KoordinatenY += 170;
+        zählerListe[0]++;
+        zählerListe[1] = -1;
+      }
+      zählerListe[1]++;
+    }
+    AblageListe[2]--;
+    zählerListe[2]++;
   }
 </script>
