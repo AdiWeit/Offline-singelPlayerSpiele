@@ -52,8 +52,13 @@
 
   function namenabfrage() {
     namen[namen.length] = prompt("Wie heißt die Person, nach der sie suchen?");
+    dbGet("von2Zu4", "highscores" + namen[namen.length - 1], function(result) {
+      if (result.toString().split(',')[0] == "NOPE" || result.toString().split(',')[0] == "" || result.toString().split(',')[0] == "null") {
+        namen.pop();
+      }
     AblageListe[3] = 267 * namen.length
     highscoresAndereSpieler(namen[namen.length - 1])
+        });
   }
 
   function gespeicherteHighscoresAbfragen() {
@@ -73,42 +78,62 @@
 
   function highscoresAndereSpieler(nameAndererSpieler) {
     dbGet("von2Zu4", "highscores" + nameAndererSpieler, function(result) {
+
       canvas.font = "65px Georgia";
-      canvas.fillStyle = "red";
+      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
       canvas.fillText("user: " + nameAndererSpieler, 0, 120 * 2 + AblageListe[3] - 120);
       //    canvas.fillText("×" + nameAndererSpieler, 0, 120*2 + AblageListe[3]  - 120);
       canvas.fillStyle = "blue";
-      canvas.fillRect(230, 120 * 2 + AblageListe[3] - 173 + 5, 70, 65);
+      canvas.fillRect(230 + 35*(nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 173 + 5, 70, 65);
       canvas.fillStyle = "black";
-      canvas.fillRect(239, 120 * 2 + AblageListe[3] - 173 + 10 + 5, 50, 45);
+      canvas.fillRect(239 + 35*(nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 173 + 10 + 5, 50, 45);
       canvas.font = "105px Georgia";
       canvas.fillStyle = "red";
-      canvas.fillText("×", 235, 120 * 2 + AblageListe[3] - 105 + 5);
+      canvas.fillText("×", 235 + 35*(nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 105 + 5);
 
       canvas.font = "50px Georgia";
       canvas.fillStyle = "black";
       canvas.fillText("Punkte insgesamt: ", 0, (130 + 40) * 2 - 50 + AblageListe[3] - 120);
       canvas.fillText("Höchste Punkte von 1 Stein: ", 0, (170 + 57) * 2 - 55 + AblageListe[3] - 120);
       canvas.font = "30px Georgia";
-
-      canvas.fillText("highscore: " + result.toString().split(',')[0], 0, (145 + 40) * 2 - 48 + AblageListe[3] - 120);
+      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
+      canvas.fillText("highscore: " + JSON.parse(result.toString().split(',')[0]), 0, (145 + 40) * 2 - 48 + AblageListe[3] - 120);
+      if (JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
       canvas.fillText("highscore: " + result.toString().split(',')[1], 0, (185 + 47) * 2 - 37 + AblageListe[3] - 120);
       dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler, function(result) {
+        canvas.fillStyle = "black";
         canvas.fillText("zweit bester Score: " + result.toString().split(',')[0], 0, (160 + 40) * 2 - 47 + AblageListe[3] - 120);
         canvas.fillText("zweit bester Score: " + result.toString().split(',')[1], 0, (195 + 50) * 2 - 35 + AblageListe[3] - 120);
-      });
-    });
     if (zustände[0] == "whileFunctionHighscoresAbfragen" && zählerListe[0] < namen.length) {
       whileFunctionHighscoresAbfragen();
-    }
-    else {
+    } else {
       zustände[0] = "beendet"
     }
+  });
+});
   }
 
   function neueRunde() {
     canvas.fillStyle = "white";
-    canvas.fillRect(0,0,5000,5000);
+    canvas.fillRect(0, 0, 5000, 5000);
     zustände[2] = "inRunde";
     zustände[0] = "beendet";
     felderAuswahl = [];
