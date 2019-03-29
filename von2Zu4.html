@@ -36,6 +36,11 @@
       zweitBesteScores = result.toString().split(',');
     }
   });
+  dbGet("von2Zu4", "namen" + name, function(result) {
+    if (result == "NOPE" == false) {
+      namen = result.toString().split(',');
+    }
+  });
 
   zahlenKreieren();
   spielfeldKreieren();
@@ -56,24 +61,29 @@
       if (result.toString().split(',')[0] == "NOPE" || result.toString().split(',')[0] == "" || result.toString().split(',')[0] == "null") {
         namen.pop();
       }
+      dbSet("von2Zu4", "namen" + name, namen);
     AblageListe[3] = 267 * namen.length
     highscoresAndereSpieler(namen[namen.length - 1])
         });
   }
 
   function gespeicherteHighscoresAbfragen() {
-    zählerListe[0] = 0;
-    AblageListe[3] = 0;
-    if (namen.length > 0) {
-      zustände[0] = "whileFunctionHighscoresAbfragen";
-      whileFunctionHighscoresAbfragen();
+    setTimeout(function () {
+      zählerListe[0] = 0;
+      AblageListe[3] = 0;
+      if (namen.length > 0) {
+        zustände[0] = "whileFunctionHighscoresAbfragen";
+        whileFunctionHighscoresAbfragen();
     }
+      }, 100);
   }
 
   function whileFunctionHighscoresAbfragen() {
     highscoresAndereSpieler(namen[zählerListe[0]]);
-    AblageListe[3] += 267;
-    zählerListe[0]++;
+  //  setTimeout(function () {
+      AblageListe[3] += 267;
+      zählerListe[0]++;
+  //  }, 550);
   }
 
   function highscoresAndereSpieler(nameAndererSpieler) {
@@ -289,11 +299,18 @@
       zählerListe[0] = 0;
       AblageListe[3] = 0;
       while (zählerListe[0] < namen.length) {
-        if (mausx > 230 && mausx < 230 + 70 && mausy > 369 + AblageListe[3] && mausy < 369 + 65 + AblageListe[3]) {
-          console.log("Löschen " + zählerListe[0]);
+        if (mausx > 230 + 35*(namen[zählerListe[0]].length - 2) && mausx < 230 + 35*(namen[zählerListe[0]].length - 2) + 70 && mausy > 369 + AblageListe[3] && mausy < 369 + 65 + AblageListe[3]) {
+            console.log("Löschen " + zählerListe[0]);
+          namen.splice(zählerListe[0],1);
+          canvas.fillStyle = "white";
+          canvas.fillRect(0,337,10000, 10000)
+          gespeicherteHighscoresAbfragen();
+          zählerListe[0] = namen.length;
         }
-        AblageListe[3] += 267;
-        zählerListe[0]++;
+        if (zählerListe[0] == namen.length == false) {
+          AblageListe[3] += 267;
+          zählerListe[0]++;
+        }
       }
     }
   });
