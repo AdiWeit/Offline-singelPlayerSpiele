@@ -1,10 +1,24 @@
 <meta charset="utf-8">
 <script src="http://adi.nicolaiweitkemper.de/Database/js.js"></script>
-
 <button type="button" onclick="namenabfrage()" name="button">highscores von anderen Spielern ansehen</button>
 <button type="button" onclick="neueRunde()" name="button">Neue Runde</button>
 <canvas id="textur" width="2570" height="1800"></canvas>
 <script>
+if( navigator.userAgent.match(/Android/i)
+|| navigator.userAgent.match(/webOS/i)
+|| navigator.userAgent.match(/iPhone/i)
+|| navigator.userAgent.match(/iPad/i)
+|| navigator.userAgent.match(/iPod/i)
+|| navigator.userAgent.match(/BlackBerry/i)
+|| navigator.userAgent.match(/Windows Phone/i)
+){
+ var gerät = "Handy"
+ console.log("Handy");
+}
+else {
+    var gerät = "PC"
+     console.log("PC");
+}
   var textur = document.getElementById('textur');
   var canvas = textur.getContext('2d'); //Dimension
   var AblageListe = [];
@@ -42,8 +56,21 @@
     }
   });
 
-  zahlenKreieren();
-  spielfeldKreieren();
+  dbGet("von2Zu4", "spielfeld" + name, function(result) {
+    if (result == "NOPE" == false) {
+      spielfeld = result.toString().split(';');
+      zählerListe[0] = 0;
+      spielfeld.pop();
+      while (zählerListe[0] < 4) {
+        spielfeld[zählerListe[0]] = spielfeld[zählerListe[0]].toString().split(',');
+        zählerListe[0]++;
+      }
+    }
+    else {
+      zahlenKreieren();
+    }
+   spielfeldKreieren();
+  });
 
   /*canvas.fillStyle = "blue"
   canvas.beginPath();
@@ -241,8 +268,10 @@
   var f = function() {
     var eventHandler = function(event) {
       console.log(window.scrollX + " - " + window.scrollY);
+      if (zustände[2] == "inRunde" == false) {
       mausxScroll = window.scrollX;
       mausyScroll = window.scrollY;
+    }
     };
     window.addEventListener('scroll', eventHandler, false)
     //    koordinatenSpieler1[6] = 0;
@@ -254,7 +283,11 @@
     mausx = e.clientX + mausxScroll;
     mausy = e.clientY + mausyScroll;
     //  console.log(e.clientX);
-
+    if (gerät == "PC") {
+      mousemoveFolgen();
+    }
+  }
+  function mousemoveFolgen() {
     if (zustände[0] == "Auswahl" && zustände[2] == "inRunde") {
       klickpointCheck();
       if (zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1]) {
@@ -275,8 +308,41 @@
     }
   }
   document.onmousemove = readMouseMove
+  if (gerät == "Handy") {
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+  }
+
+function touch(ev){
+    mausx = ev.touches[0]["pageX"] + mausxScroll;
+    mausy = ev.touches[0]["pageY"] + mausyScroll;
+    if (ev.type == "touchstart") {
+      klickpointCheck();
+      if (felderAuswahl < 1) {
+       zustände[0] = "beendet";
+       mousedownFolgen();
+     }
+      if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] == false || AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1] == false) {
+        zustände[0] = "beendet";
+        mousedownFolgen();
+      }
+      else if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] && AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) {
+        mousedownFolgen();
+      }
+    }
+    if (ev.type == "touchmove") {
+      mousemoveFolgen();
+    }
+}
+
 
   window.addEventListener('mousedown', function() {
+    if (gerät == "PC") {
+      mousedownFolgen();
+    }
+  });
+
+  function mousedownFolgen() {
     if (zustände[2] == "beendet" == false) {
       klickpointCheck();
       if (zählerListe[0] == 5) {
@@ -303,6 +369,7 @@
             console.log("Löschen " + zählerListe[0]);
           namen.splice(zählerListe[0],1);
           canvas.fillStyle = "white";
+          dbSet("von2Zu4", "namen" + name, namen);
           canvas.fillRect(0,337,10000, 10000)
           gespeicherteHighscoresAbfragen();
           zählerListe[0] = namen.length;
@@ -313,7 +380,18 @@
         }
       }
     }
-  });
+  }
+
+  function zuVarSpielfeld() {
+    zählerListe[0] = 0;
+    AblageListe[4] = "";
+    while (zählerListe[0] < 4) {
+      AblageListe[4] += spielfeld[zählerListe[0]]
+      AblageListe[4] += ";"
+      zählerListe[0]++;
+    }
+    console.log(AblageListe[4]);
+  }
 
   function klickpointCheck() {
     zählerListe[0] = 0;
@@ -401,13 +479,17 @@
       zählerListe[1] = 0;
     }
     if (zählerListe[0] < 5) {
+      dbSet("von2Zu4", "spielfeld" + name, "NOPE");
       zustände[2] = "beendet"
       AblageListe[2] = 69;
       zählerListe[2] = 0;
       Endanimation = setInterval(endanimation, 10);
       console.log("beendet");
     }
-
+    else {
+      zuVarSpielfeld();
+      dbSet("von2Zu4", "spielfeld" + name, AblageListe[4]);
+    }
   }
 
   function endanimation() {
@@ -423,6 +505,7 @@
         zählerListe[0] = 0;
         zählerListe[1] = 0;
         AblageListe[2] = spielfeld[0] + "," + spielfeld[1] + "," + spielfeld[2] + "," + spielfeld[3]
+        scores[0] = 0;
         while (zählerListe[0] < AblageListe[2].toString().split(',').length) {
           scores[0] += JSON.parse(AblageListe[2].toString().split(',')[zählerListe[0]])
           zählerListe[0]++;
@@ -452,12 +535,7 @@
         }
         AblageListe[2].sort();
         zählerListe[0] = 0;
-        while (zählerListe[0] < AblageListe[2].length) {
-          AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
-          if (AblageListe[2][zählerListe[0]].includes("0") == false) {
-            zählerListe[0]++;
-          }
-        }
+        remove0();
 
         if (JSON.parse(AblageListe[2][AblageListe[2].length - 1]) > JSON.parse(highscores[1])) {
           zweitBesteScores[1] = highscores[1];
@@ -541,4 +619,28 @@
     AblageListe[2]--;
     zählerListe[2]++;
   }
+
+//  window.scrollTo(0, 100);
+
+function remove0() {
+  while (zählerListe[0] < AblageListe[2].length) {
+    try {
+      if (JSON.parse(AblageListe[2][zählerListe[0]].replace("0", ""))) {zustände[0] == "noError"}
+    }
+    catch (e) {
+      AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
+      zustände[0] = "error";
+    }
+    if (zustände[0] == "noError") {
+      zählerListe[0]++;
+    }
+    else {
+      AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
+      zustände[0] = "noError";
+    }
+  }
+}
+
+
+
 </script>
