@@ -625,7 +625,7 @@ function touch(ev){
 function remove0() {
   while (zählerListe[0] < AblageListe[2].length) {
     try {
-      if (JSON.parse(AblageListe[2][zählerListe[0]].replace("0", ""))) {zustände[0] == "noError"}
+      if (JSON.parse(AblageListe[2][zählerListe[0]])) {zustände[0] == "noError"}
     }
     catch (e) {
       AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
