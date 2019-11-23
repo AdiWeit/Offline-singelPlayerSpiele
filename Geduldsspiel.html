@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<p><img id="preview"></p>
+<html>
+<head>
+<title>Accelerometer</title>
+<meta name="viewport" content="width=device-width,user-scalable=yes" />
+<div id="ball">
+  <style>
+  .shape {
+   position: absolute;
+   width: 50px;
+   height: 50px;
+   -webkit-radius: 50px;
+   margin:0;
+   padding:0;
+  }
+  #sphere1{
+   border-radius: 50px;
+   background-color: blue;
+  }
+  </style>
+</div>
+</head>
+<body>
+<div id="content">
+    <div class ="shape" id="sphere1"></div>
+</div>
+<canvas id="textur" width="1582" height="740"></canvas>
+<head>
+<style>
+table, td {
+  border: 1px solid black;
+}
+</style>
+</head>
+<table id="scores">
+  <!-- <tr>
+    <td>Row1 cell1</td>
+    <td>Row1 cell2</td>
+  </tr>
+  <tr>
+    <td>Row2 cell1</td>
+    <td>Row2 cell2</td>
+  </tr>
+  <tr>
+    <td>Row3 cell1</td>
+    <td>Row3 cell2</td>
+  </tr> -->
+</table>
+<br>
+<br>
+<select name="course" id="courceSelection" onchange="courceSelected()"></select>
+<p id="pictureSelection">select Picture as level from PC<input type="file" onchange="imageLoaded(this);"></p>
+<script type="text/javascript">
+// document.getElementById('image').width = window.innerWidth;
+// document.getElementById('image').height = window.innerHeight;
+document.getElementById('pictureSelection').style.display = "none";
+var canvas = textur.getContext('2d'); //Dimension
+var Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap1.png"
+    canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
+    setTimeout(function () {
+      Layout();
+    }, 500);
+document.getElementById('textur').width = window.innerWidth - 20;
+document.getElementById('textur').height = window.innerHeight - 20;
+console.log(window.innerWidth + " - " + window.innerHeight);
+var mins = 0;
+var secs = 0;
+var tenths = 0;
+  var time = 0;
+var x1 = 10, y1 = 177;//window.innerHeight - 150 + 3,
+  x2 = 0, y2 = 0,
+  vx1 = 0, vy1 = 0,
+  vx2 = 0, vy2 = 0,
+  ax1 = 0, ay1 = 0;
+  var zählerListe = [window.innerHeight];
+  var level = {number:1, 1: {}, 2:{blinkWall: [{x: /*220*/window.innerWidth/7.25, y: /*177*/window.innerHeight/4.4, width: /*115*/window.innerWidth/14, height: 17}, {x: /*220*/window.innerWidth/7.25, y: /*177*/window.innerHeight/2, width: /*115*/window.innerWidth/14, height: 17}]}, 3: {rotatingWall: [{x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 0}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 22}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 44}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 88}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 110}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 130}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 150}, {x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-120, height: 17, angle: 70}]}, 5: {rotatingWall: [{x: window.innerWidth/2, y: window.innerHeight/2, width: window.innerWidth-200, height: 17, angle: 0}]}, 4: {rotatingDreieck: [{x: window.innerWidth/(1600/300), y: window.innerHeight/(769/155), size: window.innerWidth/(1600/37), timeFor360GradRotation: 1000, angle: 0}, {x: window.innerWidth/(1600/500), y: window.innerHeight/(769/444), size: (window.innerWidth + window.innerHeight)/((1600 + 769)/37),timeFor360GradRotation: 1000, angle: 10}, {x: window.innerWidth/(1600/733), y: window.innerHeight/(769/588), size: window.innerWidth/(1600/37),timeFor360GradRotation: 1000, angle: 0}, {x: window.innerWidth/(1600/1222), y: window.innerHeight/(769/377), size: window.innerWidth/(1600/96) ,timeFor360GradRotation: 777, angle: 0}]
+}, 6: {}, 7: {rotatingWall: [{x: window.innerWidth/4.22, y: window.innerHeight/5.85, width: window.innerWidth/2.9, height: 17, angle: 0}, {x: window.innerWidth/2.4, y: window.innerHeight/1.9, width: window.innerWidth/4, height: 17, angle: 0}, {x: window.innerWidth/1.44, y: window.innerHeight/1.77, width: window.innerWidth/5, height: 17, angle: 0}, {x: window.innerWidth/1.1, y: window.innerHeight/1.8, width: window.innerWidth/5, height: 17, angle: 0}]}, 8: {}, 9: {}}
+  var worldWideLevel = [];
+  var spawnPoint = 255//window.innerHeight - 150 + 3//window.innerHeight/4//610;
+// for (var i = 0; zählerListe[0]>0;i++) {
+//   data = canvas.getImageData(10, zählerListe[0], 1, 1);
+//   red = data.data[0];
+//   green = data.data[1];
+//   blue = data.data[2];
+//   alpha = data.data[3];
+//   if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+//     y1 = zählerListe[0] - (window.innerWidth/40 + 66);
+//     spawnPoint = zählerListe[0] - (window.innerWidth/40 + 66)
+//   }
+//   zählerListe[0]--;
+// }
+var highscores = {}
+var AblageListe = [];
+var name = prompt("Wie heißen sie? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! Ihre Zeiten werden auf Anfrage, oder beim Beenden aller Level angezeigt)")
+highscores[name] = [];
+dbGet("Gelduldspiel", "highscores", function(result) {
+  if (!(result == "NOPE")) {
+    AblageListe[0] = JSON.parse(result);
+    for (var i = 0; i < Object.keys(AblageListe[0]).length; i++) {
+      highscores[Object.keys(AblageListe[0])[i]] = AblageListe[0][Object.keys(AblageListe[0])[i]];
+    }
+  }
+    AblageListe[0] = 0;
+  for (var i = 0; (i < highscores[name].length + 1 && highscores[name].length <= level.length - 1) || i < highscores[name].length; i++) {
+    opt = document.createElement("option");
+      document.getElementById("courceSelection").options.add(opt);
+      opt.setAttribute("id", i);
+      opt.text = (i+1) + ". map"
+      AblageListe[0] = i;
+  }
+  opt = document.createElement("option");
+    document.getElementById("courceSelection").options.add(opt);
+    opt.setAttribute("id", i + 1);
+    opt.text = "show Scores";
+    opt = document.createElement("option");
+    document.getElementById("courceSelection").options.add(opt);
+    opt.setAttribute("id", i + 2);
+    opt.text = "upload own level";
+  if (highscores[name].length == 0) courceSelected();
+  else document.getElementById('textur').style.display = "none";
+    document.getElementById('courceSelection').value = "select map!";
+});
+function courceSelected() {
+  if (document.getElementById('courceSelection').value == "show Scores") showScores();
+  else if (document.getElementById('courceSelection').value == "upload own level") {
+    document.getElementById('pictureSelection').style.display = "inline";
+    document.getElementById('courceSelection').style.display = "none";
+    document.getElementById('preview').style.display = "none";
+  }
+  else {
+    level.number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+    document.getElementById('textur').style.display = "inline";
+    Layout();
+    setTimeout(function () {
+      Layout();
+    }, 500);
+    startPause();
+    window.scroll(0,0)
+  }
+}
+function imageLoaded(input) {
+  var reader = new FileReader();
+reader.onload = function (e) {
+  document.getElementById('preview').setAttribute("src", e.target.result)
+};
+reader.readAsDataURL(input.files[0])
+setTimeout(function () {
+  canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, window.innerHeight);
+  document.getElementById('textur').style.display = "inline";
+}, 500);
+}
+var sphere1 = document.getElementById("sphere1");
+    sphere1.style.width = (window.innerWidth/40 + 66)/2 + "px";
+    sphere1.style.height = (window.innerWidth/40 + 66)/2 + "px";
+if (window.DeviceMotionEvent != undefined) {
+ window.ondevicemotion = function(e) {
+  ax1 = event.accelerationIncludingGravity.x * 5;
+  ay1 = event.accelerationIncludingGravity.y * 5;
+ }
+ setInterval( function() {
+  var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
+  if ( landscapeOrientation) {
+   vx1 = vx1 + ay1;
+   vy1 = vy1 + ax1;
+  vx2 = vx2 + ay1;
+   vy2 = vy2 + ax1;
+  } else {
+   vy1 = vy1 - ay1;
+   vx1 = vx1 + ax1;
+  vy2 = vy2 - ay1;
+   vx2 = vx2 + ax1;
+  }
+  vx1 = vx1 * 0.98;
+  vy1 = vy1 * 0.98;
+  y1 = parseInt(y1 + vy1 / 50);
+  x1 = parseInt(x1 + vx1 / 50);
+
+ vx2 = vx2 * 0.98;
+  vy2 = vy2 * 0.98;
+  y2 = parseInt(y2 + vy2 / 30);
+  x2 = parseInt(x2 + vx2 / 30);
+  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
+  boundingBoxCheck();
+  sphere1.style.top = y1 + "px";
+  sphere1.style.left = x1 + "px";
+  if (/*y1 <= window.innerHeight*/scrollY == 0) sphere1.style.display = "inline";
+  else sphere1.style.display = "none";
+  var numbers = [[x1 + JSON.parse(sphere1.style.width.replace("px", "")) - 7, y1 + JSON.parse(sphere1.style.height.replace("px", ""))/2], [x1 + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1 - 8],
+  [x1 + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1 + JSON.parse(sphere1.style.height.replace("px", "")) - 7], [x1 - 10, y1 + JSON.parse(sphere1.style.height.replace("px", ""))/2]]
+  for (var i = 0; i < 4; i++) {
+    // canvas.fillStyle = "red";
+    // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
+    data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+    red = data.data[0];
+    green = data.data[1];
+    blue = data.data[2];
+    alpha = data.data[3];
+    if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+      console.log("Fail!");
+      x1 = 10;
+      y1 = spawnPoint;//window.innerHeight - 150 + 3;
+      // x1 = 940;
+      // y1 = 155;
+      time = 0;
+    }
+    if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
+  }
+ }, 25);
+}
+function blinkWall() {
+  Layout();
+  setTimeout(function () {
+    canvas.fillStyle = "black";
+    for (var i = 0; !(level[level.number].blinkWall == undefined) && i < level[level.number].blinkWall.length; i++) {
+      canvas.fillRect(level[level.number].blinkWall[i].x, level[level.number].blinkWall[i].y, level[level.number].blinkWall[i].width, level[level.number].blinkWall[i].height);
+    }
+  }, 3000);
+}
+function zielErreicht() {
+  x1 = 10;
+  y1 = 177;
+  if (highscores[name][level.number] == undefined || highscores[name][level.number] > mins + ":" + secs + ":" + "0" + tenths) {
+    highscores[name][level.number] = mins + ":" + secs + ":" + "0" + tenths;
+    dbSet("Gelduldspiel", "highscores", JSON.stringify(highscores));
+  }
+  level.number++;
+  if (level[level.number] == undefined) {
+    console.log("everything Finished!");
+    clearInterval(blinkWall);
+    clearInterval(rotatingWall);
+    clearInterval(rotatingDreieck);
+    showScores();
+  }
+  else Layout();
+}
+function showScores() {
+  document.getElementById('textur').style.display = "none";
+  console.log("scores: " + highscores);
+  var cell = [/*row.insertCell(0)*/];
+  for (var i = 0; i < Object.keys(highscores).length; i++) {
+    var table = document.getElementById("scores");
+    var row = table.insertRow(i);
+    cell.push(row.insertCell(0));
+    cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
+  //  var cell = [/*row.insertCell(0)*/];
+  for (var i1 = 1; i1 < Object.keys(level).length; i1++) {
+    if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
+    cell[cell.length - 2] = row.insertCell(i1);
+    cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1 - 1];
+  if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "red";
+  else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[name][i1 - 1])  cell[cell.length - 2].style.color = "green";
+  else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
+  else cell[cell.length - 2].style.color = "black";
+}
+  else {
+    cell[cell.length - 2] = row.insertCell(i1);
+  //  cell[cell.length - 2].innerHTML = "unmade";
+  //  cell[cell.length - 2].style.color = "black";
+  }
+  }
+    var row = table.insertRow(i);
+    if (i == 0) {
+    }
+  //  var row = table.insertRow(i+1);
+    // var row = table.insertRow(i + 1);
+  }
+//  var row = table.insertRow(0);
+//  var cell = [/*row.insertCell(0)*/];
+  // cell.push(row.insertCell(0));
+  // cell[cell.length - 1].innerHTML = "name";
+  var row = table.insertRow(0);
+  cell.push(row.insertCell(0));
+  cell[cell.length - 1].innerHTML = "name";
+  for (var i1 = 1; i1 < Object.keys(level).length; i1++) {
+    cell.push(row.insertCell(i1));
+    cell[cell.length - 1].innerHTML = (i1) + ". Map";
+  }
+}
+// Für rotatingDreieck:
+const point = (x, y) => ({x, y});
+const triangle = createPath(point(0,-25), point(-50,-75), point(-100,-25));
+// function drawPath(path, x, y, angle) {
+//     canvas.setTransform(1, 0, 0, 1, x, y);
+//     canvas.rotate(level[level.number].rotatingDreieck[i].angle);
+//     canvas.stroke(path);
+// }
+
+function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
+    canvas.setTransform(scale, 0, 0, scale, x, y);
+    canvas.rotate(angle);
+    fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
+    strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
+}
+
+
+function renderLoop(time) {
+  //  canvas.clearRect(0, 0, textur.width, textur.height);
+    Layout();
+    const scale = Math.sin(time / 500) * 0.2 + 1.0;
+    const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+  for (var i = 0; i < level[level.number].rotatingDreieck.length; i++) {
+    time += level[level.number].rotatingDreieck[i].angle*10000
+    drawPath_V2(triangle, level[level.number].rotatingDreieck[i].x, level[level.number].rotatingDreieck[i].y, level[level.number].rotatingDreieck[i].size / 10 /*level[level.number].rotatingDreieck[i].size*/,time / (level[level.number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI /*level[level.number].rotatingDreieck[i].angle*/, "black", "black", i); //360 every 2 second
+  }
+    // scale path
+  //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
+
+    canvas.setTransform(1, 0, 0, 1, 0, 0);
+  //  requestAnimationFrame(renderLoop);
+}
+
+function createPath(...points) {
+    var cx = 0; cy = 0;
+    for (const p of points) {
+        cx += p.x;
+        cy += p.y;
+    }
+    cx /= points.length;
+    cy /= points.length;
+
+    const path = new Path2D;
+    for (const p of points) {
+        path.lineTo(p.x - cx , p.y - cy);
+    }
+    path.closePath();
+    return path;
+}
+function rotatingDreieck() {
+if (!(level[level.number].rotatingDreieck == undefined)) {
+    requestAnimationFrame(renderLoop); // start animation
+}
+//   if (!(level[level.number] == undefined || level[level.number].rotatingDreieck == undefined || level[level.number].rotatingDreieck[0].angle == undefined)) Layout();
+//   for (var i = 0; !(level[level.number] == undefined || level[level.number].rotatingDreieck == undefined || level[level.number].rotatingDreieck[0].angle == undefined) && i < level[level.number].rotatingDreieck.length; i++) {
+//   canvas.save();
+//   canvas.beginPath();
+//
+//     // canvas.moveTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
+//     // canvas.lineTo(0, -(level[level.number].rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
+//     // canvas.lineTo((level[level.number].rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
+//     // canvas.lineTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
+//     canvas.fillStyle = "black";
+//     var path=new Path2D();
+//     path.moveTo(-50+50,-(25/2));
+//     path.lineTo(-50,-(25/2)-50);
+//     path.lineTo(-50-50,-(25/2));
+//     canvas.fill(path);
+//
+// canvas.closePath();
+// canvas.restore();
+// level[level.number].rotatingDreieck[i].angle++;
+// }
+
+}
+function rotatingWall() {
+if (!(level[level.number] == undefined || level[level.number].rotatingWall == undefined || level[level.number].rotatingWall[0].angle == undefined)) Layout();
+for (var i = 0; !(level[level.number] == undefined || level[level.number].rotatingWall == undefined || level[level.number].rotatingWall[0].angle == undefined) && i < level[level.number].rotatingWall.length; i++) {
+  canvas.save();
+  canvas.translate(level[level.number].rotatingWall[i].x, level[level.number].rotatingWall[i].y);
+  canvas.rotate(level[level.number].rotatingWall[i].angle * Math.PI / 180)
+  canvas.fillStyle = "black";
+  canvas.fillRect(-(level[level.number].rotatingWall[i].width/2), -(level[level.number].rotatingWall[i].height/2), level[level.number].rotatingWall[i].width, level[level.number].rotatingWall[i].height);
+  canvas.restore();
+  level[level.number].rotatingWall[i].angle++;
+}
+}
+function boundingBoxCheck(){
+ if (x1<0) { x1 = 0; vx1 = -vx1; }
+ if (y1<0) { y1 = 0; vy1 = -vy1; }
+ if (x1>window.innerWidth-(window.innerWidth/40 + 66)/2) { x1 = window.innerWidth-(window.innerWidth/40 + 66)/2; vx1 = -vx1; }
+ if (y1>window.innerHeight-(window.innerWidth/40 + 66)/2) { y1 = window.innerHeight-(window.innerWidth/40 + 66)/2; vy1 = -vy1; }
+ if (x2<0) { x2 = 0; vx2 = -vx2; }
+ if (y2<0) { y2 = 0; vy2 = -vy2; }
+ if (x2>window.innerWidth-(window.innerWidth/40 + 66)/2) { x2 = window.innerWidth-(window.innerWidth/40 + 66)/2; vx2 = -vx2; }
+ if (y2>window.innerHeight-(window.innerWidth/40 + 66)/2) { y2 = window.innerHeight-(window.innerWidth/40 + 66)/2; vy2 = -vy2; }
+}
+function Layout() {
+  if (!(document.getElementById('courceSelection').value == "upload own level")) {
+  Bild = new Image();
+  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + level.number + ".png"
+  canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
+}
+}
+
+// stopWatch:
+var time = 0;
+var running = 0;
+
+function startPause() {
+if (running == 0) {
+  running = 1;
+  time = 0;
+  increment();
+}
+else {
+  running = 0;
+}
+}
+function reset() {
+running = 0;
+timer = 0;
+}
+function increment() {
+if (running == 1) {
+setTimeout(function () {
+  time++;
+  mins = Math.floor(time/10/60);
+  secs = Math.floor(time/10);
+  secs -= 60*mins;
+  tenths = time % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  increment();
+}, 100);
+}
+}
+var blinkWall = setInterval(blinkWall, 6000);
+var rotatingWall = setInterval(rotatingWall, 70);
+var rotatingDreieck = setInterval(rotatingDreieck, 70);
+</script>
+</body>
+
+</html>

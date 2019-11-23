@@ -1,0 +1,432 @@
+<meta charset="utf-8">
+<select name="course" id="Auswahl">
+  <option value="Zahlenmerken-1">Zahlenmerken</option>
+  <option value="ReihenfolgeButtons-2">Reihenfolge Felder</option>
+  <option value="ReihenfolgeTöne-3">Reihenfolge Töne</option>
+</select>
+<button onclick="start()">start</button>
+<br>
+<button type="button" onclick="vorbereitungZeigeReihenfolge()" id="zeigeReihenfolge" name="button">Reihenfolge Töne anzeigen</button>
+<br>
+<span id="richtig" style="font-size:77"></span>
+<span id="falsch" style="font-size:77"></span>
+<div class="row">
+  <span id="ownHighscore" style="font-size:77"></span>
+</div>
+  <span id="ownScore" style="font-size:57"></span>
+<div class="column" id="newRecord">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/New%20best.png" id="newHighscore" onclick="imageClicked()">
+</div>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  .column {
+    float: left;
+    width: 33.33%;
+    padding: 5px;
+  }
+
+  /* Clearfix (clear floats) */
+  .row::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  img {
+    position: absolute;
+    left: 370px;
+    top: 0px;
+  }
+  #ownScore {
+    position: absolute;
+    left: 210px;
+    top: 130px;
+  }
+</style>
+<br>
+<input type="text" placeholder="Zahlenfolge" id="Zahlenfolge" ></input>
+<br>
+<br>
+<div id="highscores">
+  <h1 id="highscoresBetterThanYours"></h1>
+  <h1 id="highscoresWorseThanYours"></h1>
+  <h1 id="highscoresAsGoodAsYours"></h1>
+</div>
+<canvas id="textur" width="1582" height="750"></canvas>
+
+<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+
+<script>
+
+document.getElementById('highscoresBetterThanYours').style.color = "red"
+document.getElementById('highscoresWorseThanYours').style.color = "green";
+document.getElementById('highscores').style.display = "none"
+
+/*
+  Formel Reihenfolge Töne: x + 1 + 3*y
+*/
+
+function imageClicked() {
+  console.log("imageClicked");
+}
+
+var canvas = document.getElementById('textur').getContext('2d');
+var audio;
+var zähler = [0, 4];
+var zahlen = "";
+var Ablage = [];
+var Start = false;
+var blinkendesFeld;
+var zustände = [];
+var mausxScroll = 0;
+var mausyScroll = 0;
+var name = prompt("Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können.");
+var highscores = {};
+highscores[name] = {};
+highscores[name] = {"Zahlenmerken-1": 0, "ReihenfolgeButtons-2": 0, "ReihenfolgeTöne-3": 0};
+document.getElementById('richtig').style.color = "green"
+document.getElementById('falsch').style.color = "red"
+document.getElementById("Zahlenfolge").style.display = "none";
+document.getElementById('newHighscore').style.display = "none";
+
+dbGet("gehirntrainer", "highscores", function(result) {
+  if (result == "NOPE" == false) {
+    highscores = JSON.parse(result);
+  }
+});
+
+function start() {
+  document.getElementById('newHighscore').style.display = "none";
+  document.getElementById('highscores').style.display = "none";
+  Ablage[0] = ["richtig", "falsch", "highscoresAsGoodAsYours", "highscoresBetterThanYours", "highscoresWorseThanYours", "ownHighscore", "ownScore"];
+  document.getElementById("Zahlenfolge").style.display = "none";
+  for (var i = 0; i < Ablage[0].length; i++) {
+    document.getElementById(Ablage[0][i]).innerHTML = "";
+  }
+  if (zahlen == "" == false) {
+    zähler = [0, 4];
+    zahlen = "";
+    Ablage = [];
+    Start = false;
+  }
+
+  if (document.getElementById('Auswahl').value == "Zahlenmerken-1") {
+    while (zähler[0] < zähler[1]) {
+      zahlen += Math.floor(Math.random()*9)
+      zähler[0]++;
+    }
+    zähler[0] = 0;
+    console.log(zahlen);
+    document.getElementById('richtig').innerHTML = zahlen;
+    document.getElementById("falsch").style.display = "inline";
+    document.getElementById("richtig").style.display = "inline";
+    setTimeout(function () {
+      document.getElementById("richtig").innerHTML = "";
+      document.getElementById("Zahlenfolge").style.display = "inline";
+
+      Start = true;
+       document.getElementById("Zahlenfolge").select();
+    }, zähler[1]*500);
+  }
+  if (document.getElementById('Auswahl').value == "ReihenfolgeButtons-2" || document.getElementById('Auswahl').value == "ReihenfolgeTöne-3") {
+    document.getElementById("falsch").style.display = "none";
+    document.getElementById("richtig").style.display = "none";
+    document.getElementById("Zahlenfolge").style.display = "none";
+    clearInterval(blinkendesFeld);
+    zähler[1] = 0;
+    zähler[0] = 0;
+    canvas.fillStyle = "red";
+    canvas.fillRect(0, 0, 350, 350);
+    while (zähler[0] < 3) {
+      canvas.fillStyle = "blue"
+      canvas.fillRect(20 + 110*zähler[1], 20 + 110*zähler[0], 90, 90);
+      zähler[1]++;
+      if (zähler[1] == 3) {
+        zähler[1] = 0;
+        zähler[0]++;
+      }
+    }
+    zähler = [3, 0, 0];
+    Ablage[2] = [];
+    zustände[0] = "ReihenfolgeAnzeigen";
+    ReihenfolgeAnzeigen();
+  }
+  if (document.getElementById('Auswahl').value == "ReihenfolgeTöne-3") {
+    document.getElementById('zeigeReihenfolge').style.display = "inline";
+  }
+  else {
+    document.getElementById('zeigeReihenfolge').style.display = "none";
+  }
+}
+if (document.getElementById('Auswahl').value == "ReihenfolgeTöne-3") {
+  document.getElementById('zeigeReihenfolge').style.display = "inline";
+}
+else {
+  document.getElementById('zeigeReihenfolge').style.display = "none";
+}
+// TODO
+function vorbereitungZeigeReihenfolge() {
+  if (document.getElementById('zeigeReihenfolge').innerHTML == "Reihenfolge Töne anzeigen") {
+  zähler[3] = 0;
+  zähler[4] = 0;
+  zeigeReihenfolge();
+  document.getElementById('zeigeReihenfolge').innerHTML = "Tonleiter abbrechen"
+}
+else {
+  document.getElementById('zeigeReihenfolge').innerHTML = "Reihenfolge Töne anzeigen"
+  zähler[3] = 4;
+  zähler[4] = 4;
+}
+}
+function zeigeReihenfolge() {
+  audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/Klavier%20(einzelne)%20T%C3%B6ne/Ton%20" + (3*zähler[4] + (zähler[3] + 1)) + ".wav").play();
+  canvas.fillStyle = "green";
+  canvas.fillRect(20 + 110*zähler[3], 20 + 110*zähler[4], 90, 90);
+  Ablage[0] = [zähler[3], zähler[4]];
+  zähler[3]++;
+  if (zähler[3] == 3) {
+    zähler[4]++;
+    zähler[3] = 0;
+  }
+    setTimeout(function () {
+      canvas.fillStyle = "blue";
+      canvas.fillRect(20 + 110*Ablage[0][0], 20 + 110*Ablage[0][1], 90, 90);
+      if (zähler[4] < 3) {
+      zeigeReihenfolge();
+    }
+    }, 2375);
+}
+
+function ReihenfolgeAnzeigen() {
+  Ablage[0] = Math.round(Math.random()*2);
+  Ablage[1] = Math.round(Math.random()*2);
+  if (Ablage[0] == 0 && Ablage[1] == 0) {
+    Ablage[0]++;
+  }
+  Ablage[2][zähler[1]] = Ablage[0] + " - " + Ablage[1];
+  console.log(Ablage[0] + " - " + Ablage[1]);
+  if (!(document.getElementById('Auswahl').value == "ReihenfolgeTöne-3")) {
+    canvas.fillStyle = "green";
+    canvas.fillRect(20 + 110*Ablage[0], 20 + 110*Ablage[1], 90, 90);
+  }
+  else {
+    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/Klavier%20(einzelne)%20T%C3%B6ne/Ton%20" + (3*JSON.parse(Ablage[2][zähler[1]][4]) + JSON.parse(Ablage[2][zähler[1]][0])) + ".wav").play();
+  }
+  zähler[1]++;
+  setTimeout(function () {
+    canvas.fillStyle = "blue";
+  if (!(document.getElementById('Auswahl').value == "ReihenfolgeTöne-3")) {
+    canvas.fillRect(20 + 110*Ablage[0], 20 + 110*Ablage[1], 90, 90);
+  }
+    setTimeout(function () {
+      if (zähler[1] < zähler[0]) {
+        ReihenfolgeAnzeigen();
+      }
+      else {
+        zustände[0] = "ReihenfolgeEingeben";
+      }
+    }, 799);
+  }, 1000);
+}
+
+document.onkeydown = function(event) {
+if (document.getElementById('Auswahl').value == "Zahlenmerken-1") {
+setTimeout(function () {
+  if (Start == true) {
+    document.getElementById('Zahlenfolge').style.display = "inline";
+    if (document.getElementById('Zahlenfolge').value == zahlen[0]) {
+      if (zahlen.length > 1) {
+        audio = new Audio("https://vue-vokabeln.herokuapp.com/sounds/click.ogg").play();
+      }
+      document.getElementById('richtig').innerHTML += zahlen[0]
+      zahlen = zahlen.replace(zahlen[0], "");
+      document.getElementById('Zahlenfolge').value = "";
+      if (zahlen == "") {
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/right%20answer%20sound%20effect-%5bAudioTrimmer.com%5d.mp3").play();
+        document.getElementById('Zahlenfolge').style.display = "none";
+        zähler[1]++;
+        Start = false;
+        start();
+      }
+    }
+    else {
+      document.getElementById('falsch').innerHTML = zahlen;
+      Start = false;
+      setTimeout(function () {
+        showScore();
+      }, 3000);
+    }
+  }
+}, 10);
+
+}
+}
+
+window.addEventListener('mousedown', function() {
+if ((document.getElementById('Auswahl').value == "ReihenfolgeButtons-2" || document.getElementById('Auswahl').value == "ReihenfolgeTöne-3") && zustände[0] == "ReihenfolgeEingeben") {
+  zähler[1] = 0;
+  zähler[2] = 0;
+  while (zähler[2] < 3) {
+    if (mausx > 20 + 110*zähler[1] && mausx < 20 + 110*zähler[1] + 90 && mausy > 20 + 110*zähler[2] && mausy < 20 + 110*zähler[2] + 90) {
+        Ablage[3] = "" + zähler[1] + zähler[2];
+      if (document.getElementById('Auswahl').value == "ReihenfolgeTöne-3") {
+        zähler[1]++;
+        if (zähler[1] == 3) {
+          zähler[1] = 0;
+          zähler[2]++;
+        }
+      }
+      console.log(zähler[1] + " - " + zähler[2] + "/" + Ablage[2][0]);
+      if (zähler[1] + " - " + zähler[2] == Ablage[2][0]) {
+        if (Ablage[2].length > 1 && !(document.getElementById('Auswahl').value == "ReihenfolgeTöne-3")) {
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/Pop%20%20Sound%20Effect.mp3");
+          audio.currentTime = 9.7;
+          audio.play();
+           setTimeout(function () {
+            audio.pause();
+           }, 900);
+        }
+        else if (Ablage[2].length > 0 && (document.getElementById('Auswahl').value == "ReihenfolgeTöne-3")) {
+          console.log("Ton Piano spielen");
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/Klavier%20(einzelne)%20T%C3%B6ne/Ton%20" + (3*zähler[2] + (zähler[1])) + ".wav").play();
+          zähler[1]--;
+        }
+        canvas.fillStyle = "green";
+        canvas.fillRect(20 + 110*zähler[1], 20 + 110*zähler[2], 90, 90);
+        Ablage[3] = [];
+        Ablage[3][Ablage[3].length] = "" + zähler[1] + zähler[2]
+      setTimeout(function () {
+        canvas.fillStyle = "blue";
+        if (Ablage[3].length > 0) {
+        canvas.fillRect(20 + 110*Ablage[3][0][0], 20 + 110*Ablage[3][0][1], 90, 90);
+          try {
+            Ablage[3].shift();
+          } catch (e) {
+            console.log(Ablage[3]);
+          }
+        }
+      }, 700);
+        Ablage[2].shift();
+      }
+      else {
+        zustände[0] = "RundeBeendert";
+        console.log("Fehler!");
+        setTimeout(function () {
+          showScore();
+        }, 1000);
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/Fail%20-%20N%C3%B6%C3%B6t.mp3").play();
+        BlinkendesFeld();
+        blinkendesFeld = setInterval(BlinkendesFeld, 2000);
+        zähler[2] = 3;
+      }
+      setTimeout(function () {
+        if (Ablage[2].length == 0) {
+        console.log("Alles richtig!");
+        audio = new Audio("https://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
+        audio.currentTime = 9.7;
+        audio.play();
+    /*    setTimeout(function () {
+          audio.pause();
+        }, 900); */
+          zähler[0]++;
+          zustände[0] = "ReihenfolgeAnzeigen";
+          zähler[1] = 0;
+          zähler[2] = 0;
+          Ablage[2] = [];
+          setTimeout(function () {
+              ReihenfolgeAnzeigen();
+          }, 700*zähler[0]);
+        }
+      }, 100);
+    }
+    zähler[1]++;
+    if (zähler[1] == 3) {
+      zähler[1] = 0;
+      zähler[2]++;
+    }
+  }
+
+}
+});
+
+function BlinkendesFeld() {
+  canvas.fillStyle = "green";
+  canvas.fillRect(20 + 110*Ablage[3][0], 20 + 110*Ablage[3][1], 90, 90);
+setTimeout(function () {
+  canvas.fillStyle = "blue";
+  canvas.fillRect(20 + 110*Ablage[3][0], 20 + 110*Ablage[3][1], 90, 90);
+}, 1000);
+}
+
+
+function readMouseMove(e) {
+  mausx = e.clientX + mausxScroll;
+  mausy = e.clientY + mausyScroll - 50;
+//  console.log(mausx + " - " + mausy);
+}
+document.onmousemove = readMouseMove
+
+var f = function() {
+  var eventHandler = function(event) {
+    console.log(window.scrollX + " - " + window.scrollY);
+    if (zustände[2] == "inRunde" == false) {
+    mausxScroll = window.scrollX;
+    mausyScroll = window.scrollY;
+  }
+  };
+  window.addEventListener('scroll', eventHandler, false)
+  //    koordinatenSpieler1[6] = 0;
+
+};
+window.addEventListener('DOMContentLoaded', f, false)
+
+// TODO
+function showScore() {
+  document.getElementById('ownScore').style.margin = (document.getElementById('ownHighscore').getBoundingClientRect().top - 50) + 'px 0 0 0'
+  document.getElementById('highscores').style.display = "inline";
+  var dataMode = {"Zahlenmerken-1": zähler[1], "ReihenfolgeTöne-3": zähler[0], "ReihenfolgeButtons-2": zähler[0]};
+  if (highscores[name] == undefined || dataMode[document.getElementById('Auswahl').value] > highscores[name][document.getElementById('Auswahl').value]) {
+    console.log("newHighscore!!!");
+    document.getElementById('newHighscore').style.display = "inline";
+    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/stamp-sound-effects-all-sounds-youtubemp3free.org.mp3");
+    audio.currentTime = 60*4 + 15;
+    audio.play();
+    setTimeout(function () {
+      audio.pause();
+    }, 1500);
+  //  document.getElementById('falsch').style.display = "none";
+    if (highscores[name] == undefined) {
+      highscores[name] = {};
+      highscores[name] = {"Zahlenmerken-1": 0, "ReihenfolgeButtons-2": 0, "ReihenfolgeTöne-3": 0};
+    }
+    highscores[name][document.getElementById('Auswahl').value] = dataMode[document.getElementById('Auswahl').value]
+    console.log("SaveOnServer");
+    dbSet("gehirntrainer", "highscores", JSON.stringify(highscores));
+  }
+  document.getElementById('ownHighscore').innerHTML = "Highscore: " + dataMode[document.getElementById('Auswahl').value]
+  document.getElementById('ownScore').innerHTML = "Score: " + dataMode[document.getElementById('Auswahl').value]
+  zähler[0] = 0;
+  Ablage[0] = [];
+  for (var i = 0; i < Object.keys(highscores).length; i++) {
+    if (!(Object.keys(highscores)[i] == name)) {
+      Ablage[0].push([highscores[Object.keys(highscores)[i]][document.getElementById('Auswahl').value], Object.keys(highscores)[i]]);
+    }
+  }
+  Ablage[0].sort();
+  while (zähler[0] < Ablage[0].length) {
+    if ((Ablage[0][zähler[0]][0] > dataMode[document.getElementById('Auswahl').value])) {
+      document.getElementById('highscoresBetterThanYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+    }
+    else if ((Ablage[0][zähler[0]][0] < dataMode[document.getElementById('Auswahl').value])) {
+      document.getElementById('highscoresWorseThanYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+    }
+    else {
+      document.getElementById('highscoresAsGoodAsYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+    }
+    zähler[0]++;
+  }
+}
+
+</script>
