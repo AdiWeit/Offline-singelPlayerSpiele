@@ -1,0 +1,1227 @@
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<div id="vorSpielBeginn">
+<button type="button" id="benachrichtigungAusschalten" onclick="benachrichtigungAusschalten()" name="button">Benachrichtigung zukünftig nicht mehr anzeigen</button>
+<br>
+<div id="app">
+<select name="course" id="spielmodi" onchange="modusSelected()" style="display: inline;">
+<option id="1-normal">normal</option><option id="2-play hunter">play hunter</option></select>
+<li v-for="title in db" id="pixelSpielfelder">
+{{ title }}
+</li>
+</div>
+<button type="button" name="button" onclick="rundeStarten()" id="rundeStarten">bereit für Rundenbeginn</button>
+</div>
+<div id="highscores">
+  <h1 id="highscore"></h1>
+  <h2 id="score"></h2>
+  <h2 id="highscoresBetterThanYours"></h2>
+  <h2 id="highscoresWorseThanYours"></h2>
+  <h2 id="highscoresAsGoodAsYours"></h2>
+</div>
+<html lang="">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>Team S.C.R.I.P.T.</title>
+ <style> body {padding: 0; margin: 0;} </style>
+ <script src="https://adi.nicolaiweitkemper.de/p5/p5.min.js"></script>
+ <script src="https://adi.nicolaiweitkemper.de/p5/addons/p5.dom.min.js"></script>
+ <script src="https://adi.nicolaiweitkemper.de/p5/addons/p5.sound.min.js"></script>
+</head>
+<body>
+</body>
+</html>
+
+<script>
+
+    // debug:
+  // setTimeout(function () {
+  //   document.getElementById('spielmodi').value = "play hunter";
+  // }, 1000);
+if (localStorage.getItem("benachrichtigungAusschalten") == null) {
+  localStorage.setItem("benachrichtigungAusschalten", false);
+  document.getElementById('benachrichtigungAusschalten').style.display = "inline";
+}
+document.getElementById('highscoresBetterThanYours').style.color = "red"
+document.getElementById('highscoresWorseThanYours').style.color = "green";
+document.getElementById('vorSpielBeginn').style.display = "inline";
+document.getElementById('benachrichtigungAusschalten').style.display = "none";
+
+function benachrichtigungAusschalten() {
+  if (document.getElementById('benachrichtigungAusschalten').innerHTML == "Benachrichtigung zukünftig nicht mehr anzeigen") {
+    document.getElementById('benachrichtigungAusschalten').innerHTML = "Benachrichtigung zukünftig wieder anzeigen";
+    localStorage.setItem("benachrichtigungAusschalten", true);
+  }
+  else {
+    document.getElementById('benachrichtigungAusschalten').innerHTML = "Benachrichtigung zukünftig nicht mehr anzeigen"
+    localStorage.setItem("benachrichtigungAusschalten", false);
+  }
+}
+
+var time = [0, 174];
+var running = [0, 0];
+var mins = [];
+var secs = [];
+var tenths = [];
+var opositeDirection = {"UP_ARROW": "DOWN_ARROW", "RIGHT_ARROW": "LEFT_ARROW", "DOWN_ARROW": "UP_ARROW", "LEFT_ARROW": "RIGHT_ARROW"}
+var directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LEFT_ARROW"};
+// var Bild = new Image();
+// Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+
+var name = prompt('Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können. Wenn sie damit nicht einverstanden sind, klicken sie bitte auf "abbrechen". ');
+var showTimeInterval;
+
+function startPause() {
+if (running[0] == 0) {
+running[0] = 1;
+time[0] = 0;
+increment();
+}
+else {
+running[0] = 0;
+}
+}
+function startPause1() {
+if (running[1] == 0) {
+running[1] = 1;
+time[1] = 174;
+AblageListe[4] = 0;
+increment1();
+}
+else {
+running[1] = 0;
+}
+}
+function reset() {
+running[0] = 0;
+//timer = 0;
+}
+function increment() {
+if ((running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+  setTimeout(function () {
+    time[0]++;
+    mins[0] = Math.floor(time[0]/10/60);
+    secs[0] = Math.floor(time[0]/10);
+        secs[0] -= 60*mins[0];
+    tenths[0] = time[0] % 10;
+    if (mins[0] < 10) {
+      mins[0] = "0" + mins[0]
+    }
+    if (secs[0] < 10) {
+      secs[0] = "0" + secs[0];
+    }
+  //  document.getElementById('stopWatch').innerHTML = mins[0] + ":" + secs[0] + ":" + "0" + tenths[0];
+    increment();
+  }, 100);
+}
+}
+function increment1() {
+if ((running[1] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+  setTimeout(function () {
+    time[1]--;
+    mins[1] = Math.floor(time[1]/10/60);
+    secs[1] = Math.floor(time[1]/10);
+        secs[1] -= 60*mins[1];
+    tenths[1] = time[1] % 10;
+    if (mins[1] < 10) {
+      mins[1] = "0" + mins[1]
+    }
+    if (secs[1] < 10) {
+      secs[1] = "0" + secs[1];
+    }
+  //  document.getElementById('stopWatch').innerHTML = mins[1] + ":" + secs[1] + ":" + "0" + tenths[1];
+  if (mins[1] + ":" + secs[1] + ":" + "0" + tenths[1] == "00:00:00") {
+    startPause1();
+    soundsRoundFinished();
+    console.log("gameFinished!");
+  }
+    increment1();
+  }, 100);
+}
+}
+var spielerIch = -1;
+var AblageListe = [];
+ AblageListe[1] = [];
+ AblageListe[4] = 0;
+var zählerListe = [];
+var coordinates = [];
+var selected;
+var pos;
+var dist;
+var tab = [];
+var pixelSpielfelder = {
+"create own pixel rate": "warning"
+}
+
+var app = new Vue({
+el: '#app',
+data: {
+db: Object.keys(pixelSpielfelder)
+}
+})
+
+function modusSelected() {
+  console.log("modus selected");
+  AblageListe[0] = [];
+  for (var i = 0; i < app._data.db.length; i++) {
+    AblageListe[0].push(app._data.db[i]);
+  }
+  for (var i = 0; i < app._data.db.length - 1; i++) {
+ //   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
+    AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+  //  app._data.db[i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+    console.log(app._data.db[i] + " to " + app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)");
+ //   }
+  }
+  app._data.db = AblageListe[0];
+  setTimeout(function () {
+    var items = document.querySelectorAll("#pixelSpielfelder"),
+     liIndex;
+     tab = [];
+           for(var i = 0; i < items.length; i++){
+               tab.push(items[i].innerHTML);
+           }
+  }, 500);
+}
+
+dbGet("snakeGame", "pixelSpielfelder").then(result => {
+//if (!(dbGet("snakeGame", "pixelSpielfelder").promiseValue == undefined)) {
+ pixelSpielfelder = JSON.parse(result);
+ AblageListe[0] = [];
+ for (var i = 0; i < Object.keys(pixelSpielfelder).length; i++) {
+   if (Object.keys(pixelSpielfelder)[i].toString().split(' x ')[0] <= x && Object.keys(pixelSpielfelder)[i].toString().split(' x ')[1] <= y) {
+     AblageListe[0][AblageListe[0].length] = Object.keys(pixelSpielfelder)[i];
+   }
+ }
+ AblageListe[0].push("create own pixel rate");
+ app._data.db = AblageListe[0];
+ for (var i = 0; i < Object.keys(pixelSpielfelder).length - 1; i++) {
+//   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
+   app._data.db[i] += " (" + Object.keys(pixelSpielfelder[app._data.db[i]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+//   }
+ }
+//}
+}).catch(function(e) {
+//  console.log("Data not found");
+  console.log(e);
+  if (e == "TypeError: Failed to fetch") {
+    if (localStorage.getItem("benachrichtigungAusschalten") == "false") {
+      alert("Der Offline modus ist aktiviert, da keine Internet Verbindug aufgebaut werden konnte. Ihr Highscore wird auf ihrem Gerät abgespeichert und die der Gegner, die beim letzten Spielen mit Internet aktuell waren, werden angezeigt. Wenn sie wieder Internet haben, können sie ihre Daten auf den Server hochladen.");
+    }
+    else {
+      document.getElementById('benachrichtigungAusschalten').innerHTML = "Benachrichtigung zukünftig wieder anzeigen";
+    }
+    document.getElementById('benachrichtigungAusschalten').style.display = "inline";
+    setTimeout(function () {
+      if (!(localStorage.getItem("pixelSpielfelder") == null) && JSON.parse(localStorage.getItem("pixelSpielfelder"))[1] == name) {
+        pixelSpielfelder = JSON.parse(localStorage.getItem("pixelSpielfelder"))[0];
+      }
+    }, 1375);
+  }
+});
+// Auswahl von Liste:
+setTimeout(function () {
+  var items = document.querySelectorAll("#pixelSpielfelder"),
+  liIndex;
+  tab = [];
+         for(var i = 0; i < items.length; i++){
+             tab.push(items[i].innerHTML);
+         }
+         for(i = 0; i < items.length; i++){
+             items[i].onclick = function(){
+                 liIndex = tab.indexOf(this.innerHTML);
+                 console.log(this.innerHTML + " INDEX = " + liIndex);
+                 if (this.innerHTML.includes("create own pixel rate") && confirm("Sind sie sich sicher, dass keins der vorgeschlagenen Varianten für sie geeignet ist? Die Highscores werden für jede Spielgröße einzeln gespeichert!")) {
+                   selected = x + " x " + y;
+                   pixelSpielfelder[selected] = {};
+                   pixelSpielfelder[selected][document.getElementById('spielmodi').value] = {};
+                   for (var i = 0; i < document.getElementById('spielmodi').options.length; i++) {
+                     pixelSpielfelder[selected][document.getElementById('spielmodi').options[i].text] = {};
+                     pixelSpielfelder[selected][document.getElementById('spielmodi').options[i].text].highscores = {};
+                     pixelSpielfelder[selected][document.getElementById('spielmodi').options[i].text].highscores[name] = "not played yet!";
+                   }
+                   pixelSpielfelder[selected].normal.coordinates = [];
+                   for (var i = 0; i < Math.floor((selected.toString().split(' x ')[0]*selected.toString().split(' x ')[1])/17400); i++) {
+                     AblageListe[0] = Math.floor(Math.random() * (x - scl))
+                       while ((AblageListe[0]/20 + "").includes(".")) {
+                         if (AblageListe[0] >= x-20) {
+                         AblageListe[0]--;
+                       }
+                       else {
+                         AblageListe[0]++;
+                       }
+                       }
+                       AblageListe[1] = Math.floor(Math.random() * (y - scl))
+                         while ((AblageListe[1]/20 + "").includes(".")) {
+                           if (AblageListe[1] >= x-20) {
+                           AblageListe[1]--;
+                         }
+                         else {
+                           AblageListe[1]++;
+                         }
+                         }
+                     pixelSpielfelder[selected]["normal"].coordinates[i] = [AblageListe[0], AblageListe[1]];
+                   }
+                   // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores = {};
+                   // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = "not played yet!";
+                   AblageListe[0] = JSON.stringify(pixelSpielfelder)
+                   dbSet("snakeGame", "pixelSpielfelder", AblageListe[0]);
+                   localStorage.setItem("pixelSpielfelder", JSON.stringify([AblageListe[0], name]));
+                 }
+                 else if (!(this.innerHTML.includes("create own pixel rate"))) {
+                   selected = app._data.db[liIndex].toString().split(" (")[0];
+                   x = selected.toString().split(" x ")[0]
+                   y = selected.toString().split(" x ")[1]
+                   createCanvas(x, y);
+                   console.log(selected + " selected!");
+                 }
+         };
+       }
+       pixelSpielfelderTemporär = pixelSpielfelder
+}, 1000);
+
+
+document.addEventListener('touchstart', handleTouchStart, false);
+document.addEventListener('touchmove', handleTouchMove, false);
+var xDown = null;
+var yDown = null;
+function getTouches(evt) {
+return evt.touches ||             // browser API
+    evt.originalEvent.touches; // jQuery
+}
+function handleTouchStart(evt) {
+const firstTouch = getTouches(evt)[0];
+xDown = firstTouch.clientX;
+yDown = firstTouch.clientY;
+//  document.getElementById('koordinaten').innerHTML = "first touch: " + firstTouch.clientX + " - " + firstTouch.clientY;
+};
+function handleTouchMove(evt) {
+//  document.getElementById('koordinaten2').innerHTML = "touches: " + evt.touches[0].clientX + " - " + evt.touches[0].clientY ;
+var xUp = evt.touches[0].clientX;
+var yUp = evt.touches[0].clientY;
+var xDiff = xDown - xUp;
+var yDiff = yDown - yUp;
+
+if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+   if ( xDiff > 0 ) {
+       /* left swipe */
+       AblageListe[0] = 37;
+   } else {
+       /* right swipe */
+       AblageListe[0] = 39;
+   }
+} else {
+   if ( yDiff > 0 ) {
+       /* up swipe */
+       AblageListe[0] = 38;
+   } else {
+       /* down swipe */
+       AblageListe[0] = 40;
+   }
+}
+folgenKeyPressed();
+};
+
+if (navigator.userAgent.match(/Android/i) ||
+navigator.userAgent.match(/webOS/i) ||
+navigator.userAgent.match(/iPhone/i) ||
+navigator.userAgent.match(/iPad/i) ||
+navigator.userAgent.match(/iPod/i) ||
+navigator.userAgent.match(/BlackBerry/i) ||
+navigator.userAgent.match(/Windows Phone/i)
+) {
+var gerät = "Handy"
+console.log("Handy");
+} else {
+var gerät = "PC"
+console.log("PC");
+}
+
+setTimeout(function () {
+//  if (spielerIch == 1) {
+ setup();
+//  }
+canvas.style.display = "none";
+}, 1000);
+
+function rundeStarten() {
+ if (gerät == "Handy") {
+ viewPage();
+}
+ AblageListe[0] = {"normal": 0, "play hunter": 1}
+ spielerIch = AblageListe[0][document.getElementById('spielmodi').value]
+if (spielerIch == 1) {
+ AblageListe[3] = 0;
+if (spielerIch == 1) {
+ s.y = y-(scl*5);
+ var hMovement = setInterval(moveH, 37);
+ AblageListe[1] = "total to " + (Math.floor(JSON.parse(x)/80));
+ startPause1();
+}
+}
+canvas.style.display = "inline";
+document.getElementById('vorSpielBeginn').style.display = "none";
+if (spielerIch == 0) {
+pickLocation();
+}
+startPause();
+}
+
+ var w = window,
+     d = document,
+     e = d.documentElement,
+     g = d.getElementsByTagName('body')[0],
+     x = w.innerWidth || e.clientWidth || g.clientWidth,
+     y = w.innerHeight|| e.clientHeight|| g.clientHeight;
+     while ((x/20 + "").length > 2 && x > 0) {
+       x--;
+     }
+     while ((y/20 + "").length > 2 && y > 0) {
+       y--;
+     }
+console.log(x + ' × ' + y);
+     function viewPage () {
+       var el = document.body;
+       toggleFullscreen(el);
+     };
+
+     function viewImage () {
+       var el = canvas/*document.getElementById('myImage');*/
+       toggleFullscreen(el);
+     };
+
+     function toggleFullscreen (el) {
+   /*		if(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement){
+         if(document.exitFullscreen){
+         //	document.exitFullscreen();
+         }else if(document.mozCancelFullScreen){
+       //		document.mozCancelFullScreen();
+         }else if(document.webkitExitFullscreen){
+       //		document.webkitExitFullscreen();
+         }else if(document.msExitFullscreen){
+       //		document.msExitFullscreen();
+         }
+       }else{*/
+         if(document.documentElement.requestFullscreen){
+           el.requestFullscreen();
+         }else if(document.documentElement.mozRequestFullScreen){
+           el.mozRequestFullScreen();
+         }else if(document.documentElement.webkitRequestFullscreen){
+           el.webkitRequestFullscreen();
+         }else if(document.documentElement.msRequestFullscreen){
+           el.msRequestFullscreen();
+         }
+     //	}
+     };
+
+
+// sketch.js
+var s;
+var scl=20;
+var food = {};
+
+function setup() {
+ createCanvas(x,y);
+ s=new Snake();
+ h=new hunter();
+ frameRate(10);
+//  pickLocation(true);
+}
+
+function pickLocation(setup)
+{
+ // var cols=floor(width/scl);
+ // var rows=floor(height/scl);
+ // food=createVector(floor(random(cols)),floor(random(rows)));
+ // food.mult(scl);
+ food.x = [];
+ food.y = [];
+ for (var i = 0; i < pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates.length; i++) {
+   if (pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates.length > 0) {
+     food.x[i] = pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates[i][0];
+     food.y[i] = pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates[i][1];
+   }
+ }
+}
+
+function draw(inGame) {
+  background(51);
+  fill(255, 0, 0);
+ if (inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+   coordinates[0] = 30;
+   coordinates[1] = x - 133;
+   coordinates[2] = 30;
+ }
+ // else {
+ //   console.log("Animation");
+ // }
+ textSize(coordinates[0]);
+ text(mins[0] + ":" + secs[0] + ":" + "0" + tenths[0], coordinates[1], coordinates[2])
+ if (spielerIch == 1) {
+   textSize(30);
+   text(mins[1] + ":" + secs[1] + ":" + "0" + tenths[1], x - 133, 30 + 37);
+ }
+ if (inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+   if (spielerIch == 0)  s.death();
+    if (spielerIch == 1 && AblageListe[1].includes("total to")) {
+      s.total++;
+      if (s.total == AblageListe[1].toString().split(' to')[1]) {
+        AblageListe[1] = "finished";
+      }
+    }
+    s.update();
+    if(/*spielerIch == 0 && snake == true && */s.eat(food))
+    {
+    }
+
+//  if (spielerIch == 0 && snake == true) {
+   // s.death();
+   // s.update();
+ //  syncroS();
+//  }
+ // if (spielerIch == 1) {
+ //   i.collision();
+ // }
+ s.show();
+}
+ for (var i = 0;!(food.x == undefined) && i < food.x.length; i++) {
+   fill(255,0,100);
+   rect(food.x[i],food.y[i],scl,scl);
+ }
+ // if (!(character.includes("insect"))) {
+ //   fill(110, 100, 110)
+ //   rect(i.x, i.y,scl,scl);
+ // //  syncroI();
+ // }
+ // if (!(character.includes("draughts (Dame)"))) {
+ //   fill("#B45F04");
+ //   rect(d.x, d.y,scl,scl);
+ //   // fill(199,115,0, 73);
+ //   // for(var i = 0; i < d.futureKoordinates.length; i++){
+ //   //   rect(d.futureKoordinates[i][0], d.futureKoordinates[i][1],scl,scl);
+ //   // }
+ // }
+ // fill(51);
+ // if (drawFrog == false) {
+ //   fill(0, 255, 0, /* trancparence: */f.visibility);
+ // }
+ // else {
+ //   fill(255, 0, 0, /* trancparence: */f.visibility);
+ // }
+ // if (!(character.includes("frog"))) {
+ //   rect(f.x, f.y,scl,scl);
+ //   // room.send({
+ //   //   message: {
+ //   //     "type": "f",
+ //   //     "data": [f.x, f.y, f.visibility, drawFrog]
+ //   //   }
+ //   // });
+ // }
+ // snake = true;
+ if (spielerIch == 1 && inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+   AblageListe[0] = canvas.getContext('2d');
+   AblageListe[0].drawImage(h.image, h.x, y - scl, scl, scl)
+   if (h.bullet.y < y - scl) {
+     fill(255, 0, 0);
+     rect(h.bullet.x, h.bullet.y, scl, scl);
+     // room.send({
+     //   message: {
+     //     "type": "hBullet",
+     //     "data": [h.bullet.x, h.bullet.y]
+     //   }
+     // });
+    }
+  }
+}
+function keyPressed()
+{
+ AblageListe[0] = keyCode;
+ if (!(spielerIch == 1 && !(keyCode == 32))) {
+   folgenKeyPressed();
+ }
+}
+window.addEventListener('mousedown', function() {
+ if (gerät == "Handy") {
+   AblageListe[0] = 32;
+   folgenKeyPressed();
+ }
+});
+function folgenKeyPressed() {
+ if (gerät == "PC") {
+   viewImage();
+ }
+ if(AblageListe[0]=== UP_ARROW/* && spielerIch == 0 */)
+ {
+    s.dir(0,-1);
+ }
+ else if (AblageListe[0]===DOWN_ARROW/* && spielerIch == 0 */)
+ {
+    s.dir(0,1);
+ }
+ else if (AblageListe[0]===RIGHT_ARROW/* && spielerIch == 0 */)
+ {
+    s.dir(1,0);
+ }
+ else if (AblageListe[0]===LEFT_ARROW/* && spielerIch == 0 */)
+ {
+    s.dir(-1,0);
+ }
+ else if (AblageListe[0] == 32 && h.bullet.y == - 20 && spielerIch == 1) {
+   setTimeout(function () {
+     h.bullet.y = y - scl;
+     h.bullet.x = h.x;
+   }, 58);
+   hunterBullet = setInterval(moveHunterBullet, 59);
+ }
+ // if (spielerIch == 1 && (AblageListe[0]===DOWN_ARROW || AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW)) {
+ //   i.direction = i.directionObj[AblageListe[0]];
+ // }
+ // if (spielerIch == 2 && (AblageListe[0]===DOWN_ARROW || AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW)) {
+ //   f.direction = i.directionObj[AblageListe[0]];
+ // }
+//   if (spielerIch == 3 && (AblageListe[0]===LEFT_ARROW || AblageListe[0]===RIGHT_ARROW /*|| AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW*/)) {
+//     d.futureKoordinates = [];
+//     AblageListe[1] = [];
+//     AblageListe[1][0] = d.x;
+//     AblageListe[1][1] = d.y;
+//     while (!(AblageListe[1][0] == 0 || AblageListe[1][1] == 0 || AblageListe[1][0] == x - scl || AblageListe[1][1] == y - scl)) {
+//     if (d.direction.toString().split(' + ')[0] == "LEFT_ARROW" && d.zählerWinkel[0] > 0) {
+//       AblageListe[1][0] -= scl;
+//     }
+//     else if (d.zählerWinkel[0] > 0) {
+//       AblageListe[1][0] += scl;
+//     }
+//     if (d.direction.toString().split(' + ')[1] == "UP_ARROW" && d.zählerWinkel[1] > 0) {
+//       AblageListe[1][1] -= scl;
+//     }
+//     else if (d.zählerWinkel[1] > 0) {
+//       AblageListe[1][1] += scl;
+//     }
+//     d.zählerWinkel[0]--;
+//     d.zählerWinkel[1]--;
+//     if (d.zählerWinkel[0] < 1 && d.zählerWinkel[1] < 1) {
+//       d.zählerWinkel[0] = d.winkel[0];
+//       d.zählerWinkel[1] = d.winkel[1];
+//     }
+//   }
+// //  d.zählerWinkel = [d.winkel[0], d.winkel[1]];
+//     if (AblageListe[0]===LEFT_ARROW) {
+//     if (AblageListe[1][0] == 0 || AblageListe[1][0] == x - scl) {
+//       if (d.futureWinkel[1] > 1) {
+//         d.futureWinkel[1]--;
+//       }
+//       else {
+//         d.futureWinkel[0]++;
+//       }
+//     }
+//     if (AblageListe[1][1] == 0 || AblageListe[1][1] == y - scl) {
+//       if (d.futureWinkel[0] > 1) {
+//         d.futureWinkel[0]--;
+//       }
+//       else {
+//         d.futureWinkel[1]++;
+//       }
+//     }
+//   }
+//   else if (AblageListe[1][0] == 0 || AblageListe[1][0] == x - scl && AblageListe[0]===RIGHT_ARROW) {
+//           d.futureWinkel[1]++;
+//         }
+//       else if (AblageListe[1][1] == 0 || AblageListe[1][1] == y - scl && AblageListe[0]===RIGHT_ARROW) {
+//           d.futureWinkel[0]++;
+//           }
+//         // //
+//         // if (AblageListe[1][0] == 0) {
+//         //   d.directionFuture = "RIGHT_ARROW" + " + " + d.directionFuture.toString().split(' + ')[1];
+//         // }
+//         // if (AblageListe[1][0] == x - scl) {
+//         //   d.directionFuture = "LEFT_ARROW" + " + " + d.directionFuture.toString().split(' + ')[1];
+//         // }
+//         // if (AblageListe[1][1] == 0) {
+//         //   d.directionFuture = d.directionFuture.toString().split(' + ')[0] + " + " + "DOWN_ARROW";
+//         // }
+//         // if (AblageListe[1][1] == y - scl) {
+//         //   d.directionFuture = d.directionFuture.toString().split(' + ')[0] + " + " + "UP_ARROW";
+//         // }
+//       //  JSON.parse(JSON.stringify(d.zählerWinkel = d.futureWinkel));
+//       //  zählerListe[0] = 0;
+//       //  d.zählerWinkel = [d.futureWinkel[0], d.futureWinkel[1]];
+//         // while (zählerListe[0] < 7) {
+//         //   if (d.directionFuture.toString().split(' + ')[0] == "LEFT_ARROW" && d.zählerWinkel[0] > 0) {
+//         //     AblageListe[1][0] -= scl;
+//         //   }
+//         //   else if (d.zählerWinkel[0] > 0) {
+//         //     AblageListe[1][0] += scl;
+//         //   }
+//         //   if (d.directionFuture.toString().split(' + ')[1] == "UP_ARROW" && d.zählerWinkel[1] > 0) {
+//         //     AblageListe[1][1] -= scl;
+//         //   }
+//         //   else if (d.zählerWinkel[1] > 0) {
+//         //     AblageListe[1][1] += scl;
+//         //   }
+//         //   d.zählerWinkel[0]--;
+//         //   d.zählerWinkel[1]--;
+//         //   if (d.zählerWinkel[0] < 1 && d.zählerWinkel[1] < 1) {
+//         //     d.zählerWinkel[0] = d.winkel[0];
+//         //     d.zählerWinkel[1] = d.winkel[1];
+//         //   }
+//         //   d.futureKoordinates[d.futureKoordinates.length] = [AblageListe[1][0], AblageListe[1][1]];
+//         //   zählerListe[0]++;
+//         // }
+//   }
+ }
+
+// function insect() {
+//   AblageListe[0] = 0;
+//   while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+//     AblageListe[0]++;
+//   }
+//   this.x = ((floor(AblageListe[0]))*20) - 60;
+//   AblageListe[0] = 0;
+//   while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+//     AblageListe[0]++;
+//   }
+//   this.y = ((floor(AblageListe[0]))*20)-60;
+//   this.direction = "RIGHT_ARROW";
+//   this.
+//
+//   this.collision= function() {
+//     if (this.x > x - scl) {
+//       this.isDead[1] = "LEFT_ARROW";
+//     }
+//     else if (this.y > y - 20) {
+//       this.isDead[1] = "UP_ARROW";
+//     }
+//     else if (this.y < 0) {
+//       this.isDead[1] = "DOWN_ARROW";
+//     }
+//     else if (this.x < 0) {
+//       this.isDead[1] = "RIGHT_ARROW";
+//     }
+//     zählerListe[0] = 0;
+//     while (zählerListe[0] < s.tail.length) {
+//       if (s.tail[zählerListe[0]].x == this.x && s.tail[zählerListe[0]].y == this.y) {
+//         console.log("collisionSnake");
+//         s.lives -= 37;
+//         checkGewinner();
+//         this.isDead[0] = true;
+//         this.isDead[1] = this.opositeDirection[this.direction];
+//         this.isDead[2] = "collision";
+//       clearInterval(iDirectionInterval);
+//       clearInterval(syncI)
+//       setTimeout(function () {
+//         iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+//         syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2)
+//       }, 1537);
+//       }
+//       zählerListe[0]++;
+//     }
+//   /*  if (s.tail.some(x => x.includes(this.x) ) && s.tail.some(x => x.includes(this.y) )) {
+//       console.log("collisionSnake");
+//     } */
+//     if (dist(this.x, this.y, s.x, s.y) == 0 && this.direction == this.opositeDirection[s.direction]) {
+//       console.log("snakeEatsInsect");
+//       s.lives += 13;
+//       s.total++;
+//       checkGewinner();
+//       clearInterval(iDirectionInterval);
+//       clearInterval(syncI);
+//       AblageListe[0] = 0;
+//       while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+//         AblageListe[0]++;
+//       }
+//       this.x = (floor(AblageListe[0]))*20;
+//       AblageListe[0] = 0;
+//       while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+//         AblageListe[0]++;
+//       }
+//       this.y = (floor(AblageListe[0]))*20;
+//       zählerListe[0] = 0;
+//       while (zählerListe[0] < s.tail.length) {
+//         if (s.tail[zählerListe[0]].x == this.x && s.tail[zählerListe[0]].y == this.y) {
+//           this.y += 20;
+//           this.direction = "RIGHT_ARROW";
+//           if (this.y == y - 20) {
+//             this.x += 20;
+//           }
+//           zählerListe[0] = -1;
+//         }
+//         zählerListe[0]++;
+//       }
+//       setTimeout(function () {
+//         iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+//         syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2)
+//       }, 2731);
+//     }
+//     if (this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) {
+//       console.log("deathInsect (Rand)");
+//       this.isDead[0] = true;
+//       this.isDead[2] = "Rand";
+//     }
+//     if (dist(this.x, this.y, food.x, food.y) == 0) {
+//       console.log("insectEatFood");
+//       pickLocation(false);
+//     }
+//     if (this.isDead[0] == true) {
+//       this.isDead[0] = false;
+//       if (this.isDead[1] == "LEFT_ARROW") {
+//         this.x -= 20;
+//       }
+//       else if (this.isDead[1] == "RIGHT_ARROW") {
+//         this.x += 20;
+//       }
+//       else if (this.isDead[1] == "UP_ARROW") {
+//         this.y -= 20;
+//       }
+//       else {
+//         this.y += 20;
+//       }
+//       if (this.isDead[1] == "RIGHT_ARROW" || this.isDead[1] == "LEFT_ARROW" || this.isDead[1] == "UP_ARROW" || this.isDead[1] == "DOWN_ARROW") {
+//         this.isDead[1] = "none";
+//         this.direction = this.opositeDirection[this.direction];
+//       }
+//       if (this.isDead[2] == "Rand") {
+//         clearInterval(iDirectionInterval);
+//         clearInterval(syncI)
+//         setTimeout(function () {
+//           iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+//           syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2);
+//         }, 3700);
+//       }
+//     }
+//   }
+// }
+
+function moveI() {
+if (i.direction == "UP_ARROW") i.y -= scl;
+else if (i.direction == "DOWN_ARROW") i.y += scl;
+else if (i.direction == "RIGHT_ARROW") i.x += scl;
+else i.x -= scl;
+snake = true;
+draw(true);
+}
+
+// function frog() {
+//   this.x = 300;
+//   this.y = 400;
+//   this.direction = "RIGHT_ARROW";
+//   this.visibility = 255;
+// //  this.moving = false;
+//   this.visibilityPerField = 11 + ((1580 - x)/33);
+//   this.visibilityDirection = "unvisible"
+//   //
+// }
+// function draughts() {
+//   this.x = x - scl;
+//   this.y = y - scl;
+//   this.direction = "LEFT_ARROW + UP_ARROW";
+//   this.winkel = [3, 3];
+//   this.futureWinkel = [3, 3];
+//   this.futureKoordinates = [];
+//   this.directionFuture = "LEFT_ARROW + UP_ARROW";
+//   this.zählerWinkel = [3,3];
+// }
+function hunter() {
+this.x = 20;
+this.bullet = {"x": this.x, "y": - 20}
+this.image = new Image();
+this.image.src = "https://adi.nicolaiweitkemper.de/Bilder/Tarnfarbe.jpeg";
+this.direction = "RIGHT_ARROW";
+this.hit = false;
+}
+
+// function moveF() {
+//   if (!(f.visibility >= 250 && f.visibilityDirection == "visible") && (f.x < x - scl || !(f.direction == "RIGHT_ARROW")) && (f.y < y - scl || !(f.direction == "DOWN_ARROW")) && (f.x > 1 || !(f.direction == "LEFT_ARROW")) && (f.y > 1 || !(f.direction == "UP_ARROW"))) {
+//     if (f.direction == "RIGHT_ARROW") {
+//       f.x += scl;
+//     }
+//     else if (f.direction == "LEFT_ARROW") {
+//       f.x -= scl;
+//     }
+//     else if (f.direction == "UP_ARROW") {
+//       f.y -= scl;
+//     }
+//     else {
+//       f.y += scl;
+//     }
+//   }
+//   if (f.visibility > 77 && f.visibilityDirection == "unvisible") {
+//     f.visibility -= f.visibilityPerField;
+//   }
+//   else if (f.visibility < 250) {
+//     f.visibilityDirection = "visible";
+//     f.visibility += f.visibilityPerField;
+//   }
+//   else {
+//     f.visibility = 255;
+//   //  f.moving = false;
+//     clearInterval(fMovement);
+//     setTimeout(function () {
+//       drawFrog = true;
+//       draw(true);
+//       room.send({
+//         message: {
+//           "type": "f",
+//           "data": [f.x, f.y, f.visibility, drawFrog]
+//         }
+//       });
+//     }, 3735);
+//     setTimeout(function () {
+//       f.visibilityDirection = "unvisible";
+//     //  f.moving = true;
+//       drawFrog = false;
+//       fMovement = setInterval(moveF, 77);
+//     }, 4735);
+//     for (var i = 0; i < s.tail.length; i++) {
+//       if (dist(s.tail[i].x, s.tail[i].y, f.x, f.y) == 0) {
+//         console.log("collisionSnake");
+//         s.lives -= 27;
+//         checkGewinner();
+//       }
+//     }
+//     room.send({
+//       message: {
+//         "type": "f",
+//         "data": [f.x, f.y, f.visibility, drawFrog]
+//       }
+//     });
+//   }
+//   room.send({
+//     message: {
+//       "type": "f",
+//       "data": [f.x, f.y, f.visibility, drawFrog]
+//     }
+//   });
+// }
+// function moveD() {
+//   if (d.direction.toString().split(' + ')[0] == "LEFT_ARROW" && d.zählerWinkel[0] > 0) {
+//     d.x -= scl;
+//   }
+//   else if (d.zählerWinkel[0] > 0) {
+//     d.x += scl;
+//   }
+//   if (d.direction.toString().split(' + ')[1] == "UP_ARROW" && d.zählerWinkel[1] > 0) {
+//     d.y -= scl;
+//   }
+//   else if (d.zählerWinkel[1] > 0) {
+//     d.y += scl;
+//   }
+// //  console.log(d.x + " - " + d.y);
+//   if (d.x == 0 || d.y == 0 || d.x == x - scl || d.y == y - scl) {
+//   //  clearInterval(dMoving);
+//     d.winkel = JSON.parse(JSON.stringify(d.futureWinkel));
+//     if (d.x == 0) {
+//       d.direction = "RIGHT_ARROW" + " + " + d.direction.toString().split(' + ')[1];
+//     }
+//     if (d.x == x - scl) {
+//       d.direction = "LEFT_ARROW" + " + " + d.direction.toString().split(' + ')[1];
+//     }
+//     if (d.y == 0) {
+//       d.direction = d.direction.toString().split(' + ')[0] + " + " + "DOWN_ARROW";
+//     }
+//     if (d.y == y - scl) {
+//       d.direction = d.direction.toString().split(' + ')[0] + " + " + "UP_ARROW";
+//     }
+//     // if (d.direction.toString().split(' + ').length == 2) {
+//     //   d.direction = i.opositeDirection[d.direction.toString().split(' + ')[0]] + " + " + i.opositeDirection[d.direction.toString().split(' + ')[1]];
+//     // }
+//     // else {
+//     //   d.direction = i.opositeDirection[d.direction.toString().split(' + ')[0]];
+//     // }
+//     d.zählerWinkel = [d.winkel[0], d.winkel[1]];
+//     // setTimeout(function () {
+//     //   d.zählerWinkel = [d.winkel[0], d.winkel[1]];
+//     //   dMoving = setInterval(moveD, 99);
+//     // }, 2753);
+//   }
+//   d.zählerWinkel[0]--;
+//   d.zählerWinkel[1]--;
+//   if (d.zählerWinkel[0] < 1 && d.zählerWinkel[1] < 1) {
+//     d.zählerWinkel[0] = d.winkel[0];
+//     d.zählerWinkel[1] = d.winkel[1];
+//   }
+// }
+function moveH() {
+if (h.x == x - scl || h.x == 0) {
+ h.direction = opositeDirection[h.direction];
+}
+if (h.direction == "RIGHT_ARROW") {
+ h.x += scl;
+}
+else {
+ h.x -= scl;
+}
+AblageListe[3]++;
+}
+function moveHunterBullet() {
+for(var i = 0; i < s.tail.length; i++){
+   if (h.bullet.x == s.tail[i].x && h.bullet.y == s.tail[i].y && h.hit == false) {
+     console.log("hitBodeySnake");
+     time[1] += 58;
+//     s.lives -= 10;
+    h.hit = true;
+    setTimeout(function () {
+      h.hit = false;
+    }, 3000);
+   }
+}
+if (h.bullet.x == s.x && h.bullet.y == s.y && h.hit == false) {
+  h.hit = true;
+ console.log("hitHeadSnake");
+ h.hit = false;
+// s.lives -= 15;
+ // s.total--;
+ // s.tail.pop();
+ time[1] += 68;
+}
+if (!(h.bullet.y == - 20)) {
+ h.bullet.y -= scl;
+}
+else {
+ clearInterval(hunterBullet)
+}
+}
+
+// snake.js
+function Snake()
+{
+this.x=0;
+this.y=0;
+this.xspeed=1;
+this.yspeed=0;
+this.total=1;
+this.tail=[];
+this.direction = "RIGHT_ARROW";
+//this.lives = (x*y)/400;
+
+this.eat=function(pos)
+{
+ d=[];
+ for (var i = 0;!(food.x == undefined) && i < food.x.length; i++) {
+     d[i]=dist(this.x,this.y,pos.x[i],pos.y[i]);
+     if (d[i] == 0) {
+       food.x.splice([i], 1);
+       food.y.splice([i], 1);
+   }
+
+ }
+ if(d.includes(0)){
+  var audio = new Audio('http://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
+    audio.play();
+    audio.currentTime = 0.5;
+    setTimeout(function () {
+      audio.pause();
+    }, 100);
+   this.total++;
+   if (food.x.length < 1) {
+     soundsRoundFinished();
+   }
+   return true;
+ }
+ else {return false;}
+}
+
+this.dir=function(x,y)
+{
+if (!(AblageListe[5] == "make turn")) {
+ this.direction = {"0,1": "UP_ARROW", "0,-1": "DOWN_ARROW", "1,0": "RIGHT_ARROW", "-1,0": "LEFT_ARROW"}
+ this.direction = this.direction[x + "," + y];
+}
+ this.xspeed=x;
+ this.yspeed=y;
+}
+
+this.death=function(){
+
+ for(var i=0;i<this.tail.length;i++)
+ {
+   pos=this.tail[i];
+   var d=dist(this.x,this.y,pos.x,pos.y);
+   if(d<1)
+   {
+     if (document.getElementById('vorSpielBeginn').style.display == "none") {
+       s.lives -= 27
+       if (this.total > 1) {
+         this.total -= 1;
+         this.tail.pop();
+       }
+     //  checkGewinner();
+     }
+     AblageListe[0] = 0;
+     while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+       AblageListe[0]++;
+     }
+     this.x = (floor(AblageListe[0]))*20;
+     AblageListe[0] = 0;
+     while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+       AblageListe[0]++;
+     }
+     this.y = (floor(AblageListe[0]))*20;
+     this.x -= 20*this.total;
+     this.dir(1,0);
+   }
+ }
+
+}
+this.update=function()
+{
+ if(this.total===this.tail.length)
+ {
+   for(var i=0;i<this.tail.length-1;i++)
+   {
+   this.tail[i]=this.tail[i+1];
+   }
+
+ }
+ this.tail[this.total-1]=createVector(this.x,this.y);
+ this.x=this.x+this.xspeed*scl;
+ this.y=this.y+this.yspeed*scl;
+
+ this.x=constrain(this.x,0,width-scl);
+ this.y=constrain(this.y,0,height-scl);
+ // if (spielerIch == 1 && running[1] == 1) {
+ //   console.log("beginn");
+ // }
+ if (spielerIch == 1 && AblageListe[4] > 0 && (!((AblageListe[4]/4 + "").includes(".")) && s.y > 320 || !((AblageListe[4]/9 + "").includes(".")) && s.y <= 360) && s.y > 80) {
+   AblageListe[5] = "make turn";
+   AblageListe[0] = 38; // UP_ARROW
+   folgenKeyPressed();
+   AblageListe[4]++;
+ }
+ if (spielerIch == 1 && (this.x == x - scl || this.x == 0 || AblageListe[5] == "make turn")) {
+   if (AblageListe[5] == "make turn") {
+    AblageListe[5] = "finished";
+     setTimeout(function () {
+       AblageListe[0] = {"UP_ARROW":38, "DOWN_ARROW":40, "RIGHT_ARROW":39, "LEFT_ARROW":37};
+        AblageListe[0] = AblageListe[0]/*[opositeDirection*/[s.direction]//];
+        folgenKeyPressed();
+        AblageListe[4]++;
+     }, 300);
+     console.log(s.y);
+   }
+   else {
+     AblageListe[0] = {"UP_ARROW":38, "DOWN_ARROW":40, "RIGHT_ARROW":39, "LEFT_ARROW":37};
+      AblageListe[0] = AblageListe[0][opositeDirection[this.direction]];
+      folgenKeyPressed();
+      AblageListe[4]++;
+      AblageListe[5] = "finished";
+   }
+   if (s.y == 360) {
+     time[1] += 270;
+   }
+ }
+}
+
+this.show=function()
+{
+ fill(255);
+ for(var i=0;i<this.tail.length;i++)
+ {
+   rect(this.tail[i].x,this.tail[i].y,scl,scl);
+ //   if (!((s.lives + "")[i] == undefined)) {
+ // //    fill(51);
+ //   }
+ }
+ rect(this.x,this.y,scl,scl);
+ // if (s.direction == "RIGHT_ARROW"/* || s.direction == "DOWN_ARROW"*/ || s.direction == "UP_ARROW") {
+ //   for (var i = 0; i < s.tail.length; i++) {
+ //     fill(255, 0, 0);
+ //     textSize(30);
+ //     text((s.lives + "")[i], this.tail[i].x, this.tail[i].y);
+ //     fill(255);
+ //   }
+ // }
+ // else {
+ //   zählerListe[0] = 0;
+ //   for (var i = s.tail.length - 1; i > -1; i--) {
+ //     fill(255, 0, 0);
+ //     textSize(30);
+ //     text((s.lives + "")[zählerListe[0]], this.tail[i].x, this.tail[i].y);
+ //     fill(255);
+ //     zählerListe[0]++;
+ //   }
+ // }
+}
+}
+
+function soundsRoundFinished() {
+  startPause();
+  coordinates[0] = 30;
+  coordinates[1] = x - 133;
+  coordinates[2] = 30;
+  showTimeInterval = setInterval(showTime, 80);
+  setTimeout(function () {
+ // clearInterval(showTime);
+  audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/epic-win-sound-effects-youtubemp3free.org.mp3");
+  audio.currentTime = 10.5;
+  audio.play();
+setTimeout(function () {
+ audio.pause()
+  if (!(name == null) && (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == undefined || pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == "not played yet!" || (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] > mins[0] + ":" + secs[0] + ":0" + tenths[0] && spielerIch == 0 || pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] < mins[0] + ":" + secs[0] + ":0" + tenths[0] && spielerIch == 1))) {
+    pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = mins[0] + ":" + secs[0] + ":0" + tenths[0];
+    console.log("newHighscore");
+    document.getElementById('highscores').style.color = "green";
+    audio = new Audio("https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+    setTimeout(function () {
+      audio = new Audio("http://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
+      audio.currentTime = 9.7;
+      audio.play();
+    }, 2000);
+    // Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+    // canvas.getContext('2d').drawImage(Bild, 277, 20, 437, 437);
+    dbSet("snakeGame", "pixelSpielfelder", JSON.stringify(pixelSpielfelder));
+    localStorage.setItem("pixelSpielfelder", JSON.stringify([pixelSpielfelder, name]));
+    // TODO
+  }
+  else {
+    document.getElementById('highscores').style.color = "black";
+  }
+  showRewards();
+}, 2000);
+
+}, 500);
+}
+
+function showTime() {
+  coordinates[0] += 17;
+  coordinates[1] -= 97;
+  coordinates[2] += 97;
+  draw(false);
+  if (coordinates[0] > (Math.floor((x*y)/4650)) - 1) {
+    clearInterval(showTimeInterval);
+  }
+}
+
+function showRewards() {
+  // animation TODO
+  canvas.style.display = "none";
+  document.getElementById('highscore').innerHTML = "highscore: " + pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name];
+  document.getElementById('score').innerHTML = "score: " + mins[0] + ":" + secs[0] + ":0" + tenths[0];
+  zählerListe[0] = 0;
+  AblageListe[0] = [];
+  for (var i = 0; i < Object.keys(pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores).length; i++) {
+    if (!(Object.keys(pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores)[i] == name)) {
+      AblageListe[0].push([pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[Object.keys(pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores)[i]], Object.keys(pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores)[i]]);
+    }
+  }
+  AblageListe[0].sort();
+  while (zählerListe[0] < AblageListe[0].length) {
+    if ((AblageListe[0][zählerListe[0]][0] < pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 0) || (AblageListe[0][zählerListe[0]][0] > pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 1)) {
+      document.getElementById('highscoresBetterThanYours').innerHTML += AblageListe[0][zählerListe[0]][0] + "  " + AblageListe[0][zählerListe[0]][1] + '<br>';
+    }
+    else if ((AblageListe[0][zählerListe[0]][0] > pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 0) || (AblageListe[0][zählerListe[0]][0] < pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 1)) {
+      document.getElementById('highscoresWorseThanYours').innerHTML += AblageListe[0][zählerListe[0]][0] + "  " + AblageListe[0][zählerListe[0]][1] + '<br>';
+    }
+    else {
+      document.getElementById('highscoresAsGoodAsYours').innerHTML += AblageListe[0][zählerListe[0]][0] + "  " + AblageListe[0][zählerListe[0]][1] + '<br>';
+    }
+    zählerListe[0]++;
+  }
+}
+
+function deleteDataServer() {
+  dbSet("snakeGame", "pixelSpielfelder", "");
+}
+
+</script>

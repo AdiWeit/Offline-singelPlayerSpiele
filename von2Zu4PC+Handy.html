@@ -1,0 +1,720 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<meta charset="utf-8">
+<script src="http://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<button id="BAndereBenutzerAnzeigen" type="button" onclick="namenabfrage()" name="button">highscores von anderen Spielern ansehen</button>
+<button id="BNeueRunde" type="button" onclick="neueRunde()" name="button">Neue Runde</button>
+<canvas id="textur" width="2570" height="888" style="touch-action: none"></canvas>
+<script>
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+  }
+  var textur = document.getElementById('textur');
+  var canvas = textur.getContext('2d'); //Dimension
+  var Bild;
+  var AblageListe = [];
+  var zählerListe = [];
+  var spielfeld = [];
+  var KoordinatenX = 145;
+  var KoordinatenY = 110;
+  var zählerListe = [];
+  var mausx = 0;
+  var mausy = 0;
+  var mausxScroll = 0;
+  var mausyScroll = 0;
+  var zustände = [];
+  var felderAuswahl = [];
+  zustände[2] = "inRunde";
+  var Endanimation;
+  var scores = [0, 0];
+  var zweitBesteScores = [0, 0];
+  var highscores = [0, 0];
+  var name = prompt("Wie heißen sie? Diese Information ist nötig, um deine Highscores speichern zu können.");
+  var namen = [];
+  dbGet("von2Zu4", "highscores" + name, function(result) {
+    if (result == "NOPE" == false) {
+      highscores = result.toString().split(',');
+    }
+  });
+  dbGet("von2Zu4", "zweitBesteScores" + name, function(result) {
+    if (result == "NOPE" == false) {
+      zweitBesteScores = result.toString().split(',');
+    }
+  });
+  dbGet("von2Zu4", "namen" + name, function(result) {
+    if (result == "NOPE" == false) {
+      namen = result.toString().split(',');
+    }
+  });
+
+  dbGet("von2Zu4", "spielfeld" + name, function(result) {
+    if (result == "NOPE" == false) {
+      spielfeld = result.toString().split(';');
+      zählerListe[0] = 0;
+      spielfeld.pop();
+      while (zählerListe[0] < 4) {
+        spielfeld[zählerListe[0]] = spielfeld[zählerListe[0]].toString().split(',');
+        zählerListe[0]++;
+      }
+    } else {
+      zahlenKreieren();
+    }
+    spielfeldKreieren();
+  });
+
+  /*canvas.fillStyle = "blue"
+  canvas.beginPath();
+  canvas.arc(110,110,99,0,Math.PI*2, false);
+  canvas.fill();
+  canvas.fillStyle = "red"
+  canvas.beginPath();
+  canvas.arc(110,110,90,0,Math.PI*2, false);
+  canvas.fill();
+  */
+
+  if (gerät == "Handy") {
+    $('head').append('<link rel="stylesheet" href="http://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
+  }
+
+  function namenabfrage() {
+    namen[namen.length] = prompt("Wie heißt die Person, nach der sie suchen?");
+    dbGet("von2Zu4", "highscores" + namen[namen.length - 1], function(result) {
+      if (result.toString().split(',')[0] == "NOPE" || result.toString().split(',')[0] == "" || result.toString().split(',')[0] == "null") {
+        namen.pop();
+        audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/windows%207%20trash.wav").play();
+      }
+      dbSet("von2Zu4", "namen" + name, namen);
+      AblageListe[3] = 267 * namen.length
+      document.getElementById('textur').height = 888 + 300 * namen.length + "";
+      eigenenHighscoreAnzeigen();
+      gespeicherteHighscoresAbfragen();
+    });
+  }
+
+  function gespeicherteHighscoresAbfragen() {
+    setTimeout(function() {
+      zählerListe[0] = 0;
+      AblageListe[3] = 0;
+      if (namen.length > 0) {
+        zustände[0] = "whileFunctionHighscoresAbfragen";
+        whileFunctionHighscoresAbfragen();
+      }
+    }, 100);
+  }
+
+  function whileFunctionHighscoresAbfragen() {
+    highscoresAndereSpieler(namen[zählerListe[0]]);
+    //  setTimeout(function () {
+    AblageListe[3] += 267;
+    zählerListe[0]++;
+    //  }, 550);
+  }
+
+  function highscoresAndereSpieler(nameAndererSpieler) {
+    dbGet("von2Zu4", "highscores" + nameAndererSpieler, function(result) {
+
+      canvas.font = "65px Georgia";
+      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
+      canvas.fillText("user: " + nameAndererSpieler, 30, 120 * 2 + AblageListe[3] - 120);
+      //    canvas.fillText("×" + nameAndererSpieler, 0, 120*2 + AblageListe[3]  - 120);
+      canvas.fillStyle = "blue";
+      canvas.fillRect(280 + 40 * (nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 173 + 5, 70, 65);
+      canvas.fillStyle = "black";
+      canvas.fillRect(289 + 40 * (nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 173 + 10 + 5, 50, 45);
+      canvas.font = "105px Georgia";
+      canvas.fillStyle = "red";
+      canvas.fillText("×", 285 + 40 * (nameAndererSpieler.length - 2), 120 * 2 + AblageListe[3] - 105 + 5);
+
+      canvas.font = "50px Georgia";
+      canvas.fillStyle = "black";
+      canvas.fillText("Punkte insgesamt: ", 30, (130 + 40) * 2 - 50 + AblageListe[3] - 120);
+      canvas.fillText("Höchste Punkte von 1 Stein: ", 30, (170 + 57) * 2 - 55 + AblageListe[3] - 120);
+      canvas.font = "30px Georgia";
+      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
+      canvas.fillText("highscore: " + JSON.parse(result.toString().split(',')[0]), 30, (145 + 40) * 2 - 48 + AblageListe[3] - 120);
+      if (JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "red";
+      } else if (JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "black";
+      }
+      canvas.fillText("highscore: " + result.toString().split(',')[1], 30, (185 + 47) * 2 - 37 + AblageListe[3] - 120);
+      dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler, function(result) {
+        canvas.fillStyle = "black";
+        canvas.fillText("zweit bester Score: " + result.toString().split(',')[0], 30, (160 + 40) * 2 - 47 + AblageListe[3] - 120);
+        canvas.fillText("zweit bester Score: " + result.toString().split(',')[1], 30, (195 + 50) * 2 - 35 + AblageListe[3] - 120);
+        if (zustände[0] == "whileFunctionHighscoresAbfragen" && zählerListe[0] < namen.length) {
+          whileFunctionHighscoresAbfragen();
+        } else {
+          zustände[0] = "beendet"
+        }
+      });
+    });
+  }
+
+  function neueRunde() {
+    canvas.fillStyle = "white";
+    canvas.fillRect(0, 0, 5000, 5000);
+    zustände[2] = "inRunde";
+    zustände[0] = "beendet";
+    felderAuswahl = [];
+    document.getElementById('textur').style = "touch-action: none";
+    zahlenKreieren();
+    spielfeldKreieren();
+  }
+
+  function spielfeldKreieren() {
+    canvas.fillStyle = "white"
+    canvas.fillRect(0, 0, 1800, 700)
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    KoordinatenX = 145;
+    KoordinatenY = 110;
+    while (KoordinatenY < 700) {
+      if (felderAuswahl.includes(zählerListe[0] + " - " + zählerListe[1])) {
+        canvas.fillStyle = "green";
+      } else {
+        canvas.fillStyle = "blue";
+      }
+      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1]) {
+        canvas.fillStyle = "red"
+      }
+
+      canvas.beginPath();
+      canvas.arc(KoordinatenX, KoordinatenY, 69, 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.fillStyle = "yellow"
+      canvas.beginPath();
+      canvas.arc(KoordinatenX, KoordinatenY, 60, 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.fillStyle = "black";
+      //    canvas.
+      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false) {
+        spielfeld[zählerListe[0]][zählerListe[1]] += "";
+        canvas.font = 105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length + "px Georgia";
+        KoordinatenX += 10;
+        KoordinatenX -= 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+        canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
+        KoordinatenX -= 10;
+        KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+      } else {
+        AblageListe[1] = "";
+        AblageListe[1] += zustände[1] * felderAuswahl.length;
+        canvas.font = 105 - 15 * AblageListe[1].length + "px Georgia";
+        KoordinatenX += 10;
+        KoordinatenX -= 10 * AblageListe[1].length;
+        canvas.fillText(zustände[1] * felderAuswahl.length, KoordinatenX - 23, KoordinatenY + 23);
+        KoordinatenX -= 10;
+        KoordinatenX += 10 * AblageListe[1].length;
+      }
+      KoordinatenX += 170;
+      if (KoordinatenX > 1500) {
+        KoordinatenX = 145;
+        KoordinatenY += 170;
+        zählerListe[0]++;
+        zählerListe[1] = -1;
+      }
+      zählerListe[1]++;
+    }
+    if (spielfeld[0].includes("empty")) {
+      removeEmpty();
+      spielfeldKreieren();
+    }
+    if (spielfeld[1].includes("empty")) {
+      removeEmpty();
+      spielfeldKreieren();
+    }
+    if (spielfeld[2].includes("empty")) {
+      removeEmpty();
+      spielfeldKreieren();
+    }
+    if (spielfeld[3].includes("empty")) {
+      removeEmpty();
+      spielfeldKreieren();
+    }
+  }
+
+  function zahlenKreieren() {
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+      spielfeld[zählerListe[0]] = [];
+      while (zählerListe[1] < 8) {
+        spielfeld[zählerListe[0]][zählerListe[1]] = Math.floor(Math.random() * 4);
+        spielfeld[zählerListe[0]][zählerListe[1]]++;
+        spielfeld[zählerListe[0]][zählerListe[1]] = spielfeld[zählerListe[0]][zählerListe[1]] * 2
+        zählerListe[1]++;
+      }
+      zählerListe[1] = 0;
+      zählerListe[0]++;
+    }
+  }
+
+  var f = function() {
+    var eventHandler = function(event) {
+      console.log(window.scrollX + " - " + window.scrollY);
+  //    if (zustände[2] == "inRunde" == false) {
+        mausxScroll = window.scrollX;
+        mausyScroll = window.scrollY;
+    //  }
+    };
+    window.addEventListener('scroll', eventHandler, false)
+    //    koordinatenSpieler1[6] = 0;
+
+  };
+  window.addEventListener('DOMContentLoaded', f, false)
+
+  function readMouseMove(e) {
+    mausx = e.clientX + mausxScroll;
+    mausy = e.clientY + mausyScroll;
+    //  console.log(e.clientX);
+  //  if (gerät == "PC") {
+      mousemoveFolgen();
+  //  }
+  }
+
+  function mousemoveFolgen() {
+    if (zustände[0] == "Auswahl" && zustände[2] == "inRunde") {
+      klickpointCheck();
+      if (zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1]) {
+        if (AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) + 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString()
+            .split(' - ')[1]) || AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) - 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length -
+            1].toString().split(' - ')[1]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) + 1 && AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[
+            felderAuswahl.length - 1].toString().split(' - ')[0]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) - 1 && AblageListe[0].toString().split(' - ')[0] == JSON
+          .parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0])) {
+
+          felderAuswahl[felderAuswahl.length] = AblageListe[0];
+          console.log(felderAuswahl);
+        }
+      }
+      if (zählerListe[0] == 5 && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1] && AblageListe[0] == felderAuswahl[felderAuswahl.length - 2]) {
+        felderAuswahl.pop();
+      }
+      spielfeldKreieren();
+    }
+  }
+  document.onmousemove = readMouseMove
+  if (gerät == "Handy") {
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+  }
+
+  function touch(ev) {
+    mausx = ev.touches[0]["pageX"] + mausxScroll;
+    mausy = ev.touches[0]["pageY"] + mausyScroll;
+    if (ev.type == "touchstart") {
+      klickpointCheck();
+      if (felderAuswahl < 1) {
+        zustände[0] = "beendet";
+        mousedownFolgen();
+      }
+      if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] == false || AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString()
+        .split(' - ')[1] == false) {
+        zustände[0] = "beendet";
+        mousedownFolgen();
+      } else if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] && AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString()
+        .split(' - ')[1]) {
+        mousedownFolgen();
+      }
+    }
+    if (ev.type == "touchmove") {
+      mousemoveFolgen();
+    }
+  }
+
+
+   window.addEventListener('mousedown', function() {
+    if (gerät == "PC") {
+      klickpointCheck();
+      if (felderAuswahl < 1) {
+        zustände[0] = "beendet";
+        mousedownFolgen();
+      }
+      if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] == false || AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString()
+        .split(' - ')[1] == false) {
+        zustände[0] = "beendet";
+        mousedownFolgen();
+      } else if (felderAuswahl.length > 0 && AblageListe[0].toString().split(' - ')[0] == felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0] && AblageListe[0].toString().split(' - ')[1] == felderAuswahl[felderAuswahl.length - 1].toString()
+        .split(' - ')[1]) {
+        mousedownFolgen();
+      }
+    }
+  });
+
+  function mousedownFolgen() {
+    if (zustände[2] == "beendet" == false) {
+      klickpointCheck();
+      if (zählerListe[0] == 5) {
+        if (zustände[0] == "Auswahl" == false) {
+          zustände[0] = "Auswahl";
+          felderAuswahl = [];
+          felderAuswahl[0] = AblageListe[0];
+          spielfeldKreieren();
+        } else {
+          zählerListe[0] = 0;
+          while (zählerListe[0] < felderAuswahl.length - 1) {
+            spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] = "empty";
+            zählerListe[0]++;
+          }
+          spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] = zustände[1] * felderAuswahl.length
+          if (felderAuswahl.length > 1) {
+          var audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/''PLOP''%20-%20Sound%20Effect%20(FREE).mp3")
+              audio.play();
+               setTimeout(function () {
+                  audio.pause();
+                }, 900);
+              }
+              spielfeldKreieren();
+        }
+      }
+    } else {
+      zählerListe[0] = 0;
+      AblageListe[3] = 0;
+      while (zählerListe[0] < namen.length) {
+        if (mausx > 280 + 40 * (namen[zählerListe[0]].length - 2) && mausx < 280 + 40 * (namen[zählerListe[0]].length - 2) + 70 && mausy > 369 + AblageListe[3] && mausy < 369 + 65 + AblageListe[3]) {
+          console.log("Löschen " + zählerListe[0]);
+          namen.splice(zählerListe[0], 1);
+          dbSet("von2Zu4", "namen" + name, namen);
+          canvas.fillStyle = "white";
+          canvas.fillRect(0, 337, 10000, 10000)
+          gespeicherteHighscoresAbfragen();
+          zählerListe[0] = namen.length;
+          audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/windows%207%20trash.wav").play();
+        }
+        if (zählerListe[0] == namen.length == false) {
+          AblageListe[3] += 267;
+          zählerListe[0]++;
+        }
+      }
+    }
+  }
+
+  function klickpointCheck() {
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+      while (zählerListe[1] < 8) {
+        if (mausx > 80 + 170 * zählerListe[1] && mausx < 80 + 170 * zählerListe[1] + 138 && mausy > 50 + 170 * zählerListe[0] && mausy < 50 + 170 * zählerListe[0] + 138) {
+          //console.log(zählerListe[0] + " - " + zählerListe[1]);
+          AblageListe[0] = zählerListe[0] + " - " + zählerListe[1]
+          if (zustände[0] == "Auswahl" == false) {
+
+            zustände[1] = spielfeld[zählerListe[0]][zählerListe[1]];
+          }
+          zählerListe[0] = 4;
+        }
+        zählerListe[1]++;
+      }
+      zählerListe[1] = 0;
+      zählerListe[0]++;
+    }
+  }
+
+  document.onkeydown = function(event) {
+    if (event.keyCode == 46) {
+      zustände[0] = "beendet";
+      felderAuswahl = [];
+      spielfeldKreieren();
+    }
+
+  };
+
+  function removeEmpty() {
+    zählerListe[0] = 3;
+    zählerListe[1] = 7;
+    while (zählerListe[0] > 0) {
+
+      while (zählerListe[1] > -1) {
+        if (spielfeld[zählerListe[0]][zählerListe[1]] == "empty") {
+          if (zählerListe[0] > 0) {
+            spielfeld[zählerListe[0]][zählerListe[1]] = spielfeld[zählerListe[0] - 1][zählerListe[1]]
+            spielfeld[zählerListe[0] - 1][zählerListe[1]] = "empty";
+          } else {
+            spielfeld[zählerListe[0]][zählerListe[1]] = Math.floor(Math.random() * 4);
+
+            spielfeld[zählerListe[0]][zählerListe[1]]++;
+            spielfeld[zählerListe[0]][zählerListe[1]] *= 2;
+          }
+
+        }
+
+
+        if (zählerListe[1] == 0 && zählerListe[0] == 0 == false) {
+          zählerListe[0]--;
+          zählerListe[1] = 9;
+        }
+        zählerListe[1]--;
+      }
+    }
+    zustände[0] = "beendet";
+    felderAuswahl = [];
+    spielfeldKreieren();
+    // SpielendeCheck
+
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    while (zählerListe[0] < 4) {
+
+      while (zählerListe[1] < 8) {
+        if (zählerListe[0] == 5 == false && zählerListe[0] > 0 && spielfeld[zählerListe[0] - 1][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1]]) {
+          zählerListe[0] = 5;
+        }
+        if (zählerListe[0] == 5 == false && zählerListe[0] < 3 && spielfeld[zählerListe[0] + 1][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1]]) {
+          zählerListe[0] = 5;
+        }
+        if (zählerListe[0] == 5 == false && zählerListe[1] > 0 && spielfeld[zählerListe[0]][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1] - 1]) {
+          zählerListe[0] = 5;
+        }
+
+        if (zählerListe[0] == 5 == false && zählerListe[1] < 7 && spielfeld[zählerListe[0]][zählerListe[1]] == spielfeld[zählerListe[0]][zählerListe[1] + 1]) {
+          zählerListe[0] = 5;
+        }
+        zählerListe[1]++;
+      }
+      zählerListe[0]++;
+      zählerListe[1] = 0;
+    }
+    if (zählerListe[0] < 5) {
+      dbSet("von2Zu4", "spielfeld" + name, "NOPE");
+      zustände[2] = "beendet"
+      zählerListe[0] = 0;
+      zählerListe[1] = 0;
+      AblageListe[2] = 69;
+      zählerListe[2] = 0;
+      KoordinatenX = 145;
+      KoordinatenY = 110;
+      new Audio("http://soundbible.com/mp3/flyby-Conor-1500306612.mp3").play();
+      Endanimation = setInterval(endanimation, 0);
+      console.log("beendet");
+    } else {
+      zuVarSpielfeld();
+      dbSet("von2Zu4", "spielfeld" + name, AblageListe[4]);
+    }
+  }
+
+  function zuVarSpielfeld() {
+    zählerListe[0] = 0;
+    AblageListe[4] = "";
+    while (zählerListe[0] < 4) {
+      AblageListe[4] += spielfeld[zählerListe[0]]
+      AblageListe[4] += ";"
+      zählerListe[0]++;
+    }
+    console.log(AblageListe[4]);
+  }
+
+  function endanimation() {
+  canvas.fillStyle = "white"
+  canvas.fillRect(0, 0, 1800, 700)
+  zählerListe[0] = 0;
+  zählerListe[1] = 0;
+  KoordinatenX = 145;
+  KoordinatenY = 110;
+  if (AblageListe[2] < 1) {
+    clearInterval(Endanimation);
+    zählerListe[0] = 0;
+    zählerListe[1] = 0;
+    AblageListe[2] = spielfeld[0] + "," + spielfeld[1] + "," + spielfeld[2] + "," + spielfeld[3]
+    scores[0] = 0;
+    while (JSON.parse(zählerListe[0]) < JSON.parse(AblageListe[2].toString().split(',').length)) {
+      scores[0] += JSON.parse(AblageListe[2].toString().split(',')[zählerListe[0]])
+      zählerListe[0]++;
+    }
+    if (JSON.parse(scores[0]) > JSON.parse(highscores[0])) {
+      zweitBesteScores[0] = highscores[0];
+      highscores[0] = scores[0];
+      if (name == null == false && name == "" == false) {
+        dbSet("von2Zu4", "highscores" + name, highscores);
+        dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+          Bild = new Image();
+          Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+          canvas.drawImage(Bild, 277, 20, 437, 437);
+          setTimeout(function () {
+            canvas.drawImage(Bild, 277, 20, 437, 437);
+          }, 300);
+        audio = new Audio("http://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+      }
+    }
+    zählerListe[0] = 0;
+    AblageListe[2] = AblageListe[2].toString().split(',')
+    while (zählerListe[0] < AblageListe[2].length) {
+      if (AblageListe[2][zählerListe[0]].length == 1) {
+        AblageListe[2][zählerListe[0]] = "0" + AblageListe[2][zählerListe[0]]
+      }
+      zählerListe[0]++;
+    }
+    zählerListe[0] = 0;
+    while (zählerListe[0] < AblageListe[2].length) {
+      if (AblageListe[2][zählerListe[0]].length == 2) {
+        AblageListe[2][zählerListe[0]] = "0" + AblageListe[2][zählerListe[0]]
+      }
+      zählerListe[0]++;
+    }
+    AblageListe[2].sort();
+    zählerListe[0] = 0;
+    remove0();
+
+    if (JSON.parse(AblageListe[2][AblageListe[2].length - 1]) > JSON.parse(highscores[1])) {
+      zweitBesteScores[1] = highscores[1];
+      highscores[1] = AblageListe[2][AblageListe[2].length - 1];
+      if (name == null == false && name == "" == false) {
+        dbSet("von2Zu4", "highscores" + name, highscores);
+        dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+          Bild = new Image();
+          Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+          canvas.drawImage(Bild, 277, 180, 430, 430);
+          setTimeout(function () {
+            canvas.drawImage(Bild, 277, 180, 430, 430);
+          }, 300);
+        audio = new Audio("http://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+      }
+    }
+    scores[1] = AblageListe[2][AblageListe[2].length - 1]
+    if (JSON.parse(scores[0]) > JSON.parse(zweitBesteScores[0]) && JSON.parse(scores[0]) < JSON.parse(highscores[0])) {
+      zweitBesteScores[0] = scores[0];
+      dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+    }
+    if (JSON.parse(scores[1]) > JSON.parse(zweitBesteScores[1]) && JSON.parse(scores[1]) < JSON.parse(highscores[1])) {
+      zweitBesteScores[1] = scores[1];
+      dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+    }
+    KoordinatenY = 700;
+    AblageListe[3] = 0;
+    /*    canvas.fillStyle = "blue";
+        canvas.fillRect(0,350,100 + 75,50);
+        canvas.fillStyle = "yellow";
+        canvas.fillRect(10,360,80 + 75,30);
+        canvas.fillStyle = "black";
+        canvas.fillText("Neue Runde", 13, 383) */
+    document.getElementById('textur').style = "";
+    gespeicherteHighscoresAbfragen();
+    eigenenHighscoreAnzeigen();
+  }
+
+  while (KoordinatenY < 700) {
+    if (AblageListe[2] == "NAN") {
+      AblageListe[2] = 69;
+    }
+
+    if (felderAuswahl.includes(zählerListe[0] + " - " + zählerListe[1])) {
+      canvas.fillStyle = "green";
+    } else {
+      canvas.fillStyle = "blue";
+    }
+    if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1]) {
+      canvas.fillStyle = "red"
+    }
+
+    canvas.beginPath();
+    canvas.arc(KoordinatenX, KoordinatenY, AblageListe[2], 0, Math.PI * 2, false);
+    canvas.fill();
+    canvas.fillStyle = "yellow"
+    canvas.beginPath();
+    if (AblageListe[2] > 8) {
+      canvas.arc(KoordinatenX, KoordinatenY, AblageListe[2] - 9, 0, Math.PI * 2, false);
+      canvas.fill();
+      canvas.fillStyle = "black";
+    }
+    //    canvas.
+    if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false) {
+      spielfeld[zählerListe[0]][zählerListe[1]] += "";
+      canvas.font = (105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length) - zählerListe[2] * 2 + "px Georgia";
+      KoordinatenX += 10;
+      KoordinatenX -= 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+      canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
+      KoordinatenX -= 10;
+      KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+    } else {
+      AblageListe[1] = "";
+      AblageListe[1] += zustände[1] * felderAuswahl.length;
+      canvas.font = (105 - 15 * AblageListe[1].length) - zählerListe[2] * 2 + "px Georgia";
+      KoordinatenX += 10;
+      KoordinatenX -= 10 * AblageListe[1].length;
+      canvas.fillText(zustände[1] * felderAuswahl.length, KoordinatenX - 23, KoordinatenY + 23);
+      KoordinatenX -= 10;
+      KoordinatenX += 10 * AblageListe[1].length;
+    }
+    KoordinatenX += 170;
+    if (KoordinatenX > 1500) {
+      KoordinatenX = 145;
+      KoordinatenY += 170;
+      zählerListe[0]++;
+      zählerListe[1] = -1;
+    }
+    zählerListe[1]++;
+  }
+  AblageListe[2]--;
+  zählerListe[2]++;
+}
+
+  /*   zustände[2] = "beendet"
+     AblageListe[2] = 69;
+     zählerListe[2] = 0;
+  Endanimation = setInterval(endanimation, 10);  */
+
+  function eigenenHighscoreAnzeigen() {
+    canvas.font = "50px Georgia";
+    canvas.fillStyle = "black";
+    canvas.fillText("Punkte insgesamt: ", 30, 0 + 70);
+    canvas.fillText("Höchste Punkte von 1 Stein: ", 30, 150 + 80);
+    canvas.font = "30px Georgia";
+    canvas.fillText("highscore: " + highscores[0], 30, 115);
+    canvas.fillText("zweit bester Score: " + zweitBesteScores[0], 30, 145);
+    canvas.fillText("score: " + scores[0], 30, 175);
+
+    canvas.fillText("highscore: " + highscores[1], 30, 270);
+    canvas.fillText("zweit bester Score: " + zweitBesteScores[1], 30, 300);
+    canvas.fillText("score: " + scores[1], 30, 330);
+  }
+
+  //  window.scrollTo(0, 100);
+
+  function remove0() {
+    while (zählerListe[0] < AblageListe[2].length) {
+      try {
+        if (JSON.parse(AblageListe[2][zählerListe[0]])) {zustände[0] = "noError"}
+      }
+      catch (e) {
+        AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
+        zustände[0] = "error";
+      }
+      try {
+        if (JSON.parse(AblageListe[2][zählerListe[0]])) {zustände[0] = "noError"}
+      }
+      catch (e) {
+        AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
+        zustände[0] = "error";
+      }
+      if (zustände[0] == "noError") {
+        zählerListe[0]++;
+      }
+    /*  else {
+        AblageListe[2][zählerListe[0]] = AblageListe[2][zählerListe[0]].replace("0", "");
+        zustände[0] = "noError";
+      } */
+    }
+  }
+</script>
