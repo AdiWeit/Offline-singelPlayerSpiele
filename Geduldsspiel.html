@@ -751,35 +751,11 @@
         }, 500);
         startPause();
         window.scroll(0, 0)
-        if (level[level.levelType][level.number] != undefined && !(level.vorgefertigt[level.number].blinkWall == undefined)) {
-        BlinkWall = setInterval(function() {
-          for (var i = 0; i < level[level.levelType][level.number].blinkWall.length; i++) {
-            level.rotating.blinkWall[i] = false;
-          }
-          setTimeout(function() {
-            for (var i = 0; i < level[level.levelType][level.number].blinkWall.length; i++) {
-              level.rotating.blinkWall[i] = true;
-            }
-            level.rotatingNow = "blinkWall";
-            Layout();
-          }, 3000);
-          Layout();
-        }, 6000);
-      }
-        if (level[level.levelType][level.number] != undefined && !(level[level.levelType][level.number].rotatingWall == undefined)) {
-        RotatingWall = setInterval(function() {
-          level.rotating.rotatingWall = true;
-          level.rotatingNow = "rotatingWall";
-          Layout();
-        }, 70);
-      }
-        if (level[level.levelType][level.number] != undefined && !(level[level.levelType][level.number].rotatingDreieck == undefined)) {
-        RotatingDreieck = setInterval(function() {
-          level.rotating.rotatingDreieck = true;
-          level.rotatingNow = "rotatingDreieck";
-          Layout();
-        }, 70);
-      }
+        blinkWall = setInterval(blinkWall, 6000);
+        rotatingWall = setInterval(rotatingWall, 70);
+        level.rotating.rotatingWall = true;
+        level.rotatingNow = "rotatingDreieck";
+        rotatingDreieck = setInterval(rotating, 70);
       }
       if (level.levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
       if (level.levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -867,17 +843,21 @@
         level.editLevel.Test.spawnPoint = level.editHistory.spawnPoint;
         level.levelType = "editLevel";
         level.number = "Test";
-        if (!(level.editLevel["Test"].rotatingWall == undefined) && level.editLevel["Test"].rotatingWall.length > 0) AblageListe[0] = JSON.parse(JSON.stringify(level.editLevel["Test"].rotatingWall));
+        if (!(level.editLevel["Test"].rotatingWall == undefined) && level.editLevel["Test"].rotatingWall.length > 0) {
+        AblageListe[0] = JSON.parse(JSON.stringify(level.editLevel["Test"].rotatingWall));
         RotatingWall = setInterval(function() {
           level.rotating.rotatingWall = true;
           level.rotatingNow = "rotatingWall";
           Layout();
         }, 70);
+      }
+      if (!(level.editLevel["Test"].rotatingDreieck == undefined) && level.editLevel["Test"].rotatingDreieck.length > 0) {
         RotatingDreieck = setInterval(function() {
           level.rotating.rotatingDreieck = true;
           level.rotatingNow = "rotatingDreieck";
           Layout();
         }, 70);
+      }
         activateBlinkWall();
         document.getElementById('testLevel').innerHTML = "stop Test";
 
@@ -1105,6 +1085,7 @@
       y
     });
     const triangle = createPath(point(0, -25), point(-50, -75), point(-100, -25));
+    var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
     // function drawPath(path, x, y, angle) {
     //     canvas.setTransform(1, 0, 0, 1, x, y);
     //     canvas.rotate(level.vorgefertigt[level.number].rotatingDreieck[i].angle);
@@ -1113,8 +1094,8 @@
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level.levelType == "editHistory"/* || level.rotating.rotatingDreieck == false*/) angle = (level[level.levelType][level.number].rotatingDreieck[i].angle / 58);
-      if (level.rotating.rotatingDreieck == true && i == level[level.levelType][level.number].rotatingDreieck.length - 1) level.rotating.rotatingDreieck = false;
+      if (level.levelType == "editHistory"/* || level.rotating[level.rotatingNow] == false*/) angle = (level[level.levelType][level.number][level.rotatingNow][i].angle / 58);
+      if (level.rotating[level.rotatingNow] == true && i == level[level.levelType][level.number][level.rotatingNow].length - 1) level.rotating[level.rotatingNow] = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
@@ -1126,13 +1107,26 @@
       //  if (!(level.levelType == "editHistory")) Layout();
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
-      for (var i = 0; i < level[level.levelType][level.number].rotatingDreieck.length; i++) {
-        time += level[level.levelType][level.number].rotatingDreieck[i].angle * 10000
-        if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.levelType][level.number].rotatingDreieck[i].x, level[level.levelType][level.number]
-          .rotatingDreieck[i].y, level[level.levelType][level.number].rotatingDreieck[i].size / 10 /*level[level.levelType][level.number].rotatingDreieck[i].size*/ , time / (level[level.levelType][level.number].rotatingDreieck[i].timeFor360GradRotation) *
-          Math.PI /*level[level.levelType][level.number].rotatingDreieck[i].angle*/ , "blue", "blue", i); //360 every 2 second
-        else drawPath_V2(triangle, level[level.levelType][level.number].rotatingDreieck[i].x, level[level.levelType][level.number].rotatingDreieck[i].y, level[level.levelType][level.number].rotatingDreieck[i].size / 10 /*level[level.levelType][level.number].rotatingDreieck[i].size*/ ,
-          time / (level[level.levelType][level.number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI /*level[level.levelType][level.number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
+      AblageListe[0] = time
+      for (var i = 0; level[level.levelType][level.number][level.rotatingNow] != undefined && i < level[level.levelType][level.number][level.rotatingNow].length; i++) {
+        time = AblageListe[0];
+        time += level[level.levelType][level.number][level.rotatingNow][i].angle * 10000
+        if (level.rotatingNow == "rotatingDreieck" || level.levelType == "vorgefertigt") {
+          if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number]
+            [level.rotatingNow][i].y, level[level.levelType][level.number][level.rotatingNow][i].size / 10 /*level[level.levelType][level.number][level.rotatingNow][i].size*/ , time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
+            Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/ , "blue", "blue", i); //360 every 2 second
+          else drawPath_V2(triangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, level[level.levelType][level.number][level.rotatingNow][i].size / 10 /*level[level.levelType][level.number][level.rotatingNow][i].size*/ ,
+            time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) * Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/ , "black", "black", i); //360 every 2 second
+        }
+        else {
+          // -(level[level.levelType][level.number].rotatingWall[i].width / 2), -(level[level.levelType][level.number].rotatingWall[i].height / 2), level[level.levelType][level.number].rotatingWall[i].width, level[level.levelType][level.number]
+          //  .rotatingWall[i].height
+          rectangle = createPath(point(-(level[level.levelType][level.number].rotatingWall[i].width / 2),-(level[level.levelType][level.number].rotatingWall[i].height / 2)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].width), -(level[level.levelType][level.number].rotatingWall[i].height / 2)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].width), -(level[level.levelType][level.number].rotatingWall[i].height / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].height)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2), -(level[level.levelType][level.number].rotatingWall[i].height / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].height)));
+          if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingWall") drawPath_V2(rectangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, 1, time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
+          Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/, "blue", "blue", i);
+          else drawPath_V2(rectangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, 1, time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
+          Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/, "black", "black", i);
+        }
       }
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
@@ -1159,8 +1153,8 @@
       return path;
     }
 
-    function rotatingDreieck() {
-      if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingDreieck == undefined || level[level.levelType][level.number].rotatingDreieck == undefined)) {
+    function rotating() { // früher dreieck
+      if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number][level.rotatingNow] == undefined || level[level.levelType][level.number][level.rotatingNow] == undefined)) {
         requestAnimationFrame(renderLoop); // start animation
       }
       //   if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingDreieck == undefined || level[level.levelType][level.number].rotatingDreieck[0].angle == undefined)) Layout();
@@ -1188,6 +1182,7 @@
 
     function rotatingWall(rotate) {
       //if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingWall == undefined || level[level.levelType][level.number].rotatingWall[0].angle == undefined) && !(level.levelType == "editHistory")) Layout();
+      if (level.levelType == "vorgefertigt") {rotate = true;Layout();}
       for (var i = 0; !(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingWall == undefined || level[level.levelType][level.number].rotatingWall[0].angle == undefined) && i < level[level.levelType][
           level.number
         ].rotatingWall.length; i++) {
@@ -1200,7 +1195,7 @@
           .rotatingWall[i].height);
         canvas.restore();
         if (!(level.levelType == "editHistory") && level.rotating.rotatingWall == true) level[level.levelType][level.number].rotatingWall[i].angle++;
-        if (level.rotating.rotatingWall == true && i == level[level.levelType][level.number].rotatingWall.length - 1) level.rotating.rotatingWall = false;
+        if (level.levelType != "vorgefertigt" && level.rotating.rotatingWall == true && i == level[level.levelType][level.number].rotatingWall.length - 1) level.rotating.rotatingWall = false;
       }
     }
 
@@ -1248,8 +1243,7 @@
       //  if (level.levelType == "editHistory"/* || level.levelType == "editLevel" */|| level.levelType == "worldWideLevel") {
       //    größeAnpassen();
       //}
-      if (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingWall")) || level.rotatingNow == "rotatingWall") rotatingWall();
-      if (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingDreieck")) || level.rotatingNow == "rotatingDreieck") rotatingDreieck();
+      if (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingWall") || (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingDreieck")))) || level.rotatingNow == "rotatingWall") rotating();
       if (!(level.rotating.blinkWall == undefined) && level.rotating.blinkWall.includes(true)) blinkWall();
       if (level.levelType == "editHistory") {
         level.number = level.stepOfHistory;
@@ -1258,7 +1252,7 @@
           if (!(Object.keys(level["editHistory"][level.stepOfHistory])[i] == "picture"))
             for (var i1 = 0; i1 < level["editHistory"][level.stepOfHistory][Object.keys(level["editHistory"][level.stepOfHistory])[i]].length; i1++) {
               if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "rotatingWall") rotatingWall(false);
-              if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "rotatingDreieck") rotatingDreieck(false);
+              if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "rotatingDreieck") rotating(false);
               if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "blinkWall") blinkWall();
             }
         }
@@ -1338,6 +1332,7 @@
     }
 
     function select(type) {
+      level.rotatingNow = type;
       document.getElementById(level.editLevel.selected[0]).style.background = "";
       if (level.editHistory.length == 0) level.editLevel.selected = [type, 0];
       else if (level.editHistory[level.stepOfHistory][level.editLevel.selected[0]] == undefined) level.editLevel.selected = [type, 0];
@@ -1441,6 +1436,7 @@
           })
           document.getElementById('angle').style.display = "inline";
           visibilityEditStuff();
+          if (level.editLevel.selected[0] == "rotatingWall") level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = 3000;
           if (level.editLevel.selected[0] == "blinkWall") {
             //    visible([['timeVisible', "inline"], ['timeInvisible', "inline"]]);
             level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeVisible"] = document.getElementById('timeVisible').value;
@@ -1465,7 +1461,9 @@
             // document.getElementById('sliderHeight').style.display = "none";
             // document.getElementById('timeFor360GradRotation').style.display = "inline";
           }
-          if (level.editLevel.selected[0] == "blinkWall") document.getElementById('angle').style.display = "none";
+          if (level.editLevel.selected[0] == "blinkWall") {
+            document.getElementById('angle').style.display = "none";
+          }
           //  else document.getElementById('angle').style.display = "inline";
           level.editLevel.selected[1] = level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1;
           Layout();
