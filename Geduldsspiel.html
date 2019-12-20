@@ -64,7 +64,7 @@
 </style>
   </head>
   <h2>sensibility: </h2>
-  <input type="range" min="1" onchange="sensibility(value)" max="25" value="5" class="slider" id="sensibility">
+  <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
   <button type="button" id="normalSensibility" onclick="sensibility(level[level.levelType][level.number].sensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
@@ -199,7 +199,7 @@
     var zählerListe = [window.innerHeight];
     var level = {
       rotating: {
-        blinkWall: false /*, rotatingWall: false*/ ,
+        blinkWall: [false] /*, rotatingWall: false*/ ,
         rotatingDreieck: false
       },
       number: 1,
@@ -385,6 +385,20 @@
             x: 10,
             y: 255
           }
+        },
+        10: {
+          sensibility: 5,
+          spawnPoint: {
+            x: 10,
+            y: 255
+          }
+        },
+        11: {
+          sensibility: 5,
+          spawnPoint: {
+            x: 10,
+            y: 255
+          }
         }
       },
       editLevel: {
@@ -559,6 +573,8 @@
         }, 1);
       }).catch(function(e) {
         console.error(e);
+        app._data.db = [];
+        app._data.db.push("create new level");
       });
     }
     }).catch(function(e) {
@@ -597,7 +613,7 @@
       level.rotating.blinkWall = [false];
       level.rotating.rotatingDreieck = false;
       level.rotating.rotatingWall = false;
-      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores);document.getElementById('levelEditTool').style.display = "none"}
+      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores);document.getElementById('levelEditTool').style.display = "none";level.levelType = "showScores";}
       else if (document.getElementById('courceSelection').value == "upload own level") {
         setTimeout(function () {
           var items = document.querySelectorAll("#levelNames");
@@ -765,7 +781,9 @@
         }, 70);
       }
       }
-      if (level.levelType != "editHistory") document.getElementById('textur').style.display = "none";
+      if (level.levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
+      if (level.levelType != "showScores") document.getElementById('scores').style.display = "none";
+      else document.getElementById('scores').style.display = "inline";
     }
 
     function imageLoaded(input) {
@@ -846,6 +864,7 @@
     function testLevel() {
       if (document.getElementById('testLevel').innerHTML == "test Level") {
         level.editLevel["Test"] = level.editHistory[level.stepOfHistory];
+        level.editLevel.Test.spawnPoint = level.editHistory.spawnPoint;
         level.levelType = "editLevel";
         level.number = "Test";
         if (!(level.editLevel["Test"].rotatingWall == undefined) && level.editLevel["Test"].rotatingWall.length > 0) AblageListe[0] = JSON.parse(JSON.stringify(level.editLevel["Test"].rotatingWall));
