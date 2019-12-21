@@ -91,7 +91,7 @@
   <script type="text/javascript">
     function sensibility(value, backToNormal) {
       if (value == level[level.levelType][level.number].sensibility || level.levelType == "editLevel" || level.levelType == "editHistory" || confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!")) {
-        if (level.levelType == "editLevel" || level.levelType == "editHistory" && backToNormal == true) value = 5;
+        if (level.levelType == "editLevel" || level.levelType == "editHistory" && backToNormal != undefined) value = 5;
         document.getElementById('sensibility').value = value;
         window.ondevicemotion = function(e) {
           ax1 = event.accelerationIncludingGravity.x * value;
@@ -555,7 +555,8 @@
                 Layout();
                 level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
                 level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
-                level.editLevel[level.editLevel.selectedLevel].sensibility = 5;
+                level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
+                level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
                 setTimeout(function() {
                   Layout();
                 }, 500);
@@ -654,6 +655,8 @@
                 Layout();
                 level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
                 level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
+                level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
+                level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
                 setTimeout(function() {
                   Layout();
                 }, 500);
@@ -840,7 +843,7 @@
     function testLevel() {
       if (document.getElementById('testLevel').innerHTML == "test Level") {
         level.editLevel["Test"] = level.editHistory[level.stepOfHistory];
-        level.editLevel.Test.spawnPoint = level.editHistory.spawnPoint;
+        if (level.editHistory.spawnPoint != undefined) level.editLevel.Test.spawnPoint = level.editHistory.spawnPoint;
         level.levelType = "editLevel";
         level.number = "Test";
         if (!(level.editLevel["Test"].rotatingWall == undefined) && level.editLevel["Test"].rotatingWall.length > 0) {
