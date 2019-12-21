@@ -89,17 +89,18 @@
   </div>
   <select name="course" id="courceSelection" onchange="courceSelected()"></select>
   <script type="text/javascript">
-    function sensibility(value, backToNormal) {
-      if (value == level[level.levelType][level.number].sensibility || level.levelType == "editLevel" || level.levelType == "editHistory" || confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!")) {
-        if (level.levelType == "editLevel" || level.levelType == "editHistory" && backToNormal != undefined) value = 5;
-        document.getElementById('sensibility').value = value;
-        window.ondevicemotion = function(e) {
-          ax1 = event.accelerationIncludingGravity.x * value;
-          ay1 = event.accelerationIncludingGravity.y * value;
-      }
-      if (level.levelType == "editLevel" || level.levelType == "editHistory") level[level.levelType][level.number].sensibility = value;
+  function sensibility(value, backToNormal) {
+//    if (value == level[level.levelType][level.number].sensibility || level.levelType == "editLevel" || level.levelType == "editHistory") {
+      if (!(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.levelType][level.number].sensibility;
+      if ((level.levelType == "editLevel" || level.levelType == "editHistory") && backToNormal == true) value = level[level.levelType][level.number].sensibility;
+      document.getElementById('sensibility').value = value;
+      window.ondevicemotion = function(e) {
+        ax1 = event.accelerationIncludingGravity.x * value;
+        ay1 = event.accelerationIncludingGravity.y * value;
     }
-    }
+    if (level.levelType == "editLevel" || level.levelType == "editHistory") level[level.levelType][level.number].sensibility = value;
+  //}
+  }
     function changing(id) {
       //  console.log(document.getElementById('sliderWidth').value);
       // if (id == "")
@@ -131,7 +132,8 @@
     }
     function courceSelectedEdit(value) {
       AblageListe[4] = true;
-      document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
+      if (offline == false) document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
+      else document.getElementById('preview').src = level.mapsVorgefertigt[JSON.parse(value.toString().split('.')[0]) - 1];
       Layout();
       setTimeout(function() {
         Layout();
@@ -167,7 +169,7 @@
 
     var canvas = textur.getContext('2d'); //Dimension
     var Bild = new Image();
-    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap1.png"
+    if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap1.png"
     canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
     setTimeout(function() {
       Layout();
@@ -197,6 +199,7 @@
     var mausx = 0;
     var mausy = 0;
     var zählerListe = [window.innerHeight];
+    var offline = false;
     var level = {
       rotating: {
         blinkWall: [false] /*, rotatingWall: false*/ ,
@@ -433,12 +436,30 @@
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
     dbGet("Gelduldspiel", "highscores").then(result => {
-      if (!(result == "NOPE")) {
-        AblageListe[0] = JSON.parse(result);
-        for (var i = 0; i < Object.keys(AblageListe[0]).length; i++) {
-          highscores[Object.keys(AblageListe[0])[i]] = AblageListe[0][Object.keys(AblageListe[0])[i]];
+      folgenDbgetHighscores(JSON.parse(result), false);
+      localStorage.setItem("highscores", JSON.stringify(highscores));
+      if (localStorage.getItem("uploadScore") == true) {
+        for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
+          level.worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
         }
+        localStorage.setItem("uploadScore", false);
       }
+      if (localStorage.getItem("highscores") != null && !(angular.equals(highscores[name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
+        highscores[name] = JSON.parse(localStorage.getItem("highscores"))[name];
+      }
+    }).catch(function(e) {
+      console.error(e);
+      if (e == "TypeError: Failed to fetch") {
+        alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
+        offline = true;
+        folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscores")), true);
+      }
+    });
+    function folgenDbgetHighscores(result, offline) {
+        highscores = result
+        for (var i = 0; i < result.length; i++) {
+          highscores[Object.keys(result)[i]] = result[Object.keys(result)[i]];
+        }
       AblageListe[0] = 0;
       highscores.allMaps = [];
       for (var i = 0; i < Object.keys(level.vorgefertigt).length; i++) {
@@ -473,114 +494,153 @@
       if (highscores[name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
       document.getElementById('courceSelection').value = "select map!";
-      if (highscores[name].length > 0) {
+      if (highscores[name].length > 0 && offline == false) {
       dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-        level.worldWideLevel = result;
-        app._data.db = result;
-        setTimeout(function() {
-          var items = document.querySelectorAll("#levelNames");
-          var tab = [];
-          var liIndex;
-          for (i = 0; i < items.length; i++) {
-            tab.push(items[i].innerHTML);
-          }
-          for (var i = 0; i < items.length; i++) {
-            items[i].onclick = function() {
-              liIndex = tab.indexOf(this.innerHTML);
-              console.log(this.innerText + " INDEX = " + liIndex);
-              level.levelType = "worldWideLevel";
-              level.number = this.innerText;
-              document.getElementById('preview').src = level[level.levelType][level.number].picture;
-              Layout();
-              visible([['preview', "none"], ['textur', "inline"]]);
-              document.getElementById('preview').style.display = "none";
-              window.scroll(0, 0);
-              startPause();
-              activateBlinkWall();
-            };
-          };
-        }, 1);
-        setTimeout(function() {
-          alert("you are now ready to play level from all around the world!");
-        }, 1000);
-        var notification = new Notification('level loaded!', {
-          icon: 'http://www.myiconfinder.com/uploads/iconsets/256-256-ced60fa9d650262cf8dc8efc4ed78084-loading.png',
-          body: "Your level are now ready to be edited, played or uploaded!",
-        });
+        folgenDbGetLevelAroundTheWorld(result, false);
       }).catch(function(e) {
         console.error(e);
       });
       dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-        app._data.db = [];
-        for (var i = 0; i < Object.keys(result).length; i++) {
-          level.editLevel[Object.keys(result)[i]] = result[Object.keys(result)[i]];
-          app._data.db.push(Object.keys(result)[i]);
+        folgenDbGetLevelBy(result, false);
+        if (JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
+          for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
+            level.editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
+            level.worldWideLevel[level.editLevel.selectedLevel] = level.editLevel[level.editLevel.selectedLevel];
+            level.worldWideLevel[level.editLevel.selectedLevel].playedBy = [];
+            level.worldWideLevel[level.editLevel.selectedLevel].highscores = [{}];
+          }
+          localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel))
+          dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
+          localStorage.setItem("uploadCources", []);
         }
-        app._data.db.push("create new level");
-        setTimeout(function() {
-          var items = document.querySelectorAll("#levelNames");
-          var tab = [];
-          var liIndex;
-          for (i = 0; i < items.length; i++) {
-            tab.push(items[i].innerHTML);
-          }
-          for (var i = 0; i < items.length; i++) {
-            items[i].onclick = function() {
-              liIndex = tab.indexOf(this.innerHTML);
-              console.log(this.innerText + " INDEX = " + liIndex);
-              visible([
-                ['pictureSelection', "inline"],
-                ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
-                ['preview', "none"],
-                // ['blinkWall', "inline"],
-                // ['rotatingWall', "inline"],
-                // ["rotatingDreieck", "inline"],
-                // ['testLevel', "inline"],
-                // ["courceSelectionEdit", "inline"]
-                ['levelEditTool', "inline"]
-              ]);
-              if (this.innerHTML.includes("create new level")) {
-                createNewLevel();
-                canvas.fillStyle = "white";
-                canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
-                canvas.font = "50px Georgia";
-                canvas.fillStyle = "black";
-                canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
-              } else {
-                document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
-                level.editHistory.push(level.editLevel[this.innerText]);
-                level.stepOfHistory = level.editHistory.length - 1;
-                level.editLevel.selectedLevel = this.innerText;
-                größeAnpassen();
-                Layout();
-                level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
-                level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
-                level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
-                level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
-                setTimeout(function() {
-                  Layout();
-                }, 500);
-              };
-            };
-          }
-          Notification.requestPermission();
-          setTimeout(function() {
-            alert("you are now ready to open your level!");
-          }, 1000);
-          var notification = new Notification('level loaded!', {
-            icon: 'http://www.myiconfinder.com/uploads/iconsets/256-256-ced60fa9d650262cf8dc8efc4ed78084-loading.png',
-            body: "Your level are now ready to be edited, played or uploaded!",
-          });
-        }, 1);
       }).catch(function(e) {
         console.error(e);
         app._data.db = [];
         app._data.db.push("create new level");
       });
     }
-    }).catch(function(e) {
-      console.error(e);
-    });
+    else if (highscores[name].length > 0) {
+      folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy" + name)), true);
+      folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
+    }
+    }
+    function folgenDbGetLevelAroundTheWorld(result, offline) {
+      level.worldWideLevel = result;
+      app._data.db = Object.keys(result);
+      setTimeout(function() {
+        visible([
+          ["app", "inline"],
+          ['uploadLevel', "inline"],
+          ['levelEditTool', "none"]
+        ]);
+        var items = document.querySelectorAll("#levelNames");
+        var tab = [];
+        var liIndex;
+        for (i = 0; i < items.length; i++) {
+          tab.push(items[i].innerHTML);
+        }
+        for (var i = 0; i < items.length; i++) {
+          items[i].onclick = function() {
+            liIndex = tab.indexOf(this.innerHTML);
+            console.log(this.innerText + " INDEX = " + liIndex);
+            level.levelType = "worldWideLevel";
+            level.number = this.innerText;
+            document.getElementById('preview').src = level[level.levelType][level.number].picture;
+            Layout();
+            visible([['preview', "none"], ['textur', "inline"]]);
+            document.getElementById('preview').style.display = "none";
+            window.scroll(0, 0);
+            startPause();
+            activateBlinkWall();
+          };
+        };
+      }, 1);
+        alert("you are now ready to play level from all around the world!");
+      var notification = new Notification('level loaded!', {
+        icon: 'http://www.myiconfinder.com/uploads/iconsets/256-256-ced60fa9d650262cf8dc8efc4ed78084-loading.png',
+        body: "Your level are now ready to be edited, played or uploaded!",
+      });
+    }
+    function folgenDbGetLevelBy(result, offline) {
+
+      // if (Object.keys(level.editLevel).length > 2) {
+      //   AblageListe[0] = Object.keys(level.editLevel);
+      //   for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
+      //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
+      //   }
+      //   app._data.db = AblageListe[0]
+      //   app._data.db.push("create new level");
+      // }
+      // alert("loading your levels...");
+      // visible([
+      //   ['app', "inline"],
+      //   ['preview', "none"]/*,
+      //   ['levelEditTool', "inline"]*/
+      // ]);
+      //
+      app._data.db = [];
+      for (var i = 0; i < Object.keys(result).length; i++) {
+        level.editLevel[Object.keys(result)[i]] = result[Object.keys(result)[i]];
+        if (Object.keys(result)[i] != "selectedLevel" && Object.keys(result)[i] != "selected") app._data.db.push(Object.keys(result)[i]);
+      }
+      app._data.db.push("create new level");
+      setTimeout(function() {
+        visible([
+          ["app", "inline"]
+        ]);
+        var items = document.querySelectorAll("#levelNames");
+        var tab = [];
+        var liIndex;
+        for (i = 0; i < items.length; i++) {
+          tab.push(items[i].innerHTML);
+        }
+        for (var i = 0; i < items.length; i++) {
+          items[i].onclick = function() {
+            liIndex = tab.indexOf(this.innerHTML);
+            console.log(this.innerText + " INDEX = " + liIndex);
+            visible([
+              ['pictureSelection', "inline"],
+              ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
+              ['preview', "none"],
+              // ['blinkWall', "inline"],
+              // ['rotatingWall', "inline"],
+              // ["rotatingDreieck", "inline"],
+              // ['testLevel', "inline"],
+              // ["courceSelectionEdit", "inline"]
+              ['levelEditTool', "inline"]
+            ]);
+            if (this.innerHTML.includes("create new level")) {
+              createNewLevel();
+              canvas.fillStyle = "white";
+              canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
+              canvas.font = "50px Georgia";
+              canvas.fillStyle = "black";
+              canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
+            } else {
+              document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
+              level.editHistory.push(level.editLevel[this.innerText]);
+              level.stepOfHistory = level.editHistory.length - 1;
+              level.editLevel.selectedLevel = this.innerText;
+              größeAnpassen();
+              Layout();
+              level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
+              level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
+              level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
+              level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
+              setTimeout(function() {
+                Layout();
+              }, 500);
+            };
+          };
+        }
+        Notification.requestPermission();
+          alert("you are now ready to open your level!");
+        var notification = new Notification('level loaded!', {
+          icon: 'http://www.myiconfinder.com/uploads/iconsets/256-256-ced60fa9d650262cf8dc8efc4ed78084-loading.png',
+          body: "Your level are now ready to be edited, played or uploaded!",
+        });
+      }, 1);
+    }
     var app = new Vue({
       el: '#app',
       data: {
@@ -614,70 +674,72 @@
       level.rotating.blinkWall = [false];
       level.rotating.rotatingDreieck = false;
       level.rotating.rotatingWall = false;
+      if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
       if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores);document.getElementById('levelEditTool').style.display = "none";level.levelType = "showScores";}
       else if (document.getElementById('courceSelection').value == "upload own level") {
-        setTimeout(function () {
-          var items = document.querySelectorAll("#levelNames");
-          var tab = [];
-          var liIndex;
-          for (i = 0; i < items.length; i++) {
-            tab.push(items[i].innerHTML);
-          }
-          for (var i = 0; i < items.length; i++) {
-            items[i].onclick = function() {
-              liIndex = tab.indexOf(this.innerHTML);
-              console.log(this.innerText + " INDEX = " + liIndex);
-              level.blinkWall = false;
-              visible([
-                ['pictureSelection', "inline"],
-                ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
-                ['preview', "none"],
-                // ['blinkWall', "inline"],
-                // ['rotatingWall', "inline"],
-                // ["rotatingDreieck", "inline"],
-                // ['testLevel', "inline"],
-                // ["courceSelectionEdit", "inline"]
-                ['levelEditTool', "inline"]
-              ]);
-              if (this.innerHTML.includes("create new level")) {
-                createNewLevel();
-                canvas.fillStyle = "white";
-                canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
-                canvas.font = "50px Georgia";
-                canvas.fillStyle = "black";
-                canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
-              } else {
-                document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
-                level.editHistory.push(level.editLevel[this.innerText]);
-                level.stepOfHistory = level.editHistory.length - 1;
-                level.editLevel.selectedLevel = this.innerText;
-                größeAnpassen();
-                Layout();
-                level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
-                level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
-                level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
-                level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
-                setTimeout(function() {
-                  Layout();
-                }, 500);
-              };
-            };
-          }
-        }, 1000);
-        if (Object.keys(level.editLevel).length > 2) {
-          AblageListe[0] = Object.keys(level.editLevel);
-          for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
-            if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
-          }
-          app._data.db = AblageListe[0]
-          app._data.db.push("create new level");
-        }
-        alert("loading your levels...");
-        visible([
-          ['app', "inline"],
-          ['preview', "none"]/*,
-          ['levelEditTool', "inline"]*/
-        ]);
+        folgenDbGetLevelBy(level.editLevel, offline);
+        // setTimeout(function () {
+        //   var items = document.querySelectorAll("#levelNames");
+        //   var tab = [];
+        //   var liIndex;
+        //   for (i = 0; i < items.length; i++) {
+        //     tab.push(items[i].innerHTML);
+        //   }
+        //   for (var i = 0; i < items.length; i++) {
+        //     items[i].onclick = function() {
+        //       liIndex = tab.indexOf(this.innerHTML);
+        //       console.log(this.innerText + " INDEX = " + liIndex);
+        //       level.blinkWall = false;
+        //       visible([
+        //         ['pictureSelection', "inline"],
+        //         ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
+        //         ['preview', "none"],
+        //         // ['blinkWall', "inline"],
+        //         // ['rotatingWall', "inline"],
+        //         // ["rotatingDreieck", "inline"],
+        //         // ['testLevel', "inline"],
+        //         // ["courceSelectionEdit", "inline"]
+        //         ['levelEditTool', "inline"]
+        //       ]);
+        //       if (this.innerHTML.includes("create new level")) {
+        //         createNewLevel();
+        //         canvas.fillStyle = "white";
+        //         canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
+        //         canvas.font = "50px Georgia";
+        //         canvas.fillStyle = "black";
+        //         canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
+        //       } else {
+        //         document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
+        //         level.editHistory.push(level.editLevel[this.innerText]);
+        //         level.stepOfHistory = level.editHistory.length - 1;
+        //         level.editLevel.selectedLevel = this.innerText;
+        //         größeAnpassen();
+        //         Layout();
+        //         level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
+        //         level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
+        //         level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
+        //         level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
+        //         setTimeout(function() {
+        //           Layout();
+        //         }, 500);
+        //       };
+        //     };
+        //   }
+        // }, 1000);
+        // if (Object.keys(level.editLevel).length > 2) {
+        //   AblageListe[0] = Object.keys(level.editLevel);
+        //   for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
+        //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
+        //   }
+        //   app._data.db = AblageListe[0]
+        //   app._data.db.push("create new level");
+        // }
+        // alert("loading your levels...");
+        // visible([
+        //   ['app', "inline"],
+        //   ['preview', "none"]/*,
+        //   ['levelEditTool', "inline"]*/
+        // ]);
         level.number = level.editHistory.length - 1;
         // document.getElementById('pictureSelection').style.display = "inline";
         // document.getElementById('courceSelection').style.display = "none";
@@ -693,30 +755,31 @@
         level.number = 1;
       } else if (document.getElementById('courceSelection').value == "play from world wide web") {
         level.levelType = "worldWideLevel";
-        setTimeout(function () {
-          var items = document.querySelectorAll("#levelNames");
-          var tab = [];
-          var liIndex;
-          for (i = 0; i < items.length; i++) {
-            tab.push(items[i].innerHTML);
-          }
-          for (var i = 0; i < items.length; i++) {
-            items[i].onclick = function() {
-              liIndex = tab.indexOf(this.innerHTML);
-              console.log(this.innerText + " INDEX = " + liIndex);
-              level.blinkWall = false;
-              level.levelType = "worldWideLevel";
-              level.number = this.innerText;
-              document.getElementById('preview').src = level[level.levelType][level.number].picture;
-              Layout();
-              visible([['preview', "none"], ['textur', "inline"]]);
-              document.getElementById('preview').style.display = "none";
-              window.scroll(0, 0);
-              startPause();
-              activateBlinkWall();
-            };
-          };
-        }, 1000);
+        folgenDbGetLevelAroundTheWorld(level.worldWideLevel, offline);
+        // setTimeout(function () {
+        //   var items = document.querySelectorAll("#levelNames");
+        //   var tab = [];
+        //   var liIndex;
+        //   for (i = 0; i < items.length; i++) {
+        //     tab.push(items[i].innerHTML);
+        //   }
+        //   for (var i = 0; i < items.length; i++) {
+        //     items[i].onclick = function() {
+        //       liIndex = tab.indexOf(this.innerHTML);
+        //       console.log(this.innerText + " INDEX = " + liIndex);
+        //       level.blinkWall = false;
+        //       level.levelType = "worldWideLevel";
+        //       level.number = this.innerText;
+        //       document.getElementById('preview').src = level[level.levelType][level.number].picture;
+        //       Layout();
+        //       visible([['preview', "none"], ['textur', "inline"]]);
+        //       document.getElementById('preview').style.display = "none";
+        //       window.scroll(0, 0);
+        //       startPause();
+        //       activateBlinkWall();
+        //     };
+        //   };
+        // }, 1000);
         visible([
           ["app", "inline"],
           ['uploadLevel', "inline"],
@@ -959,7 +1022,8 @@
       if (level.levelType == "vorgefertigt") {
         if (highscores[name][level.number] == undefined || highscores[name][level.number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[name][level.number] = mins + ":" + secs + ":" + "0" + tenths;
-          dbSet("Gelduldspiel", "highscores", JSON.stringify(highscores));
+          localStorage.setItem("highscores", JSON.stringify(highscores));
+          if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
         }
         level.number++;
         document.getElementById('courceSelection').value = level.number + ". map";
@@ -975,9 +1039,11 @@
       if (level.levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
       if (level.levelType == "editLevel" && AblageListe[1] == "uploadLevel") {
         AblageListe[1] = "beendet";
-        level.worldWideLevel[level.editLevel.selectedLevel] = level.editLevel[level.editLevel.selectedLevel];
+        level.worldWideLevel[level.editLevel.selectedLevel] = level.editLevel.Test//[level.editLevel.selectedLevel];
         level.worldWideLevel[level.editLevel.selectedLevel].playedBy = [];
         level.worldWideLevel[level.editLevel.selectedLevel].highscores = [{}];
+        localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel))
+        if (offline == false) {
         dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
         alert("uploading...");
         var checkLevelUploaded = setInterval(function() {
@@ -990,6 +1056,13 @@
             console.error(e);
           });
         }, 1000);
+      }
+      else {
+        alert("level will be uploaded, when you have internet again and open this site");
+        AblageListe[0] = JSON.parse(localStorage.getItem("oploadCources"));
+        AblageListe[0].push();
+        localStorage.setItem("oploadCources", level.editLevel.selectedLevel);
+      }
       }
     }
     else if (level.number == highscores[name].length) {
@@ -1062,6 +1135,8 @@
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
       if (level.levelType == "worldWideLevel") {
+        localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel));
+        if (offline == false) {
       dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
       alert("uploading (high)score...");
       var checkLevelUploadedHighscore = setInterval(function() {
@@ -1080,6 +1155,11 @@
           console.error(e);
         });
       }, 5000);
+    }
+    else {
+      alert("your score will be uploaded when you are online again!");
+      localStorage.setItem("uploadScore", true);
+    }
     }
     }
     // Für rotatingDreieck:
@@ -1240,7 +1320,8 @@
     function Layout() {
       if (level.levelType == "vorgefertigt") {
         Bild = new Image();
-        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + level.number + ".png"
+        if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + level.number + ".png"
+        else document.getElementById('preview').src = level.mapsVorgefertigt[level.number - 1];
         canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5])
       } else canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
       //  if (level.levelType == "editHistory"/* || level.levelType == "editLevel" */|| level.levelType == "worldWideLevel") {
@@ -1505,14 +1586,16 @@
         AblageListe[3] = true;
         AblageListe[0] = {};
         for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
-          if (!(Object.keys(level.editLevel)[i] == "selectedLevel" || Object.keys(level.editLevel)[i] == "selected")) AblageListe[0][Object.keys(level.editLevel)[i]] = level.editLevel[Object.keys(level.editLevel)[i]];
+          if (!(Object.keys(level.editLevel)[i] == "selectedLevel" || Object.keys(level.editLevel)[i] == "selected" || Object.keys(level.editLevel)[i] == "Test")) AblageListe[0][Object.keys(level.editLevel)[i]] = level.editLevel[Object.keys(level.editLevel)[i]];
         }
-        dbSet("Gelduldspiel", "levelBy " + name, AblageListe[0]);
         Layout();
+        localStorage.setItem("levelBy " + name, JSON.stringify(AblageListe[0]));
+        if (offline == false) {
+        dbSet("Gelduldspiel", "levelBy " + name, AblageListe[0]);
         alert("saving...")
         var checkLevelSaved = setInterval(function() {
           dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-            if (angular.equals(level.editLevel[level.editLevel.selectedLevel], result[level.editLevel.selectedLevel])) {
+            if (angular.equals(Object.keys(level.editLevel[level.editLevel.selectedLevel]), Object.keys(result[level.editLevel.selectedLevel]))) {
               alert("level saved!");
               clearInterval(checkLevelSaved);
               AblageListe[3] = false;
@@ -1524,6 +1607,7 @@
             console.error(e);
           });
         }, 1000);
+      }
       }
     }
     document.onkeydown = function(event) {
@@ -1584,6 +1668,20 @@
     function capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
+
+    AblageListe[0] = [];
+    for (var i = 0; i < Object.keys(level.vorgefertigt).length; i++) {
+      Bild = new Image();
+      if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + i + ".png"
+      else document.getElementById('preview').src = level.mapsVorgefertigt[i - 1];
+      canvas.drawImage(Bild, 0, 0);
+      AblageListe[0].push(textur.toDataURL());
+    }
+    console.log(AblageListe[0]);
+    if (localStorage.getItem("mapsVorgefertigt") != null) {
+      localStorage.setItem("mapsVorgefertigt", AblageListe[0]);
+    }
+    level.mapsVorgefertigt = AblageListe[0];
   </script>
 </body>
 
