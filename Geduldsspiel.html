@@ -65,7 +65,7 @@
   </head>
   <h2>sensibility: </h2>
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
-  <button type="button" id="normalSensibility" onclick="sensibility(level[level.levelType][level.number].sensibility, true)" name="button">back to normal</button>
+  <button type="button" id="normalSensibility" onclick="sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
     <td>Row1 cell1</td>
@@ -90,31 +90,54 @@
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
   <br>
-  <select name="course" id="modeSelection" onchange="modeSelected()">
+  <select name="course" id="modeSelection" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
     <option value="growing">growing</option>
+    <option value="survive">survive</option>
   </select>
   <br>
-  <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps on device for offline mode</button>
+  <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
   <script type="text/javascript">
+
+  var sphere1 = document.getElementById("sphere1");
+  var growing;
+  function modeSelected(value) {
+    clearInterval(growing);
+    level.mode = value;
+    startPause();
+    if (value == "growing") {
+      sphere1.style.width =  level.growing[level.growing.levelType][level.growing.number].beginningSize.x//(window.innerWidth / 40 + 66) / 2 + "px";
+      sphere1.style.height = level.growing[level.growing.levelType][level.growing.number].beginningSize.y//(window.innerHeight / 40 + 66) / 2 + "px";
+      growing = setInterval(function () {
+        sphere1.style.width = (JSON.parse(sphere1.style.width.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
+        sphere1.style.height = (JSON.parse(sphere1.style.height.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
+        level.growing[level.growing.levelType][level.growing.number].spawnPoint.x = window.innerWidth/2 - JSON.parse(sphere1.style.width.toString().split('px')[0]) + 77;
+        level.growing[level.growing.levelType][level.growing.number].spawnPointy = window.innerHeight/2 - JSON.parse(sphere1.style.height.toString().split('px')[0]);
+      }, 7);
+    }
+    else {
+      sphere1.style.width = (window.innerWidth / 40 + 66) / 2 + "px";
+      sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
+    }
+  }
   function sensibility(value, backToNormal) {
-//    if (value == level[level.levelType][level.number].sensibility || level.levelType == "editLevel" || level.levelType == "editHistory") {
-      if (backToNormal == true || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.levelType][level.number].sensibility;
-      if ((level.levelType == "editLevel" || level.levelType == "editHistory") && backToNormal == true) value = level[level.levelType][level.number].sensibility;
+//    if (value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {
+      if (backToNormal == true ||level[level.mode].levelType == "editHistory" || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
+      if ((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") && backToNormal == true) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
       document.getElementById('sensibility').value = value;
       window.ondevicemotion = function(e) {
         ax1 = event.accelerationIncludingGravity.x * value;
         ay1 = event.accelerationIncludingGravity.y * value;
     }
-    if (level.levelType == "editLevel" || level.levelType == "editHistory") level[level.levelType][level.number].sensibility = value;
+    if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility = value;
   //}
   }
     function changing(id) {
       //  console.log(document.getElementById('sliderWidth').value);
       // if (id == "")
-      //if (!(level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout")) AblageListe[7] = JSON.parse(JSON.stringify(level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"]));
-      //level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = "Layout";
-      level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editLevel.selected[1]][id.replace("slider", "").toLowerCase()] = JSON.parse(JSON.stringify(document.getElementById(id).value))
+      //if (!(level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout")) AblageListe[7] = JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"]));
+      //level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = "Layout";
+      level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][id.replace("slider", "").toLowerCase()] = JSON.parse(JSON.stringify(document.getElementById(id).value))
       Layout();
       // setTimeout(function () {
       //   Layout();
@@ -122,41 +145,41 @@
     }
 
     function changedSlider(id) {
-      level.editHistory.push(JSON.parse(JSON.stringify(level.editHistory[level.stepOfHistory] /*[level.editHistory.length - 1]*/ )));
-      //  if (level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout") level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = AblageListe[0]
-      //  level.stepOfHistory++;
-      level.stepOfHistory = level.editHistory.length - 1;
+      level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory] /*[level[level.mode].editHistory.length - 1]*/ )));
+      //  if (level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout") level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = AblageListe[0]
+      //  level[level.mode].stepOfHistory++;
+      level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
       Layout();
     }
 
     function changeTextbox(id) {
       if (!(isNaN(document.getElementById(id).value))) {
-        level.editHistory.push(JSON.parse(JSON.stringify(level.editHistory[level.stepOfHistory])));
-        level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editLevel.selected[1]][id] = document.getElementById(id).value;
-        //  level.stepOfHistory++;
-        level.stepOfHistory = level.editHistory.length - 1;
+        level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory])));
+        level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][id] = document.getElementById(id).value;
+        //  level[level.mode].stepOfHistory++;
+        level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
         Layout();
       }
     }
     function courceSelectedEdit(value) {
       AblageListe[4] = true;
       if (offline == false) document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
-      else document.getElementById('preview').src = level.mapsVorgefertigt[JSON.parse(value.toString().split('.')[0]) - 1];
+      else document.getElementById('preview').src = level[level.mode].mapsVorgefertigt[JSON.parse(value.toString().split('.')[0]) - 1];
       Layout();
       setTimeout(function() {
         Layout();
       }, 500);
     }
     // function changeAngle() {
-    //   level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["angle"] = document.getElementById("angle").value;
+    //   level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["angle"] = document.getElementById("angle").value;
     //   Layout();
-    //   level.editHistory.push(JSON.parse(JSON.stringify(level.editHistory[level.editHistory.length - 1])));
+    //   level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1])));
     //
     // }
     // function changetimeFor360GradRotation() {
-    //   level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById("timeFor360GradRotation").value;
+    //   level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById("timeFor360GradRotation").value;
     //   Layout();
-    //   level.editHistory.push(JSON.parse(JSON.stringify(level.editHistory[level.editHistory.length - 1])));
+    //   level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1])));
     // }
     // document.getElementById('image').width = window.innerWidth;
     // document.getElementById('image').height = AblageListe[5];
@@ -194,6 +217,7 @@
     var RotatingWall;
     var RotatingDreieck;
     var BlinkWall;
+    var bulletInterval = [];
     var mins = 0;
     var secs = 0;
     var tenths = 0;
@@ -209,6 +233,7 @@
     var zählerListe = [window.innerHeight];
     var offline = false;
     var level = {
+      normal: {
       rotating: {
         blinkWall: [false] /*, rotatingWall: false*/ ,
         rotatingDreieck: false
@@ -410,7 +435,29 @@
             x: 10,
             y: 255
           }
-        }
+        },
+        12: {
+          sensibility: 5,
+          spawnPoint: {
+            x: 10,
+            y: 255
+          },
+          bullet: [
+            {
+              startPointInSec: 0,
+              pxPerMiliSec: 33,
+              startPosition: {
+                x: window.innerWidth + 100,
+                y: 50
+              },
+              // endPosition:
+              repeatIntervalIn_Secs: 7,
+              repetitions: {need: "endless"},
+              direction: "left",
+              radius: 50
+            }
+          ]
+        },
       },
       editLevel: {
         selectedLevel: 1
@@ -419,6 +466,113 @@
       stepOfHistory: -1,
       worldWideLevel: {},
       levelType: "vorgefertigt"
+    },
+    growing: {
+      rotating: {
+        blinkWall: [false] /*, rotatingWall: false*/ ,
+        rotatingDreieck: false
+      },
+      number: 1,
+      editlevel: {
+        selectedLevel: 1
+      },
+      editHistory: [],
+      stepOfHistory: -1,
+      worldWidelevel: {},
+      levelType: "vorgefertigt",
+      vorgefertigt: {
+        1: {
+          sensibility: 5,
+          miliSecForGrowning: 0.07,
+          beginningSize: {
+            x: (window.innerWidth / 40 + 333) / 2 + "px",
+            y: (window.innerHeight / 40 + 333) / 2 + "px"
+          },
+          spawnPoint: {
+            x: window.innerWidth/2 - sphere1.style.width,
+            y: window.innerHeight/2 - sphere1.style.height
+          }
+        }
+      }
+    },
+    survive: {
+      rotating: {
+        blinkWall: [false] /*, rotatingWall: false*/ ,
+        rotatingDreieck: false
+      },
+      number: 1,
+      editlevel: {
+        selectedLevel: 1
+      },
+      editHistory: [],
+      stepOfHistory: -1,
+      worldWidelevel: {},
+      levelType: "vorgefertigt",
+      vorgefertigt: {
+        1: {
+          sensibility: 25,
+          spawnPoint: {
+            x: window.innerWidth/2 - sphere1.style.width,
+            y: window.innerHeight/2 - sphere1.style.height
+          },
+          bullet: [
+            {
+              startPointInSec: 0,
+              pxPerMiliSec: 33,
+              startPosition: {
+                x: -90,
+                y: window.innerHeight/2 - 50
+              },
+              // endPosition:
+              repeatIntervalIn_Secs: 7,
+              repetitions: {need: 3, beginningtimes: [7, 7, 7]},
+              direction: "right",
+              radius: 50
+            },
+            {
+              startPointInSec: 0,
+              pxPerMiliSec: 33,
+              startPosition: {
+                x: -90,
+                y: window.innerHeight/2 + 133
+              },
+              // endPosition:
+              repeatIntervalIn_Secs: 7,
+              repetitions: {need: 3, beginningtimes: [7, 7, 7]},
+              direction: "right",
+              radius: 50
+            },
+            {
+              startPointInSec: 27,
+              pxPerMiliSec: 15,
+              startPosition: {
+                x: window.innerWidth/2 + 100,
+                y: -90
+              },
+              // endPosition:
+              repeatIntervalIn_Secs: 7,
+              repetitions: {need: 2, beginningtimes: [0, 0]},
+              direction: "down",
+              radius: 77
+            },
+            {
+              startPointInSec: 34,
+              pxPerMiliSec: 20,
+              startPosition: {
+                x: window.innerWidth/2 -150,
+                y: -90
+              },
+              // endPosition:
+              repeatIntervalIn_Secs: 7, // not needed (?)
+              repetitions: {need: 0, beginningtimes: []},
+              direction: "down",
+              radius: 77
+            }
+          ]
+        }
+      }
+    },
+      mode: "normal"
     }
     //window.innerHeight - 150 + 3//window.innerHeight/4//610;
     // for (var i = 0; zählerListe[0]>0;i++) {
@@ -437,30 +591,32 @@
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
     var name = prompt("Wie heißen sie? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! Ihre Zeiten werden auf Anfrage, oder beim Beenden aller Level angezeigt)")
-    highscores[name] = [];
+    for (var i = 0; i < Object.keys(level).length - 1; i++) {
+      highscores[Object.keys(level)[i]] = {};
+      highscores[Object.keys(level)[i]][name] = [];
+    }
     AblageListe[6] = false;
     function selected() {
       if (AblageListe[6] == true) {AblageListe[6] = false; document.getElementById('select').style.background = "";}
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
     dbGet("Gelduldspiel", "highscores").then(result => {
-      folgenDbgetHighscores(JSON.parse(result), false);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
+      folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
       if (localStorage.getItem("uploadScore") == true) {
         for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
-          level.worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
+          level[level.mode].worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
         }
         localStorage.setItem("uploadScore", false);
       }
-      if (localStorage.getItem("highscores") != null && !(angular.equals(highscores[name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
-        highscores[name] = JSON.parse(localStorage.getItem("highscores"))[name];
+      if (localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
+        highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
       }
     }).catch(function(e) {
       console.error(e);
       if (e == "TypeError: Failed to fetch") {
         alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
         offline = true;
-        if (localStorage.getItem("mapsVorgefertigt") != null) level.mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
+        if (localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
         else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
         document.getElementById('saveMaps').style.display = "none";
         window.innerWidth += 832;
@@ -469,16 +625,18 @@
     });
     function folgenDbgetHighscores(result, offline) {
         highscores = result
-        for (var i = 0; i < result.length; i++) {
-          highscores[Object.keys(result)[i]] = result[Object.keys(result)[i]];
-        }
+        // for (var i = 0; i < result.length; i++) {
+        //   highscores[Object.keys(result)[i]] = result[Object.keys(result)[i]];
+        // }
       AblageListe[0] = 0;
-      highscores.allMaps = [];
-      for (var i = 0; i < Object.keys(level.vorgefertigt).length; i++) {
-        highscores.allMaps.push("allMaps")
+      for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
+      highscores[Object.keys(highscores)[i1]].allMaps = [];
+      for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
+        highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
       }
+    }
       for (var i = 0;
-        (i < highscores[name].length + 1 && i <= Object.keys(level.vorgefertigt).length - 1)/* || i < highscores[name].length*/; i++) {
+        (i < highscores[level.mode][name].length + 1 && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
@@ -489,7 +647,7 @@
         opt1.text = (i + 1) + ". map"
         AblageListe[0] = i;
       }
-      if (highscores[name].length > 0) {
+      if (highscores[level.mode][name].length > 0) {
       opt = document.createElement("option");
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", i + 1);
@@ -503,10 +661,10 @@
       opt.setAttribute("id", i + 2);
       opt.text = "play from world wide web";
     }
-      if (highscores[name].length == 0) courceSelected();
+      if (highscores[level.mode][name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
       document.getElementById('courceSelection').value = "select map!";
-      if (highscores[name].length > 0 && offline == false) {
+      if (highscores[level.mode][name].length > 0 && offline == false) {
       dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
         folgenDbGetLevelAroundTheWorld(result, false);
       }).catch(function(e) {
@@ -516,13 +674,13 @@
         folgenDbGetLevelBy(result, false);
         if (JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
           for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
-            level.editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
-            level.worldWideLevel[level.editLevel.selectedLevel] = level.editLevel[level.editLevel.selectedLevel];
-            level.worldWideLevel[level.editLevel.selectedLevel].playedBy = [];
-            level.worldWideLevel[level.editLevel.selectedLevel].highscores = [{}];
+            level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
+            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel];
+            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].playedBy = [];
+            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].highscores = [{}];
           }
-          localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel))
-          dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
+          localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
+          dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
           localStorage.setItem("uploadCources", []);
         }
       }).catch(function(e) {
@@ -531,13 +689,13 @@
         app._data.db.push("create new level");
       });
     }
-    else if (highscores[name].length > 0) {
+    else if (highscores[level.mode][name].length > 0) {
       folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
       folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
     }
     }
     function folgenDbGetLevelAroundTheWorld(result, offline) {
-      level.worldWideLevel = result;
+      level[level.mode].worldWideLevel = result;
       app._data.db = Object.keys(result);
       setTimeout(function() {
         visible([
@@ -555,9 +713,9 @@
           items[i].onclick = function() {
             liIndex = tab.indexOf(this.innerHTML);
             console.log(this.innerText + " INDEX = " + liIndex);
-            level.levelType = "worldWideLevel";
-            level.number = this.innerText;
-            document.getElementById('preview').src = level[level.levelType][level.number].picture;
+            level[level.mode].levelType = "worldWideLevel";
+            level[level.mode].number = this.innerText;
+            document.getElementById('preview').src = level[level.mode][level[level.mode].levelType][level[level.mode].number].picture;
             Layout();
             visible([['preview', "none"], ['textur', "inline"]]);
             document.getElementById('preview').style.display = "none";
@@ -575,9 +733,9 @@
     }
     function folgenDbGetLevelBy(result, offline) {
 
-      // if (Object.keys(level.editLevel).length > 2) {
-      //   AblageListe[0] = Object.keys(level.editLevel);
-      //   for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
+      // if (Object.keys(level[level.mode].editLevel).length > 2) {
+      //   AblageListe[0] = Object.keys(level[level.mode].editLevel);
+      //   for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
       //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
       //   }
       //   app._data.db = AblageListe[0]
@@ -592,7 +750,7 @@
       //
       app._data.db = [];
       for (var i = 0; result != null && i < Object.keys(result).length; i++) {
-        level.editLevel[Object.keys(result)[i]] = result[Object.keys(result)[i]];
+        level[level.mode].editLevel[Object.keys(result)[i]] = result[Object.keys(result)[i]];
         if (Object.keys(result)[i] != "selectedLevel" && Object.keys(result)[i] != "selected") app._data.db.push(Object.keys(result)[i]);
       }
       app._data.db.push("create new level");
@@ -629,16 +787,16 @@
               canvas.fillStyle = "black";
               canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
             } else {
-              document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
-              level.editHistory.push(level.editLevel[this.innerText]);
-              level.stepOfHistory = level.editHistory.length - 1;
-              level.editLevel.selectedLevel = this.innerText;
+              document.getElementById('preview').src = level[level.mode].editLevel[this.innerText].picture; /*level[level.mode].number = this.innerText; */
+              level[level.mode].editHistory.push(level[level.mode].editLevel[this.innerText]);
+              level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
+              level[level.mode].editLevel.selectedLevel = this.innerText;
               größeAnpassen();
               Layout();
-              level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
-              level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
-              level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
-              level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
+              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
+              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
+              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
+              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
               setTimeout(function() {
                 Layout();
               }, 500);
@@ -661,13 +819,13 @@
     })
     function createNewLevel() {
       AblageListe[0] = prompt("Wie wollen sie das Level nennen?");
-      if (Object.keys(level.editLevel).includes(AblageListe[0]) || AblageListe[0] == "Test") {
+      if (Object.keys(level[level.mode].editLevel).includes(AblageListe[0]) || AblageListe[0] == "Test") {
         alert("Name bereits vorhanden! Bitte anderen Namen eingeben!");
         createNewLevel();
       } else {
-        level.editLevel.selectedLevel = AblageListe[0];
-        level.number = AblageListe[0];
-        level.editHistory.spawnPoint = {
+        level[level.mode].editLevel.selectedLevel = AblageListe[0];
+        level[level.mode].number = AblageListe[0];
+        level[level.mode].editHistory.spawnPoint = {
           x: 10,
           y: 255
         };
@@ -683,13 +841,16 @@
 
     function courceSelected() {
       window.scroll(0, 0);
-      level.rotating.blinkWall = [false];
-      level.rotating.rotatingDreieck = false;
-      level.rotating.rotatingWall = false;
+      level[level.mode].rotating.blinkWall = [false];
+      level[level.mode].rotating.rotatingDreieck = false;
+      level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
-      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores);document.getElementById('levelEditTool').style.display = "none";level.levelType = "showScores";}
+      if (document.getElementById('modeSelection').value == "survive") activateBullets();
+      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores[level.mode]);document.getElementById('levelEditTool').style.display = "none";level[level.mode].levelType = "showScores";        clearInterval(BlinkWall);
+        clearInterval(RotatingWall);
+        clearInterval(RotatingDreieck);}
       else if (document.getElementById('courceSelection').value == "upload own level") {
-        folgenDbGetLevelBy(level.editLevel, offline);
+        folgenDbGetLevelBy(level[level.mode].editLevel, offline);
         // setTimeout(function () {
         //   var items = document.querySelectorAll("#levelNames");
         //   var tab = [];
@@ -701,7 +862,7 @@
         //     items[i].onclick = function() {
         //       liIndex = tab.indexOf(this.innerHTML);
         //       console.log(this.innerText + " INDEX = " + liIndex);
-        //       level.blinkWall = false;
+        //       level[level.mode].blinkWall = false;
         //       visible([
         //         ['pictureSelection', "inline"],
         //         ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
@@ -721,16 +882,16 @@
         //         canvas.fillStyle = "black";
         //         canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
         //       } else {
-        //         document.getElementById('preview').src = level.editLevel[this.innerText].picture; /*level.number = this.innerText; */
-        //         level.editHistory.push(level.editLevel[this.innerText]);
-        //         level.stepOfHistory = level.editHistory.length - 1;
-        //         level.editLevel.selectedLevel = this.innerText;
+        //         document.getElementById('preview').src = level[level.mode].editLevel[this.innerText].picture; /*level[level.mode].number = this.innerText; */
+        //         level[level.mode].editHistory.push(level[level.mode].editLevel[this.innerText]);
+        //         level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
+        //         level[level.mode].editLevel.selectedLevel = this.innerText;
         //         größeAnpassen();
         //         Layout();
-        //         level.editLevel[level.editLevel.selectedLevel].screenXOriginal = innerWidth;
-        //         level.editLevel[level.editLevel.selectedLevel].screenYOriginal = innerHeight;
-        //         level.editLevel[level.editLevel.selectedLevel].sensibility = result[level.editLevel.selectedLevel].sensibility;
-        //         level.editLevel[level.editLevel.selectedLevel].spawnPoint = result[level.editLevel.selectedLevel].spawnPoint;
+        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
+        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
+        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
+        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
         //         setTimeout(function() {
         //           Layout();
         //         }, 500);
@@ -738,9 +899,9 @@
         //     };
         //   }
         // }, 1000);
-        // if (Object.keys(level.editLevel).length > 2) {
-        //   AblageListe[0] = Object.keys(level.editLevel);
-        //   for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
+        // if (Object.keys(level[level.mode].editLevel).length > 2) {
+        //   AblageListe[0] = Object.keys(level[level.mode].editLevel);
+        //   for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
         //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
         //   }
         //   app._data.db = AblageListe[0]
@@ -752,22 +913,22 @@
         //   ['preview', "none"]/*,
         //   ['levelEditTool', "inline"]*/
         // ]);
-        level.number = level.editHistory.length - 1;
+        level[level.mode].number = level[level.mode].editHistory.length - 1;
         // document.getElementById('pictureSelection').style.display = "inline";
         // document.getElementById('courceSelection').style.display = "none";
         // document.getElementById('preview').style.display = "none";
         // document.getElementById('blinkWall').style.display = "inline";
         // document.getElementById('rotatingWall').style.display = "inline";
         // document.getElementById('rotatingDreieck').style.display = "inline";
-        level.levelType = "editHistory";
+        level[level.mode].levelType = "editHistory";
 
         clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        level.number = 1;
+        level[level.mode].number = 1;
       } else if (document.getElementById('courceSelection').value == "play from world wide web") {
-        level.levelType = "worldWideLevel";
-        folgenDbGetLevelAroundTheWorld(level.worldWideLevel, offline);
+        level[level.mode].levelType = "worldWideLevel";
+        folgenDbGetLevelAroundTheWorld(level[level.mode].worldWideLevel, offline);
         // setTimeout(function () {
         //   var items = document.querySelectorAll("#levelNames");
         //   var tab = [];
@@ -779,10 +940,10 @@
         //     items[i].onclick = function() {
         //       liIndex = tab.indexOf(this.innerHTML);
         //       console.log(this.innerText + " INDEX = " + liIndex);
-        //       level.blinkWall = false;
-        //       level.levelType = "worldWideLevel";
-        //       level.number = this.innerText;
-        //       document.getElementById('preview').src = level[level.levelType][level.number].picture;
+        //       level[level.mode].blinkWall = false;
+        //       level[level.mode].levelType = "worldWideLevel";
+        //       level[level.mode].number = this.innerText;
+        //       document.getElementById('preview').src = level[level.mode][level[level.mode].levelType][level[level.mode].number].picture;
         //       Layout();
         //       visible([['preview', "none"], ['textur', "inline"]]);
         //       document.getElementById('preview').style.display = "none";
@@ -797,22 +958,22 @@
           ['uploadLevel', "inline"],
           ['levelEditTool', "none"]
         ]);
-        if (Object.keys(level.worldWideLevel).length > 0) app._data.db = Object.keys(level.worldWideLevel);
+        if (Object.keys(level[level.mode].worldWideLevel).length > 0) app._data.db = Object.keys(level[level.mode].worldWideLevel);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        if (level[level.levelType][level.number] != undefined && !(level[level.levelType][level.number].rotatingwall == undefined)) {
+        if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingwall == undefined)) {
         RotatingWall = setInterval(function() {
-          level.rotating.rotatingWall = true;
-          level.rotatingNow = "rotatingWall";
+          level[level.mode].rotating.rotatingWall = true;
+          level[level.mode].rotatingNow = "rotatingWall";
           Layout();
-        }, 70);
+        }, 40);
       }
-        if (level[level.levelType][level.number] != undefined && !(level[level.levelType][level.number].rotatingDreieck == undefined)) {
+        if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
         RotatingDreieck = setInterval(function() {
-          level.rotating.rotatingDreieck = true;
-          level.rotatingNow = "rotatingDreieck";
+          level[level.mode].rotating.rotatingDreieck = true;
+          level[level.mode].rotatingNow = "rotatingDreieck";
           Layout();
-        }, 70);
+        }, 40);
       }
         clearInterval(BlinkWall);
       } else {
@@ -820,8 +981,8 @@
         clearInterval(RotatingDreieck);
         clearInterval(BlinkWall);
         document.getElementById('levelEditTool').style.display = "none";
-        level.levelType = "vorgefertigt";
-        if (document.getElementById('courceSelection').value != "") {level.number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+        level[level.mode].levelType = "vorgefertigt";
+        if (document.getElementById('courceSelection').value != "") {level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
         document.getElementById('textur').style.display = "inline";
         Layout();
         setTimeout(function() {
@@ -831,33 +992,33 @@
         window.scroll(0, 0)
       //  BlinkWall = setInterval(blinkWall, 6000);
       BlinkWall = setInterval(function() {
-        for (var i = 0; level[level.levelType][level.number].blinkWall != undefined && i <  level[level.levelType][level.number].blinkWall.length; i++) {
-          level.rotating.blinkWall[i] = false;
+        for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall != undefined && i <  level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+          level[level.mode].rotating.blinkWall[i] = false;
         }
         setTimeout(function() {
-          for (var i = 0; level[level.levelType][level.number].blinkWall != undefined &&  i < level[level.levelType][level.number].blinkWall.length; i++) {
-            level.rotating.blinkWall[i] = true;
+          for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall != undefined &&  i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+            level[level.mode].rotating.blinkWall[i] = true;
           }
-          level.rotatingNow = "blinkWall";
+          level[level.mode].rotatingNow = "blinkWall";
           Layout();
         }, 3000);
         Layout();
       }, 6000);
-        if (level[level.levelType][level.number].rotatingWall != undefined) RotatingWall = setInterval(rotatingWall, 70);
-        level.rotating.rotatingWall = true;
-        level.rotatingNow = "rotatingDreieck";
-        if (level[level.levelType][level.number].rotatingDreieck != undefined) RotatingDreieck = setInterval(rotating, 70);
+        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall != undefined) RotatingWall = setInterval(rotatingWall, 70);
+        level[level.mode].rotating.rotatingWall = true;
+        level[level.mode].rotatingNow = "rotatingDreieck";
+        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined) RotatingDreieck = setInterval(rotating, 70);
       }
       else {
         alert("every vorgefertigt level finished! That was the last one :(  )");
       }
       }
-      if (level.levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
-      if (level.levelType != "showScores") document.getElementById('scores').style.display = "none";
+      if (level[level.mode].levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
+      if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
       else document.getElementById('scores').style.display = "inline";
-      if (level[level.levelType][level.number] != undefined) {
-      x1 = level[level.levelType][level.number].spawnPoint.x;
-      y1 = level[level.levelType][level.number].spawnPoint.y;
+      if (level.type != "showScores" && level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
+      x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
+      y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
     }
     }
 
@@ -873,7 +1034,6 @@
         document.getElementById('textur').style.display = "inline";
       }, 500);
     }
-    var sphere1 = document.getElementById("sphere1");
     sphere1.style.width = (window.innerWidth / 40 + 66) / 2 + "px";
     sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
     if (window.DeviceMotionEvent != undefined) {
@@ -925,8 +1085,12 @@
           alpha = data.data[3];
           if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
             console.log("Fail!");
-            x1 = level[level.levelType][level.number].spawnPoint.x;
-            y1 = level[level.levelType][level.number].spawnPoint.y; //AblageListe[5] - 150 + 3;
+            if (level.mode == "growing") {
+              modeSelected("growing");
+              startPause();
+            }
+            x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
+            y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y; //AblageListe[5] - 150 + 3;
             // x1 = 940;
             // y1 = 155;
             time = 0;
@@ -938,24 +1102,24 @@
 
     function testLevel() {
       if (document.getElementById('testLevel').innerHTML == "test Level") {
-        level.editLevel["Test"] = level.editHistory[level.stepOfHistory];
-        if (level.editHistory.spawnPoint != undefined) level.editLevel.Test.spawnPoint = level.editHistory.spawnPoint;
-        level.levelType = "editLevel";
-        level.number = "Test";
-        if (!(level.editLevel["Test"].rotatingWall == undefined) && level.editLevel["Test"].rotatingWall.length > 0) {
-        AblageListe[0] = JSON.parse(JSON.stringify(level.editLevel["Test"].rotatingWall));
+        level[level.mode].editLevel["Test"] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
+        if (level[level.mode].editHistory.spawnPoint != undefined) level[level.mode].editLevel.Test.spawnPoint = level[level.mode].editHistory.spawnPoint;
+        level[level.mode].levelType = "editLevel";
+        level[level.mode].number = "Test";
+        if (!(level[level.mode].editLevel["Test"].rotatingWall == undefined) && level[level.mode].editLevel["Test"].rotatingWall.length > 0) {
+        AblageListe[0] = JSON.parse(JSON.stringify(level[level.mode].editLevel["Test"].rotatingWall));
         RotatingWall = setInterval(function() {
-          level.rotating.rotatingWall = true;
-          level.rotatingNow = "rotatingWall";
+          level[level.mode].rotating.rotatingWall = true;
+          level[level.mode].rotatingNow = "rotatingWall";
           Layout();
-        }, 70);
+        }, 40);
       }
-      if (!(level.editLevel["Test"].rotatingDreieck == undefined) && level.editLevel["Test"].rotatingDreieck.length > 0) {
+      if (!(level[level.mode].editLevel["Test"].rotatingDreieck == undefined) && level[level.mode].editLevel["Test"].rotatingDreieck.length > 0) {
         RotatingDreieck = setInterval(function() {
-          level.rotating.rotatingDreieck = true;
-          level.rotatingNow = "rotatingDreieck";
+          level[level.mode].rotating.rotatingDreieck = true;
+          level[level.mode].rotatingNow = "rotatingDreieck";
           Layout();
-        }, 70);
+        }, 40);
       }
         activateBlinkWall();
         document.getElementById('testLevel').innerHTML = "stop Test";
@@ -973,16 +1137,16 @@
         //  ['levelEditTool', "none"]
         ]);
       } else {
-        //  level[level.levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
-        level.number = 0;
+        //  level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
+        level[level.mode].number = 0;
         document.getElementById('testLevel').innerHTML = "test Level";
         //clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        for (var i = 0; !(level.editHistory[level.stepOfHistory].rotatingWall == undefined) && i < AblageListe[0].length; i++) {
-          level.editHistory[level.stepOfHistory].rotatingWall[i].angle = AblageListe[0][i].angle;
+        for (var i = 0; !(level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall == undefined) && i < AblageListe[0].length; i++) {
+          level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall[i].angle = AblageListe[0][i].angle;
         }
-        level.levelType = "editHistory";
+        level[level.mode].levelType = "editHistory";
         Layout();
         visible([
           ['angle', "inline"],
@@ -997,7 +1161,7 @@
     }
 
     function visibilityEditStuff() {
-      if (level.editLevel.selected[0] == "blinkWall") {
+      if (level[level.mode].editLevel.selected[0] == "blinkWall") {
         visible([
           ['timeVisible', "inline"],
           ['timeInvisible', "inline"],
@@ -1009,7 +1173,7 @@
         ['timeInvisible', "none"],
         ['angle', "inline"]
       ]);
-      if (!(level.editLevel.selected[0] == "rotatingDreieck")) {
+      if (!(level[level.mode].editLevel.selected[0] == "rotatingDreieck")) {
         visible([
           ['sliderSize', "none"],
           ['timeFor360GradRotation', "none"],
@@ -1027,61 +1191,61 @@
     }
 
     function blinkWall() {
-      // if (!(level.levelType == "editHistory")) {
+      // if (!(level[level.mode].levelType == "editHistory")) {
       //Layout();
       //  setTimeout(function () {
-      for (var i = 0; !(level[level.levelType][level.number].blinkWall == undefined) && i < level[level.levelType][level.number].blinkWall.length; i++) {
-        if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "blinkWall") canvas.fillStyle = "blue";
+      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+        if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "blinkWall") canvas.fillStyle = "blue";
         else canvas.fillStyle = "black";
-        if (level.levelType == "editHistory" || (level.rotating.blinkWall[i] == true/* && (level.levelType == "editLevel" || level.levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.levelType][level.number].blinkWall[i].x, level[level.levelType][level.number].blinkWall[i].y, level[level.levelType][level.number].blinkWall[i].width, level[level.levelType][level.number].blinkWall[i].height);
+        if (level[level.mode].levelType == "editHistory" || (level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
       }
       //  }, 3000);
       // }
       // else {
-      //   for (var i = 0; !(level[level.levelType][level.number].blinkWall == undefined) && i < level[level.levelType][level.number].blinkWall.length; i++) {
-      //     canvas.fillRect(level[level.levelType][level.number].blinkWall[i].x, level[level.levelType][level.number].blinkWall[i].y, level[level.levelType][level.number].blinkWall[i].width, level[level.levelType][level.number].blinkWall[i].height);
+      //   for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+      //     canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
       //   }
       //}
     }
 
     function zielErreicht() {
-      if (document.getElementById('sensibility').value == level[level.levelType][level.number].sensibility) {
-      if (level.levelType == "worldWideLevel") {
-        if (!(level.worldWideLevel[level.number].playedBy.includes(name))) level.worldWideLevel[level.number].playedBy.push(name);
-        if (level.worldWideLevel[level.number].highscores[0][name] == undefined) level.worldWideLevel[level.number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        else if (mins + ":" + secs + ":" + "0" + tenths < level.worldWideLevel[level.number].highscores[0][name][0]) level.worldWideLevel[level.number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        showScores(level.worldWideLevel[level.number].highscores[0]);
+      if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility) {
+      if (level[level.mode].levelType == "worldWideLevel") {
+        if (!(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].playedBy.includes(name))) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].playedBy.push(name);
+        if (level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[level.mode][0][name] == undefined) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+        else if (mins + ":" + secs + ":" + "0" + tenths < level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name][0]) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+        showScores(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0]);
       }
-      if (level.levelType == "vorgefertigt") {
-        if (highscores[name][level.number] == undefined || highscores[name][level.number] > mins + ":" + secs + ":" + "0" + tenths) {
-          highscores[name][level.number] = mins + ":" + secs + ":" + "0" + tenths;
-          localStorage.setItem("highscores", JSON.stringify(highscores));
+      if (level[level.mode].levelType == "vorgefertigt") {
+        if (highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
+          highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
+          // localStorage.setItem("highscores", JSON.stringify(highscores));
           if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
         }
-        level.number++;
-        document.getElementById('courceSelection').value = level.number + ". map";
+        level[level.mode].number++;
+        document.getElementById('courceSelection').value = level[level.mode].number + ". map";
         courceSelected();
-        if (level.vorgefertigt[level.number] == undefined) {
+        if (level[level.mode].vorgefertigt[level[level.mode].number] == undefined) {
           console.log("everything Finished!");
           clearInterval(BlinkWall);
           clearInterval(RotatingWall);
           clearInterval(RotatingDreieck);
-          showScores(highscores);
+          showScores(highscores[level.mode]);
         }
       }
-      if (level.levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
-      if (level.levelType == "editLevel" && AblageListe[1] == "uploadLevel") {
+      if (level[level.mode].levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
+      if (level[level.mode].levelType == "editLevel" && AblageListe[1] == "uploadLevel") {
         AblageListe[1] = "beendet";
-        level.worldWideLevel[level.editLevel.selectedLevel] = level.editLevel.Test//[level.editLevel.selectedLevel];
-        level.worldWideLevel[level.editLevel.selectedLevel].playedBy = [];
-        level.worldWideLevel[level.editLevel.selectedLevel].highscores = [{}];
-        localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel))
+        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel.Test//[level[level.mode].editLevel.selectedLevel];
+        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].playedBy = [];
+        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].highscores = [{}];
+        // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
         if (offline == false) {
-        dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
+        dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
         alert("uploading...");
         var checkLevelUploaded = setInterval(function() {
           dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-            if (angular.equals(Object.keys(level.worldWideLevel), Object.keys(result))) {
+            if (angular.equals(Object.keys(level[level.mode].worldWideLevel), Object.keys(result))) {
               alert("level uploaded!");
               clearInterval(checkLevelUploaded);
             }
@@ -1094,31 +1258,31 @@
         alert("level will be uploaded, when you have internet again and open this site");
         AblageListe[0] = JSON.parse(localStorage.getItem("oploadCources"));
         AblageListe[0].push();
-        localStorage.setItem("oploadCources", level.editLevel.selectedLevel);
+        localStorage.setItem("oploadCources", level[level.mode].editLevel.selectedLevel);
       }
       }
     }
-    else if (level.number == highscores[name].length) {
+    else if (level[level.mode].number == highscores[level.mode][name].length) {
       alert("gg! Now, try it at normal speed to receve an highscore and maybe even unlock new level)");
     }
     else {
       alert("WARNING: The sensibility isn't normal, so you won't get any score for that!");
-      level.number++;
-      document.getElementById('courceSelection').value = level.number + ". map";
+      level[level.mode].number++;
+      document.getElementById('courceSelection').value = level[level.mode].number + ". map";
       courceSelected();
-      if (level.vorgefertigt[level.number] == undefined) {
+      if (level[level.mode].vorgefertigt[level[level.mode].number] == undefined) {
         console.log("everything Finished!");
         clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        showScores(highscores);
+        showScores(highscores[level.mode]);
       }
     }
-    if (level[level.levelType][level.number] != undefined) {
-    x1 = level[level.levelType][level.number].spawnPoint.x;
-    y1 = level[level.levelType][level.number].spawnPoint.y;
+    if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
+    x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
+    y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
   }
-    if (document.getElementById('sensibility').value != level[level.levelType][level.number - 1].sensibility && !(level.number == highscores[name].length)) sensibility(level[level.levelType][level.number].sensibility);
+    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
   }
     function showScores(highscores) {
       document.getElementById('textur').style.display = "none";
@@ -1132,13 +1296,13 @@
           cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
         }
         //  var cell = [/*row.insertCell(0)*/];
-        for (var i1 = 1; (i1 < Object.keys(level[level.levelType]).length && level.levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length + 1 && level.levelType == "worldWideLevel"); i1++) {
+        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
           if (!(Object.keys(highscores)[i] == "allMaps")) {
             if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
               cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1 - 1];
-              if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "red";
-              else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "green";
+              if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[level.mode][name][i1 - 1]) cell[cell.length - 2].style.color = "red";
+              else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[level.mode][name][i1 - 1]) cell[cell.length - 2].style.color = "green";
               else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
               else cell[cell.length - 2].style.color = "black";
 
@@ -1161,25 +1325,25 @@
       var row = table.insertRow(0);
       cell.push(row.insertCell(0));
       cell[cell.length - 1].innerHTML = "name";
-      if (level.levelType == "worldWideLevel") {
+      if (level[level.mode].levelType == "worldWideLevel") {
         cell.push(row.insertCell(i1 - 3));
         cell[cell.length - 1].innerHTML = "times";
       }
-      for (var i1 = 1; i1 < Object.keys(level[level.levelType]).length; i1++) {
+      for (var i1 = 1; i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
-      if (level.levelType == "worldWideLevel") {
-        localStorage.setItem("levelAroundTheWorld", JSON.stringify(level.worldWideLevel));
+      if (level[level.mode].levelType == "worldWideLevel") {
+        // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel));
         if (offline == false) {
-      dbSet("Gelduldspiel", "levelAroundTheWorld", level.worldWideLevel);
+      dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
       alert("uploading (high)score...");
       var checkLevelUploadedHighscore = setInterval(function() {
         dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-          if (angular.equals(Object.keys(level.worldWideLevel), Object.keys(result))) {
+          if (angular.equals(Object.keys(level[level.mode].worldWideLevel), Object.keys(result))) {
             AblageListe[0] = 0;
-            for (var i = 0; i < Object.keys(level.worldWideLevel).length; i++) {
-              if (angular.equals(level.worldWideLevel[level.number].highscores[0][Object.keys(level.worldWideLevel[level.number].highscores[0])[i]], result[level.number].highscores[0][Object.keys(result[level.number].highscores[0])[i]])) AblageListe[0]++;
+            for (var i = 0; i < Object.keys(level[level.mode].worldWideLevel).length; i++) {
+              if (angular.equals(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][Object.keys(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0])[i]], result[level[level.mode].number].highscores[0][Object.keys(result[level[level.mode].number].highscores[0])[i]])) AblageListe[0]++;
             }
             if (AblageListe[0] == Object.keys(result).length) {
             alert("(high)score uploaded!");
@@ -1206,14 +1370,14 @@
     var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
     // function drawPath(path, x, y, angle) {
     //     canvas.setTransform(1, 0, 0, 1, x, y);
-    //     canvas.rotate(level.vorgefertigt[level.number].rotatingDreieck[i].angle);
+    //     canvas.rotate(level[level.mode].vorgefertigt[level[level.mode].number].rotatingDreieck[i].angle);
     //     canvas.stroke(path);
     // }
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level.levelType == "editHistory"/* || level.rotating[level.rotatingNow] == false*/) angle = (level[level.levelType][level.number][level.rotatingNow][i].angle / 58);
-      if (level.rotating[level.rotatingNow] == true && i == level[level.levelType][level.number][level.rotatingNow].length - 1) level.rotating[level.rotatingNow] = false;
+      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating[level[level.mode].rotatingNow] == false*/) angle = (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle / 58);
+      if (level[level.mode].rotating[level[level.mode].rotatingNow] == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow].length - 1) level[level.mode].rotating[level[level.mode].rotatingNow] = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
@@ -1222,31 +1386,34 @@
 
     function renderLoop(time) {
       //  canvas.clearRect(0, 0, textur.width, textur.height);
-      //  if (!(level.levelType == "editHistory")) Layout();
+      //  if (!(level[level.mode].levelType == "editHistory")) Layout();
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       AblageListe[0] = time
-      if (offline == true) Layout();
-      for (var i = 0; level[level.levelType][level.number][level.rotatingNow] != undefined && i < level[level.levelType][level.number][level.rotatingNow].length; i++) {
+  //    if (/*offline == true && */level[level.mode].levelType != "editHistory" && (level[level.mode].rotatingNow == "rotatingDreieck" || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined) ) Layout();
+      if (level[level.mode].levelType == "vorgefertigt") Layout();
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow].length; i++) {
         time = AblageListe[0];
-        time += level[level.levelType][level.number][level.rotatingNow][i].angle * 10000
-        if (level.rotatingNow == "rotatingDreieck"/* || level.levelType == "vorgefertigt"*/) {
-          if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number]
-            [level.rotatingNow][i].y, level[level.levelType][level.number][level.rotatingNow][i].size / 10 /*level[level.levelType][level.number][level.rotatingNow][i].size*/ , time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
-            Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/ , "blue", "blue", i); //360 every 2 second
-          else drawPath_V2(triangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, level[level.levelType][level.number][level.rotatingNow][i].size / 10 /*level[level.levelType][level.number][level.rotatingNow][i].size*/ ,
-            time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) * Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/ , "black", "black", i); //360 every 2 second
+        time += level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle * 10000
+        if (level[level.mode].rotatingNow == "rotatingDreieck"/* || level[level.mode].levelType == "vorgefertigt"*/) {
+          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number]
+            [level[level.mode].rotatingNow][i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size*/ , time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
+            Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/ , "blue", "blue", i); //360 every 2 second
+          else drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size*/ ,
+            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) * Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/ , "black", "black", i); //360 every 2 second
         }
-        else if (!(level[level.levelType][level.number].rotatingWall == undefined)) {
-          // -(level[level.levelType][level.number].rotatingWall[i].width / 2), -(level[level.levelType][level.number].rotatingWall[i].height / 2), level[level.levelType][level.number].rotatingWall[i].width, level[level.levelType][level.number]
+        else if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
+          // -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
           //  .rotatingWall[i].height
-          rectangle = createPath(point(-(level[level.levelType][level.number].rotatingWall[i].width / 2),-(level[level.levelType][level.number].rotatingWall[i].height / 2)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].width), -(level[level.levelType][level.number].rotatingWall[i].height / 2)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].width), -(level[level.levelType][level.number].rotatingWall[i].height / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].height)), point(-(level[level.levelType][level.number].rotatingWall[i].width / 2), -(level[level.levelType][level.number].rotatingWall[i].height / 2) + JSON.parse(level[level.levelType][level.number].rotatingWall[i].height)));
-          if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingWall") drawPath_V2(rectangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, 1, time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
-          Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/, "blue", "blue", i);
-          else drawPath_V2(rectangle, level[level.levelType][level.number][level.rotatingNow][i].x, level[level.levelType][level.number][level.rotatingNow][i].y, 1, time / (level[level.levelType][level.number][level.rotatingNow][i].timeFor360GradRotation) *
-          Math.PI /*level[level.levelType][level.number][level.rotatingNow][i].angle*/, "black", "black", i);
+          rectangle = createPath(point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2),-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height)));
+          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") drawPath_V2(rectangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, 1, time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
+          Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/, "blue", "blue", i);
+          else drawPath_V2(rectangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, 1, time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
+          Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/, "black", "black", i);
         }
       }
+      if (level[level.mode].rotatingNow == "rotatingWall" && level[level.mode].levelType != "vorgefertigt" && level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined) level[level.mode].rotatingNow = "rotatingDreieck";
+      else if (level[level.mode].rotatingNow == "rotatingDreieck" && level[level.mode].levelType != "vorgefertigt" && level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall != undefined) level[level.mode].rotatingNow = "rotatingWall";
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
 
@@ -1273,18 +1440,18 @@
     }
 
     function rotating() { // früher dreieck
-      if (offline == true && level.levelType == "vorgefertigt") level.rotatingNow = "rotatingDreieck";
-      if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number][level.rotatingNow] == undefined || level[level.levelType][level.number][level.rotatingNow] == undefined)) {
+      if (/*offline == true && */level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingDreieck";
+      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] == undefined)) {
         requestAnimationFrame(renderLoop); // start animation
       }
-      //   if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingDreieck == undefined || level[level.levelType][level.number].rotatingDreieck[0].angle == undefined)) Layout();
-      //   for (var i = 0; !(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingDreieck == undefined || level[level.levelType][level.number].rotatingDreieck[0].angle == undefined) && i < level[level.levelType][level.number].rotatingDreieck.length; i++) {
+      //   if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[0].angle == undefined)) Layout();
+      //   for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
       //   canvas.save();
       //   canvas.beginPath();
       //
       //     // canvas.moveTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo(0, -(level[level.levelType][level.number].rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo((level[level.levelType][level.number].rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
+      //     // canvas.lineTo(0, -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
+      //     // canvas.lineTo((level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
       //     // canvas.lineTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
       //     canvas.fillStyle = "black";
       //     var path=new Path2D();
@@ -1295,28 +1462,28 @@
       //
       // canvas.closePath();
       // canvas.restore();
-      // level[level.levelType][level.number].rotatingDreieck[i].angle++;
+      // level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle++;
       // }
 
     }
 
     function rotatingWall(rotate) {
-      //if (!(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingWall == undefined || level[level.levelType][level.number].rotatingWall[0].angle == undefined) && !(level.levelType == "editHistory")) Layout();
-      if (offline == true && level.levelType == "vorgefertigt") level.rotatingNow = "rotatingWall";
-      if (level.levelType == "vorgefertigt") {rotate = true;Layout();}
-      for (var i = 0; !(level[level.levelType][level.number] == undefined || level[level.levelType][level.number].rotatingWall == undefined || level[level.levelType][level.number].rotatingWall[0].angle == undefined) && i < level[level.levelType][
-          level.number
+      //if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
+      if (offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
+      if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
+      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
+          level[level.mode].number
         ].rotatingWall.length; i++) {
         canvas.save();
-        canvas.translate(level[level.levelType][level.number].rotatingWall[i].x, level[level.levelType][level.number].rotatingWall[i].y);
-        canvas.rotate(level[level.levelType][level.number].rotatingWall[i].angle * Math.PI / 180)
-        if (i == level.editLevel.selected[1] && level.levelType == "editHistory" && level.editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
+        canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
+        canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
+        if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
         else canvas.fillStyle = "black";
-        canvas.fillRect(-(level[level.levelType][level.number].rotatingWall[i].width / 2), -(level[level.levelType][level.number].rotatingWall[i].height / 2), level[level.levelType][level.number].rotatingWall[i].width, level[level.levelType][level.number]
+        canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
           .rotatingWall[i].height);
         canvas.restore();
-        if (!(level.levelType == "editHistory") && level.rotating.rotatingWall == true) level[level.levelType][level.number].rotatingWall[i].angle++;
-        if (level.levelType != "vorgefertigt" && level.rotating.rotatingWall == true && i == level[level.levelType][level.number].rotatingWall.length - 1) level.rotating.rotatingWall = false;
+        if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle++;
+        if (level[level.mode].levelType != "vorgefertigt" && level[level.mode].rotating.rotatingWall == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
       }
     }
 
@@ -1329,12 +1496,12 @@
         y1 = 0;
         vy1 = -vy1;
       }
-      if (x1 > window.innerWidth - (window.innerWidth / 40 + 66) / 2) {
-        x1 = window.innerWidth - (window.innerWidth / 40 + 66) / 2;
+      if (x1 > window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+        x1 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
         vx1 = -vx1;
       }
-      if (y1 > AblageListe[5] - (window.innerWidth / 40 + 66) / 2) {
-        y1 = AblageListe[5] - (window.innerWidth / 40 + 66) / 2;
+      if (y1 > AblageListe[5] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+        y1 = AblageListe[5] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
         vy1 = -vy1;
       }
       if (x2 < 0) {
@@ -1345,47 +1512,50 @@
         y2 = 0;
         vy2 = -vy2;
       }
-      if (x2 > window.innerWidth - (window.innerWidth / 40 + 66) / 2) {
-        x2 = window.innerWidth - (window.innerWidth / 40 + 66) / 2;
+      if (x2 > window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+        x2 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
         vx2 = -vx2;
       }
-      if (y2 > AblageListe[5] - (window.innerWidth / 40 + 66) / 2) {
-        y2 = AblageListe[5] - (window.innerWidth / 40 + 66) / 2;
+      if (y2 > AblageListe[5] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+        y2 = AblageListe[5] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
         vy2 = -vy2;
       }
     }
 
     function Layout() {
-      if (level.levelType == "vorgefertigt") {
+      if (level[level.mode].levelType == "vorgefertigt") {
         Bild = new Image();
-        if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + level.number + ".png"
-        else Bild.src = level.mapsVorgefertigt[level.number - 1];
+        if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
+        else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
         canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5])
       } else canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-      //  if (level.levelType == "editHistory"/* || level.levelType == "editLevel" */|| level.levelType == "worldWideLevel") {
+      //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
       //    größeAnpassen();
       //}
-      if (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingWall") || (((level.levelType == "editLevel" || level.levelType == "editHistory" || level.levelType == "worldWideLevel") && !(level.rotatingNow == "rotatingDreieck")))) || level.rotatingNow == "rotatingWall") rotating();
-      if (!(level.rotating.blinkWall == undefined) && level.rotating.blinkWall.includes(true)) blinkWall();
-      if (level.levelType == "editHistory") {
-        level.number = level.stepOfHistory;
+      for (var i = 0; /*i < level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && */level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x != undefined) drawBullet(level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i]);
+      }
+      if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
+      if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
+      if (level[level.mode].levelType == "editHistory") {
+        level[level.mode].number = level[level.mode].stepOfHistory;
         canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        for (var i = 0; level.stepOfHistory > -1 && i < Object.keys(level["editHistory"][level.stepOfHistory]).length; i++) {
-          if (!(Object.keys(level["editHistory"][level.stepOfHistory])[i] == "picture"))
-            for (var i1 = 0; i1 < level["editHistory"][level.stepOfHistory][Object.keys(level["editHistory"][level.stepOfHistory])[i]].length; i1++) {
-              if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "rotatingWall") rotatingWall(false);
-              if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "rotatingDreieck") rotating(false);
-              if (Object.keys(level["editHistory"][level.stepOfHistory])[i] == "blinkWall") blinkWall();
+        for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory]).length; i++) {
+          if (!(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "picture"))
+            for (var i1 = 0; i1 < level[level.mode]["editHistory"][level[level.mode].stepOfHistory][Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]].length; i1++) {
+              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingWall") rotatingWall(false);
+              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingDreieck") rotating(false);
+              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "blinkWall") blinkWall();
             }
         }
       }
-      //if (level.levelType == "editHistory"/* || level.levelType == "editLevel" */|| level.levelType == "worldWideLevel") level[level.levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
+      //if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
     }
 
     function größeAnpassen() {
-      //  AblageListe[1] = JSON.parse(JSON.stringify(level[level.levelType]));
-      if (level.levelType == "editHistory") AblageListe[2] = level.editHistory[level.stepOfHistory];
-      else AblageListe[2] = JSON.parse(JSON.stringify(level[level.levelType]));
+      //  AblageListe[1] = JSON.parse(JSON.stringify(level[level.mode][level[level.mode].levelType]));
+      if (level[level.mode].levelType == "editHistory") AblageListe[2] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
+      else AblageListe[2] = JSON.parse(JSON.stringify(level[level.mode][level[level.mode].levelType]));
       for (var i = 0; i < Object.keys(AblageListe[2]).length; i++) {
         if (!(Object.keys(AblageListe[2])[i] == "picture")) {
           for (var i1 = 0; i1 < AblageListe[2][Object.keys(AblageListe[2])[i]].length; i1++) {
@@ -1454,11 +1624,11 @@
     }
 
     function select(type) {
-      level.rotatingNow = type;
-      document.getElementById(level.editLevel.selected[0]).style.background = "";
-      if (level.editHistory.length == 0) level.editLevel.selected = [type, 0];
-      else if (level.editHistory[level.stepOfHistory][level.editLevel.selected[0]] == undefined) level.editLevel.selected = [type, 0];
-      else level.editLevel.selected = [type, level.editHistory[level.stepOfHistory][level.editLevel.selected[0]].length - 1];
+      level[level.mode].rotatingNow = type;
+      document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
+      if (level[level.mode].editHistory.length == 0) level[level.mode].editLevel.selected = [type, 0];
+      else if (level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]] == undefined) level[level.mode].editLevel.selected = [type, 0];
+      else level[level.mode].editLevel.selected = [type, level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1];
       document.getElementById(type).style.background = "blue";
     }
     visible([
@@ -1472,45 +1642,83 @@
     // document.getElementById('blinkWall').style.display = "none";
     // document.getElementById('rotatingWall').style.display = "none";
     // document.getElementById('rotatingDreieck').style.display = "none";
-    // level.editLevel.selected = [];
-    level.editLevel.selected = ["blinkWall", 0];
+    // level[level.mode].editLevel.selected = [];
+    level[level.mode].editLevel.selected = ["blinkWall", 0];
     document.getElementById("blinkWall").style.background = "blue";
 
     function activateBlinkWall() {
-      level.blinkWall = true;
-      for (var i = 0; !(level[level.levelType][level.number].blinkWall == undefined) && i < level[level.levelType][level.number].blinkWall.length; i++) {
+      level[level.mode].blinkWall = true;
+      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
         blinkWallFunction(i);
       }
     }
 
     function blinkWallFunction(i) {
       setTimeout(function() {
-        level.rotating.blinkWall[i] = true;
-        if (level.levelType == "worldWideLevel") Layout();
+        level[level.mode].rotating.blinkWall[i] = true;
+        if (level[level.mode].levelType == "worldWideLevel") Layout();
         setTimeout(function() {
-          level.rotating.blinkWall[i] = false;
-          if (level.levelType == "worldWideLevel") Layout();
-          if (level.levelType == "editLevel" || level.levelType == "worldWideLevel" && level.blinkWall == true) blinkWallFunction(i);
-        }, level[level.levelType][level.number].blinkWall[i].timeVisible);
-      }, level[level.levelType][level.number].blinkWall[i].timeInvisible);
+          level[level.mode].rotating.blinkWall[i] = false;
+          if (level[level.mode].levelType == "worldWideLevel") Layout();
+          if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel" && level[level.mode].blinkWall == true) blinkWallFunction(i);
+        }, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].timeVisible);
+      }, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].timeInvisible);
     }
 
+    function activateBullets() {
+      for (var i = 0; i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+        level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done = 0;
+        bulletInterval[i] = true;
+        bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPointInSec, level[level.mode].levelType, level[level.mode].number);
+      }
+    }
+    function bullet(i, levelAktuell, waitingTimeInSec, type, number) {
+      level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position = {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPosition.x, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPosition.y};
+      setTimeout(function () {
+        bulletInterval[i] = true;
+        setTimeout(function () {
+          bulletInterval[i] = false;
+          level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done++;
+          if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.need == "endless" && level[level.mode].levelType == type && level[level.mode].number == number)  bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], 0, type, number);
+          else if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.need) bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], levelAktuell.repetitions.beginningtimes[level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done - 1], type, number);
+        }, levelAktuell.repeatIntervalIn_Secs*1000);
+        movingBullet(levelAktuell, i);
+        //   bulletInterval = setInterval(function () {
+        // }, levelAktuell.pxPerMiliSec);
+      }, waitingTimeInSec*1000);
+    }
+    function movingBullet(levelAktuell, i) {
+      if (levelAktuell.direction == "right") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x += levelAktuell.pxPerMiliSec;
+      if (levelAktuell.direction == "left") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x += levelAktuell.pxPerMiliSec;
+      if (levelAktuell.direction == "down") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.y += levelAktuell.pxPerMiliSec;
+      if (levelAktuell.direction == "up") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.y += levelAktuell.pxPerMiliSec;
+      Layout();
+      setTimeout(function () {
+        if (bulletInterval[i] == true) movingBullet(levelAktuell, i);
+      }, 1);
+    }
+    function drawBullet(levelAktuell) {
+      canvas.fillStyle = "black";
+      canvas.beginPath();
+      canvas.arc(levelAktuell.position.x,levelAktuell.position.y,levelAktuell.radius,100,Math.PI*2, true);
+      canvas.fill();
+    }
     function canvasClicked() {
-      if (level.levelType == "editHistory") {
+      if (level[level.mode].levelType == "editHistory") {
         AblageListe[0] = [];
         AblageListe[0][0] = [];
         AblageListe[0][1] = [];
         AblageListe[0][2] = [];
         AblageListe[0][3] = [];
         AblageListe[0][4] = [];
-        for (var i = 0; level.stepOfHistory > -1 && i < Object.keys(level.editHistory[level.stepOfHistory]).length; i++) {
-          for (var i1 = 0; i1 < level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]].length; i1++) {
-            if (Object.keys(level.editHistory[level.stepOfHistory])[i] == "picture") i1 = level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]].length;
+        for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]).length; i++) {
+          for (var i1 = 0; i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length; i1++) {
+            if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i] == "picture") i1 = level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length;
             else {
-              AblageListe[0][0].push(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1].x);
-              AblageListe[0][1].push(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1].y);
-              AblageListe[0][2].push(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1].width);
-              AblageListe[0][3].push(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1].hight);
+              AblageListe[0][0].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].x);
+              AblageListe[0][1].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].y);
+              AblageListe[0][2].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].width);
+              AblageListe[0][3].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].hight);
               AblageListe[0][4].push([i, i1]);
             }
           }
@@ -1518,64 +1726,64 @@
         for (var i = 0; i < AblageListe[0][0].length; i++) {
           if ((AblageListe[0][0][i] - mausx < 55 && AblageListe[0][0][i] - mausx > -55) && (AblageListe[0][1][i] - mausy < 55 && AblageListe[0][1][i] - mausy > -55)) {
             console.log(AblageListe[0][4][i])
-            console.log(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[AblageListe[0][4][i][0]]]
+            console.log(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[AblageListe[0][4][i][0]]]
               [AblageListe[0][4][i][1]]);
             AblageListe[0][0] = i;
             i = AblageListe[0][1].length + 1;
           }
         }
         if (i == AblageListe[0][1].length + 2 && AblageListe[6] == true) {
-          document.getElementById(level.editLevel.selected[0]).style.background = "";
-          level.editLevel.selected[0] = Object.keys(level.editHistory[level.stepOfHistory])[AblageListe[0][4][AblageListe[0][0]][0]]; //[AblageListe[0][0]];
-          level.editLevel.selected[1] = [AblageListe[0][4][AblageListe[0][0]][1]];
-          document.getElementById(level.editLevel.selected[0]).style.background = "blue";
+          document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
+          level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[AblageListe[0][4][AblageListe[0][0]][0]]; //[AblageListe[0][0]];
+          level[level.mode].editLevel.selected[1] = [AblageListe[0][4][AblageListe[0][0]][1]];
+          document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "blue";
           Layout();
           visibilityEditStuff();
-          for (var i = 0; i < Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]]).length; i++) {
-            if (Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i] == "width" || Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[
-                i] == "height" || Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level.editHistory[
-              level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i])).value = level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]][Object.keys(level.editHistory[level.stepOfHistory]
-              [level.editLevel.selected[0]][level.editLevel.selected[1]])[i]];
-            else if (!(document.getElementById(Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i]) == undefined))
-              document.getElementById(Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i]).value = level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[
-                1]][Object.keys(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editLevel.selected[1]])[i]];
+          for (var i = 0; i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]]).length; i++) {
+            if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i] == "width" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[
+                i] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level[level.mode].editHistory[
+              level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i])).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]
+              [level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]];
+            else if (!(document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]) == undefined))
+              document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[
+                1]][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]];
           }
         } else {
           console.log("createElement");
-          //  level.stepOfHistory++;
-          if (level.editHistory.length > 0) {
-            level.editHistory.push(JSON.parse(JSON.stringify(level.editHistory[level.stepOfHistory])));
+          //  level[level.mode].stepOfHistory++;
+          if (level[level.mode].editHistory.length > 0) {
+            level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory])));
           } else {
-            level.editHistory.push({});
+            level[level.mode].editHistory.push({});
           }
-          level.stepOfHistory = level.editHistory.length - 1;
-          level.number = level.stepOfHistory;
-          if (level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]] == undefined) level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]] = [];
-          level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].push({
+          level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
+          level[level.mode].number = level[level.mode].stepOfHistory;
+          if (level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] == undefined) level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] = [];
+          level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].push({
             x: mausx,
             y: mausy /* - 17 - scrollY*/ ,
             angle: 0
           })
           document.getElementById('angle').style.display = "inline";
           visibilityEditStuff();
-          if (level.editLevel.selected[0] == "rotatingWall") level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = 3000;
-          if (level.editLevel.selected[0] == "blinkWall") {
+          if (level[level.mode].editLevel.selected[0] == "rotatingWall") level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = 3000;
+          if (level[level.mode].editLevel.selected[0] == "blinkWall") {
             //    visible([['timeVisible', "inline"], ['timeInvisible', "inline"]]);
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeVisible"] = document.getElementById('timeVisible').value;
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeInvisible"] = document.getElementById('timeInvisible').value;
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeVisible"] = document.getElementById('timeVisible').value;
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeInvisible"] = document.getElementById('timeInvisible').value;
           }
           //  else visible([['timeVisible', "none"], ['timeInvisible', "none"]]);
-          if (!(level.editLevel.selected[0] == "rotatingDreieck")) {
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["width"] = document.getElementById('sliderWidth').value;
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["height"] = document.getElementById('sliderHeight').value;
+          if (!(level[level.mode].editLevel.selected[0] == "rotatingDreieck")) {
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["width"] = document.getElementById('sliderWidth').value;
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["height"] = document.getElementById('sliderHeight').value;
             //    visible([['sliderSize', "none"], ['timeFor360GradRotation', "none"], ['sliderWidth', "inline"], ['sliderHeight', "inline"]])
             // document.getElementById('sliderSize').style.display = "none";
             // document.getElementById('timeFor360GradRotation').style.display = "none";
             // document.getElementById('sliderWidth').style.display = "inline";
             // document.getElementById('sliderHeight').style.display = "inline";
           } else {
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["size"] = document.getElementById('sliderSize').value;
-            level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]][level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById(
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["size"] = document.getElementById('sliderSize').value;
+            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById(
               'timeFor360GradRotation').value;
             //    visible([["sliderSize", "inline"], ['sliderWidth', "none"], ['sliderHeight', "none"], ['timeFor360GradRotation', "inline"]]);
             // document.getElementById('sliderSize').style.display = "inline";
@@ -1583,16 +1791,16 @@
             // document.getElementById('sliderHeight').style.display = "none";
             // document.getElementById('timeFor360GradRotation').style.display = "inline";
           }
-          if (level.editLevel.selected[0] == "blinkWall") {
+          if (level[level.mode].editLevel.selected[0] == "blinkWall") {
             document.getElementById('angle').style.display = "none";
           }
           //  else document.getElementById('angle').style.display = "inline";
-          level.editLevel.selected[1] = level.editHistory[level.editHistory.length - 1][level.editLevel.selected[0]].length - 1;
+          level[level.mode].editLevel.selected[1] = level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1;
           Layout();
         }
       }
-      for (var i = level.editHistory.length - 1; Object.keys(level.editHistory[i]).length == 0; i--) {
-        level.editHistory.pop();
+      for (var i = level[level.mode].editHistory.length - 1; level[level.mode].editHistory[i] != undefined && Object.keys(level[level.mode].editHistory[i]).length == 0; i--) {
+        level[level.mode].editHistory.pop();
       }
     }
 
@@ -1623,8 +1831,8 @@
       if (AblageListe[3] == false) {
         AblageListe[3] = true;
         AblageListe[0] = {};
-        for (var i = 0; i < Object.keys(level.editLevel).length; i++) {
-          if (!(Object.keys(level.editLevel)[i] == "selectedLevel" || Object.keys(level.editLevel)[i] == "selected" || Object.keys(level.editLevel)[i] == "Test")) AblageListe[0][Object.keys(level.editLevel)[i]] = level.editLevel[Object.keys(level.editLevel)[i]];
+        for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
+          if (!(Object.keys(level[level.mode].editLevel)[i] == "selectedLevel" || Object.keys(level[level.mode].editLevel)[i] == "selected" || Object.keys(level[level.mode].editLevel)[i] == "Test")) AblageListe[0][Object.keys(level[level.mode].editLevel)[i]] = level[level.mode].editLevel[Object.keys(level[level.mode].editLevel)[i]];
         }
         Layout();
         localStorage.setItem("levelBy " + name, JSON.stringify(AblageListe[0]));
@@ -1633,7 +1841,7 @@
         alert("saving...")
         var checkLevelSaved = setInterval(function() {
           dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-            if (angular.equals(Object.keys(level.editLevel[level.editLevel.selectedLevel]), Object.keys(result[level.editLevel.selectedLevel]))) {
+            if (angular.equals(Object.keys(level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel]), Object.keys(result[level[level.mode].editLevel.selectedLevel]))) {
               alert("level saved!");
               clearInterval(checkLevelSaved);
               AblageListe[3] = false;
@@ -1653,53 +1861,53 @@
     }
     function folgenKeyPressed(event) {
       console.log(event)
-      if (level.levelType == "editHistory" && event.key.toLowerCase() == "s" && event.ctrlKey == true) {
-        level.editLevel[level.editLevel.selectedLevel] = level.editHistory[level.stepOfHistory];
+      if (level[level.mode].levelType == "editHistory" && event.key.toLowerCase() == "s" && event.ctrlKey == true) {
+        level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
         canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        if (AblageListe[4] == false) level.editLevel[level.editLevel.selectedLevel].picture = textur.toDataURL();
-        else level.editLevel[level.editLevel.selectedLevel].picture = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + document.getElementById('courceSelectionEdit').value.toString().split('.')[0] + ".png";
-        if (level.editLevel[level.editLevel.selectedLevel].screenXOriginal == undefined) {
-          level.editLevel[level.editLevel.selectedLevel].screenXOriginal = window.innerWidth;
-          level.editLevel[level.editLevel.selectedLevel].screenYOriginal = AblageListe[5];
+        if (AblageListe[4] == false) level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].picture = textur.toDataURL();
+        else level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].picture = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + document.getElementById('courceSelectionEdit').value.toString().split('.')[0] + ".png";
+        if (level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal == undefined) {
+          level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = window.innerWidth;
+          level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = AblageListe[5];
         }
-        level.editLevel[level.editLevel.selectedLevel].spawnPoint = level.editHistory.spawnPoint;
+        level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = level[level.mode].editHistory.spawnPoint;
         saveLevel();
       }
-      if (level.levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level.stepOfHistory == level.editHistory.length - 1 && (offline != true && angular.equals(level.editHistory[level.editHistory.length - 1], level.editHistory[level.editHistory.length -
-          2])) || (offline == true && level.editHistory[level.editHistory.length - 1] == level.editHistory[level.editHistory.length -2])) level.stepOfHistory--;
-      if (level.levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level.stepOfHistory > 0) level.stepOfHistory--;
-      if (level.levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level.stepOfHistory == 0 && !(Object.keys(level.editHistory[0]).length == 0)) level.editHistory.unshift([]);
-      if (level.levelType == "editHistory" && event.key == "y" && event.ctrlKey == true && level.stepOfHistory < level.editHistory.length - 1) level.stepOfHistory++;
-      if (level.levelType == "editHistory" && (event.key == "z" || event.key == "y") && event.ctrlKey == true && level.stepOfHistory > -1 && level.stepOfHistory < level.editHistory.length) {
-        level.number = level.stepOfHistory;
-        for (var i = level.editHistory.length - 1; Object.keys(level.editHistory[i]).length == 0 && level.editHistory.length > 0; i--) {
-          level.editHistory.pop();
+      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == level[level.mode].editHistory.length - 1 && (offline != true && angular.equals(level[level.mode].editHistory[level[level.mode].editHistory.length - 1], level[level.mode].editHistory[level[level.mode].editHistory.length -
+          2])) || (offline == true && level[level.mode].editHistory[level[level.mode].editHistory.length - 1] == level[level.mode].editHistory[level[level.mode].editHistory.length -2])) level[level.mode].stepOfHistory--;
+      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory > 0) level[level.mode].stepOfHistory--;
+      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == 0 && !(Object.keys(level[level.mode].editHistory[0]).length == 0)) level[level.mode].editHistory.unshift([]);
+      if (level[level.mode].levelType == "editHistory" && event.key == "y" && event.ctrlKey == true && level[level.mode].stepOfHistory < level[level.mode].editHistory.length - 1) level[level.mode].stepOfHistory++;
+      if (level[level.mode].levelType == "editHistory" && (event.key == "z" || event.key == "y") && event.ctrlKey == true && level[level.mode].stepOfHistory > -1 && level[level.mode].stepOfHistory < level[level.mode].editHistory.length) {
+        level[level.mode].number = level[level.mode].stepOfHistory;
+        for (var i = level[level.mode].editHistory.length - 1; Object.keys(level[level.mode].editHistory[i]).length == 0 && level[level.mode].editHistory.length > 0; i--) {
+          level[level.mode].editHistory.pop();
         }
-        for (var i = 0; i < Object.keys(level.editHistory[level.stepOfHistory]).length; i++) {
-          for (var i1 = 0; i1 < level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]].length; i1++) {
-            for (var i2 = 0; i2 < Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][0]).length; i2++) {
-              // if (!(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]].length - 1 == undefined) && event.key == "y" && !(angular.equals(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]], level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory - 1])[i]]))) level.editLevel.selected[0] = Object.keys(level.editHistory[level.stepOfHistory - 1])[i];
-              // if (!(level.editHistory[level.stepOfHistory][level.editLevel.selected[0]].length - 1 == undefined) && event.key == "z" && !(angular.equals(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]], level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory + 1])[i]])))level.editLevel.selected[0] = Object.keys(level.editHistory[level.stepOfHistory] + 1)[i];
-              if (!(document.getElementById(level.editLevel.selected[0]) == undefined) && (level.editHistory[level.stepOfHistory][level.editLevel.selected[0]] == undefined)) {
-                document.getElementById(level.editLevel.selected[0]).style.background = "";
-                level.editLevel.selected[0] = Object.keys(level.editHistory[level.stepOfHistory])[0];
-                document.getElementById(level.editLevel.selected[0]).style.background = "blue";
+        for (var i = 0; i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]).length; i++) {
+          for (var i1 = 0; i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length; i1++) {
+            for (var i2 = 0; i2 < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][0]).length; i2++) {
+              // if (!(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1 == undefined) && event.key == "y" && !(angular.equals(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]], level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory - 1])[i]]))) level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory - 1])[i];
+              // if (!(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1 == undefined) && event.key == "z" && !(angular.equals(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]], level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory + 1])[i]])))level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory] + 1)[i];
+              if (!(document.getElementById(level[level.mode].editLevel.selected[0]) == undefined) && (level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]] == undefined)) {
+                document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
+                level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[0];
+                document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "blue";
               };
-              if (Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2] == "width" || Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[
-                  i]][i1])[i2] == "height" || Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level
-                .editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2])).value = level.editHistory[level.stepOfHistory][level.editLevel.selected[0]][level.editHistory[level.stepOfHistory][level.editLevel
+              if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "width" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
+                  i]][i1])[i2] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level
+                .editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2])).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel
                 .selected[0]
-              ].length - 1][Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2]];
-              else if (!(Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2] == "x" || Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[
-                  i]][i1])[i2] == "y")) document.getElementById(Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2]).value = level.editHistory[level.stepOfHistory][level.editLevel.selected[
-                0]][level.editHistory[level.stepOfHistory][level.editLevel.selected[0]].length - 1][Object.keys(level.editHistory[level.stepOfHistory][Object.keys(level.editHistory[level.stepOfHistory])[i]][i1])[i2]];
+              ].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
+              else if (!(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "x" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
+                  i]][i1])[i2] == "y")) document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[
+                0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
             }
           }
         }
         Layout();
       }
-      for (var i = level.editHistory.length - 1; level.editHistory.length > 0 && Object.keys(level.editHistory[i]).length == 0; i--) {
-        level.editHistory.pop();
+      for (var i = level[level.mode].editHistory.length - 1; level[level.mode].editHistory.length > 0 && Object.keys(level[level.mode].editHistory[i]).length == 0; i--) {
+        level[level.mode].editHistory.pop();
       }
     }
 
@@ -1708,6 +1916,8 @@
     }
     function saveMapsVorgefertigt() {
       alert("WARNING: wait for all maps been shown on the screen. After that, it finished! you will also get a message then.");
+      localStorage.setItem("highscores", JSON.stringify(highscores));
+      localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
       document.getElementById('textur').style.display = "inline";
       setTimeout(function () {
       AblageListe[7] = [];
@@ -1718,15 +1928,15 @@
           console.log("i: " + AblageListe[1][1]);
           Bild = new Image();
           if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + (AblageListe[1][1]) + ".png"
-          else Bild.src = level.mapsVorgefertigt[AblageListe[1][1]];
+          else Bild.src = level[level.mode].mapsVorgefertigt[AblageListe[1][1]];
           canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
           if ((AblageListe[1][0]/2 + "").includes(".")) AblageListe[7].push(textur.toDataURL());
-          if (AblageListe[1][1] >= Object.keys(level.vorgefertigt).length && (AblageListe[1][0]/2 + "").includes(".")) {
+          if (AblageListe[1][1] >= Object.keys(level[level.mode].vorgefertigt).length && (AblageListe[1][0]/2 + "").includes(".")) {
           //  if (localStorage.getItem("mapsVorgefertigt") == null || !(angular.equals(JSON.parse(localStorage.getItem("mapsVorgefertigt")).length, AblageListe[7].length))) {
               localStorage.setItem("mapsVorgefertigt", JSON.stringify(AblageListe[7]));
               alert("level stored on device!");
         //    }
-            level.mapsVorgefertigt = AblageListe[7];
+            level[level.mode].mapsVorgefertigt = AblageListe[7];
             clearInterval(saveLevelFertig);
           }
           AblageListe[1][0]++;
@@ -1734,12 +1944,12 @@
     }
     else {
       if (localStorage.getItem("mapsVorgefertigt") == null) alert("You have to be online first, to be able to store the maps for offline play!");
-      else level.mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
+      else level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
     }
-      // for (var i = 0; i < Object.keys(level.vorgefertigt).length; i++) {
+      // for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
       //   Bild = new Image();
       //   if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + (i + 1) + ".png"
-      //   else Bild.src = level.mapsVorgefertigt[i];
+      //   else Bild.src = level[level.mode].mapsVorgefertigt[i];
       //   canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
       //   AblageListe[7].push(textur.toDataURL());
       // }
