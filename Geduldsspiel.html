@@ -122,14 +122,14 @@
   }
   function sensibility(value, backToNormal) {
 //    if (value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {
-      if (backToNormal == true ||level[level.mode].levelType == "editHistory" || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
+      if (backToNormal == true || level[level.mode].levelType == "editHistory" || level[level.mode].levelType || "editLevel" || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
       if ((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") && backToNormal == true) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
+      if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility = document.getElementById('sensibility').value; value = document.getElementById('sensibility').value;}
       document.getElementById('sensibility').value = value;
       window.ondevicemotion = function(e) {
         ax1 = event.accelerationIncludingGravity.x * value;
         ay1 = event.accelerationIncludingGravity.y * value;
     }
-    if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility = value;
   //}
   }
     function changing(id) {
@@ -163,7 +163,7 @@
     }
     function courceSelectedEdit(value) {
       AblageListe[4] = true;
-      if (offline == false) document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
+      if (offline == false) document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
       else document.getElementById('preview').src = level[level.mode].mapsVorgefertigt[JSON.parse(value.toString().split('.')[0]) - 1];
       Layout();
       setTimeout(function() {
@@ -199,12 +199,6 @@
     // document.getElementById('angle').style.display = "none";
 
     var canvas = textur.getContext('2d'); //Dimension
-    var Bild = new Image();
-    if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap1.png"
-    canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
-    setTimeout(function() {
-      Layout();
-    }, 500);
     document.getElementById('textur').width = window.innerWidth - 20;
     document.getElementById('textur').height = window.innerHeight - 20;
     visible([
@@ -232,6 +226,12 @@
     var mausy = 0;
     var zählerListe = [window.innerHeight];
     var offline = false;
+    var Bild = new Image();
+    if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/normal/GeduldsspielMap1.png"
+    canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
+    setTimeout(function() {
+      Layout();
+    }, 500);
     var level = {
       normal: {
       rotating: {
@@ -473,12 +473,12 @@
         rotatingDreieck: false
       },
       number: 1,
-      editlevel: {
+      editLevel: {
         selectedLevel: 1
       },
       editHistory: [],
       stepOfHistory: -1,
-      worldWidelevel: {},
+      worldWideLevel: {},
       levelType: "vorgefertigt",
       vorgefertigt: {
         1: {
@@ -501,12 +501,12 @@
         rotatingDreieck: false
       },
       number: 1,
-      editlevel: {
+      editLevel: {
         selectedLevel: 1
       },
       editHistory: [],
       stepOfHistory: -1,
-      worldWidelevel: {},
+      worldWideLevel: {},
       levelType: "vorgefertigt",
       vorgefertigt: {
         1: {
@@ -602,13 +602,13 @@
     }
     dbGet("Gelduldspiel", "highscores").then(result => {
       folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
-      if (localStorage.getItem("uploadScore") == true) {
+      if (localStorage.getItem("uploadScore") == true && localStorage.getItem("profileName") == name) {
         for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
           level[level.mode].worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
         }
         localStorage.setItem("uploadScore", false);
       }
-      if (localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
+      if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
         highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
       }
     }).catch(function(e) {
@@ -616,7 +616,7 @@
       if (e == "TypeError: Failed to fetch") {
         alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
         offline = true;
-        if (localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
+        if (localStorage.getItem("profileName") == name && localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
         else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
         document.getElementById('saveMaps').style.display = "none";
         window.innerWidth += 832;
@@ -635,32 +635,36 @@
         highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
       }
     }
-      for (var i = 0;
-        (i < highscores[level.mode][name].length + 1 && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
+        if (highscores[level.mode][name] != undefined && highscores[level.mode][name].length > 0) {
+        for (var i = 0;
+          (i < highscores[level.mode][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
+          opt = document.createElement("option");
+          document.getElementById("courceSelection").options.add(opt);
+          opt.setAttribute("id", i);
+          opt.text = (i + 1) + ". map"
+          opt1 = document.createElement("option");
+          document.getElementById("courceSelectionEdit").options.add(opt1);
+          opt1.setAttribute("id", i);
+          opt1.text = (i + 1) + ". map"
+          AblageListe[0] = i;
+        }
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", i);
-        opt.text = (i + 1) + ". map"
-        opt1 = document.createElement("option");
-        document.getElementById("courceSelectionEdit").options.add(opt1);
-        opt1.setAttribute("id", i);
-        opt1.text = (i + 1) + ". map"
-        AblageListe[0] = i;
+        opt.setAttribute("id", i + 1);
+        opt.text = "show Scores";
+        opt = document.createElement("option");
+        document.getElementById("courceSelection").options.add(opt);
+        opt.setAttribute("id", i + 2);
+        opt.text = "upload own level";
+        opt = document.createElement("option");
+        document.getElementById("courceSelection").options.add(opt);
+        opt.setAttribute("id", i + 2);
+        opt.text = "play from world wide web";
       }
-      if (highscores[level.mode][name].length > 0) {
-      opt = document.createElement("option");
-      document.getElementById("courceSelection").options.add(opt);
-      opt.setAttribute("id", i + 1);
-      opt.text = "show Scores";
-      opt = document.createElement("option");
-      document.getElementById("courceSelection").options.add(opt);
-      opt.setAttribute("id", i + 2);
-      opt.text = "upload own level";
-      opt = document.createElement("option");
-      document.getElementById("courceSelection").options.add(opt);
-      opt.setAttribute("id", i + 2);
-      opt.text = "play from world wide web";
-    }
+      else {
+        visible([["modeSelection", "none"]]);
+        highscores.normal[name] = [];
+      }
       if (highscores[level.mode][name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
       document.getElementById('courceSelection').value = "select map!";
@@ -672,12 +676,12 @@
       });
       dbGet("Gelduldspiel", "levelBy " + name).then(result => {
         folgenDbGetLevelBy(result, false);
-        if (JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
+        if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
           for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
             level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
-            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel];
-            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].playedBy = [];
-            level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].highscores = [{}];
+            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel];
+            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
+            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
           }
           localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
           dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
@@ -689,7 +693,7 @@
         app._data.db.push("create new level");
       });
     }
-    else if (highscores[level.mode][name].length > 0) {
+    else if (localStorage.getItem("profileName") == name && highscores[level.mode][name].length > 0) {
       folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
       folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
     }
@@ -715,6 +719,7 @@
             console.log(this.innerText + " INDEX = " + liIndex);
             level[level.mode].levelType = "worldWideLevel";
             level[level.mode].number = this.innerText;
+            if (level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name] == undefined)  level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name] = {played: true, finished: false};
             document.getElementById('preview').src = level[level.mode][level[level.mode].levelType][level[level.mode].number].picture;
             Layout();
             visible([['preview', "none"], ['textur', "inline"]]);
@@ -722,6 +727,23 @@
             window.scroll(0, 0);
             startPause();
             activateBlinkWall();
+            sensibility(level[level.mode].worldWideLevel[level[level.mode].number].sensibility, false);
+            if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
+            RotatingWall = setInterval(function() {
+              level[level.mode].rotating.rotatingWall = true;
+              level[level.mode].rotatingNow = "rotatingWall";
+              Layout();
+              rotatingWall(true);
+            }, 70);
+          }
+            if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
+            RotatingDreieck = setInterval(function() {
+              level[level.mode].rotating.rotatingDreieck = true;
+              level[level.mode].rotatingNow = "rotatingDreieck";
+              Layout();
+              rotatingDreieck();
+            }, 70);
+          }
           };
         };
       }, 1);
@@ -779,6 +801,7 @@
               // ["courceSelectionEdit", "inline"]
               ['levelEditTool', "inline"]
             ]);
+            level[level.mode].editHistory = [];
             if (this.innerHTML.includes("create new level")) {
               createNewLevel();
               canvas.fillStyle = "white";
@@ -788,15 +811,18 @@
               canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
             } else {
               document.getElementById('preview').src = level[level.mode].editLevel[this.innerText].picture; /*level[level.mode].number = this.innerText; */
+              level[level.mode].number = 1;
               level[level.mode].editHistory.push(level[level.mode].editLevel[this.innerText]);
-              level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
+            //  level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
+              level[level.mode].stepOfHistory = 1;
+              level.normal.editHistory.unshift([]);
               level[level.mode].editLevel.selectedLevel = this.innerText;
               größeAnpassen();
               Layout();
-              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
-              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
-              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
-              level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
+              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
+              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
+              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
+              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
               setTimeout(function() {
                 Layout();
               }, 500);
@@ -845,7 +871,7 @@
       level[level.mode].rotating.rotatingDreieck = false;
       level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
-      if (document.getElementById('modeSelection').value == "survive") activateBullets();
+      /*if (document.getElementById('modeSelection').value == "survive") */
       if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores[level.mode]);document.getElementById('levelEditTool').style.display = "none";level[level.mode].levelType = "showScores";        clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);}
@@ -888,10 +914,10 @@
         //         level[level.mode].editLevel.selectedLevel = this.innerText;
         //         größeAnpassen();
         //         Layout();
-        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
-        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
-        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
-        //         level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
+        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
+        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
+        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
+        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
         //         setTimeout(function() {
         //           Layout();
         //         }, 500);
@@ -961,28 +987,19 @@
         if (Object.keys(level[level.mode].worldWideLevel).length > 0) app._data.db = Object.keys(level[level.mode].worldWideLevel);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingwall == undefined)) {
-        RotatingWall = setInterval(function() {
-          level[level.mode].rotating.rotatingWall = true;
-          level[level.mode].rotatingNow = "rotatingWall";
-          Layout();
-        }, 40);
-      }
-        if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
-        RotatingDreieck = setInterval(function() {
-          level[level.mode].rotating.rotatingDreieck = true;
-          level[level.mode].rotatingNow = "rotatingDreieck";
-          Layout();
-        }, 40);
-      }
         clearInterval(BlinkWall);
       } else {
+        activateBullets();
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
         clearInterval(BlinkWall);
         document.getElementById('levelEditTool').style.display = "none";
         level[level.mode].levelType = "vorgefertigt";
-        if (document.getElementById('courceSelection').value != "") {level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+      //  if (highscores[level.mode][name] != undefined && highscores[level.mode][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
+        if (document.getElementById('courceSelection').value != "") level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+        else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
+          alert("every vorgefertigt level finished! That was the last one :(  )");
+        }
         document.getElementById('textur').style.display = "inline";
         Layout();
         setTimeout(function() {
@@ -1004,14 +1021,22 @@
         }, 3000);
         Layout();
       }, 6000);
-        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall != undefined) RotatingWall = setInterval(rotatingWall, 70);
+      if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
+      RotatingWall = setInterval(function() {
         level[level.mode].rotating.rotatingWall = true;
+        level[level.mode].rotatingNow = "rotatingWall";
+        Layout();
+        rotatingWall(true);
+      }, 70);
+    }
+      if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
+      RotatingDreieck = setInterval(function() {
+        level[level.mode].rotating.rotatingDreieck = true;
         level[level.mode].rotatingNow = "rotatingDreieck";
-        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined) RotatingDreieck = setInterval(rotating, 70);
-      }
-      else {
-        alert("every vorgefertigt level finished! That was the last one :(  )");
-      }
+        Layout();
+        rotatingDreieck();
+      }, 70);
+    }
       }
       if (level[level.mode].levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -1019,6 +1044,11 @@
       if (level.type != "showScores" && level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
       x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
       y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
+    }
+    if (level[level.mode].levelType == "vorgefertigt") {
+      Bild = new Image();
+      if (offline == false)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
+      else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
     }
     }
 
@@ -1095,7 +1125,7 @@
             // y1 = 155;
             time = 0;
           }
-          if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
+          if (red == 255 && blue == 0 && alpha == 255 && green == 242 && level[level.mode].levelType != "editHistory") zielErreicht();
         }
       }, 25);
     }
@@ -1107,7 +1137,7 @@
         level[level.mode].levelType = "editLevel";
         level[level.mode].number = "Test";
         if (!(level[level.mode].editLevel["Test"].rotatingWall == undefined) && level[level.mode].editLevel["Test"].rotatingWall.length > 0) {
-        AblageListe[0] = JSON.parse(JSON.stringify(level[level.mode].editLevel["Test"].rotatingWall));
+        AblageListe[8] = JSON.parse(JSON.stringify(level[level.mode].editLevel["Test"].rotatingWall));
         RotatingWall = setInterval(function() {
           level[level.mode].rotating.rotatingWall = true;
           level[level.mode].rotatingNow = "rotatingWall";
@@ -1143,8 +1173,8 @@
         //clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        for (var i = 0; !(level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall == undefined) && i < AblageListe[0].length; i++) {
-          level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall[i].angle = AblageListe[0][i].angle;
+        for (var i = 0; !(level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall == undefined) && i < AblageListe[8].length; i++) {
+          level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall[i].angle = AblageListe[8][i].angle;
         }
         level[level.mode].levelType = "editHistory";
         Layout();
@@ -1194,7 +1224,7 @@
       // if (!(level[level.mode].levelType == "editHistory")) {
       //Layout();
       //  setTimeout(function () {
-      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
         if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "blinkWall") canvas.fillStyle = "blue";
         else canvas.fillStyle = "black";
         if (level[level.mode].levelType == "editHistory" || (level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
@@ -1209,12 +1239,12 @@
     }
 
     function zielErreicht() {
-      if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility) {
+      if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || (level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility == undefined && level[level.mode].levelType == "editLevel")) {
       if (level[level.mode].levelType == "worldWideLevel") {
-        if (!(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].playedBy.includes(name))) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].playedBy.push(name);
-        if (level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[level.mode][0][name] == undefined) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        else if (mins + ":" + secs + ":" + "0" + tenths < level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name][0]) level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        showScores(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0]);
+        level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name].finished = true;
+        if (level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] == undefined) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+        else if (mins + ":" + secs + ":" + "0" + tenths < level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name][0]) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+        showScores(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0]);
       }
       if (level[level.mode].levelType == "vorgefertigt") {
         if (highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
@@ -1236,9 +1266,9 @@
       if (level[level.mode].levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
       if (level[level.mode].levelType == "editLevel" && AblageListe[1] == "uploadLevel") {
         AblageListe[1] = "beendet";
-        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel.Test//[level[level.mode].editLevel.selectedLevel];
-        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].playedBy = [];
-        level[level.mode].worldWidelevel[level.mode][level[level.mode].editLevel.selectedLevel].highscores = [{}];
+        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel.Test//[level[level.mode].editLevel.selectedLevel];
+        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
+        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
         // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
         if (offline == false) {
         dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
@@ -1254,7 +1284,7 @@
           });
         }, 1000);
       }
-      else {
+      else if (localStorage.getItem("profileName") == name) {
         alert("level will be uploaded, when you have internet again and open this site");
         AblageListe[0] = JSON.parse(localStorage.getItem("oploadCources"));
         AblageListe[0].push();
@@ -1301,8 +1331,8 @@
             if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
               cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1 - 1];
-              if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[level.mode][name][i1 - 1]) cell[cell.length - 2].style.color = "red";
-              else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[level.mode][name][i1 - 1]) cell[cell.length - 2].style.color = "green";
+              if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "red";
+              else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "green";
               else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
               else cell[cell.length - 2].style.color = "black";
 
@@ -1329,7 +1359,7 @@
         cell.push(row.insertCell(i1 - 3));
         cell[cell.length - 1].innerHTML = "times";
       }
-      for (var i1 = 1; i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
+      for (var i1 = 1; level[level.mode].levelType != "worldWideLevel" && i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
@@ -1343,7 +1373,7 @@
           if (angular.equals(Object.keys(level[level.mode].worldWideLevel), Object.keys(result))) {
             AblageListe[0] = 0;
             for (var i = 0; i < Object.keys(level[level.mode].worldWideLevel).length; i++) {
-              if (angular.equals(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0][Object.keys(level[level.mode].worldWidelevel[level.mode][level[level.mode].number].highscores[0])[i]], result[level[level.mode].number].highscores[0][Object.keys(result[level[level.mode].number].highscores[0])[i]])) AblageListe[0]++;
+              if (angular.equals(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][Object.keys(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0])[i]], result[level[level.mode].number].highscores[0][Object.keys(result[level[level.mode].number].highscores[0])[i]])) AblageListe[0]++;
             }
             if (AblageListe[0] == Object.keys(result).length) {
             alert("(high)score uploaded!");
@@ -1376,8 +1406,8 @@
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating[level[level.mode].rotatingNow] == false*/) angle = (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle / 58);
-      if (level[level.mode].rotating[level[level.mode].rotatingNow] == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow].length - 1) level[level.mode].rotating[level[level.mode].rotatingNow] = false;
+      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating.rotatingDreieck == false*/) angle = (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle / 58);
+      if (level[level.mode].rotating.rotatingDreieck == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length - 1) level[level.mode].rotating.rotatingDreieck = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
@@ -1391,29 +1421,16 @@
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       AblageListe[0] = time
   //    if (/*offline == true && */level[level.mode].levelType != "editHistory" && (level[level.mode].rotatingNow == "rotatingDreieck" || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined) ) Layout();
-      if (level[level.mode].levelType == "vorgefertigt") Layout();
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow].length; i++) {
+    //  if (level[level.mode].levelType == "vorgefertigt") Layout();
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
         time = AblageListe[0];
-        time += level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle * 10000
-        if (level[level.mode].rotatingNow == "rotatingDreieck"/* || level[level.mode].levelType == "vorgefertigt"*/) {
-          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number]
-            [level[level.mode].rotatingNow][i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size*/ , time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
-            Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/ , "blue", "blue", i); //360 every 2 second
-          else drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].size*/ ,
-            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) * Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/ , "black", "black", i); //360 every 2 second
-        }
-        else if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
-          // -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
-          //  .rotatingWall[i].height
-          rectangle = createPath(point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2),-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height)), point(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2) + JSON.parse(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height)));
-          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") drawPath_V2(rectangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, 1, time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
-          Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/, "blue", "blue", i);
-          else drawPath_V2(rectangle, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].y, 1, time / (level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].timeFor360GradRotation) *
-          Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow][i].angle*/, "black", "black", i);
-        }
+        time += level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle * 10000
+          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number]
+            .rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ , time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) *
+            Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "blue", "blue", i); //360 every 2 second
+          else drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ ,
+            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
       }
-      if (level[level.mode].rotatingNow == "rotatingWall" && level[level.mode].levelType != "vorgefertigt" && level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined) level[level.mode].rotatingNow = "rotatingDreieck";
-      else if (level[level.mode].rotatingNow == "rotatingDreieck" && level[level.mode].levelType != "vorgefertigt" && level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall != undefined) level[level.mode].rotatingNow = "rotatingWall";
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
 
@@ -1439,9 +1456,8 @@
       return path;
     }
 
-    function rotating() { // früher dreieck
-      if (/*offline == true && */level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingDreieck";
-      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number][level[level.mode].rotatingNow] == undefined)) {
+    function rotatingDreieck() {
+      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined/* || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined*/)) {
         requestAnimationFrame(renderLoop); // start animation
       }
       //   if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[0].angle == undefined)) Layout();
@@ -1470,7 +1486,7 @@
     function rotatingWall(rotate) {
       //if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
       if (offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
-      if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
+  //    if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
       for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
           level[level.mode].number
         ].rotatingWall.length; i++) {
@@ -1524,27 +1540,28 @@
 
     function Layout() {
       if (level[level.mode].levelType == "vorgefertigt") {
-        Bild = new Image();
-        if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
-        else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
         canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5])
       } else canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
       //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
       //    größeAnpassen();
       //}
-      for (var i = 0; /*i < level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && */level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
         if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x != undefined) drawBullet(level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i]);
       }
-      if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
-      if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
+      if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
+      if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
+      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
+      // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
+      // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       if (level[level.mode].levelType == "editHistory") {
         level[level.mode].number = level[level.mode].stepOfHistory;
         canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
+        AblageListe[1] = ["rotatingWall", "rotatingDreieck", "blinkWall", "bullet"];
         for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory]).length; i++) {
           if (!(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "picture"))
-            for (var i1 = 0; i1 < level[level.mode]["editHistory"][level[level.mode].stepOfHistory][Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]].length; i1++) {
+            for (var i1 = 0; (AblageListe[1].includes(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]) && i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length); i1++) {
               if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingWall") rotatingWall(false);
-              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingDreieck") rotating(false);
+              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingDreieck") rotatingDreieck(false);
               if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "blinkWall") blinkWall();
             }
         }
@@ -1567,7 +1584,7 @@
               // window.innerWidth/(1600/300)
               AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x = window.innerWidth / (AblageListe[2].screenXOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x);
               AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y = AblageListe[5] / (AblageListe[2].screenYOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y);
-              // if ([Object.keys(AblageListe[2])[i]][i1] == "rotatingwall") {
+              // if ([Object.keys(AblageListe[2])[i]][i1] == "rotatingWall") {
               //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width + ((window.innerWidth - AblageListe[2].screenXOriginal)/2);
               //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height + ((AblageListe[5] - AblageListe[2][Object.keys(AblageListe[2])[i]][i1].screenYOriginal)/2);
               // }
@@ -1666,7 +1683,7 @@
     }
 
     function activateBullets() {
-      for (var i = 0; i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
         level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done = 0;
         bulletInterval[i] = true;
         bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPointInSec, level[level.mode].levelType, level[level.mode].number);
@@ -1711,8 +1728,10 @@
         AblageListe[0][2] = [];
         AblageListe[0][3] = [];
         AblageListe[0][4] = [];
+
+        AblageListe[0][5] = ["rotatingWall", "rotatingDreieck", "blinkWall", "bullet"];
         for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]).length; i++) {
-          for (var i1 = 0; i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length; i1++) {
+          for (var i1 = 0; (AblageListe[0][5].includes(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]) && i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length); i1++) {
             if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i] == "picture") i1 = level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length;
             else {
               AblageListe[0][0].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].x);
@@ -1756,6 +1775,7 @@
           } else {
             level[level.mode].editHistory.push({});
           }
+          if (level[level.mode].editHistory.length == 1) level.normal.editHistory.unshift([]);
           level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
           level[level.mode].number = level[level.mode].stepOfHistory;
           if (level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] == undefined) level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] = [];
@@ -1764,6 +1784,8 @@
             y: mausy /* - 17 - scrollY*/ ,
             angle: 0
           })
+    //      level[level.mode].editHistory[level[level.mode].editHistory.length - 1].spawnPoint = {x: 10, y: 255};
+          level[level.mode].editHistory/*[level[level.mode].editHistory.length - 1]*/.sensibility = 5;
           document.getElementById('angle').style.display = "inline";
           visibilityEditStuff();
           if (level[level.mode].editLevel.selected[0] == "rotatingWall") level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = 3000;
@@ -1841,7 +1863,7 @@
         alert("saving...")
         var checkLevelSaved = setInterval(function() {
           dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-            if (angular.equals(Object.keys(level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel]), Object.keys(result[level[level.mode].editLevel.selectedLevel]))) {
+            if (angular.equals(Object.keys(level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel]), Object.keys(result[level[level.mode].editLevel.selectedLevel]))) {
               alert("level saved!");
               clearInterval(checkLevelSaved);
               AblageListe[3] = false;
@@ -1860,23 +1882,29 @@
       folgenKeyPressed(event);
     }
     function folgenKeyPressed(event) {
+      setTimeout(function () {
+        Layout();
+      }, 100);
       console.log(event)
       if (level[level.mode].levelType == "editHistory" && event.key.toLowerCase() == "s" && event.ctrlKey == true) {
-        level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
+        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
         canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        if (AblageListe[4] == false) level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].picture = textur.toDataURL();
-        else level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].picture = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + document.getElementById('courceSelectionEdit').value.toString().split('.')[0] + ".png";
-        if (level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal == undefined) {
-          level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenXOriginal = window.innerWidth;
-          level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].screenYOriginal = AblageListe[5];
+        if (AblageListe[4] == false) level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].picture = textur.toDataURL();
+        else level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].picture = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + document.getElementById('courceSelectionEdit').value.toString().split('.')[0] + ".png";
+        if (level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal == undefined) {
+          level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = window.innerWidth;
+          level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = AblageListe[5];
         }
-        level[level.mode].editlevel[level.mode][level[level.mode].editLevel.selectedLevel].spawnPoint = level[level.mode].editHistory.spawnPoint;
+        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = level[level.mode].editHistory.spawnPoint;
+        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = level[level.mode].editHistory.sensibility;
         saveLevel();
       }
       if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == level[level.mode].editHistory.length - 1 && (offline != true && angular.equals(level[level.mode].editHistory[level[level.mode].editHistory.length - 1], level[level.mode].editHistory[level[level.mode].editHistory.length -
-          2])) || (offline == true && level[level.mode].editHistory[level[level.mode].editHistory.length - 1] == level[level.mode].editHistory[level[level.mode].editHistory.length -2])) level[level.mode].stepOfHistory--;
+          2])) || (offline == true && level[level.mode].editHistory[level[level.mode].editHistory.length - 1] == level[level.mode].editHistory[level[level.mode].editHistory.length -2])) {
+            level[level.mode].stepOfHistory--;
+          }
       if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory > 0) level[level.mode].stepOfHistory--;
-      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == 0 && !(Object.keys(level[level.mode].editHistory[0]).length == 0)) level[level.mode].editHistory.unshift([]);
+      // why should I?:   if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == 0 && !(Object.keys(level[level.mode].editHistory[0]).length == 0)) level[level.mode].editHistory.unshift([]);
       if (level[level.mode].levelType == "editHistory" && event.key == "y" && event.ctrlKey == true && level[level.mode].stepOfHistory < level[level.mode].editHistory.length - 1) level[level.mode].stepOfHistory++;
       if (level[level.mode].levelType == "editHistory" && (event.key == "z" || event.key == "y") && event.ctrlKey == true && level[level.mode].stepOfHistory > -1 && level[level.mode].stepOfHistory < level[level.mode].editHistory.length) {
         level[level.mode].number = level[level.mode].stepOfHistory;
@@ -1894,13 +1922,13 @@
                 document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "blue";
               };
               if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "width" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
-                  i]][i1])[i2] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level
-                .editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2])).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel
-                .selected[0]
-              ].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
+                  i]][i1])[i2] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "size")
+                  document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2])).value =
+                  level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
               else if (!(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "x" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
-                  i]][i1])[i2] == "y")) document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[
-                0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
+                  i]][i1])[i2] == "y"))
+                   document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]).value =
+                   level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
             }
           }
         }
@@ -1916,6 +1944,7 @@
     }
     function saveMapsVorgefertigt() {
       alert("WARNING: wait for all maps been shown on the screen. After that, it finished! you will also get a message then.");
+      localStorage.setItem("profileName", name);
       localStorage.setItem("highscores", JSON.stringify(highscores));
       localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
       document.getElementById('textur').style.display = "inline";
@@ -1927,7 +1956,7 @@
           if (!((AblageListe[1][0]/2 + "").includes("."))) AblageListe[1][1]++;
           console.log("i: " + AblageListe[1][1]);
           Bild = new Image();
-          if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + (AblageListe[1][1]) + ".png"
+          if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + (AblageListe[1][1]) + ".png"
           else Bild.src = level[level.mode].mapsVorgefertigt[AblageListe[1][1]];
           canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
           if ((AblageListe[1][0]/2 + "").includes(".")) AblageListe[7].push(textur.toDataURL());
@@ -1948,7 +1977,7 @@
     }
       // for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
       //   Bild = new Image();
-      //   if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/GeduldsspielMap" + (i + 1) + ".png"
+      //   if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + (i + 1) + ".png"
       //   else Bild.src = level[level.mode].mapsVorgefertigt[i];
       //   canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
       //   AblageListe[7].push(textur.toDataURL());
