@@ -1,7 +1,11 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <meta charset="utf-8">
-<script src="http://adi.nicolaiweitkemper.de/Database/js.js"></script>
-<button id="BAndereBenutzerAnzeigen" type="button" onclick="namenabfrage()" name="button">highscores von anderen Spielern ansehen</button>
+<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<button id="BAndereBenutzerAnzeigen" type="button" onclick="namenabfrage(prompt('Wie heißt die Person, nach der sie suchen?'));" name="button">highscores von anderen Spielern ansehen</button>
+<select name="course" id="modeSelection" value="move" onchange="modeSelected(value);">
+  <option value="normal">normal</option>
+  <option value="items">items</option>
+</select>
 <button id="BNeueRunde" type="button" onclick="neueRunde()" name="button">Neue Runde</button>
 <canvas id="textur" width="2570" height="888" style="touch-action: none"></canvas>
 <script>
@@ -37,18 +41,26 @@
   zustände[2] = "inRunde";
   var Endanimation;
   var scores = [0, 0];
-  var zweitBesteScores = [0, 0];
-  var highscores = [0, 0];
+  var zweitBesteScores = {normal: [0, 0], items: [0, 0]};
+  var highscores = {normal: [0, 0], items: [0, 0,]};
   var name = prompt("Wie heißen sie? Diese Information ist nötig, um deine Highscores speichern zu können.");
   var namen = [];
+  var mode = "normal";
+  var items = {flash: {xp: {needs: 100, got: 0}}, exchanger: {xp: {needs: 77, got: 0}}, changer: {xp: {needs: 88, got: 0}}}
+  var selectedItem = "flash";
+
+  var alert = true;
+
+  var diff;
+
   dbGet("von2Zu4", "highscores" + name, function(result) {
     if (result == "NOPE" == false) {
-      highscores = result.toString().split(',');
+      highscores = JSON.parse(result);
     }
   });
   dbGet("von2Zu4", "zweitBesteScores" + name, function(result) {
     if (result == "NOPE" == false) {
-      zweitBesteScores = result.toString().split(',');
+      zweitBesteScores = JSON.parse(result);
     }
   });
   dbGet("von2Zu4", "namen" + name, function(result) {
@@ -57,7 +69,7 @@
     }
   });
 
-  dbGet("von2Zu4", "spielfeld" + name, function(result) {
+  dbGet("von2Zu4", mode + " spielfeld " + name, function(result) {
     if (result == "NOPE" == false) {
       spielfeld = result.toString().split(';');
       zählerListe[0] = 0;
@@ -86,10 +98,36 @@
     $('head').append('<link rel="stylesheet" href="http://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
   }
 
-  function namenabfrage() {
-    namen[namen.length] = prompt("Wie heißt die Person, nach der sie suchen?");
+  function modeSelected(value) {
+    mode = value;
+    dbGet("von2Zu4", mode + " spielfeld " + name, function(result) {
+      if (result == "NOPE") {
+        neueRunde();
+      }
+      else {
+        if (mode == "items") itemsAnzeigen(0);
+        spielfeld = result.toString().split(';');
+        zählerListe[0] = 0;
+        spielfeld.pop();
+        while (zählerListe[0] < 4) {
+          spielfeld[zählerListe[0]] = spielfeld[zählerListe[0]].toString().split(',');
+          zählerListe[0]++;
+        }
+        spielfeldKreieren();
+      }
+    });
+    dbGet("von2Zu4", "items " + name, function(result) {
+      if (result == "NOPE" == false) {
+        items = JSON.parse(result);
+      }
+    });
+  }
+
+  function namenabfrage(name, included) {
+    if (namen.includes(name)) included = true;
+    namen[namen.length] = name;
     dbGet("von2Zu4", "highscores" + namen[namen.length - 1], function(result) {
-      if (result.toString().split(',')[0] == "NOPE" || result.toString().split(',')[0] == "" || result.toString().split(',')[0] == "null") {
+      if (included == true || JSON.parse(result)[mode][0] == "NOPE" || JSON.parse(result)[mode][0] == "" || JSON.parse(result)[mode][0] == "null") {
         namen.pop();
         audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/windows%207%20trash.wav").play();
       }
@@ -124,9 +162,9 @@
     dbGet("von2Zu4", "highscores" + nameAndererSpieler, function(result) {
 
       canvas.font = "65px Georgia";
-      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+      if (JSON.parse(highscores[mode][0]) < JSON.parse(JSON.parse(result)[mode][0]) && JSON.parse(highscores[mode][1]) < JSON.parse(JSON.parse(result)[mode][1])) {
         canvas.fillStyle = "red";
-      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0]) && JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+      } else if (JSON.parse(highscores[mode][0]) > JSON.parse(JSON.parse(result)[mode][0]) && JSON.parse(highscores[mode][1]) > JSON.parse(JSON.parse(result)[mode][1])) {
         canvas.fillStyle = "green";
       } else {
         canvas.fillStyle = "black";
@@ -146,26 +184,26 @@
       canvas.fillText("Punkte insgesamt: ", 30, (130 + 40) * 2 - 50 + AblageListe[3] - 120);
       canvas.fillText("Höchste Punkte von 1 Stein: ", 30, (170 + 57) * 2 - 55 + AblageListe[3] - 120);
       canvas.font = "30px Georgia";
-      if (JSON.parse(highscores[0]) < JSON.parse(result.toString().split(',')[0])) {
+      if (JSON.parse(highscores[mode][0]) < JSON.parse(JSON.parse(result)[mode][0])) {
         canvas.fillStyle = "red";
-      } else if (JSON.parse(highscores[0]) > JSON.parse(result.toString().split(',')[0])) {
+      } else if (JSON.parse(highscores[mode][0]) > JSON.parse(JSON.parse(result)[mode][0])) {
         canvas.fillStyle = "green";
       } else {
         canvas.fillStyle = "black";
       }
-      canvas.fillText("highscore: " + JSON.parse(result.toString().split(',')[0]), 30, (145 + 40) * 2 - 48 + AblageListe[3] - 120);
-      if (JSON.parse(highscores[1]) < JSON.parse(result.toString().split(',')[1])) {
+      canvas.fillText("highscore: " + JSON.parse(JSON.parse(result)[mode][0]), 30, (145 + 40) * 2 - 48 + AblageListe[3] - 120);
+      if (JSON.parse(highscores[mode][1]) < JSON.parse(JSON.parse(result)[mode][1])) {
         canvas.fillStyle = "red";
-      } else if (JSON.parse(highscores[1]) > JSON.parse(result.toString().split(',')[1])) {
+      } else if (JSON.parse(highscores[mode][1]) > JSON.parse(JSON.parse(result)[mode][1])) {
         canvas.fillStyle = "green";
       } else {
         canvas.fillStyle = "black";
       }
-      canvas.fillText("highscore: " + result.toString().split(',')[1], 30, (185 + 47) * 2 - 37 + AblageListe[3] - 120);
+      canvas.fillText("highscore: " + JSON.parse(result)[mode][1], 30, (185 + 47) * 2 - 37 + AblageListe[3] - 120);
       dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler, function(result) {
         canvas.fillStyle = "black";
-        canvas.fillText("zweit bester Score: " + result.toString().split(',')[0], 30, (160 + 40) * 2 - 47 + AblageListe[3] - 120);
-        canvas.fillText("zweit bester Score: " + result.toString().split(',')[1], 30, (195 + 50) * 2 - 35 + AblageListe[3] - 120);
+        canvas.fillText("zweit bester Score: " + JSON.parse(result)[mode][0], 30, (160 + 40) * 2 - 47 + AblageListe[3] - 120);
+        canvas.fillText("zweit bester Score: " + JSON.parse(result)[mode][1], 30, (195 + 50) * 2 - 35 + AblageListe[3] - 120);
         if (zustände[0] == "whileFunctionHighscoresAbfragen" && zählerListe[0] < namen.length) {
           whileFunctionHighscoresAbfragen();
         } else {
@@ -184,11 +222,15 @@
     document.getElementById('textur').style = "touch-action: none";
     zahlenKreieren();
     spielfeldKreieren();
+    for (var i = 0; i < Object.keys(items).length; i++) {
+      items[Object.keys(items)[i]].xp.got = 0;
+    }
+    if (mode == "items") itemsAnzeigen(0);
   }
 
   function spielfeldKreieren() {
-    canvas.fillStyle = "white"
-    canvas.fillRect(0, 0, 1800, 700)
+    canvas.fillStyle = "white";
+    canvas.fillRect(0, 0, textur.width, textur.height);
     zählerListe[0] = 0;
     zählerListe[1] = 0;
     KoordinatenX = 145;
@@ -211,8 +253,7 @@
       canvas.arc(KoordinatenX, KoordinatenY, 60, 0, Math.PI * 2, false);
       canvas.fill();
       canvas.fillStyle = "black";
-      //    canvas.
-      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false) {
+      if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1] == false && (felderAuswahl.length == 2 && zustände[3] == "exchanger" && (!(zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[0] || zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[1])) || zustände[3] != "exchanger" || (felderAuswahl.length != 2 && zustände[3] == "exchanger"))) {
         spielfeld[zählerListe[0]][zählerListe[1]] += "";
         canvas.font = 105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length + "px Georgia";
         KoordinatenX += 10;
@@ -220,7 +261,7 @@
         canvas.fillText(spielfeld[zählerListe[0]][zählerListe[1]], KoordinatenX - 23, KoordinatenY + 23);
         KoordinatenX -= 10;
         KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
-      } else {
+      } else if (zustände[3] != "exchanger"/* && zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1]*/) {
         AblageListe[1] = "";
         AblageListe[1] += zustände[1] * felderAuswahl.length;
         canvas.font = 105 - 15 * AblageListe[1].length + "px Georgia";
@@ -229,6 +270,16 @@
         canvas.fillText(zustände[1] * felderAuswahl.length, KoordinatenX - 23, KoordinatenY + 23);
         KoordinatenX -= 10;
         KoordinatenX += 10 * AblageListe[1].length;
+      }
+      else {
+        spielfeld[zählerListe[0]][zählerListe[1]] += "";
+        canvas.font = 105 - 15 * spielfeld[zählerListe[0]][zählerListe[1]].length + "px Georgia";
+        KoordinatenX += 10;
+        KoordinatenX -= 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
+        if (zählerListe[0] + " - " + zählerListe[1] == felderAuswahl[felderAuswahl.length - 1]) canvas.fillText(spielfeld[felderAuswahl[0].toString().split(' - ')[0]][felderAuswahl[0].toString().split(' - ')[1]], KoordinatenX - 23, KoordinatenY + 23);
+        else canvas.fillText(spielfeld[felderAuswahl[1].toString().split(' - ')[0]][felderAuswahl[1].toString().split(' - ')[1]], KoordinatenX - 23, KoordinatenY + 23);
+        KoordinatenX -= 10;
+        KoordinatenX += 10 * spielfeld[zählerListe[0]][zählerListe[1]].length;
       }
       KoordinatenX += 170;
       if (KoordinatenX > 1500) {
@@ -255,6 +306,7 @@
       removeEmpty();
       spielfeldKreieren();
     }
+    if (mode == "items") itemsAnzeigen(0);
   }
 
   function zahlenKreieren() {
@@ -270,6 +322,50 @@
       }
       zählerListe[1] = 0;
       zählerListe[0]++;
+    }
+  }
+
+  function itemsAnzeigen(time) {
+    for (var i = 0; i < Object.keys(items).length; i++) {
+      var Bild = new Image();
+          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/von%202%20zu%204/item" + (i + 1) + ".jpeg";
+          canvas.drawImage(Bild, 145 + 170*i - 55, 790/* + 170*/ - 55, 120/* - 20*/ - 35 + 30, 120 - 17 - 3 + 20 - 35 +25);
+          diff = ((100 / 100) * Math.PI*2*10).toFixed(2);
+          canvas.lineWidth = 10;
+          if (Object.keys(items)[i] == selectedItem || zustände[3] == Object.keys(items)[i])  canvas.strokeStyle = "red"; // colour for progress bar
+          else canvas.strokeStyle = "yellow";
+          canvas.beginPath();
+          canvas.arc(145 + 170*i, 790/* + 170*/, 60, 4.72, diff/10+4.72, false);
+          canvas.stroke();
+          canvas.strokeStyle = "white";
+          canvas.beginPath();
+          canvas.arc(145 + 170*i, 790/* + 170*/, 76, 4.72, diff/10+4.72, false);
+          canvas.stroke();
+          canvas.beginPath();
+          canvas.arc(145 + 170*i, 790/* + 170*/, 70, 4.72, diff/10+4.72, false);
+          canvas.stroke();
+      diff = ((/*al*/(items[Object.keys(items)[i]].xp.got/items[Object.keys(items)[i]].xp.needs*100) / 100) * Math.PI*2*10).toFixed(2);
+      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) {canvas.strokeStyle = "blue"; alert = true;} // colour for progress bar
+      else {
+        canvas.strokeStyle = "#40FF00";
+        if (Object.keys(items)[i] == selectedItem) changeSelection();
+    }
+    if (zustände[3] != Object.keys(items)[i]) {
+      canvas.beginPath();
+      canvas.arc(145 + 170*i, 790/* + 170*/, 60, 4.72, diff/10+4.72, false);
+      canvas.stroke();
+    }
+      // if (items[Object.keys(items)[i]].xp.got >= items[Object.keys(items)[i]].xp.needs) {
+      //   canvas.strokeStyle = "#40FF00"; // colour for progress bar
+      //   canvas.beginPath();
+      //   canvas.arc(145 + 170*i, 790/* + 170*/, 60, 4.72, diff/10+4.72, false);
+      //   canvas.stroke();
+      // }
+    }
+    if (time < 5) {
+      setTimeout(function () {
+        itemsAnzeigen(time + 1);
+      }, 500);
     }
   }
 
@@ -299,12 +395,12 @@
   function mousemoveFolgen() {
     if (zustände[0] == "Auswahl" && zustände[2] == "inRunde") {
       klickpointCheck();
-      if (zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1]) {
-        if (AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) + 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString()
+      if ((zählerListe[0] == 5 && felderAuswahl.includes(AblageListe[0]) == false && (spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] == zustände[1] && zustände[3] != "exchanger") || (zustände[3] == "exchanger" && felderAuswahl.length < 2))) {
+        if ((AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) + 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString()
             .split(' - ')[1]) || AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]) - 1 && AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length -
             1].toString().split(' - ')[1]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) + 1 && AblageListe[0].toString().split(' - ')[0] == JSON.parse(felderAuswahl[
             felderAuswahl.length - 1].toString().split(' - ')[0]) || AblageListe[0].toString().split(' - ')[1] == JSON.parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[1]) - 1 && AblageListe[0].toString().split(' - ')[0] == JSON
-          .parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0])) {
+          .parse(felderAuswahl[felderAuswahl.length - 1].toString().split(' - ')[0]))) {
 
           felderAuswahl[felderAuswahl.length] = AblageListe[0];
           console.log(felderAuswahl);
@@ -367,19 +463,66 @@
   function mousedownFolgen() {
     if (zustände[2] == "beendet" == false) {
       klickpointCheck();
+      AblageListe[5] = "none";
+      for (var i = 0; i < 8; i++) {
+        if (mausx > 80 + 170 * i && mausx < 80 + 170 * i + 138 && mausy > 50 + 170 * 4 && mausy < 50 + 170 * 4 + 138) AblageListe[5] = i;
+      }
+       if (AblageListe[5] != "none" && !(items[Object.keys(items)[AblageListe[5]]].xp.got >= items[Object.keys(items)[AblageListe[5]]].xp.needs)) {
+        selectedItem = Object.keys(items)[AblageListe[5]];
+        itemsAnzeigen(0);
+      }
+      else if (AblageListe[5] != "none") {
+        zustände[3] = Object.keys(items)[AblageListe[5]];
+        itemsAnzeigen();
+      }
       if (zählerListe[0] == 5) {
         if (zustände[0] == "Auswahl" == false) {
           zustände[0] = "Auswahl";
           felderAuswahl = [];
           felderAuswahl[0] = AblageListe[0];
           spielfeldKreieren();
-        } else {
+        } else if (zustände[3] == "flash") {
+        var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/thunder-and-lightning-storm-sound-effects-with-flashes-youtubemp3free.org.mp3")
+            audio.play();
+             setTimeout(function () {
+                audio.pause();
+              }, 9000);
+          zustände[3] = "beendet";
+            items.flash.xp.got = 0
+            spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] = "empty";
+            spielfeldKreieren();
+        }
+        else if (zustände[3] == "changer") {
+          doChanger(prompt("Mit welcher Zahl wollen sie das Feld ersetzen? (bitte wählen sie zwischen 2,4 und 6)"));
+        }
+        else if (zustände[3] == "exchanger") {
+          if (felderAuswahl.length == 2) {
+            AblageListe[1] = spielfeld[felderAuswahl[0].toString().split(' - ')[0]][felderAuswahl[0].toString().split(' - ')[1]];
+            // felderAuswahl[0] = felderAuswahl[1];
+            // felderAuswahl[1] = AblageListe[1];
+            spielfeld[felderAuswahl[0].toString().split(' - ')[0]][felderAuswahl[0].toString().split(' - ')[1]] = spielfeld[felderAuswahl[1].toString().split(' - ')[0]][felderAuswahl[1].toString().split(' - ')[1]];
+            spielfeld[felderAuswahl[1].toString().split(' - ')[0]][felderAuswahl[1].toString().split(' - ')[1]] = AblageListe[1];
+            felderAuswahl = [];
+            zustände[3] = "beendet";
+            items.exchanger.xp.got = 0;
+            spielfeldKreieren();
+            audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/appearance-sound-effects-all-sounds-youtubemp3free.org.mp3");
+            audio.currentTime = 17;
+            audio.play();
+             setTimeout(function () {
+              audio.pause();
+            }, 1555);
+          }
+        }
+        else {
           zählerListe[0] = 0;
           while (zählerListe[0] < felderAuswahl.length - 1) {
             spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] = "empty";
             zählerListe[0]++;
           }
-          spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] = zustände[1] * felderAuswahl.length
+          if (mode == "items" &&  spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] != zustände[1] * felderAuswahl.length) items[selectedItem].xp.got += zustände[1] * felderAuswahl.length;
+          itemsAnzeigen(0);
+          spielfeld[felderAuswahl[zählerListe[0]].toString().split(' - ')[0]][felderAuswahl[zählerListe[0]].toString().split(' - ')[1]] = zustände[1] * felderAuswahl.length;
           if (felderAuswahl.length > 1) {
           var audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/''PLOP''%20-%20Sound%20Effect%20(FREE).mp3")
               audio.play();
@@ -389,7 +532,7 @@
               }
               spielfeldKreieren();
         }
-      }
+        }
     } else {
       zählerListe[0] = 0;
       AblageListe[3] = 0;
@@ -412,6 +555,43 @@
     }
   }
 
+  function doChanger(number) {
+    if (number == 2 || number == 4 || number == 6)  {
+      items.changer.xp.got = 0;
+      spielfeld[AblageListe[0].toString().split(' - ')[0]][AblageListe[0].toString().split(' - ')[1]] = number;
+      felderAuswahl[felderAuswahl.length - 1] = number;
+      spielfeldKreieren();
+      zustände[3] = "beendet";
+      var audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/''PLOP''%20-%20Sound%20Effect%20(FREE).mp3")
+          audio.play();
+           setTimeout(function () {
+              audio.pause();
+            }, 900);
+    }
+    else {
+      alert("bitte eine Zahl innerhalb der angegebenen Parameter angeben!");
+      setTimeout(function () {
+        doChanger(prompt("Mit welcher Zahl wollen sie das Feld ersetzen? (bitte wählen sie zwischen 2,4 und 6)"));
+      }, 2000);
+    }
+  }
+
+  function changeSelection() {
+    AblageListe[1] = selectedItem;
+    for (var i = 0; i < Object.keys(items).length; i++) {
+      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) selectedItem = Object.keys(items)[i];
+    }
+    setTimeout(function () {
+      if (AblageListe[1] == selectedItem && alert == true) {
+        new Audio("http://adi.nicolaiweitkemper.de/Sounds/beendet%20sound.wav").play();
+        alert = false;
+      }
+      else if (alert == true) {
+        new Audio("https://adi.nicolaiweitkemper.de/Sounds/ding-sound-effect-youtubemp3free.org.mp3").play();
+      }
+    }, 1333);
+  }
+
   function klickpointCheck() {
     zählerListe[0] = 0;
     zählerListe[1] = 0;
@@ -421,7 +601,6 @@
           //console.log(zählerListe[0] + " - " + zählerListe[1]);
           AblageListe[0] = zählerListe[0] + " - " + zählerListe[1]
           if (zustände[0] == "Auswahl" == false) {
-
             zustände[1] = spielfeld[zählerListe[0]][zählerListe[1]];
           }
           zählerListe[0] = 4;
@@ -498,7 +677,8 @@
       zählerListe[1] = 0;
     }
     if (zählerListe[0] < 5) {
-      dbSet("von2Zu4", "spielfeld" + name, "NOPE");
+      dbSet("von2Zu4", mode + " spielfeld " + name, "NOPE");
+      dbSet("von2Zu4", "items " + name, "NOPE");
       zustände[2] = "beendet"
       zählerListe[0] = 0;
       zählerListe[1] = 0;
@@ -511,7 +691,8 @@
       console.log("beendet");
     } else {
       zuVarSpielfeld();
-      dbSet("von2Zu4", "spielfeld" + name, AblageListe[4]);
+      dbSet("von2Zu4",mode + " spielfeld " + name, AblageListe[4]);
+      dbSet("von2Zu4", "items " + name, JSON.stringify(items));
     }
   }
 
@@ -543,12 +724,12 @@
       scores[0] += JSON.parse(AblageListe[2].toString().split(',')[zählerListe[0]])
       zählerListe[0]++;
     }
-    if (JSON.parse(scores[0]) > JSON.parse(highscores[0])) {
-      zweitBesteScores[0] = highscores[0];
-      highscores[0] = scores[0];
+    if (JSON.parse(scores[0]) > JSON.parse(highscores[mode][0])) {
+      zweitBesteScores[mode][0] = highscores[mode][0];
+      highscores[mode][0] = scores[0];
       if (name == null == false && name == "" == false) {
-        dbSet("von2Zu4", "highscores" + name, highscores);
-        dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+        dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
+        dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
           Bild = new Image();
           Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
           canvas.drawImage(Bild, 277, 20, 437, 437);
@@ -577,12 +758,12 @@
     zählerListe[0] = 0;
     remove0();
 
-    if (JSON.parse(AblageListe[2][AblageListe[2].length - 1]) > JSON.parse(highscores[1])) {
-      zweitBesteScores[1] = highscores[1];
-      highscores[1] = AblageListe[2][AblageListe[2].length - 1];
+    if (JSON.parse(AblageListe[2][AblageListe[2].length - 1]) > JSON.parse(highscores[mode][1])) {
+      zweitBesteScores[mode][1] = highscores[mode][1];
+      highscores[mode][1] = AblageListe[2][AblageListe[2].length - 1];
       if (name == null == false && name == "" == false) {
-        dbSet("von2Zu4", "highscores" + name, highscores);
-        dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+        dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
+        dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
           Bild = new Image();
           Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
           canvas.drawImage(Bild, 277, 180, 430, 430);
@@ -593,13 +774,13 @@
       }
     }
     scores[1] = AblageListe[2][AblageListe[2].length - 1]
-    if (JSON.parse(scores[0]) > JSON.parse(zweitBesteScores[0]) && JSON.parse(scores[0]) < JSON.parse(highscores[0])) {
-      zweitBesteScores[0] = scores[0];
-      dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+    if (JSON.parse(scores[0]) > JSON.parse(zweitBesteScores[mode][0]) && JSON.parse(scores[0]) < JSON.parse(highscores[mode][0])) {
+      zweitBesteScores[mode][0] = scores[0];
+      dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
     }
-    if (JSON.parse(scores[1]) > JSON.parse(zweitBesteScores[1]) && JSON.parse(scores[1]) < JSON.parse(highscores[1])) {
-      zweitBesteScores[1] = scores[1];
-      dbSet("von2Zu4", "zweitBesteScores" + name, zweitBesteScores);
+    if (JSON.parse(scores[1]) > JSON.parse(zweitBesteScores[mode][1]) && JSON.parse(scores[1]) < JSON.parse(highscores[mode][1])) {
+      zweitBesteScores[mode][1] = scores[1];
+      dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
     }
     KoordinatenY = 700;
     AblageListe[3] = 0;
@@ -681,12 +862,12 @@
     canvas.fillText("Punkte insgesamt: ", 30, 0 + 70);
     canvas.fillText("Höchste Punkte von 1 Stein: ", 30, 150 + 80);
     canvas.font = "30px Georgia";
-    canvas.fillText("highscore: " + highscores[0], 30, 115);
-    canvas.fillText("zweit bester Score: " + zweitBesteScores[0], 30, 145);
+    canvas.fillText("highscore: " + highscores[mode][0], 30, 115);
+    canvas.fillText("zweit bester Score: " + zweitBesteScores[mode][0], 30, 145);
     canvas.fillText("score: " + scores[0], 30, 175);
 
-    canvas.fillText("highscore: " + highscores[1], 30, 270);
-    canvas.fillText("zweit bester Score: " + zweitBesteScores[1], 30, 300);
+    canvas.fillText("highscore: " + highscores[mode][1], 30, 270);
+    canvas.fillText("zweit bester Score: " + zweitBesteScores[mode][1], 30, 300);
     canvas.fillText("score: " + scores[1], 30, 330);
   }
 
