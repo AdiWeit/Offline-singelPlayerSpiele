@@ -1,0 +1,306 @@
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<div class="column" id="newRecord">
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/New%20best.png" id="newHighscore" onclick="imageClicked()">
+</div>
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  /* .column {
+    float: left;
+    width: 33.33%;
+    padding: 5px;
+  } */
+
+  /* Clearfix (clear floats) */
+  .row::after {
+    content: "";
+    clear: both;
+    display: table;
+  }
+  img {
+    position: absolute;
+    left: 444px;
+    top: 35px;
+  }
+/*  #ownScore {
+    position: absolute;
+    left: 210px;
+    top: 130px;
+  }*/
+</style>
+
+<span id="ownHighscore" style="font-size:77"></span>
+<br>
+<span id="ownScore" style="font-size:77"></span>
+<br>
+<div id="highscores">
+  <h1 id="highscoresBetterThanYours"></h1>
+  <h1 id="highscoresWorseThanYours"></h1>
+  <h1 id="highscoresAsGoodAsYours"></h1>
+</div>
+<canvas id="textur" width="1582" onclick="canvasClicked(true);" height="740"></canvas>
+
+<script>
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+  }
+  document.getElementById('highscores').style.display = "none";
+  document.getElementById('newHighscore').style.display = "none";
+  var canvas = textur.getContext('2d'); //Dimension
+  var AblageListe = [];
+  var field = [];
+  var handCards = [];
+  var randomItems = {blue: [{name: "fish", onCard: false, goal: false}], brown: [{name: "mole", onCard: false, goal:false}], green: [{name: "cow", onCard: false, goal: false}], yellow: [{name: "rabbit", onCard: false, goal: false}]};
+  var showing = "myCards";//"legeField"
+  var selectedCard;
+  var turnsLeft = 7;
+  var highscores = {};
+  var name = prompt("What's your name? You can type in your nick name as well. (Information used for account-based highscores)");
+  for (var i = 0; i < 3; i++) {
+    handCards.push(createNewRandomCard());
+  }
+  for (var i = 0; i < 5; i++) {
+    for (var i1 = 0; i1 < 22; i1++) {
+      if (field[i1] == undefined) field[i1] = [];
+      field[i1][i] = {colour: "none", item: false};
+    }
+  }
+  //Layout(field, 0, 0, true);
+  showOwnCards();
+  setTimeout(function () {
+    showOwnCards();
+  }, 500);
+
+  dbGet("vaderanGradens", "highscores").then(result => {
+    highscores = JSON.parse(result);
+  }).catch(function(e) {
+    console.log(e);
+  });
+
+  function Layout(fieldAktuell, beginningPointX, beginningPointY, showingField, text) {
+  canvas.clearRect(beginningPointX, beginningPointY, fieldAktuell.length*70 + 10, fieldAktuell[0].length + 10);
+  if (showingField) canvas.clearRect(beginningPointX, beginningPointY, textur.width, textur.height);
+  canvas.fillStyle = "#B45F04";
+  canvas.fillRect(beginningPointX, beginningPointY, 10 + fieldAktuell.length*70, 10 + fieldAktuell[0].length*70);
+  for (var i = 0; i < fieldAktuell[0].length; i++) {
+    for (var i1 = 0; i1 < fieldAktuell.length; i1++) {
+      if (text != undefined || fieldAktuell[i1][i].colour == "none") canvas.fillStyle = "#FF8000";
+      else canvas.fillStyle = fieldAktuell[i1][i].colour;
+      canvas.fillRect(beginningPointX + 10 + 70*i1, beginningPointY + 10 + 70*i, 60, 60);
+      if (fieldAktuell[i1][i].item != undefined && fieldAktuell[i1][i].item != false) {
+        var Bild = new Image();
+            Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/vaderanGradens/" + fieldAktuell[i1][i].item + ".png"
+            canvas.drawImage(Bild, beginningPointX + 10 + 10 + 70*i1 - 20, beginningPointY + 10 + 70*i, 70, 70);
+      }
+      if (text != undefined) {
+        canvas.font = "52px Georgia";
+        canvas.fillStyle = "white";
+        canvas.fillText(text[i1], beginningPointX + 10 + 10 + 70*i1, beginningPointY + 50);
+      }
+    }
+  }
+  if (text == undefined && showing == "field") Layout(["m", "y", " ", "c", "a", "r", "d", "s"], 70*8, 70*5, undefined, "my cards");
+  else if (text == undefined) Layout(["f", "i", "e", "l", "d"], 70*1, 70*3, undefined, "field");
+}
+function showOwnCards() {
+  textur.width = (4*70)*handCards.length;
+  canvas.clearRect(0, 0, textur.width, textur.height);
+  for (var i = 0; i < handCards.length; i++) {
+    Layout(handCards[i], (4*70)*i, 0);
+  }
+}
+function createNewRandomCard() {
+  AblageListe[0] = [];
+  for (var i = 0; i < 3; i++) {
+    AblageListe[0][i] = [];
+    for (var i1 = 0; i1 < 3; i1++) {
+      AblageListe[0][i][i1] = createNewRandomField();
+    }
+  }
+  return AblageListe[0];
+}
+function createNewRandomField() {
+  var randomColours = ["brown", "yellow", "blue", "green"];
+  var item = false;
+  var selectedColour = randomColours[Math.round(Math.random()*(randomColours.length - 1))];
+  if (Math.round(Math.random()*7) == 3) {
+    for (var i = 0; i < randomItems[selectedColour].length; i++) {
+      if (randomItems[selectedColour][i].onCard == false || randomItems[selectedColour][i].goal == false) {
+        item = randomItems[selectedColour][i].name;
+        if (randomItems[selectedColour][i].goal == false && randomItems[selectedColour][i].onCard) {item += "Goal"; randomItems[selectedColour][i].goal = true;}
+        randomItems[selectedColour][i].onCard = true;
+      }
+    }
+  }
+    return {colour: selectedColour, item: item};
+}
+function fieldClicked () {
+AblageListe[0] = "none";
+for (var i = 0; i < /*fieldParameters[1]*/50; i++) {
+  for (var i1 = 0; i1 < /*fieldParameters[0]*/50; i1++) {
+    if (mausx > 9 + 10 + 70*i && mausx < 9 + 10 + 70*i + 70 && mausy > 28 + 10 + 70*i1 && mausy < 28 + 10 + 70*i1 + 70) {console.log(i + " - " + i1); AblageListe[0] = [i, i1];}
+  }
+}
+}
+function canvasClicked(byUser) {
+  if (showing != "myCards" && selectedCard != undefined && byUser) {
+    AblageListe[1] = [];
+    for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
+      for (var i1 = AblageListe[0][1] - 1; i1 < AblageListe[0][1] + 2; i1++) {
+        if (field[i][i1].colour != "none") AblageListe[1].push("something");
+      }
+    }
+    if (((turnsLeft == 7) || AblageListe[1].includes("something")) && AblageListe[0][0] - 1 > -1 && AblageListe[0][0] + 1 < field.length && AblageListe[0][1] - 1 > -1 && AblageListe[0][1] + 1 < field[0].length) {
+      for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
+        for (var i1 = AblageListe[0][1] - 1; i1 < AblageListe[0][1] + 2; i1++) {
+          field[i][i1] = handCards[selectedCard][i - AblageListe[0][0] + 1][i1 - AblageListe[0][1] + 1];
+        }
+      }
+      handCards[selectedCard] = createNewRandomCard();
+      selectedCard = undefined;
+      turnsLeft--;
+      document.getElementById('textur').style = "";
+      if (turnsLeft == 0) {
+      //  alert("Spiel vorbei!");
+        rundeAuswerten();
+      }
+    }
+    else {
+      alert("The new card doesn't touch any old card!");
+    }
+  }
+  fieldClicked();
+  if (showing == "myCards" && byUser && AblageListe[0][0] > 0 && AblageListe[0][0] < 6 && AblageListe[0][1] == 3) {
+    showing = "field";
+    textur.width = field.length*70 + 10;
+    Layout(field, 0, 0, true);
+  }
+  if (showing == "myCards" && AblageListe[0][1] < 3) {
+    if (AblageListe[0][0] > 3) {
+      if (AblageListe[0][0]/4 != 1.5) selectedCard = Math.round(AblageListe[0][0]/4)
+      else selectedCard = Math.floor(AblageListe[0][0]/4);
+    }
+    else {selectedCard = 0;}
+    console.log(selectedCard);
+    textur.width = field.length*70 + 10;
+    Layout(field, 0, 0, true);
+    showing = "field";
+  }
+  if (showing == "field" && byUser && AblageListe[0][0] > 7 && (AblageListe[0][0] < 16) && AblageListe[0][1] == 5) {
+    showing = "myCards";
+    showOwnCards();
+  }
+}
+function checkGrößeFelder(i1, i, commingFrom) {
+  var bereitsGezählt = false;
+  for (var i2 = 0; i2 < felderChecked.length; i2++) {
+    if (felderChecked[i2][0] == i && felderChecked[i2][1] == i1) bereitsGezählt = true;
+  }
+  if (!bereitsGezählt) {felderChecked.push([i, i1]); fieldGröße++;
+    if (field[i1][i].item != false && field[i1][i].item.includes("Goal")) item.goal = true;
+    else if (field[i1][i].item != false) item.normal = true;
+    console.log(i1 > 0 && field[i1 - 1][i].colour == field[i1][i].colour);
+    if (i1 > 0 && field[i1 - 1][i].colour == field[i1][i].colour && commingFrom != "left") checkGrößeFelder(i1 - 1, i, "right");
+    console.log(i > 0 && field[i1][i - 1].colour == field[i1][i].colour);
+    if (i > 0 && field[i1][i - 1].colour == field[i1][i].colour && commingFrom != "up") checkGrößeFelder(i1, i - 1, "down");
+    console.log(i1 < field.length - 1 && field[i1 + 1][i].colour == field[i1][i].colour);
+    if (i1 < field.length - 1 && field[i1 + 1][i].colour == field[i1][i].colour && commingFrom != "right") checkGrößeFelder(i1 + 1, i, "left");
+    console.log(i < field[0].length - 1 && field[i1][i + 1].colour == field[i1][i].colour);
+    if (i < field[0].length - 1 && field[i1][i + 1].colour == field[i1][i].colour && commingFrom != "down") checkGrößeFelder(i1, i + 1, "up");
+  }
+}
+var felderChecked = [];
+var fieldGröße = 0;
+var item = {goal: false, normal: false};
+function rundeAuswerten() {
+  var points = 0;
+  for (var i1 = 0; i1 < field.length; i1++) {
+    for (var i = 0; i < field[0].length; i++) {
+      if (fieldGröße > 2) points += fieldGröße;
+      if (item.goal && item.normal) points += 5;
+      fieldGröße = 0;
+      item = {goal: false, normal: false};
+      if (field[i1][i].colour != "none") checkGrößeFelder(i1, i);
+      console.log(fieldGröße);
+    }
+  }
+  //alert("you got " + points + " points!");
+  if (highscores[name] == undefined || points > highscores[name])  {
+    highscores[name] = points; document.getElementById('newHighscore').style.display = "inline"; dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
+    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/stamp-sound-effects-all-sounds-youtubemp3free.org.mp3");
+    audio.currentTime = 60*4 + 15;
+    audio.play();
+    setTimeout(function () {
+      audio.pause();
+      audio = new Audio("http://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+      setTimeout(function () {
+        audio = new Audio("https://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
+        audio.currentTime = 9.7;
+        audio.play();
+      }, 2000);
+    }, 1500);
+  }
+  showScores(points);
+}
+function showScores(points) {
+  document.getElementById('highscores').style.display = "inline";
+  document.getElementById('textur').style.display = "none";
+  document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[name];
+  if (points != undefined) document.getElementById('ownScore').innerHTML = "your score: " + points;
+  else document.getElementById('ownScore').style.display = "none";
+  for (var i = 0; i < Object.keys(highscores).length; i++) {
+    if (Object.keys(highscores)[i] != name) {
+      if (highscores[Object.keys(highscores)[i]] > points) {
+        document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+      }
+      else if (highscores[Object.keys(highscores)[i]] < points) {
+        document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+      }
+      else {
+        document.getElementById('highscoresAsGoodAsYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+      }
+    }
+  }
+}
+function readMouseMove(e) {
+  mausx = e.clientX + scrollX;
+  mausy = e.clientY + scrollY;
+  //  console.log(mausx + " - " + mausy);
+  mousemoveFolgen();
+}
+if (gerät == "PC") document.onmousemove = readMouseMove
+function touch(ev) {
+  mausx = ev.touches[0]["pageX"] + scrollX;
+  mausy = ev.touches[0]["pageY"] + scrollY;
+  if (ev.type == "touchmove") {
+    mousemoveFolgen();
+  }
+}
+//if (gerät == "Handy") {
+  document.addEventListener('touchmove', touch);
+  document.addEventListener('touchstart', touch);
+//}
+function mousemoveFolgen() {
+  if (selectedCard != undefined && showing == "field") {
+    document.getElementById('textur').style = "touch-action: none";
+    fieldClicked(false);
+    Layout(field, 0, 0, true);
+    Layout(handCards[selectedCard], (70)*(AblageListe[0][0] - 1), (70)*(AblageListe[0][1] - 1));  // AblageListe[0][0] - 70, AblageListe[0][1] - 70
+  }
+}
+
+</script>
