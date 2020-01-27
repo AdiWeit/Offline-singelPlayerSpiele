@@ -37,9 +37,9 @@
 <span id="ownScore" style="font-size:77"></span>
 <br>
 <div id="highscores">
-  <h1 id="highscoresBetterThanYours"></h1>
-  <h1 id="highscoresWorseThanYours"></h1>
-  <h1 id="highscoresAsGoodAsYours"></h1>
+  <font id="highscoresBetterThanYours" color="red" style="font-size:77"></font>
+  <font id="highscoresWorseThanYours" color="green" style="font-size:77"></font>
+  <font id="highscoresAsGoodAsYours" style="font-size:77"></font>
 </div>
 <canvas id="textur" width="1582" onclick="canvasClicked(true);" height="740"></canvas>
 
@@ -264,10 +264,10 @@ function showScores(points) {
   else document.getElementById('ownScore').style.display = "none";
   for (var i = 0; i < Object.keys(highscores).length; i++) {
     if (Object.keys(highscores)[i] != name) {
-      if (highscores[Object.keys(highscores)[i]] > points) {
+      if (highscores[Object.keys(highscores)[i]] > highscores[name]) {
         document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
       }
-      else if (highscores[Object.keys(highscores)[i]] < points) {
+      else if (highscores[Object.keys(highscores)[i]] < highscores[name]) {
         document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
       }
       else {
