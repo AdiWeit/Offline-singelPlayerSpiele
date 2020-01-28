@@ -152,7 +152,7 @@ function createNewRandomField() {
   var randomColours = ["brown", "yellow", "blue", "green"];
   var item = false;
   var selectedColour = randomColours[Math.round(Math.random()*(randomColours.length - 1))];
-  if (Math.round(Math.random()*0) == 0) {
+  if (Math.round(Math.random()*7) == 3) {
     for (var i = 0; i < randomItems[selectedColour].length; i++) {
       if (randomItems[selectedColour][i].onCard == false || randomItems[selectedColour][i].goal == false) {
         item = randomItems[selectedColour][i].name;
@@ -174,10 +174,15 @@ for (var i = 0; i < /*fieldParameters[1]*/50; i++) {
 function canvasClicked(byUser) {
   if (showing != "myCards" && selectedCard != undefined && byUser) {
     AblageListe[1] = [];
-    for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
-      for (var i1 = AblageListe[0][1] - 1; i1 < AblageListe[0][1] + 2; i1++) {
-        if (field[i][i1].colour != "none") AblageListe[1].push("something");
+    try {
+      for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
+        for (var i1 = AblageListe[0][1] - 1; i1 < AblageListe[0][1] + 2; i1++) {
+          if (field[i][i1].colour != "none") AblageListe[1].push("something");
+        }
       }
+    } catch (e) {
+      if (!((showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 6) || showing == "field" && byUser && AblageListe[0][1] == 6 && AblageListe[0][0] == 12))alert("the card isn't completely in the screen because of the border!");
+      AblageListe[1].push("onBorder");
     }
     if (((turnsLeft == 7) || AblageListe[1].includes("something")) && AblageListe[0][0] - 1 > -1 && AblageListe[0][0] + 1 < field.length && AblageListe[0][1] - 1 > -1 && AblageListe[0][1] + 1 < field[0].length) {
       for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
@@ -196,7 +201,7 @@ function canvasClicked(byUser) {
         rundeAuswerten();
       }
     }
-    else {
+    else if (!(AblageListe[1].includes("onBorder"))) {
       alert("The new card doesn't touch any old card!");
     }
   }
@@ -217,8 +222,8 @@ function canvasClicked(byUser) {
     layoutAll();
     showing = "field";
   }
-  if (showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 12) turn("left");
-  else if (showing == "field" && byUser && AblageListe[1] == 12) turn("right");
+  if (showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 6) turn("left");
+  else if (showing == "field" && byUser && AblageListe[0][1] == 6 && AblageListe[0][0] == 12) turn("right");
   // if (showing == "field" && byUser && AblageListe[0][0] > 7 && (AblageListe[0][0] < 16) && AblageListe[0][1] == 5) {
   //   showing = "myCards";
   //   showOwnCards();
@@ -301,37 +306,12 @@ function turn(direction) {
     for (var i = 0; i < 3; i++) { // rechts --> unten works!
       neueKarte[i][2] = handCards[selectedCard][2][i];
     }
-  }
-  else {
-    for (var i = 2; i > -1; i--) { // rechts --> oben
-      neueKarte[i][0] = handCards[selectedCard][2][i];
-    }
-  }
-  if (direction == "right") {
     for (var i = 0; i < 3; i++) { // unten --> links  works!
       neueKarte[0][i] = handCards[selectedCard][1 - 1 + i][1 + 1];
     }
-  }
-  else {
-    var i1 = 0;
-    for (var i = 3; i > 0; i--) { // unten --> rechts
-      neueKarte[2][i - 1] = handCards[selectedCard][i1][2];
-      i1++;
-    }
-  }
-  if (direction == "right") {
     for (var i = 0; i < 3; i++) { // oben --> rechts works!
       neueKarte[2][i] = handCards[selectedCard][i][0];
     }
-  }
-  else {
-    var i1 = 0;
-    for (var i = 3; i > 0; i--) { // oben --> links
-      neueKarte[0][i1] = handCards[selectedCard][i - 1][0];
-      i1++;
-    }
-  }
-  if (direction == "right") {
     var i1 = 0;
     for (var i = 2; i > -1; i--) { // links --> oben works!
       neueKarte[i1][0] = handCards[selectedCard][0][i];
@@ -339,46 +319,30 @@ function turn(direction) {
     }
   }
   else {
+    for (var i = 2; i > -1; i--) { // rechts --> oben
+      neueKarte[i][0] = handCards[selectedCard][2][i];
+    }
+    var i1 = 0;
+    for (var i = 3; i > 0; i--) { // unten --> rechts
+      neueKarte[2][i - 1] = handCards[selectedCard][i1][2];
+      i1++;
+    }
+    var i1 = 0;
+    for (var i = 3; i > 0; i--) { // oben --> links
+      neueKarte[0][i1] = handCards[selectedCard][i - 1][0];
+      i1++;
+    }
     for (var i = 0; i < 3; i++) { // links --> unten
       neueKarte[i][2] = handCards[selectedCard][0][i];
     }
   }
+
   console.log(neueKarte);
   neueKarte[1][1] = handCards[selectedCard][1][1];
   handCards[selectedCard] = neueKarte;
   showOwnCards();
+  showOwnCards();
   Layout(handCards[selectedCard], (70)*(AblageListe[0][0] - 1), (70)*(AblageListe[0][1] - 1));
-  /*
-  falls links: var auf -1 setzen, sonst auf 1, mitte + var: andere Seite (links/rechts):
-
-  123
-  456
-  789
-
-  nach rechts:
-  741
-  852
-  963
-
-  nach links:
-
-  369
-  258
-  147
-
-  nach rechts:
-  unten --> Rand links (oben nach unten)
-  oben -->  Rand rechts (oben nach unten)
-  rechts --> Rand unten (rechts nach links) |
-  links --> Rand oben (rechts nach links)
-
-  nach links:
-
-  unten --> Rand rechts (unten nach oben)
-  oben --> Rand links (unten nach oben)
-  rechts --> Rand oben (links nach rechts) |
-  links --> Rand unten (links nach rechts)
-  */
 
 }
 function readMouseMove(e) {
