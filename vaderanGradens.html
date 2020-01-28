@@ -22,21 +22,25 @@
   }
   img {
     position: absolute;
-    left: 444px;
-    top: 35px;
+    right: 544px;
+    top: 100px;
   }
-/*  #ownScore {
-    position: absolute;
-    left: 210px;
-    top: 130px;
-  }*/
+  #ownScore {
+    /* position: absolute; */
+    /* right: 305px; */
+    /* down: 77px; */
+  }
 </style>
 
 <span id="ownHighscore" style="font-size:77"></span>
 <br>
 <span id="ownScore" style="font-size:77"></span>
-<br>
+
 <div id="highscores">
+  <br>
+  <br>
+  <br>
+  <br>
   <font id="highscoresBetterThanYours" color="red" style="font-size:77"></font>
   <font id="highscoresWorseThanYours" color="green" style="font-size:77"></font>
   <font id="highscoresAsGoodAsYours" style="font-size:77"></font>
@@ -58,6 +62,7 @@
     var gerät = "PC"
     console.log("PC");
   }
+  console.log(window.innerWidth);
   document.getElementById('highscores').style.display = "none";
   document.getElementById('newHighscore').style.display = "none";
   var canvas = textur.getContext('2d'); //Dimension
@@ -70,6 +75,12 @@
   var turnsLeft = 7;
   var highscores = {};
   var name = prompt("What's your name? You can type in your nick name as well. (Information used for account-based highscores)");
+  setTimeout(function () {
+    document.getElementById('newHighscore').width = window.innerWidth/(1024/250);
+    console.log(window.innerWidth/(1024/250));
+    document.getElementById('newHighscore').style.right = window.innerWidth/(1024/50) + "px"
+    console.log(window.innerWidth/(1024/611) + "px");
+  }, 3000);
   for (var i = 0; i < 3; i++) {
     handCards.push(createNewRandomCard());
   }
@@ -79,10 +90,11 @@
       field[i1][i] = {colour: "none", item: false};
     }
   }
-  //Layout(field, 0, 0, true);
-  showOwnCards();
+  layoutAll();
+  //showOwnCards();
   setTimeout(function () {
-    showOwnCards();
+    layoutAll();
+    //showOwnCards();
   }, 500);
 
   dbGet("vaderanGradens", "highscores").then(result => {
@@ -91,6 +103,10 @@
     console.log(e);
   });
 
+  function layoutAll() {
+    Layout(field, 0, 0, true);
+    showOwnCards();
+  }
   function Layout(fieldAktuell, beginningPointX, beginningPointY, showingField, text) {
   canvas.clearRect(beginningPointX, beginningPointY, fieldAktuell.length*70 + 10, fieldAktuell[0].length + 10);
   if (showingField) canvas.clearRect(beginningPointX, beginningPointY, textur.width, textur.height);
@@ -101,7 +117,7 @@
       if (text != undefined || fieldAktuell[i1][i].colour == "none") canvas.fillStyle = "#FF8000";
       else canvas.fillStyle = fieldAktuell[i1][i].colour;
       canvas.fillRect(beginningPointX + 10 + 70*i1, beginningPointY + 10 + 70*i, 60, 60);
-      if (fieldAktuell[i1][i].item != undefined && fieldAktuell[i1][i].item != false) {
+      if (fieldAktuell[i1][i] != undefined && fieldAktuell[i1][i].item != undefined && fieldAktuell[i1][i].item != false) {
         var Bild = new Image();
             Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/vaderanGradens/" + fieldAktuell[i1][i].item + ".png"
             canvas.drawImage(Bild, beginningPointX + 10 + 10 + 70*i1 - 20, beginningPointY + 10 + 70*i, 70, 70);
@@ -113,14 +129,13 @@
       }
     }
   }
-  if (text == undefined && showing == "field") Layout(["m", "y", " ", "c", "a", "r", "d", "s"], 70*8, 70*5, undefined, "my cards");
-  else if (text == undefined) Layout(["f", "i", "e", "l", "d"], 70*1, 70*3, undefined, "field");
+    if (text == "turns left:" + turnsLeft && showing == "field")  Layout(["←", "t", "u", "r", "n", "", "b", "y", "", "9", "0", "°", "→"],0, 70*6, undefined, "←turn by 90°→");
+  if (text == undefined) Layout(["t", "u", "r", "n", "s", "", "l", "e", "f", "t", ":", turnsLeft],0, 70*5, undefined, "turns left:" + turnsLeft);
 }
 function showOwnCards() {
-  textur.width = (4*70)*handCards.length;
-  canvas.clearRect(0, 0, textur.width, textur.height);
+  canvas.clearRect(0, 10 + 70*7, textur.width, textur.height);
   for (var i = 0; i < handCards.length; i++) {
-    Layout(handCards[i], (4*70)*i, 0);
+    Layout(handCards[i], (4*70)*i, 10 + 60*8);
   }
 }
 function createNewRandomCard() {
@@ -137,7 +152,7 @@ function createNewRandomField() {
   var randomColours = ["brown", "yellow", "blue", "green"];
   var item = false;
   var selectedColour = randomColours[Math.round(Math.random()*(randomColours.length - 1))];
-  if (Math.round(Math.random()*7) == 3) {
+  if (Math.round(Math.random()*0) == 0) {
     for (var i = 0; i < randomItems[selectedColour].length; i++) {
       if (randomItems[selectedColour][i].onCard == false || randomItems[selectedColour][i].goal == false) {
         item = randomItems[selectedColour][i].name;
@@ -173,7 +188,9 @@ function canvasClicked(byUser) {
       handCards[selectedCard] = createNewRandomCard();
       selectedCard = undefined;
       turnsLeft--;
+      showing = "myCards";
       document.getElementById('textur').style = "";
+      layoutAll();
       if (turnsLeft == 0) {
       //  alert("Spiel vorbei!");
         rundeAuswerten();
@@ -184,12 +201,12 @@ function canvasClicked(byUser) {
     }
   }
   fieldClicked();
-  if (showing == "myCards" && byUser && AblageListe[0][0] > 0 && AblageListe[0][0] < 6 && AblageListe[0][1] == 3) {
-    showing = "field";
-    textur.width = field.length*70 + 10;
-    Layout(field, 0, 0, true);
-  }
-  if (showing == "myCards" && AblageListe[0][1] < 3) {
+  // if (showing == "myCards" && byUser && AblageListe[0][0] > 0 && AblageListe[0][0] < 6 && AblageListe[0][1] == 3) {
+  //   showing = "field";
+  //   textur.width = field.length*70 + 10;
+  //   layoutAll();
+  // }
+  if (showing == "myCards" && AblageListe[0][1] > 6) {
     if (AblageListe[0][0] > 3) {
       if (AblageListe[0][0]/4 != 1.5) selectedCard = Math.round(AblageListe[0][0]/4)
       else selectedCard = Math.floor(AblageListe[0][0]/4);
@@ -197,13 +214,15 @@ function canvasClicked(byUser) {
     else {selectedCard = 0;}
     console.log(selectedCard);
     textur.width = field.length*70 + 10;
-    Layout(field, 0, 0, true);
+    layoutAll();
     showing = "field";
   }
-  if (showing == "field" && byUser && AblageListe[0][0] > 7 && (AblageListe[0][0] < 16) && AblageListe[0][1] == 5) {
-    showing = "myCards";
-    showOwnCards();
-  }
+  if (showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 12) turn("left");
+  else if (showing == "field" && byUser && AblageListe[1] == 12) turn("right");
+  // if (showing == "field" && byUser && AblageListe[0][0] > 7 && (AblageListe[0][0] < 16) && AblageListe[0][1] == 5) {
+  //   showing = "myCards";
+  //   showOwnCards();
+  // }
 }
 function checkGrößeFelder(i1, i, commingFrom) {
   var bereitsGezählt = false;
@@ -260,7 +279,7 @@ function showScores(points) {
   document.getElementById('highscores').style.display = "inline";
   document.getElementById('textur').style.display = "none";
   document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[name];
-  if (points != undefined) document.getElementById('ownScore').innerHTML = "your score: " + points;
+  if (points != undefined) document.getElementById('ownScore').innerHTML = "score: " + points;
   else document.getElementById('ownScore').style.display = "none";
   for (var i = 0; i < Object.keys(highscores).length; i++) {
     if (Object.keys(highscores)[i] != name) {
@@ -275,6 +294,92 @@ function showScores(points) {
       }
     }
   }
+}
+function turn(direction) {
+  var neueKarte = [[], [], []];
+  if (direction == "right") {
+    for (var i = 0; i < 3; i++) { // rechts --> unten works!
+      neueKarte[i][2] = handCards[selectedCard][2][i];
+    }
+  }
+  else {
+    for (var i = 2; i > -1; i--) { // rechts --> oben
+      neueKarte[i][0] = handCards[selectedCard][2][i];
+    }
+  }
+  if (direction == "right") {
+    for (var i = 0; i < 3; i++) { // unten --> links  works!
+      neueKarte[0][i] = handCards[selectedCard][1 - 1 + i][1 + 1];
+    }
+  }
+  else {
+    var i1 = 0;
+    for (var i = 3; i > 0; i--) { // unten --> rechts
+      neueKarte[2][i - 1] = handCards[selectedCard][i1][2];
+      i1++;
+    }
+  }
+  if (direction == "right") {
+    for (var i = 0; i < 3; i++) { // oben --> rechts works!
+      neueKarte[2][i] = handCards[selectedCard][i][0];
+    }
+  }
+  else {
+    var i1 = 0;
+    for (var i = 3; i > 0; i--) { // oben --> links
+      neueKarte[0][i1] = handCards[selectedCard][i - 1][0];
+      i1++;
+    }
+  }
+  if (direction == "right") {
+    var i1 = 0;
+    for (var i = 2; i > -1; i--) { // links --> oben works!
+      neueKarte[i1][0] = handCards[selectedCard][0][i];
+      i1++;
+    }
+  }
+  else {
+    for (var i = 0; i < 3; i++) { // links --> unten
+      neueKarte[i][2] = handCards[selectedCard][0][i];
+    }
+  }
+  console.log(neueKarte);
+  neueKarte[1][1] = handCards[selectedCard][1][1];
+  handCards[selectedCard] = neueKarte;
+  showOwnCards();
+  Layout(handCards[selectedCard], (70)*(AblageListe[0][0] - 1), (70)*(AblageListe[0][1] - 1));
+  /*
+  falls links: var auf -1 setzen, sonst auf 1, mitte + var: andere Seite (links/rechts):
+
+  123
+  456
+  789
+
+  nach rechts:
+  741
+  852
+  963
+
+  nach links:
+
+  369
+  258
+  147
+
+  nach rechts:
+  unten --> Rand links (oben nach unten)
+  oben -->  Rand rechts (oben nach unten)
+  rechts --> Rand unten (rechts nach links) |
+  links --> Rand oben (rechts nach links)
+
+  nach links:
+
+  unten --> Rand rechts (unten nach oben)
+  oben --> Rand links (unten nach oben)
+  rechts --> Rand oben (links nach rechts) |
+  links --> Rand unten (links nach rechts)
+  */
+
 }
 function readMouseMove(e) {
   mausx = e.clientX + scrollX;
@@ -298,9 +403,13 @@ function mousemoveFolgen() {
   if (selectedCard != undefined && showing == "field") {
     document.getElementById('textur').style = "touch-action: none";
     fieldClicked(false);
-    Layout(field, 0, 0, true);
+    layoutAll();
     Layout(handCards[selectedCard], (70)*(AblageListe[0][0] - 1), (70)*(AblageListe[0][1] - 1));  // AblageListe[0][0] - 70, AblageListe[0][1] - 70
   }
 }
+document.onkeydown = function(event) {
+  console.log(event);
+  if (event.key.includes("Arrow") && (event.key.includes("Left") || event.key.includes("Right"))) turn(event.key.toString().split('Arrow')[1].toLowerCase());
+};
 
 </script>
