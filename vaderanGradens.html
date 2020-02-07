@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <div class="column" id="newRecord">
   <img src="https://adi.nicolaiweitkemper.de/Bilder/New%20best.png" id="newHighscore" onclick="imageClicked()">
 </div>
@@ -46,8 +47,21 @@
   <font id="highscoresAsGoodAsYours" style="font-size:77"></font>
 </div>
 <canvas id="textur" width="1582" onclick="canvasClicked(true);" height="740"></canvas>
-
+<input type="text" id="playStyleSelection" onmouseover="this.select();" placeholder="Spielstyle(turns)" onchange="playStyleSelected(value);" list="datalist1"></input>
+<div id="app">
+  <datalist id="datalist1">
+    <option v-for="genre in genres" v-bind:value="genre">
+  </datalist>
+</div>
+<button type="button" id="newRound" onclick="restart();" name="button">new round</button>
+<div id="turnAllower" style="display: none;">
+  <br>
+  <h2 >allow turning cards (by 90°)</h2>
+  <input type="checkbox" id="allowTurning" checked="true" onchange="allowTurning(checked)" name="vehicle" >
+  <button type="button" id="createNewGamestyle" onclick="beginnGame();" name="button">create new gamestyle</button>
+</div>
 <script>
+  visible([["textur", "none"]]);
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -65,6 +79,14 @@
   console.log(window.innerWidth);
   document.getElementById('highscores').style.display = "none";
   document.getElementById('newHighscore').style.display = "none";
+  var placeholder = [];
+  var app = new Vue({
+    el: '#app',
+    data: {
+        genres: placeholder,
+      input: '',
+    }
+  })
   var canvas = textur.getContext('2d'); //Dimension
   var AblageListe = [];
   var field = [];
@@ -97,12 +119,47 @@
     //showOwnCards();
   }, 500);
 
+  function restart() {
+    visible([["highscores", "none"], ["ownScore", "none"], ["ownHighscore", "none"]]);
+    field = [];
+    for (var i = 0; i < 5; i++) {
+      for (var i1 = 0; i1 < 22; i1++) {
+        if (field[i1] == undefined) field[i1] = [];
+        field[i1][i] = {colour: "none", item: false};
+      }
+    }
+    playStyleSelected(playStyleSelection.value);
+  }
   dbGet("vaderanGradens", "highscores").then(result => {
     highscores = JSON.parse(result);
+    AblageListe[0] = [];
+    for (var i = 0; i < Object.keys(highscores).length; i++) {
+     AblageListe[0].push([/*Object.keys(highscores)[i].toString().split('(')[1]*/Object.keys(highscores[Object.keys(highscores)[i]]).length + " player played)", Object.keys(highscores)[i].toString().split('|turning: ')[0], Object.keys(highscores)[i]/*.toString().split("(")[0]*/.toString().split("|turning: ")[1]]);
+   }
+   AblageListe[0].sort();
+    for (var i = 0; i < Object.keys(highscores).length; i++) {
+      placeholder.push(AblageListe[0][i][1] + "|turning: " +  AblageListe[0][i][2] + " (" + AblageListe[0][i][0]);
+    //  placeholder.push("turns:7|turning allowed (2 player played)");
+    }
   }).catch(function(e) {
     console.log(e);
   });
 
+  function playStyleSelected(value) {
+    if (!(value.includes("turning")) && !(isNaN(value))) {visible([["turnAllower", "inline"]]);allowTurning(document.getElementById('allowTurning').checked);}
+    else if (isNaN(value) && !(value.includes("turns:") && value.includes("|turning: "))) alert("ungültige Eingabe! Bitte eins der bereits vorhandenen Parameter auswählen, oder ein neues durch Eingebe einer Rundenanzahl hinzufügen.");
+    else beginnGame();
+  }
+  function allowTurning(checked) {
+    if (document.getElementById('playStyleSelection').value.includes("allowed")) document.getElementById('playStyleSelection').value = JSON.parse(document.getElementById('playStyleSelection').value.toString().split('turns:')[1].toString().split('|')[0]);
+    if (checked) document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: allowed (nobodyPlayed)";
+    if (!checked) document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: not allowed (nobodyPlayed)";
+  }
+  function beginnGame() {
+    visible([["turnAllower", "none"], ["textur", "inline"]]);
+    turnsLeft = JSON.parse(document.getElementById('playStyleSelection').value.toString().split('turns:')[1].toString().split('|')[0]);
+    Layout(field, 0, 0)
+  }
   function layoutAll() {
     Layout(field, 0, 0, true);
     showOwnCards();
@@ -129,8 +186,9 @@
       }
     }
   }
-    if (text == "turns left:" + turnsLeft && showing == "field")  Layout(["←", "t", "u", "r", "n", "", "b", "y", "", "9", "0", "°", "→"],0, 70*6, undefined, "←turn by 90°→");
-  if (text == undefined) Layout(["t", "u", "r", "n", "s", "", "l", "e", "f", "t", ":", turnsLeft],0, 70*5, undefined, "turns left:" + turnsLeft);
+    if (text == "turns left:" + turnsLeft && showing == "field" && !(document.getElementById('playStyleSelection').value.includes("not")))  Layout(["←", "t", "u", "r", "n", "", "b", "y", "", "9", "0", "°", "→"],0, 70*6, undefined, "←turn by 90°→");
+  if (text == undefined && turnsLeft < 10) Layout(["t", "u", "r", "n", "s", "", "l", "e", "f", "t", ":", turnsLeft],0, 70*5, undefined, "turns left:" + turnsLeft);
+  else if (text == undefined) Layout(["t", "u", "r", "n", "s", "", "l", "e", "f", "t", ":", turnsLeft, "0"],0, 70*5, undefined, "turns left:" + turnsLeft);
 }
 function showOwnCards() {
   canvas.clearRect(0, 10 + 70*7, textur.width, textur.height);
@@ -184,7 +242,7 @@ function canvasClicked(byUser) {
       if (!((showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 6) || showing == "field" && byUser && AblageListe[0][1] == 6 && AblageListe[0][0] == 12))alert("the card isn't completely in the screen because of the border!");
       AblageListe[1].push("onBorder");
     }
-    if (((turnsLeft == 7) || AblageListe[1].includes("something")) && AblageListe[0][0] - 1 > -1 && AblageListe[0][0] + 1 < field.length && AblageListe[0][1] - 1 > -1 && AblageListe[0][1] + 1 < field[0].length) {
+    if (((turnsLeft == JSON.parse(document.getElementById('playStyleSelection').value.toString().split('turns:')[1].toString().split('|')[0])) || AblageListe[1].includes("something")) && AblageListe[0][0] - 1 > -1 && AblageListe[0][0] + 1 < field.length && AblageListe[0][1] - 1 > -1 && AblageListe[0][1] + 1 < field[0].length) {
       for (var i = AblageListe[0][0] - 1; i < AblageListe[0][0] + 2; i++) {
         for (var i1 = AblageListe[0][1] - 1; i1 < AblageListe[0][1] + 2; i1++) {
           field[i][i1] = handCards[selectedCard][i - AblageListe[0][0] + 1][i1 - AblageListe[0][1] + 1];
@@ -263,8 +321,9 @@ function rundeAuswerten() {
     }
   }
   //alert("you got " + points + " points!");
-  if (highscores[name] == undefined || points > highscores[name])  {
-    highscores[name] = points; document.getElementById('newHighscore').style.display = "inline"; dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
+  if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] == undefined) highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] = {};
+  if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] == undefined || points > highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name])  {
+    highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] = points; document.getElementById('newHighscore').style.display = "inline"; dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
     audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/stamp-sound-effects-all-sounds-youtubemp3free.org.mp3");
     audio.currentTime = 60*4 + 15;
     audio.play();
@@ -283,24 +342,25 @@ function rundeAuswerten() {
 function showScores(points) {
   document.getElementById('highscores').style.display = "inline";
   document.getElementById('textur').style.display = "none";
-  document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[name];
+  document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name];
   if (points != undefined) document.getElementById('ownScore').innerHTML = "score: " + points;
   else document.getElementById('ownScore').style.display = "none";
-  for (var i = 0; i < Object.keys(highscores).length; i++) {
-    if (Object.keys(highscores)[i] != name) {
-      if (highscores[Object.keys(highscores)[i]] > highscores[name]) {
-        document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+  for (var i = 0; i < Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]]).length; i++) {
+    if (Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] != name) {
+      if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] > highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name]) {
+        document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
       }
-      else if (highscores[Object.keys(highscores)[i]] < highscores[name]) {
-        document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+      else if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] < highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name]) {
+        document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
       }
       else {
-        document.getElementById('highscoresAsGoodAsYours').innerHTML += Object.keys(highscores)[i] + "  " + highscores[Object.keys(highscores)[i]] + '<br>';
+        document.getElementById('highscoresAsGoodAsYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
       }
     }
   }
 }
 function turn(direction) {
+  if (!(document.getElementById('playStyleSelection').value.includes("not"))) {
   var neueKarte = [[], [], []];
   if (direction == "right") {
     for (var i = 0; i < 3; i++) { // rechts --> unten works!
@@ -343,7 +403,7 @@ function turn(direction) {
   showOwnCards();
   showOwnCards();
   Layout(handCards[selectedCard], (70)*(AblageListe[0][0] - 1), (70)*(AblageListe[0][1] - 1));
-
+}
 }
 function readMouseMove(e) {
   mausx = e.clientX + scrollX;
@@ -376,4 +436,9 @@ document.onkeydown = function(event) {
   if (event.key.includes("Arrow") && (event.key.includes("Left") || event.key.includes("Right"))) turn(event.key.toString().split('Arrow')[1].toLowerCase());
 };
 
+function visible(list) {
+  for (var i = 0; i < list.length; i++) {
+    document.getElementById(list[i][0]).style.display = list[i][1];
+  }
+}
 </script>
