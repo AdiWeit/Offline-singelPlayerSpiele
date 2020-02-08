@@ -89,6 +89,13 @@
       {{ title }}
     </li>
   </div>
+  <input type="color" onchange="ballColourChanged(value);" name="color" id="colourPicker">
+  <select name="course" id="ballStyleSelection" value="normal" onchange="ballStyleSelected(value);">
+    <option value="normal">normal</option>
+    <option value="pick colour">pick colour</option>
+    <option value="party">party</option>
+  </select>
+  <br>
   <select name="course" id="courceSelection" onchange="courceSelected(true)">
   </select>
   <br>
@@ -98,23 +105,25 @@
     <option value="survive">survive</option>
     <option value="opposite">opposite</option>
   </select>
-  <input type="color" name="color" id="colourPicker">
-  <select name="course" id="ballStyleSelection" value="normal" onchange="ballStyleSelected(value);">
-    <option value="normal">normal</option>
-    <option value="pick colour">pick colour</option>
-    <option value="party">party</option>
-  </select>
   <br>
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
   <script type="text/javascript">
 
   visible([
-    ['ballStyleSelection', "none"],
+    // ['ballStyleSelection', "none"],
     ['colourPicker', "none"]
   ]);
   var inOrAgainstDirection = 1;
   var sphere1 = document.getElementById("sphere1");
   var growing;
+  function ballStyleSelected(value) {
+    if (value == "normal")  sphere1.style.backgroundColor = "blue";
+    if (value == "pick colour") visible([["colourPicker", "inline"]]);
+}
+function ballColourChanged (value) {
+  sphere1.style.backgroundColor = value;
+  visible([['colourPicker', "none"]]);
+}
   function modeSelected(value) {
     clearInterval(growing);
     level[value].editLevel.selected = ["blinkWall", 0];
@@ -144,14 +153,14 @@
       opt = document.createElement("option");
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", i);
-      opt.text = "";
+      opt.text = "level";
     for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
       opt = document.createElement("option");
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", i);
       opt.text = (i + 1) + ". map"
     }
-    if (highscores[level.mode][name].length == Object.keys(level[level.mode].vorgefertigt).length + 1) {
+    if (highscores[level.mode][name].length == Object.keys(level[level.mode].vorgefertigt).length) {
       opt = document.createElement("option");
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", "winnerScreen");
@@ -1282,7 +1291,7 @@
           [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1 + JSON.parse(sphere1.style.height.replace("px", "")) - 7],
           [x1 - 10, y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2]
         ]
-        for (var i = 0; document.getElementById('courceSelection').value != "" && i < 4; i++) {
+        for (var i = 0; (document.getElementById('courceSelection').value != "" || highscores[level.mode][name] == undefined) && i < 4; i++) {
           // canvas.fillStyle = "red";
           // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
           data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
@@ -1433,7 +1442,7 @@
         showScores(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0]);
       }
       if (level[level.mode].levelType == "vorgefertigt") {
-        if (highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
+        if (highscores[level.mode][name] == undefined || highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
           // localStorage.setItem("highscores", JSON.stringify(highscores));
           if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
@@ -1733,7 +1742,7 @@
         y2 = AblageListe[5] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
         vy2 = -vy2;
       }
-      if (Bild.src == "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") {
+      if (Bild.src == "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg" || document.getElementById('ballStyleSelection').value == "party") {
         sphere1.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
       }
     }
