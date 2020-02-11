@@ -26,7 +26,11 @@
 </body>
 
 </html>
-
+<select name="course" id="modeSelection" value="autoScroll" onchange="modeSelected(value);">
+  <option value="autoScroll">auto scrolling</option>
+  <!-- <option value="scrollWithBall">scroll with ball</option> -->
+</select>
+<br>
 <canvas id="textur" width="852" height="752"></canvas>
 
 <script>
@@ -60,6 +64,7 @@
     }
     vx1 = vx1 * 0.98;
     vy1 = vy1 * 0.98;
+    // if (modeSelection.value == "scrollWithBall" && parseInt(y1 + vy1 / 50) < y1) {speed = y1-parseInt(y1 + vy1 / 50); moveUp(); }
     y1 = parseInt(y1 + vy1 / 50);
     x1 = parseInt(x1 + vx1 / 50);
 
@@ -80,21 +85,20 @@
     //   canvas.fillStyle = "red";
     //   canvas.fillRect(numbers[i1][0], numbers[i1][1], 10, 10);
     // }
-    sphere1.style.top = y1 + "px";
+    /*if (modeSelection.value != "scrollWithBall")*/ sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
     data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
     red = data.data[0];
     green = data.data[1];
     blue = data.data[2];
     alpha = data.data[3];
-    if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
-      console.log("Fail!");
-      x1 = 222;
-      y1 = 300;
+    if (red == 0 && blue == 0 && alpha == 255 && green == 0 && countdown.length == 0 && !shield) {
+      beginnRound();
     }
   }
   }, 25);
   }
+  var shield = false;
   function boundingBoxCheck(){
    if (x1<0) { x1 = 0; vx1 = -vx1; }
    if (y1<0) { y1 = 0; vy1 = -vy1; }
@@ -112,6 +116,7 @@
   var screen = [];
   var figuresUnlocked = 8;
   var figuresUsed = [];
+  var countdown = [3,2,1,"Go!", "reallyGo!"];
   var objectives = [,,,,/*{
     rotatingViereck: [{
       x: 250,
@@ -122,15 +127,35 @@
     }]
   }*/];
   beginnRound();
+  var countdownInt;
   function beginnRound() {
+    countdown = [3,2,1,"Go!", "reallyGo!"];
     figuresUsed = [];
+    pixelMoved = 0;
     screen = [];
-    for (var i = 0; i < 4; i++) {
+    speed = 1;
+    for (var i = 1; i < 4; i++) {
       screen.push(createNewFigure(i));
     }
+    screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
     x1 = 222;
-    y1 = 300;
+    y1 = 600;
     textur.style.display = "inline";
+    countdownInt = setInterval(countdownFunction, 1000);
+  }
+  function countdownFunction() {
+    Layout();
+    canvas.fillStyle = "red";
+    if (countdown.length == 2) {canvas.fillStyle = "green"; clearInterval(countdownInt);
+    setTimeout(function () {
+      countdown.shift();
+      shield = true;
+      sphere1.style.backgroundColor = "green";
+    }, 1000);
+  }
+    canvas.font = "70px Georgia";
+    canvas.fillText(countdown[0], 852/3, 752/2);
+    countdown.shift();
   }
   function createNewFigure (i) {
 
@@ -151,21 +176,29 @@
       canvas.drawImage(Bild, screen[i].x, screen[i].y);
     }
   }
-  setInterval(moveUp, 10);
+  var moveUpInt;
+  function modeSelected(value) {
+    clearInterval(moveUpInt)
+    /*if (value != "scrollWithBall")*/ setInterval(moveUp, 10);
+  }
+  modeSelected("autoScroll");
   var speed = 1;
   var pixelMoved = 0;
   function moveUp() {
     pixelMoved++;
+    if (pixelMoved == 852*1) {shield = false; sphere1.style.backgroundColor = "blue";}
     // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
-    for (var i = 0; i < screen.length; i++) {
+    for (var i = 0; i < screen.length && countdown.length == 0; i++) {
       screen[i].y += speed;
       for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
         objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += speed;
       }
       if (screen[i].y > 852) {screen.splice(i, 1); screen.push(createNewFigure(screen.length));}
     }
+    if (countdown.length == 0) {
     Layout();
     Layout();
+    }
   }
   //var angle = 30;
   function rotatingViereck() {
