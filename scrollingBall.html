@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Accelerometer</title>
+  <h2 id="data"></h2>
+<meta name="viewport" content="width=device-width,user-scalable=yes" />
+<style>
+.shape {
+ position: absolute;
+ width: 30px;
+ height: 30px;
+ -webkit-radius: 30px;
+ margin:0;
+ padding:0;
+}
+#sphere1{
+ border-radius: 30px;
+ background-color: blue;
+}
+</style>
+</head>
+<body>
+<div id="content">
+    <div class ="shape" id="sphere1"></div>
+</div>
+</body>
+
+</html>
+
+<canvas id="textur" width="852" height="752"></canvas>
+
+<script>
+  // ballMovement:
+  var x1 = 0, y1 = 0,
+    x2 = 0, y2 = 0,
+    vx1 = 0, vy1 = 0,
+    vx2 = 0, vy2 = 0,
+    ax1 = 0, ay1 = 0;
+
+  var sphere1 = document.getElementById("sphere1");
+  sphere1.style.height = "30px";
+  sphere1.style.width = "30px";
+  if (window.DeviceMotionEvent != undefined) {
+   window.ondevicemotion = function(e) {
+    ax1 = event.accelerationIncludingGravity.x * 10;
+    ay1 = event.accelerationIncludingGravity.y * 10;
+   }
+   setInterval( function() {
+    var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
+    if ( landscapeOrientation) {
+     vx1 = vx1 + ay1;
+     vy1 = vy1 + ax1;
+    vx2 = vx2 + ay1;
+     vy2 = vy2 + ax1;
+    } else {
+     vy1 = vy1 - ay1;
+     vx1 = vx1 + ax1;
+    vy2 = vy2 - ay1;
+     vx2 = vx2 + ax1;
+    }
+    vx1 = vx1 * 0.98;
+    vy1 = vy1 * 0.98;
+    y1 = parseInt(y1 + vy1 / 50);
+    x1 = parseInt(x1 + vx1 / 50);
+
+   vx2 = vx2 * 0.98;
+    vy2 = vy2 * 0.98;
+    y2 = parseInt(y2 + vy2 / 30);
+    x2 = parseInt(x2 + vx2 / 30);
+
+    boundingBoxCheck();
+    for (var i = 0; i < 4; i++) {
+    var numbers = [
+      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) + 5, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2], //rechts
+      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2)], // oben
+      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) - 5], // unten
+      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2 + 8), (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
+    ]
+    // for (var i1 = 0; i1 < numbers.length; i1++) {
+    //   canvas.fillStyle = "red";
+    //   canvas.fillRect(numbers[i1][0], numbers[i1][1], 10, 10);
+    // }
+    sphere1.style.top = y1 + "px";
+    sphere1.style.left = x1 + "px";
+    data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+    red = data.data[0];
+    green = data.data[1];
+    blue = data.data[2];
+    alpha = data.data[3];
+    if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+      console.log("Fail!");
+      x1 = 222;
+      y1 = 300;
+    }
+  }
+  }, 25);
+  }
+  function boundingBoxCheck(){
+   if (x1<0) { x1 = 0; vx1 = -vx1; }
+   if (y1<0) { y1 = 0; vy1 = -vy1; }
+   if (x1>document.documentElement.clientWidth-50) { x1 = document.documentElement.clientWidth-50; vx1 = -vx1; }
+   if (y1>document.documentElement.clientHeight-50) { y1 = document.documentElement.clientHeight-50; vy1 = -vy1; }
+   if (x2<0) { x2 = 0; vx2 = -vx2; }
+   if (y2<0) { y2 = 0; vy2 = -vy2; }
+   if (x2>document.documentElement.clientWidth-50) { x2 = document.documentElement.clientWidth-50; vx2 = -vx2; }
+   if (y2>document.documentElement.clientHeight-50) { y2 = document.documentElement.clientHeight-50; vy2 = -vy2; }
+  }
+
+  // textur.width = window.innerWidth;
+  // textur.height = window.innerHeight;
+  var canvas = textur.getContext('2d'); //Dimension
+  var screen = [];
+  var figuresUnlocked = 8;
+  var figuresUsed = [];
+  var objectives = [,,,,/*{
+    rotatingViereck: [{
+      x: 250,
+      y: 100,
+      width: 100,
+      height: 100,
+      angle: 0
+    }]
+  }*/];
+  beginnRound();
+  function beginnRound() {
+    figuresUsed = [];
+    screen = [];
+    for (var i = 0; i < 4; i++) {
+      screen.push(createNewFigure(i));
+    }
+    x1 = 222;
+    y1 = 300;
+    textur.style.display = "inline";
+  }
+  function createNewFigure (i) {
+
+    return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y: 376 - i*376};
+  }
+  var randomNumber = 0;
+  function selectNewFigure(i) {
+    if (figuresUsed.length == figuresUnlocked) figuresUsed = [];
+    randomNumber = Math.round(Math.random()*(figuresUnlocked - 1));
+    if ((figuresUsed.includes(randomNumber))) selectNewFigure();
+    if (i == 0) figuresUsed.push(randomNumber);
+    if (i == 0) return randomNumber
+  }
+  function Layout() {
+    for (var i = 0; i < screen.length; i++) {
+      var Bild = new Image();
+          Bild.src = screen[i].link;
+      canvas.drawImage(Bild, screen[i].x, screen[i].y);
+    }
+  }
+  setInterval(moveUp, 10);
+  var speed = 1;
+  var pixelMoved = 0;
+  function moveUp() {
+    pixelMoved++;
+    // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
+    for (var i = 0; i < screen.length; i++) {
+      screen[i].y += speed;
+      for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
+        objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += speed;
+      }
+      if (screen[i].y > 852) {screen.splice(i, 1); screen.push(createNewFigure(screen.length));}
+    }
+    Layout();
+    Layout();
+  }
+  //var angle = 30;
+  function rotatingViereck() {
+    for (var i = 0; i < screen.length; i++) {
+      if (objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined) {
+        for (var i1 = 0; i1 < objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck.length; i1++) {
+          canvas.fillStyle = "black";
+          canvas.fillRect(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].x, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].y, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].width, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].height);
+          canvas.save();
+          canvas.translate(100, 100);
+          canvas.rotate(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].angle * Math.PI / 180)
+          canvas.restore();
+          objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].angle++;
+        }
+      }
+  }
+  }
+</script>
