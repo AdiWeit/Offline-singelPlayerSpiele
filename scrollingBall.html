@@ -1,4 +1,6 @@
 <!DOCTYPE html>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<meta charset="utf-8">
 <html>
 <head>
 <title>Accelerometer</title>
@@ -26,14 +28,56 @@
 </body>
 
 </html>
+<canvas id="textur" width="852" onclick="canvasClicked();" height="752"></canvas>
+<br>
 <select name="course" id="modeSelection" value="autoScroll" onchange="modeSelected(value);">
   <option value="autoScroll">auto scrolling</option>
+  <option value="training">training</option>
+  <option value="againstThePC">against the PC</option>
   <!-- <option value="scrollWithBall">scroll with ball</option> -->
 </select>
+<div id="trainingHTMLElements">
+  <button type="button" id="beginnTraining" onclick="style.display = 'none'; setInterval(moveUp, 10); beginnRound();" name="button">beginn</button>
+  <br>
+  <h1>change speed: </h1>
+  <input type="range" min="1" onchange="speed=value/10;" max="10" value="10" class="slider" id="sliderSpeed">
+  <button type="button" id="backToNormal" onclick="sliderSpeed.value = 10" name="button">back to normal</button>
+</div>
 <br>
-<canvas id="textur" width="852" height="752"></canvas>
-
+<button type="button" id="showHighscores" onclick="if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value); innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
+<br>
+<h2 id="textCheckLives">play with lives</h2>
+<input id="checkbLives" type="checkbox" checked="true" onchange="checkbLivesChanged(checked)" name="vehicle" value="">
+<br>
+<table id="scores">
+  <!-- <tr>
+  <td>Row1 cell1</td>
+  <td>Row1 cell2</td>
+</tr>
+<tr>
+  <td>Row2 cell1</td>
+  <td>Row2 cell2</td>
+</tr>
+<tr>
+  <td>Row3 cell1</td>
+  <td>Row3 cell2</td>
+</tr> -->
+</table>
 <script>
+if (navigator.userAgent.match(/Android/i) ||
+navigator.userAgent.match(/webOS/i) ||
+navigator.userAgent.match(/iPhone/i) ||
+navigator.userAgent.match(/iPad/i) ||
+navigator.userAgent.match(/iPod/i) ||
+navigator.userAgent.match(/BlackBerry/i) ||
+navigator.userAgent.match(/Windows Phone/i)
+) {
+var gerät = "Handy"
+console.log("Handy");
+} else {
+var gerät = "PC"
+console.log("PC");
+}
   // ballMovement:
   var x1 = 0, y1 = 0,
     x2 = 0, y2 = 0,
@@ -50,6 +94,8 @@
     ay1 = event.accelerationIncludingGravity.y * 10;
    }
    setInterval( function() {
+     if (shield) sphere1.style.backgroundColor = "green";
+     else sphere1.style.backgroundColor = "blue";
     var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
     if ( landscapeOrientation) {
      vx1 = vx1 + ay1;
@@ -93,12 +139,24 @@
     blue = data.data[2];
     alpha = data.data[3];
     if (red == 0 && blue == 0 && alpha == 255 && green == 0 && countdown.length == 0 && !shield) {
-      beginnRound();
+      lives.now--;
+      if (modeSelection.value == "training") lives.now++;
+      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
+        highscores[name][modeSelection.value][lives.beginning - lives.now] = pixelMoved - 852;
+        dbSet("scrollingBall", "highscores", highscores);
+      }
+      shield = true;
+      setTimeout(function () {
+        if (countdown.length == 0) shield = false;
+      }, 2000);
+      if (lives.now < 1 && scores.style.display == "none") beginnRound();
     }
   }
   }, 25);
   }
+  var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
   var shield = false;
+  var highscores = {};
   function boundingBoxCheck(){
    if (x1<0) { x1 = 0; vx1 = -vx1; }
    if (y1<0) { y1 = 0; vy1 = -vy1; }
@@ -112,11 +170,15 @@
 
   // textur.width = window.innerWidth;
   // textur.height = window.innerHeight;
+  var lives = {now: 3, beginning: 3};
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
   var figuresUnlocked = 8;
   var figuresUsed = [];
+  var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
+      scores.style.display = "none";
+      beginnTraining.style.display = "none";
   var objectives = [,,,,/*{
     rotatingViereck: [{
       x: 250,
@@ -126,36 +188,65 @@
       angle: 0
     }]
   }*/];
-  beginnRound();
+
+  dbGet("scrollingBall", "highscores").then(result => {
+    highscores = result;
+    if (!highscores[name]) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}};
+  }).catch(function(e) {
+    console.error(e);
+    if (e.message.includes("nicht gefunden")) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}};
+  });
+  var direction = {};
+//  beginnRound();
   var countdownInt;
   function beginnRound() {
+    if (gerät == "Handy") {
+      var directions = [1,-1];
+      var selectedDirection = directions[Math.round(Math.random()*1)];
+      if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)};}
+      else {direction = {direction: 1 /*beginning: pixelMoved,*/}; speed = 1;};
+    textur.style.display = "inline";
+    textur.width = 852;
+    scores.style.display = "none";
     countdown = [3,2,1,"Go!", "reallyGo!"];
     figuresUsed = [];
     pixelMoved = 0;
     screen = [];
-    speed = 1;
+    lives.now = lives.beginning;
+    shield = true;
+    if (modeSelection.value == "againstThePC") screen.push(createNewFigure(0));
     for (var i = 1; i < 4; i++) {
       screen.push(createNewFigure(i));
     }
-    screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
+    if (modeSelection.value != "againstThePC") screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
     x1 = 222;
     y1 = 600;
     textur.style.display = "inline";
+    clearInterval(countdownInt);
     countdownInt = setInterval(countdownFunction, 1000);
   }
+  else {
+    alert("Dieses Spiel ist auf Bewegungssteuerung basiet. Spielen sie es auf einem portablem Gerät (Handy oder Tablet), oder gucken sie sich hier, am PC die highscores an!");
+  }
+  }
   function countdownFunction() {
+    if (/*modeSelection.value != "training" || */beginnTraining.style.display == "none") {
     Layout();
     canvas.fillStyle = "red";
     if (countdown.length == 2) {canvas.fillStyle = "green"; clearInterval(countdownInt);
     setTimeout(function () {
       countdown.shift();
-      shield = true;
-      sphere1.style.backgroundColor = "green";
     }, 1000);
   }
     canvas.font = "70px Georgia";
     canvas.fillText(countdown[0], 852/3, 752/2);
     countdown.shift();
+  }
+  }
+  function checkbLivesChanged(checked) {
+    if (checked) lives.beginning = 3;
+    else lives.beginning = 1;
+    beginnRound();
   }
   function createNewFigure (i) {
 
@@ -163,13 +254,31 @@
   }
   var randomNumber = 0;
   function selectNewFigure(i) {
-    if (figuresUsed.length == figuresUnlocked) figuresUsed = [];
+    if (figuresUsed.length == figuresUnlocked || (modeSelection.value == "training" && figuresUsed.length == figuresSelected)) figuresUsed = [];
     randomNumber = Math.round(Math.random()*(figuresUnlocked - 1));
-    if ((figuresUsed.includes(randomNumber))) selectNewFigure();
+    if ((figuresUsed.includes(randomNumber)) || (modeSelection.value == "training" && figuresTraining[randomNumber] != true)) selectNewFigure();
     if (i == 0) figuresUsed.push(randomNumber);
     if (i == 0) return randomNumber
   }
+  function showUnlockedElements(times) {
+    textur.width = 477*(figuresUnlocked-1) + 444 + 5;
+    for (var i = 0; i < figuresUnlocked; i++) {
+      if (figuresTraining[i] != false && figuresTraining[i] != undefined) canvas.fillStyle = "green";
+      else canvas.fillStyle = "red";
+      canvas.fillRect(477*i, 0, 444 + 5, 400);
+      var Bild = new Image();
+          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + i + ".png";
+      canvas.drawImage(Bild, 10 + 477*i, 10);
+    }
+    if (times < 5) {
+      setTimeout(function () {
+        showUnlockedElements(times + 1);
+      }, 1);
+    }
+  }
   function Layout() {
+    // canvas.fillStyle = "black";
+    // canvas.fillRect(0, 0, textur.width, textur.height);
     for (var i = 0; i < screen.length; i++) {
       var Bild = new Image();
           Bild.src = screen[i].link;
@@ -178,22 +287,39 @@
   }
   var moveUpInt;
   function modeSelected(value) {
-    clearInterval(moveUpInt)
-    /*if (value != "scrollWithBall")*/ setInterval(moveUp, 10);
-  }
+    clearInterval(moveUpInt);
+    visible([["trainingHTMLElements", "none"], ["showHighscores", "inline"], ["checkbLives", "inline"], ["textCheckLives", "inline"]]);
+    if (value != /*"scrollWithBall"*/"training") {moveUpInt = setInterval(moveUp, 10);  beginnRound();}
+    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["checkbLives", "none"], ["textCheckLives", "none"]]); if (figuresTraining.length == 0)visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
+    }
   modeSelected("autoScroll");
   var speed = 1;
   var pixelMoved = 0;
   function moveUp() {
-    pixelMoved++;
-    if (pixelMoved == 852*1) {shield = false; sphere1.style.backgroundColor = "blue";}
+    var directions = [-1, 1]
+    var selectedDirection = directions[Math.round(Math.random()*(directions.length - 1))];
+    var i1 = 0;
+    for (var i = 0; i < screen.length; i++) {
+      if (!(screen[i].y < 400 || screen[i].y > 840)) i1++;
+    }
+    if (modeSelection.value == "againstThePC" && (!((pixelMoved/3333 + "").includes(".")) || pixelMoved == 0 || !(i1 > 0))) {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: pixelMoved + 1333}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/}
+    if (modeSelection.value == "againstThePC" && pixelMoved == direction.needed) {
+      speed = 0.01;
+      setTimeout(function () {
+        direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*300) + 500};
+        speed = 0.5;
+      }, 1000);
+    }
+    pixelMoved += speed;
+    if (pixelMoved == 852*1) {shield = false;}
     // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
     for (var i = 0; i < screen.length && countdown.length == 0; i++) {
-      screen[i].y += speed;
+      screen[i].y += direction.direction*speed;
       for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
-        objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += speed;
+        objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += direction.direction*speed;
       }
-      if (screen[i].y > 852) {screen.splice(i, 1); screen.push(createNewFigure(screen.length));}
+      if ((screen[i].y > 852 && modeSelection.value != "againstThePC")) {screen.splice(i, 1); screen.push(createNewFigure(screen.length));}
+      if (screen[i].y > 852  && modeSelection.value == "againstThePC"/* && screen[i].pushed != true*/) {screen.push(createNewFigure(screen.length - 1)); /*screen[i].pushed = true*/screen.shift();}
     }
     if (countdown.length == 0) {
     Layout();
@@ -215,5 +341,94 @@
         }
       }
   }
+  }
+  var highscoresDisplayedBefore = {};
+  function showScores(highscores, mode) {
+    scores.style.display = "inline";
+    for (var i = 0; i < Object.keys(highscoresDisplayedBefore).length + 11 && Object.keys(highscoresDisplayedBefore).length > 0; i++) {
+      try {
+        document.getElementById("scores").deleteRow(0);
+      } catch (e) {
+        console.log("wanted to delete too many elements of table");
+        i = Object.keys(highscoresDisplayedBefore).length + 11
+      }
+    }
+    highscoresDisplayedBefore = highscores;
+    document.getElementById('textur').style.display = "none";
+    console.log("scores: " + highscores);
+    var cell = [ /*row.insertCell(0)*/ ];
+    var highestLives = {lives: 0, number: 0};
+    for (var i = 0; i < Object.keys(highscores).length; i++) {
+      // if (!(Object.keys(highscores)[i] == "allMaps")) {
+        var table = document.getElementById("scores");
+        var row = table.insertRow(i);
+        cell.push(row.insertCell(0));
+        cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
+      // }
+      //  var cell = [/*row.insertCell(0)*/];
+      for (var i1 = 1; i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1; i1++) {
+        // if (!(Object.keys(highscores)[i] == "allMaps")) {
+          if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1) {
+            cell[cell.length - 2] = row.insertCell(i1);
+            // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
+            //   i1--;
+            // }
+            cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/];
+            if (highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/] > highscores[name][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "red";
+            else if (highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/] < highscores[name][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "green";
+            else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
+            else cell[cell.length - 2].style.color = "black";
+
+          } else {
+            cell[cell.length - 2] = row.insertCell(i1);
+            //  cell[cell.length - 2].innerHTML = "unmade";
+            //  cell[cell.length - 2].style.color = "black";
+          }
+        // }
+      }
+      var row = table.insertRow(i);
+      //  var row = table.insertRow(i+1);
+      // var row = table.insertRow(i + 1);
+      if (Object.keys(highscores[Object.keys(highscores)[i]][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][mode]).length}
+    }
+    //  var row = table.insertRow(0);
+    //  var cell = [/*row.insertCell(0)*/];
+    // cell.push(row.insertCell(0));
+    // cell[cell.length - 1].innerHTML = "name";
+    var row = table.insertRow(0);
+    cell.push(row.insertCell(0));
+    for (var i1 = 0; i1 < highestLives.lives + 1; i1++) {
+      cell.push(row.insertCell(i1));
+      if (i1 == 0) cell[cell.length - 1].innerHTML = "name";
+      else cell[cell.length - 1].innerHTML = (i1) + ". live";
+    }
+  }
+  var figuresSelected = 0;
+  function canvasClicked() {
+    for (var i = 0; i < figuresUnlocked; i++) {
+      // canvas.drawImage(Bild, 10 + 477*i, 10);
+      // canvas.fillRect(477*i, 0, 444 + 5, 400);
+      if (mausx > 10 + 477*i && mausx < 10 + 477*i + 444 && mausy < 400 && modeSelection.value == "training") {
+        if (figuresTraining[i] != undefined && figuresTraining[i] != false) {figuresTraining[i] = false; figuresSelected--;}
+        else {figuresTraining[i] = true; figuresSelected++;}
+        showUnlockedElements(0);
+        if (figuresTraining.includes(true)) beginnTraining.style.display = "inline";
+        else beginnTraining.style.display = "none";
+      }
+    }
+  }
+  var mausx = 0;
+  var mausy = 0;
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY;
+    //  console.log(mausx + " - " + mausy);
+  }
+  document.onmousemove = readMouseMove
+
+  function visible(list) {
+    for (var i = 0; i < list.length; i++) {
+      document.getElementById(list[i][0]).style.display = list[i][1];
+    }
   }
 </script>
