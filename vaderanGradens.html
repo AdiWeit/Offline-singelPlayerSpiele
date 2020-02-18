@@ -130,8 +130,10 @@
     }
     playStyleSelected(playStyleSelection.value);
   }
+  var offline = false;
   dbGet("vaderanGradens", "highscores").then(result => {
     highscores = JSON.parse(result);
+    localStorage.setItem("highscoresvaderanGardens", JSON.stringify(highscores));
     AblageListe[0] = [];
     for (var i = 0; i < Object.keys(highscores).length; i++) {
      AblageListe[0].push([/*Object.keys(highscores)[i].toString().split('(')[1]*/Object.keys(highscores[Object.keys(highscores)[i]]).length + " player played)", Object.keys(highscores)[i].toString().split('|turning: ')[0], Object.keys(highscores)[i]/*.toString().split("(")[0]*/.toString().split("|turning: ")[1]]);
@@ -142,7 +144,14 @@
     //  placeholder.push("turns:7|turning allowed (2 player played)");
     }
   }).catch(function(e) {
-    console.log(e);
+    console.error("offline mode activated (error: " + e + ")");
+    alert("Offline mode active! The displayed highscores are the ones from the last time, you opened the website with internet connection. If you get a new highscore, it will be uploaded next time, you have access to internet.");
+    highscores = JSON.parse(localStorage.getItem("highscoresvaderanGardens"));
+    if (JSON.parse(localStorage.getItem("uploadScore")) != undefined && JSON.parse(localStorage.getItem("uploadScore")).true == true) {
+      highscores[JSON.parse(localStorage.getItem("uploadScore")).mode][name] = JSON.parse(localStorage.getItem("uploadScore")).myScores;
+      localStorage.setItem("uploadScore", {true: false});
+    }
+    offline = true;
   });
 
   function playStyleSelected(value) {
@@ -198,10 +207,23 @@ function showOwnCards() {
 }
 function createNewRandomCard() {
   AblageListe[0] = [];
+  var colourZaehler = {yellow: 0, green: 0, blue: 0, brown: 0}
+  var itemZaehler = 0;
+  var colour = "";
   for (var i = 0; i < 3; i++) {
     AblageListe[0][i] = [];
     for (var i1 = 0; i1 < 3; i1++) {
+      colour = "";
       AblageListe[0][i][i1] = createNewRandomField();
+      colourZaehler[AblageListe[0][i][i1].colour]++;
+      if (AblageListe[0][i][i1].item != false) itemZaehler++;
+      if (itemZaehler > 1 || colourZaehler[AblageListe[0][i][i1].colour] > 3) {colour = AblageListe[0][i][i1].colour; i1--;}
+      if (colourZaehler[colour] > 3) {
+        colourZaehler[colour]--;
+      }
+      if (itemZaehler > 1) {
+        itemZaehler--;
+      }
     }
   }
   return AblageListe[0];
@@ -323,7 +345,9 @@ function rundeAuswerten() {
   //alert("you got " + points + " points!");
   if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] == undefined) highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] = {};
   if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] == undefined || points > highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name])  {
-    highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] = points; document.getElementById('newHighscore').style.display = "inline"; dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
+    highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] = points; document.getElementById('newHighscore').style.display = "inline";
+    if (offline) localStorage.setItem("uploadScore", {true: true, myScores: highscores[mode][name], mode: mode});
+    else dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
     audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/stamp-sound-effects-all-sounds-youtubemp3free.org.mp3");
     audio.currentTime = 60*4 + 15;
     audio.play();
