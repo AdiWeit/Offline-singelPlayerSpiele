@@ -1,0 +1,125 @@
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<canvas id="textur" width="300" height="300"></canvas>
+<select name="course" id="direction" value="normal" onchange="direction = value;">
+  <option value="right">right</option>
+  <option value="left">left</option>
+  <option value="down">down</option>
+  <option value="up">up</option>
+</select>
+<br>
+<button type="button" id="start" onclick="beginnRound();" name="button">start</button>
+<script>
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+  }
+
+  var canvas = textur.getContext('2d'); //Dimension
+  var mausx = 0;
+  var mausy = 0;
+  textur.width = window.innerWidth - 30;
+  textur.height = window.innerHeight - 50;
+  var inRound = false;
+  var colour;
+  var beginningPoint;
+  var countdown = [];
+  var countdownInt;
+  var direction = "right";
+  var coordinationList = [];
+  var startpoint = {x: 0, y: 0}
+  var abweichungInsgesamt = 0;
+
+  function beginnRound() {
+    beginningPoint = {x: Math.round(Math.random()*textur.width - 30) + 20, y: Math.round(Math.random()*textur.height - 30) + 20};
+  }
+  function mousemoveFolgen() {
+    if (!inRound) {
+      canvas.fillStyle = "yellow";
+      canvas.fillRect(beginningPoint.x, beginningPoint.y, 10, 10);
+    }
+    else if (!((mausx > window.innerWidth - 30 - 20 && direction == "right") || (direction == "left" && mausx < 10) || (direction == "down" && mausy > window.innerHeight - 50 - 10) || (direction == "up" && mausy > 10))) {
+      canvas.fillStyle = colour;
+      canvas.fillRect(mausx, mausy, 10, 10);
+      /*if (direction == "right") */coordinationList.push({x: mausx, y: mausy});
+    }
+    else if (abweichungInsgesamt == 0) {
+      for (var i = 0; i < coordinationList.length; i++) {
+        if (direction == "right" || direction == "left") {
+          if (coordinationList[i].y > startpoint.y) abweichungInsgesamt += coordinationList[i].y - startpoint.y;
+          else if (coordinationList[i].y < startpoint.y) abweichungInsgesamt += startpoint.y - coordinationList[i].y;
+        }
+        if (direction == "down" || direction == "up") {
+          if (coordinationList[i].x > startpoint.x) abweichungInsgesamt += coordinationList[i].x - startpoint.x;
+          else if (coordinationList[i].x < startpoint.x) abweichungInsgesamt += startpoint.x - coordinationList[i].x;
+        }
+        }
+        alert("Abweichung: " + abweichungInsgesamt);
+    }
+    if (mausx > beginningPoint.x && mausx < beginningPoint.x + 20 && mausy > beginningPoint.y && mausy < beginningPoint.y + 10 && countdown.length == 0 && !inRound) {
+      countdown = [3,2,1,"Go!", "reallyGo!"];
+      countdownInt = setInterval(countdownFunction, 1000);
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(beginningPoint.x, beginningPoint.y, 10, 10);
+    }
+  }
+  function countdownFunction() {
+    // if (/*modeSelection.value != "training" || */beginnTraining.style.display == "none") {
+    canvas.clearRect(852/3 - 20, 752/2 - 50, 70, 70);
+    canvas.fillStyle = "red";
+      if (countdown.length == 2 && mausx > beginningPoint.x && mausx < beginningPoint.x + 20 && mausy > beginningPoint.y && mausy < beginningPoint.y + 10) {
+      inRound = true;
+      colour = 'rgba(' + Math.round(Math.random()*255) + ', ' + Math.round(Math.random()*255) + ', '+ Math.round(Math.random()*255) + ',1)';
+      canvas.fillStyle = "green"; clearInterval(countdownInt);
+      startpoint = {x: mausx, y: mausy};
+      setTimeout(function () {
+        countdown.shift();
+      }, 1000);
+  }
+  else if (countdown.length == 2) {
+    clearInterval(countdownInt);
+  }
+    canvas.font = "70px Georgia";
+    canvas.fillText(countdown[0], 852/3, 752/2);
+    countdown.shift();
+  // }
+  }
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY;
+    if (gerät == "PC") mausy -= 5;
+    mausy -= 7;//9;
+    mausx -= 10;
+    //  console.log(e.clientX);
+  //  if (gerät == "PC") {
+      mousemoveFolgen();
+  //  }
+  }
+  document.onmousemove = readMouseMove
+  // if (gerät == "Handy") {
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+//  }
+
+  function touch(ev) {
+    mausx = ev.touches[0]["pageX"] + mausxScroll;
+    mausy = ev.touches[0]["pageY"] + mausyScroll;
+    // if (ev.type == "touchstart") {
+    //
+    // }
+    if (ev.type == "touchmove") {
+      mousemoveFolgen();
+    }
+  }
+
+</script>
