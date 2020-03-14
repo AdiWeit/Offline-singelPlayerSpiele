@@ -1,6 +1,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <meta charset="utf-8">
-<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <button id="BAndereBenutzerAnzeigen" type="button" onclick="namenabfrage(prompt('Wie heißt die Person, nach der sie suchen?'));" name="button">highscores von anderen Spielern ansehen</button>
 <select name="course" id="modeSelection" value="move" onchange="modeSelected(value);">
   <option value="normal">normal</option>
@@ -48,27 +48,39 @@
   var mode = "normal";
   var items = {flash: {xp: {needs: 100, needsBeginning: 100, got: 0}}, exchanger: {xp: {needs: 133, needsBeginning: 133, got: 0}}, changer: {xp: {needs: 88, needsBeginning: 88, got: 0}}}
   var selectedItem = "flash";
-  var alert = true;
+  var alertSound = true;
   //var turns = 0;
   var diff;
 
-  dbGet("von2Zu4", "highscores" + name, function(result) {
-    if (result == "NOPE" == false) {
-      highscores = JSON.parse(result);
-    }
-  });
-  dbGet("von2Zu4", "zweitBesteScores" + name, function(result) {
+  setTimeout(function () {
+    dbGet("von2Zu4", "highscores" + name).then(result => {
+      if (result == "NOPE" == false) {
+        highscores = JSON.parse(result);
+        localStorage.setItem("highscoresVon2Zu4" + name, JSON.stringify(highscores));
+      }
+    }).catch(function(e) {
+      console.error("offline mode activated (error: " + e + ")");
+      alert("Offline mode active! The displayed highscores are the ones from the last time, you opened the website with internet connection. If you get a new highscore, it will be uploaded next time, you have access to internet.");
+      highscores = JSON.parse(localStorage.getItem("highscoresVon2Zu4"));
+      if (JSON.parse(localStorage.getItem("uploadScore")) != undefined && JSON.parse(localStorage.getItem("uploadScore")).true == true) {
+        highscores[JSON.parse(localStorage.getItem("uploadScore")).mode] = JSON.parse(localStorage.getItem("uploadScore")).myScores;
+        localStorage.setItem("uploadScore", {true: false});
+      }
+      offline = true;
+    });
+  }, 1000);
+  dbGet("von2Zu4", "zweitBesteScores" + name).then(result => {
     if (result == "NOPE" == false) {
       zweitBesteScores = JSON.parse(result);
     }
   });
-  dbGet("von2Zu4", "namen" + name, function(result) {
+  dbGet("von2Zu4", "namen" + name).then(result => {
     if (result == "NOPE" == false) {
       namen = result.toString().split(',');
     }
   });
 
-  dbGet("von2Zu4", mode + " spielfeld " + name, function(result) {
+  dbGet("von2Zu4", mode + " spielfeld " + name).then(result => {
     if (result == "NOPE" == false) {
       spielfeld = result.toString().split(';');
       zählerListe[0] = 0;
@@ -100,12 +112,12 @@
   function modeSelected(value) {
     audio = new Audio("https://www.mediacollege.com/downloads/sound-effects/star-trek/tos/tos-computer-06.mp3").play();
     mode = value;
-    dbGet("von2Zu4", mode + " spielfeld " + name, function(result) {
-      dbGet("von2Zu4", "items " + name, function(result) {
+    dbGet("von2Zu4", mode + " spielfeld " + name).then(result => {
+      dbGet("von2Zu4", "items " + name).then(result => {
         if (result == "NOPE" == false) {
           items = JSON.parse(result);
         }
-        // dbGet("von2Zu4", mode +  " turns " + name, function(result) {
+        // dbGet("von2Zu4", mode +  " turns " + name).then(result => {
         //   if (result == "NOPE" == false) {
         //     turns = JSON.parse(result);
         //   }
@@ -132,7 +144,7 @@
   function namenabfrage(name, included) {
     if (namen.includes(name)) included = true;
     namen[namen.length] = name;
-    dbGet("von2Zu4", "highscores" + namen[namen.length - 1], function(result) {
+    dbGet("von2Zu4", "highscores" + namen[namen.length - 1]).then(result => {
       if (included == true || JSON.parse(result)[mode][0] == "NOPE" || JSON.parse(result)[mode][0] == "" || JSON.parse(result)[mode][0] == "null") {
         namen.pop();
         audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/windows%207%20trash.wav").play();
@@ -165,7 +177,7 @@
   }
 
   function highscoresAndereSpieler(nameAndererSpieler) {
-    dbGet("von2Zu4", "highscores" + nameAndererSpieler, function(result) {
+    dbGet("von2Zu4", "highscores" + nameAndererSpieler).then(result => {
       if (result != "NOPE") {
       canvas.font = "65px Georgia";
       // TODO: Handeln bei "NOPE"
@@ -207,7 +219,7 @@
         canvas.fillStyle = "black";
       }
       canvas.fillText("highscore: " + JSON.parse(result)[mode][1], 30, (185 + 47) * 2 - 37 + AblageListe[3] - 120);
-      dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler, function(result) {
+      dbGet("von2Zu4", "zweitBesteScores" + nameAndererSpieler).then(result => {
         canvas.fillStyle = "black";
         canvas.fillText("zweit bester Score: " + JSON.parse(result)[mode][0], 30, (160 + 40) * 2 - 47 + AblageListe[3] - 120);
         canvas.fillText("zweit bester Score: " + JSON.parse(result)[mode][1], 30, (195 + 50) * 2 - 35 + AblageListe[3] - 120);
@@ -397,7 +409,7 @@
           canvas.arc(145 + 170*i, 790/* + 170*/, 70, 4.72, diff/10+4.72, false);
           canvas.stroke();
       diff = ((/*al*/(items[Object.keys(items)[i]].xp.got/items[Object.keys(items)[i]].xp.needs*100) / 100) * Math.PI*2*10).toFixed(2);
-      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) {canvas.strokeStyle = "blue"; alert = true;} // colour for progress bar
+      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) {canvas.strokeStyle = "blue"; alertSound = true;} // colour for progress bar
       else {
         canvas.strokeStyle = "#40FF00";
         if (Object.keys(items)[i] == selectedItem) changeSelection();
@@ -650,12 +662,13 @@
       if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) selectedItem = Object.keys(items)[i];
     }
     setTimeout(function () {
-      if (AblageListe[1] == selectedItem && alert == true) {
+      if (AblageListe[1] == selectedItem && alertSound == true) {
         new Audio("https://adi.nicolaiweitkemper.de/Sounds/beendet%20sound.wav").play();
-        alert = false;
+        alertSound = false;
       }
-      else if (alert == true) {
+      else if (alertSound == true) {
         new Audio("https://adi.nicolaiweitkemper.de/Sounds/ding-sound-effect-youtubemp3free.org.mp3").play();
+        alertSound = false;
       }
     }, 1333);
   }
@@ -843,8 +856,11 @@
       }
     }
     if (newHighscore) {
-      dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
-      dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+      if (offline) localStorage.setItem("uploadScore" + name, {true: true, myScores: highscores[mode], mode: mode});
+      else {
+        dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
+        dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+      }
     }
     scores[1] = AblageListe[2][AblageListe[2].length - 1]
     var newZweitbesteScores = false;
