@@ -308,6 +308,10 @@ console.log("PC");
     if (modeSelection.value == "againstThePC" && (!((pixelMoved/13333 + "").includes(".")) || pixelMoved == 0/*|| !(i1 > 0)*/ || screen[1].y < 0)) {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: pixelMoved + 1833}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/}
     if (modeSelection.value == "againstThePC" && pixelMoved >= direction.needed) {
       speed = 0.01;
+      shield = true;
+      setTimeout(function () {
+        shield = false;
+      }, 3000);
       setTimeout(function () {
         if (selectedDirection > 0) {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: pixelMoved + (Math.round(Math.random()*100) + 300)/2}; speed = 1;}
         else {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)}; speed = 0.5;}
