@@ -156,31 +156,33 @@
       // allDirections
       if (level.mode == "allDirections") {
       var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: 50, height: 50}, ball);
-      if (collision && parseInt(y1 + vy1 / 50) < ball.y) {
-        // setTimeout(function () {
-          if (parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)//3; // down
-          else ball.y += (y1 - parseInt(y1 + vy1 / 50))
-        // }, 1);
-      }
-      if (collision && parseInt(y1 + vy1 / 50) > ball.y)  {
-        // setTimeout(function () {
-          if (y1 > parseInt(y1 + vy1 / 50)) ball.y -= (y1 - parseInt(y1 + vy1 / 50))//3; // up
-          else ball.y -= (parseInt(y1 + vy1 / 50) - y1)//3; // up
-        // }, 1);
-      }
-      if (collision && parseInt(x1 + vx1 / 50) > ball.x) {
-        // setTimeout(function () {
-          if (x1 > parseInt(x1 + vx1 / 50)) ball.y -=  (x1 - parseInt(x1 + vx1 / 50))//3; // left
-          else ball.y -= (parseInt(x1 + vx1 / 50) - x1)
-        // }, 1);
+      while (collision && ((parseInt(y1 + vy1 / 50) - y1) + (y1 - parseInt(y1 + vy1 / 50)) + (y1 - parseInt(y1 + vy1 / 50)) + (parseInt(y1 + vy1 / 50) - y1) + (parseInt(y1 + vy1 / 50) - y1) + (x1 - parseInt(x1 + vx1 / 50)) + (parseInt(x1 + vx1 / 50) - x1) + (parseInt(x1 + vx1 / 50) - x1) + (x1 - parseInt(x1 + vx1 / 50)) != 0)) {
+        collision = isCollide({x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball);
+        if (collision && parseInt(y1 + vy1 / 50) < ball.y) {
+          // setTimeout(function () {
+            if (parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)//3; // down
+            else ball.y += (y1 - parseInt(y1 + vy1 / 50))
+          // }, 1);
         }
-      if (collision && parseInt(x1 + vx1 / 50) < ball.x) {
-        // setTimeout(function () {
-          if (parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)//3;// right
-          else ball.x += (x1 - parseInt(x1 + vx1 / 50))
-        // }, 1);
-      }
-
+        if (collision && parseInt(y1 + vy1 / 50) > ball.y)  {
+          // setTimeout(function () {
+            if (y1 > parseInt(y1 + vy1 / 50)) ball.y -= (y1 - parseInt(y1 + vy1 / 50))//3; // up
+            else ball.y -= (parseInt(y1 + vy1 / 50) - y1)//3; // up
+          // }, 1);
+        }
+        if (collision && parseInt(x1 + vx1 / 50) > ball.x) {
+          // setTimeout(function () {
+            if (x1 > parseInt(x1 + vx1 / 50)) ball.x -=  (x1 - parseInt(x1 + vx1 / 50))//3; // left
+            else ball.x -= (parseInt(x1 + vx1 / 50) - x1)
+          // }, 1);
+          }
+        if (collision && parseInt(x1 + vx1 / 50) < ball.x) {
+          // setTimeout(function () {
+            if (parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)//3;// right
+            else ball.x += (x1 - parseInt(x1 + vx1 / 50))
+          // }, 1);
+        }
+    }
     }
 
       // magnet
