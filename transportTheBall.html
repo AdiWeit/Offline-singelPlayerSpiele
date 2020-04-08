@@ -1,24 +1,31 @@
 <title>Geduldspiel</title>
 <canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
+<select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
+  <option value="normal">normal</option>
+  <option value="magnet">magnet</option>
+  <option value="allDirections">all directions</option>
+</select>
 <div id="ball">
   <style>
     .shape {
- position: absolute;
- width: 50px;
- height: 50px;
- -webkit-radius: 50px;
- margin:0;width
- padding:0;
-}
-#sphere1{
- border-radius: 50px;
- background-color: blue;
-}
-#sphere2{
- border-radius: 50px;
- background-color: red;
-}
-</style>
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      -webkit-radius: 50px;
+      margin: 0;
+      width padding: 0;
+    }
+
+    #sphere1 {
+      border-radius: 50px;
+      background-color: blue;
+    }
+
+    #sphere2 {
+      border-radius: 50px;
+      background-color: red;
+    }
+  </style>
 </div>
 <div id="content">
   <div class="shape" id="sphere1"></div>
@@ -29,178 +36,434 @@
 
 
 <script>
-    var canvas = textur.getContext('2d'); //Dimension
-    var x1 = 10,
+  var canvas = textur.getContext('2d'); //Dimension
+  var x1 = 10,
     y1 = 177; //window.innerHeight - 150 + 3,
   x2 = 0, y2 = 0,
-  vx1 = 0, vy1 = 0,
-  vx2 = 0, vy2 = 0,
-  ax1 = 0, ay1 = 0;
+    vx1 = 0, vy1 = 0,
+    vx2 = 0, vy2 = 0,
+    ax1 = 0, ay1 = 0;
 
-    var sphere = {schieber: document.getElementById("sphere1"), ball: document.getElementById("sphere2")};
-    sphere.schieber.style.width = "50px";
-    sphere.schieber.style.height = "50px";
-    sphere.schieber.style.ball = "50px";
-    sphere.schieber.style.ball = "50px";
-    var level = {aktuell: 0, mode: "normal", normal: {1: {spawnPoint: {
-      schieber: {x: 177, y: 200}, ball: {x: 177, y: 250}}, ball: {width: 50, height: 50}}}};
-    var Bild = new Image();
-    if (window.DeviceMotionEvent != undefined) {
-  window.ondevicemotion = function(e) {
-    ax1 = inOrAgainstDirection*event.accelerationIncludingGravity.x * 17;
-    ay1 = inOrAgainstDirection*event.accelerationIncludingGravity.y * 17;
-  }
-  setInterval(function() {
-    var landscapeOrientation = window.innerWidth / Bild.width > 1;
-    if (landscapeOrientation) {
-      vx1 = vx1 + ay1;
-      vy1 = vy1 + ax1;
-      vx2 = vx2 + ay1;
-      vy2 = vy2 + ax1;
-    } else {
-      vy1 = vy1 - ay1;
-      vx1 = vx1 + ax1;
-      vy2 = vy2 - ay1;
-      vx2 = vx2 + ax1;
-    }
-    vx1 = vx1 * 0.98;
-    vy1 = vy1 * 0.98;
-    y1 = parseInt(y1 + vy1 / 50);
-    x1 = parseInt(x1 + vx1 / 50);
-
-    vx2 = vx2 * 0.98;
-    vy2 = vy2 * 0.98;
-    y2 = parseInt(y2 + vy2 / 30);
-    x2 = parseInt(x2 + vx2 / 30);
-    //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
-    boundingBoxCheck();
-    sphere.schieber.style.top = y1 + "px";
-    sphere.schieber.style.left = x1 + "px";
-    ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
-    ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
-    if (isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore == "left") ball.x = x1 - cssToNumber(sphere.schieber.style.width)//-= 3;
-    if (isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore == "right") ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
-    if (isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore == "up") ball.y = y1 - cssToNumber(sphere.schieber.style.height)//-= 3;
-    if (isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore == "down") ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
-    sphere.ball.style.left = ball.x + "px";
-    sphere.ball.style.top = ball.y + "px";
-    var numbers = [
-      [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
-      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
-      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 + cssToNumber(sphere.schieber.style.height) - 7],
-      [x1 - 10, y1 + cssToNumber(sphere.schieber.style.height) / 2],
-
-      [ball.x + cssToNumber(sphere.ball.style.width) - 7, ball.y + cssToNumber(sphere.ball.style.height) / 2],
-      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y - 8],
-      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y + cssToNumber(sphere.ball.style.height) - 7],
-      [ball.x - 10, ball.y + cssToNumber(sphere.ball.style.height) / 2]
-    ]
-    for (var i = 0; i < 8; i++) {
-      // canvas.fillStyle = "red";
-      // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
-      data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
-      red = data.data[0];
-      green = data.data[1];
-      blue = data.data[2];
-      alpha = data.data[3];
-      if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
-        console.log("Fail!");
-        restartLevel();
+  var sphere = {
+    schieber: document.getElementById("sphere1"),
+    ball: document.getElementById("sphere2")
+  };
+  sphere.schieber.style.width = "50px";
+  sphere.schieber.style.height = "50px";
+  sphere.schieber.style.ball = "50px";
+  sphere.schieber.style.ball = "50px";
+  var normalSpawnpoint = {
+            schieber: {
+              x: 155,
+              y: 200
+            },
+            ball: {
+              x: 155,
+              y: 250
+            }}
+  var level = {
+    aktuell: 0,
+    mode: "normal",
+    normal: {
+      1: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        }
+      },
+      2: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        },
+        ballTeleporter: [{
+          ballSide: {
+            x: 150,
+            y: 250,
+            width: 100,
+            height: 100
+          },
+          ballTeleportedSide: {
+            x: 833,
+            y: 377
+          },
+          schieberSide: {
+            x: 777,
+            y: 444,
+            width: 50,
+            height: 50
+          }
+        }]
+      },
+      3: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        }
       }
-      if (red == 255 && blue == 0 && alpha == 255 && (green > 241)) {
-        console.log("goal reached (yellow)");
-        nextLevel();
+    },
+    magnet: {
+      // 1. normale Level übernommen
+    },
+    allDirections: {
+      1: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        }
       }
     }
-  }, 25);
-}
 
-function boundingBoxCheck() {
-  Layout();
-  if (x1 < 0) {
-    x1 = 0;
-    vx1 = -vx1;
-  }
-  if (y1 < 0) {
-    y1 = 0;
-    vy1 = -vy1;
-  }
-  if (x1 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
-    x1 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
-    vx1 = -vx1;
-  }
-  if (y1 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
-    y1 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
-    vy1 = -vy1;
-  }
-  if (x2 < 0) {
-    x2 = 0;
-    vx2 = -vx2;
-  }
-  if (y2 < 0) {
-    y2 = 0;
-    vy2 = -vy2;
-  }
-  if (x2 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
-    x2 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
-    vx2 = -vx2;
-  }
-  if (y2 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
-    y2 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
-    vy2 = -vy2;
-  }
-}
+  };
+  level.magnet[1] = level.normal[1];
 
-function Layout() {
-  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/map" + level.aktuell + ".png";
-  canvas.drawImage(Bild, 0, 0);
-}
-var ball = {x: 0, y: 0, width: 50, height: 50};
-nextLevel();
-function restartLevel() {
-  x1 = level[level.mode][level.aktuell].spawnPoint.schieber.x;
-  y1 = level[level.mode][level.aktuell].spawnPoint.schieber.y;
-  sphere.ball.style.top = level[level.mode][level.aktuell].spawnPoint.ball.y + "px";
-  sphere.ball.style.left = level[level.mode][level.aktuell].spawnPoint.ball.x + "px";
-}
-function nextLevel() {
-  level.aktuell++;
-  restartLevel();
-  ball.width =
-  sphere.ball.style.width = ball.width + "px";
-  sphere.ball.style.height = ball.height + "px";
-}
+  var Bild = new Image();
+  if (window.DeviceMotionEvent != undefined) {
+    window.ondevicemotion = function(e) {
+      ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
+      ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
+    }
+    setInterval(function() {
+      var landscapeOrientation = window.innerWidth / Bild.width > 1;
+      if (landscapeOrientation) {
+        vx1 = vx1 + ay1;
+        vy1 = vy1 + ax1;
+        vx2 = vx2 + ay1;
+        vy2 = vy2 + ax1;
+      } else {
+        vy1 = vy1 - ay1;
+        vx1 = vx1 + ax1;
+        vy2 = vy2 - ay1;
+        vx2 = vx2 + ax1;
+      }
+      vx1 = vx1 * 0.98;
+      vy1 = vy1 * 0.98;
+      ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
+      ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
+      ball.width = cssToNumber(ball.width);
+      // allDirections
+      if (level.mode == "allDirections") {
+      var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: 50, height: 50}, ball);
+      if (collision && parseInt(y1 + vy1 / 50) < ball.y) {
+        // setTimeout(function () {
+          if (parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)//3; // down
+          else ball.y += (y1 - parseInt(y1 + vy1 / 50))
+        // }, 1);
+      }
+      if (collision && parseInt(y1 + vy1 / 50) > ball.y)  {
+        // setTimeout(function () {
+          if (y1 > parseInt(y1 + vy1 / 50)) ball.y -= (y1 - parseInt(y1 + vy1 / 50))//3; // up
+          else ball.y -= (parseInt(y1 + vy1 / 50) - y1)//3; // up
+        // }, 1);
+      }
+      if (collision && parseInt(x1 + vx1 / 50) > ball.x) {
+        // setTimeout(function () {
+          if (x1 > parseInt(x1 + vx1 / 50)) ball.y -=  (x1 - parseInt(x1 + vx1 / 50))//3; // left
+          else ball.y -= (parseInt(x1 + vx1 / 50) - x1)
+        // }, 1);
+        }
+      if (collision && parseInt(x1 + vx1 / 50) < ball.x) {
+        // setTimeout(function () {
+          if (parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)//3;// right
+          else ball.x += (x1 - parseInt(x1 + vx1 / 50))
+        // }, 1);
+      }
 
-var directionBefore = "";
-function isCollide(a, b) {
-if (((a.y + a.height) < (b.y))) directionBefore = "down";
-if (((a.y > (b.y + b.height)))) directionBefore = "up";
-if ((((a.x + a.width) < b.x))) directionBefore = "right";
-if (((a.x > (b.x + b.width)))) directionBefore = "left";
-if (!(
-    ((a.y + a.height) < (b.y)) ||
-    (a.y > (b.y + b.height)) ||
-    ((a.x + a.width) < b.x) ||
-    (a.x > (b.x + b.width))
-)) {}
-return !(
-    ((a.y + a.height) < (b.y)) ||
-    (a.y > (b.y + b.height)) ||
-    ((a.x + a.width) < b.x) ||
-    (a.x > (b.x + b.width))
-);
-}
-var inOrAgainstDirection = 1;
-modeSelected("normal");
-function modeSelected(mode) {
-  level.mode = mode;
-  if (mode == "normal") {
-    inOrAgainstDirection = 1;
+    }
+
+      // magnet
+      if (level.mode == "magnet") {
+      if (parseInt(y1 + vy1 / 50) + 30 > ball.y) {
+        // setTimeout(function () {
+        ball.y += (parseInt(y1 + vy1 / 50) - y1) / 10 + timeDirection.down; // down
+        // }, 1);
+        timeDirection.down += 0.1 //1
+      }
+      // else if (timeDirection.over.down < 50) {
+      //   timeDirection.over.down++;
+      //   ball.y += (parseInt(y1 + vy1 / 50) - y1)/10; // down
+      // }
+      else {
+        timeDirection.down = 0;
+        timeDirection.over.down = 0;
+      }
+      if (parseInt(y1 + vy1 / 50) < ball.y + 30) {
+        // setTimeout(function () {
+        ball.y -= (y1 - parseInt(y1 + vy1 / 50)) / 10 + timeDirection.up; // up
+        // }, 1);
+        timeDirection.up += 0.1 //1
+      }
+      // else if (timeDirection.over.up < 50) {
+      //   timeDirection.over.up++;
+      //   ball.y -= (y1 - parseInt(y1 + vy1 / 50))/10; // up
+      // }
+      else {
+        timeDirection.up = 0;
+        timeDirection.over.up = 0;
+      }
+      if (parseInt(x1 + vx1 / 50) < ball.x + 30) {
+        // setTimeout(function () {
+        ball.x -= (x1 - parseInt(x1 + vx1 / 50)) / 10 + timeDirection.left; // left
+        // }, 1);
+        timeDirection.left += 0.1 //1
+      }
+      // else if (timeDirection.over.left < 50) {
+      //   timeDirection.over.left++;
+      //   ball.x -=  (x1 - parseInt(x1 + vx1 / 50))/10; // left
+      // }
+      else {
+        timeDirection.left = 0;
+        timeDirection.over.left = 0;
+      }
+      if (parseInt(x1 + vx1 / 50) + 30 > ball.x) {
+        // setTimeout(function () {
+        ball.x += (parseInt(x1 + vx1 / 50) - x1) / 10 + timeDirection.right; // right
+        // }, 1);
+        timeDirection.right += 0.1 //1
+      }
+      // else if (timeDirection.over.right < 50) {
+      //   timeDirection.over.right++;
+      //   ball.x += (parseInt(x1 + vx1 / 50) - x1)/10; // right
+      // }
+      else {
+        timeDirection.right = 0;
+        timeDirection.over.right = 0;
+      }
+    }
+
+      y1 = parseInt(y1 + vy1 / 50);
+      x1 = parseInt(x1 + vx1 / 50);
+
+      vx2 = vx2 * 0.98;
+      vy2 = vy2 * 0.98;
+      y2 = parseInt(y2 + vy2 / 30);
+      x2 = parseInt(x2 + vx2 / 30);
+      //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
+      boundingBoxCheck();
+      sphere.schieber.style.top = y1 + "px";
+      sphere.schieber.style.left = x1 + "px";
+      // normal mode
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere.schieber.style.width)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere.schieber.style.height)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+      for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
+        if (x1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x && x1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width && y1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y && y1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height &&
+           ball.x > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x && ball.x < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width && ball.y > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y && ball.y < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height)
+           {
+             ball.x = level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x;
+             ball.y = level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y;
+           }
+      }
+      sphere.ball.style.left = ball.x + "px";
+      sphere.ball.style.top = ball.y + "px";
+      var numbers = [
+        [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+        [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
+        [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 + cssToNumber(sphere.schieber.style.height) - 7],
+        [x1 - 10, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+
+        [ball.x + cssToNumber(sphere.ball.style.width) - 7, ball.y + cssToNumber(sphere.ball.style.height) / 2],
+        [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y - 8],
+        [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y + cssToNumber(sphere.ball.style.height) - 7],
+        [ball.x - 10, ball.y + cssToNumber(sphere.ball.style.height) / 2]
+      ]
+      for (var i = 0; i < 8; i++) {
+        // canvas.fillStyle = "red";
+        // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
+        data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+        red = data.data[0];
+        green = data.data[1];
+        blue = data.data[2];
+        alpha = data.data[3];
+        if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
+          console.log("Fail!");
+          restartLevel();
+        }
+        if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3) {
+          console.log("goal reached (yellow)");
+          nextLevel();
+        }
+        if (red == 168 && green == 230 && blue == 29 && i > 3 && ((checkpoint.schieber.x - y1 > 100 || y1 - checkpoint.schieber.x > 100) || (checkpoint.schieber.y - y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.ball.x - y1 > 100 || y1 - checkpoint.ball.x > 100) || (checkpoint.ball.y - y1 > 100 || y1 - checkpoint.ball.y > 100))) {
+          console.log("checkpoint!!!");
+          checkpoint.schieber.x = x1;
+          checkpoint.schieber.y = y1;
+          checkpoint.ball.x = ball.x;
+          checkpoint.ball.y = ball.y;
+        }
+      }
+    }, 25);
   }
-}
+  var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
+  var timeDirection = {
+    right: 0,
+    left: 0,
+    up: 0,
+    down: 0,
+    over: {
+      right: 0,
+      left: 0,
+      up: 0,
+      down: 0
+    }
+  };
 
-function cssToNumber(cssStyle) {
-  return JSON.parse(cssStyle.toString().split('px')[0])
-}
+  function boundingBoxCheck() {
+    Layout();
+    if (x1 < 0) {
+      x1 = 0;
+      vx1 = -vx1;
+    }
+    if (y1 < 0) {
+      y1 = 0;
+      vy1 = -vy1;
+    }
+    if (x1 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
+      x1 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
+      vx1 = -vx1;
+    }
+    if (y1 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
+      y1 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
+      vy1 = -vy1;
+    }
+    if (x2 < 0) {
+      x2 = 0;
+      vx2 = -vx2;
+    }
+    if (y2 < 0) {
+      y2 = 0;
+      vy2 = -vy2;
+    }
+    if (x2 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
+      x2 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
+      vx2 = -vx2;
+    }
+    if (y2 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
+      y2 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
+      vy2 = -vy2;
+    }
+  }
 
+  function Layout() {
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
+    canvas.drawImage(Bild, 0, 0);
+    for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
+      canvas.fillStyle = "blue";
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y, cssToNumber(ball.width), ball.height);
+      canvas.fillStyle = "red";
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height);
+      canvas.beginPath();
+      canvas.moveTo(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width/2, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height/2);
+            canvas.lineTo(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x + cssToNumber(ball.width/2), level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y + ball.height/2);
+      canvas.lineTo(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width/2, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height/2);
+      canvas.stroke();
+    }
+  }
+  var ball = {
+    x: 0,
+    y: 0,
+    width: 50,
+    height: 50
+  };
+  nextLevel();
+
+  function restartLevel() {
+    x1 = checkpoint.schieber.x;
+    y1 = checkpoint.schieber.y;
+    sphere.ball.style.top = checkpoint.ball.y + "px";
+    sphere.ball.style.left = checkpoint.ball.x + "px";
+  }
+
+  function nextLevel() {
+    level.aktuell++;
+    checkpoint.schieber.x = level[level.mode][level.aktuell].spawnPoint.schieber.x;
+    checkpoint.schieber.y = level[level.mode][level.aktuell].spawnPoint.schieber.y;
+    checkpoint.ball.x = level[level.mode][level.aktuell].spawnPoint.ball.x;
+    checkpoint.ball.y = level[level.mode][level.aktuell].spawnPoint.ball.y;
+    restartLevel();
+    ball.width = level[level.mode][level.aktuell].ball.width
+    ball.height = level[level.mode][level.aktuell].ball.height
+    sphere.ball.style.width = ball.width + "px";
+    sphere.ball.style.height = ball.height + "px";
+  }
+
+  var directionBefore = [];
+
+  function isCollide(a, b) {
+    if (((a.y + a.height) < (b.y)) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "down";
+    // else if (((a.y + a.height) < (b.y))) directionBefore.push("down");
+    // else if ((
+    //     (a.y > (b.y + b.height)) ||
+    //     ((a.x + a.width) < b.x) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("down");
+    if (((a.y > (b.y + b.height))) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "up";
+    // else if (((a.y > (b.y + b.height)))) directionBefore.push("up");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     ((a.x + a.width) < b.x) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("up");
+    if ((((a.x + a.width) < b.x)) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "right";
+    // else if ((((a.x + a.width) < b.x))) directionBefore.push("right");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     (a.y > (b.y + b.height)) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("right");
+    if (((a.x > (b.x + b.width))) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "left";
+    // else if (((a.x > (b.x + b.width)))) directionBefore.push("left");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     (a.y > (b.y + b.height)) ||
+    //     ((a.x + a.width) < b.x)
+    //   )) removeDirection("left");
+    if (!(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
+      )) {}
+    return !(
+      ((a.y + a.height) < (b.y)) ||
+      (a.y > (b.y + b.height)) ||
+      ((a.x + a.width) < b.x) ||
+      (a.x > (b.x + b.width))
+    );
+  }
+  var inOrAgainstDirection = 1;
+  modeSelected("normal");
+
+  function modeSelected(mode) {
+    level.mode = mode;
+    if (mode == "normal") {
+      inOrAgainstDirection = 1;
+    }
+  }
+
+  function removeDirection(direction) {
+    for (var i = 0; i < directionBefore.length; i++) {
+      if (directionBefore[i] == direction) {
+        directionBefore.splice(i, 1);
+        i--;
+      }
+    }
+  }
+
+  function cssToNumber(cssStyle) {
+    return JSON.parse(cssStyle.toString().split('px')[0])
+  }
 </script>
