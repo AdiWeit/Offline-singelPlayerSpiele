@@ -4,6 +4,7 @@
   <option value="normal">normal</option>
   <option value="magnet">magnet</option>
   <option value="allDirections">all directions</option>
+  <option value="slide">slide</option>
 </select>
 <div id="ball">
   <style>
@@ -124,10 +125,24 @@
           height: 50
         }
       }
+    },
+    slide: {
+      2: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        },
+        slidingTime: 44
+      }
     }
 
   };
   level.magnet[1] = level.normal[1];
+  level.slide[1] = level.normal[1];
+  level.slide[1].slidingTime = 16;
 
   var Bild = new Image();
   if (window.DeviceMotionEvent != undefined) {
@@ -245,6 +260,7 @@
       }
     }
 
+      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball) && zaehler == 0) moveDirection();
       y1 = parseInt(y1 + vy1 / 50);
       x1 = parseInt(x1 + vx1 / 50);
 
@@ -261,6 +277,8 @@
       if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
       if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere.schieber.style.height)//-= 3;
       if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+
+
       for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
         if (x1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x && x1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width && y1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y && y1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height &&
            ball.x > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x && ball.x < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width && ball.y > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y && ball.y < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height)
@@ -285,18 +303,33 @@
       for (var i = 0; i < 8; i++) {
         // canvas.fillStyle = "red";
         // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
-        data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
-        red = data.data[0];
-        green = data.data[1];
-        blue = data.data[2];
-        alpha = data.data[3];
+        try {
+          data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+          red = data.data[0];
+          green = data.data[1];
+          blue = data.data[2];
+          alpha = data.data[3];
+        } catch (e) {
+          console.log("Das ist ein Fehler :( )");
+        }
         if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
           console.log("Fail!");
           restartLevel();
         }
-        if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3) {
+        if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1]) {
           console.log("goal reached (yellow)");
           nextLevel();
+          i = 8;
+        }
+        else if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3) {
+          alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
+          i = 8;
+          sphere.ball.style.top = "0px";
+          sphere.ball.style.left = "0px";
+          zaehler = "newLevel";
+          setTimeout(function () {
+            zaehler = 0;
+          }, 500);
         }
         if (red == 168 && green == 230 && blue == 29 && i > 3 && ((checkpoint.schieber.x - y1 > 100 || y1 - checkpoint.schieber.x > 100) || (checkpoint.schieber.y - y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.ball.x - y1 > 100 || y1 - checkpoint.ball.x > 100) || (checkpoint.ball.y - y1 > 100 || y1 - checkpoint.ball.y > 100))) {
           console.log("checkpoint!!!");
@@ -321,7 +354,40 @@
       down: 0
     }
   };
-
+  var zaehler = 0;
+  var geteiltDurch = 0.5;
+  function moveDirection() {
+    if (zaehler != "newLevel") {
+    if (directionBefore == "right" && parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (directionBefore == "right") ball.x += (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (directionBefore == "left" && parseInt(x1 + vx1 / 50) > x1) ball.x -= (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (directionBefore == "left") ball.x -= (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (directionBefore == "down" && parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (directionBefore == "down") ball.y += (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    if (directionBefore == "up" && parseInt(y1 + vy1 / 50) > y1) ball.y -= (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (directionBefore == "up") ball.y -= (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    zaehler++;
+    sphere.ball.style.top = ball.y + "px";
+    sphere.ball.style.left = ball.x + "px";
+    if (zaehler < 20 || (geteiltDurch < level.slide[level.aktuell].slidingTime)) {
+      if (zaehler > 19) geteiltDurch++;
+      setTimeout(function () {
+        moveDirection();
+      }, 10);
+    }
+    else {
+      geteiltDurch = 0.5;
+      zaehler = 0;
+    }
+  }
+    // if (zaehler > 19) {zaehler = 0;}
+    // else if (geteiltDurch > 6) {
+    //   geteiltDurch++;
+    // }
+    // else {
+    //
+    // }
+  }
   function boundingBoxCheck() {
     Layout();
     if (x1 < 0) {
@@ -391,6 +457,10 @@
 
   function nextLevel() {
     level.aktuell++;
+    zaehler = "newLevel";
+    setTimeout(function () {
+      zaehler = 0;
+    }, 500);
     checkpoint.schieber.x = level[level.mode][level.aktuell].spawnPoint.schieber.x;
     checkpoint.schieber.y = level[level.mode][level.aktuell].spawnPoint.schieber.y;
     checkpoint.ball.x = level[level.mode][level.aktuell].spawnPoint.ball.x;
