@@ -135,14 +135,50 @@
           width: 50,
           height: 50
         },
-        slidingTime: 44
+        slidestop: 44
+      },
+      4: {
+        spawnPoint:
+          normalSpawnpoint
+        ,
+        ball: {
+          width: 50,
+          height: 50
+        },
+        ballTeleporter: [{
+          ballSide: {
+            x: 1200,
+            y: 600 - 50,
+            width: 100,
+            height: 100
+          },
+          ballTeleportedSide: {
+            x: 1200,
+            y: 211
+          },
+          schieberSide: {
+            x: 1000,
+            y: 290 - 50,
+            width: 100,
+            height: 100,
+          }//,
+          //checkpoint: true
+        }]
       }
     }
 
   };
   level.magnet[1] = level.normal[1];
   level.slide[1] = level.normal[1];
-  level.slide[1].slidingTime = 16;
+  level.slide[3] = JSON.parse(JSON.stringify(level.slide[4]));
+  level.slide[3].ballTeleporter[0].checkpoint = true;
+
+  for (var i = 1; i < Object.keys(level.slide).length + 1; i++) {
+    if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
+    if (!level.slide[i].slideLength) level.slide[i].slideLength = 20;
+  }
+  level.slide[1].slidestop = 16;
+
 
   var Bild = new Image();
   if (window.DeviceMotionEvent != undefined) {
@@ -289,56 +325,7 @@
       }
       sphere.ball.style.left = ball.x + "px";
       sphere.ball.style.top = ball.y + "px";
-      var numbers = [
-        [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
-        [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
-        [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 + cssToNumber(sphere.schieber.style.height) - 7],
-        [x1 - 10, y1 + cssToNumber(sphere.schieber.style.height) / 2],
-
-        [ball.x + cssToNumber(sphere.ball.style.width) - 7, ball.y + cssToNumber(sphere.ball.style.height) / 2],
-        [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y - 8],
-        [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y + cssToNumber(sphere.ball.style.height) - 7],
-        [ball.x - 10, ball.y + cssToNumber(sphere.ball.style.height) / 2]
-      ]
-      for (var i = 0; i < 8; i++) {
-        // canvas.fillStyle = "red";
-        // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
-        try {
-          data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
-          red = data.data[0];
-          green = data.data[1];
-          blue = data.data[2];
-          alpha = data.data[3];
-        } catch (e) {
-          console.log("Das ist ein Fehler :( )");
-        }
-        if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
-          console.log("Fail!");
-          restartLevel();
-        }
-        if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1]) {
-          console.log("goal reached (yellow)");
-          nextLevel();
-          i = 8;
-        }
-        else if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3) {
-          alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
-          i = 8;
-          sphere.ball.style.top = "0px";
-          sphere.ball.style.left = "0px";
-          zaehler = "newLevel";
-          setTimeout(function () {
-            zaehler = 0;
-          }, 500);
-        }
-        if (red == 168 && green == 230 && blue == 29 && i > 3 && ((checkpoint.schieber.x - y1 > 100 || y1 - checkpoint.schieber.x > 100) || (checkpoint.schieber.y - y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.ball.x - y1 > 100 || y1 - checkpoint.ball.x > 100) || (checkpoint.ball.y - y1 > 100 || y1 - checkpoint.ball.y > 100))) {
-          console.log("checkpoint!!!");
-          checkpoint.schieber.x = x1;
-          checkpoint.schieber.y = y1;
-          checkpoint.ball.x = ball.x;
-          checkpoint.ball.y = ball.y;
-        }
-      }
+      checkColourCollisions();
     }, 25);
   }
   var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
@@ -369,8 +356,9 @@
     zaehler++;
     sphere.ball.style.top = ball.y + "px";
     sphere.ball.style.left = ball.x + "px";
-    if (zaehler < 20 || (geteiltDurch < level.slide[level.aktuell].slidingTime)) {
-      if (zaehler > 19) geteiltDurch++;
+    checkColourCollisions();
+    if (zaehler < /*20*/(level.slide[level.aktuell].slideLength) || (geteiltDurch < level.slide[level.aktuell].slidestop)) {
+      if (zaehler > (level.slide[level.aktuell].slideLength - 1)/*19*/) geteiltDurch++;
       setTimeout(function () {
         moveDirection();
       }, 10);
@@ -380,13 +368,62 @@
       zaehler = 0;
     }
   }
-    // if (zaehler > 19) {zaehler = 0;}
-    // else if (geteiltDurch > 6) {
-    //   geteiltDurch++;
-    // }
-    // else {
-    //
-    // }
+  }
+  function checkColourCollisions() {
+    var numbers = [
+      [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
+      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 + cssToNumber(sphere.schieber.style.height) - 7],
+      [x1 - 10, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+
+      [ball.x + cssToNumber(sphere.ball.style.width) - 7, ball.y + cssToNumber(sphere.ball.style.height) / 2],
+      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y - 8],
+      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y + cssToNumber(sphere.ball.style.height) - 7],
+      [ball.x - 10, ball.y + cssToNumber(sphere.ball.style.height) / 2]
+    ]
+    for (var i = 0; i < 8; i++) {
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
+      try {
+        data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+        red = data.data[0];
+        green = data.data[1];
+        blue = data.data[2];
+        alpha = data.data[3];
+      } catch (e) {
+        console.log("Das ist ein Fehler :( )");
+      }
+      if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
+        console.log("Fail!");
+        zaehler = "newLevel";
+        setTimeout(function () {
+          zaehler = 0;
+        }, 500);
+        restartLevel();
+      }
+      if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1]) {
+        console.log("goal reached (yellow)");
+        nextLevel();
+        i = 8;
+      }
+      else if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3) {
+        alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
+        i = 8;
+        sphere.ball.style.top = "0px";
+        sphere.ball.style.left = "0px";
+        zaehler = "newLevel";
+        setTimeout(function () {
+          zaehler = 0;
+        }, 500);
+      }
+      if (red == 168 && green == 230 && blue == 29 && i > 3 && ((checkpoint.schieber.x - y1 > 100 || y1 - checkpoint.schieber.x > 100) || (checkpoint.schieber.y - y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.ball.x - y1 > 100 || y1 - checkpoint.ball.x > 100) || (checkpoint.ball.y - y1 > 100 || y1 - checkpoint.ball.y > 100))) {
+        console.log("checkpoint!!!");
+        checkpoint.schieber.x = x1;
+        checkpoint.schieber.y = y1;
+        checkpoint.ball.x = ball.x;
+        checkpoint.ball.y = ball.y;
+      }
+    }
   }
   function boundingBoxCheck() {
     Layout();
@@ -428,8 +465,9 @@
     Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
     canvas.drawImage(Bild, 0, 0);
     for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
-      canvas.fillStyle = "blue";
-      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
+      if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) canvas.fillStyle = "rgba(168, 230, 29, 1)";
+      else canvas.fillStyle = "blue";
+        canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y, cssToNumber(ball.width), ball.height);
       canvas.fillStyle = "red";
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height);
