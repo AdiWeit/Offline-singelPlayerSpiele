@@ -53,36 +53,14 @@
   sphere.schieber.style.height = "50px";
   sphere.schieber.style.ball = "50px";
   sphere.schieber.style.ball = "50px";
-  var normalSpawnpoint = {
-            schieber: {
-              x: 155,
-              y: 200
-            },
-            ball: {
-              x: 155,
-              y: 250
-            }}
   var level = {
     aktuell: 0,
     mode: "normal",
     normal: {
       1: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        }
+
       },
       2: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        },
         ballTeleporter: [{
           ballSide: {
             x: 150,
@@ -103,13 +81,7 @@
         }]
       },
       3: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        }
+
       }
     },
     magnet: {
@@ -117,34 +89,16 @@
     },
     allDirections: {
       1: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        }
+
       }
     },
     slide: {
       2: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        },
+
         slidestop: 44
       },
       4: {
-        spawnPoint:
-          normalSpawnpoint
-        ,
-        ball: {
-          width: 50,
-          height: 50
-        },
+
         ballTeleporter: [{
           ballSide: {
             x: 1200,
@@ -177,6 +131,23 @@
     if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
     if (!level.slide[i].slideLength) level.slide[i].slideLength = 20;
   }
+  for (var i = 0; i < Object.keys(level).length; i++) {
+    if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
+      for (var i1 = 1; i1 < Object.keys(level[Object.keys(level)[i]]).length + 1; i1++) {
+        if (!level[Object.keys(level)[i]][i1].sizes) level[Object.keys(level)[i]][i1].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
+        if (!level[Object.keys(level)[i]][i1].spawnPoint) level[Object.keys(level)[i]][i1].spawnPoint =     {
+                    schieber: {
+                      x: 155,
+                      y: 200
+                    },
+                    ball: {
+                      x: 155,
+                      y: 250
+                    }
+                  }
+      }
+    }
+  }
   level.slide[1].slidestop = 16;
 
 
@@ -187,6 +158,7 @@
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
     setInterval(function() {
+      //if (x1 > window.innerWidth - )
       var landscapeOrientation = window.innerWidth / Bild.width > 1;
       if (landscapeOrientation) {
         vx1 = vx1 + ay1;
@@ -203,7 +175,6 @@
       vy1 = vy1 * 0.98;
       ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
       ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
-      ball.width = cssToNumber(ball.width);
       // allDirections
       if (level.mode == "allDirections") {
       var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: 50, height: 50}, ball);
@@ -463,6 +434,8 @@
 
   function Layout() {
     Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
+    textur.width = Bild.width;
+    textur.height = Bild.height;
     canvas.drawImage(Bild, 0, 0);
     for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
       if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) canvas.fillStyle = "rgba(168, 230, 29, 1)";
@@ -504,8 +477,10 @@
     checkpoint.ball.x = level[level.mode][level.aktuell].spawnPoint.ball.x;
     checkpoint.ball.y = level[level.mode][level.aktuell].spawnPoint.ball.y;
     restartLevel();
-    ball.width = level[level.mode][level.aktuell].ball.width
-    ball.height = level[level.mode][level.aktuell].ball.height
+    ball.width = level[level.mode][level.aktuell].sizes.ball.width;
+    ball.height = level[level.mode][level.aktuell].sizes.ball.height;
+    sphere.schieber.width = level[level.mode][level.aktuell].sizes.schieber.width;
+    sphere.schieber.height = level[level.mode][level.aktuell].sizes.schieber.height;
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
   }
