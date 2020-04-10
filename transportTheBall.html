@@ -82,6 +82,9 @@
       },
       3: {
 
+      },
+      4: {
+
       }
     },
     magnet: {
@@ -158,7 +161,10 @@
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
     setInterval(function() {
-      //if (x1 > window.innerWidth - )
+      if (x1 > window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width) window.scroll(scrollX + 3, scrollY);
+      if (y1 > window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height) window.scroll(scrollX, scrollY + 3);
+      if (x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      if (  y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
       var landscapeOrientation = window.innerWidth / Bild.width > 1;
       if (landscapeOrientation) {
         vx1 = vx1 + ay1;
@@ -387,7 +393,7 @@
           zaehler = 0;
         }, 500);
       }
-      if (red == 168 && green == 230 && blue == 29 && i > 3 && ((checkpoint.schieber.x - y1 > 100 || y1 - checkpoint.schieber.x > 100) || (checkpoint.schieber.y - y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.ball.x - y1 > 100 || y1 - checkpoint.ball.x > 100) || (checkpoint.ball.y - y1 > 100 || y1 - checkpoint.ball.y > 100))) {
+      if (red == 168 && green == 230 && blue == 29 && i > 3 &&  (/*(checkpoint.schieber.y- y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.schieber.x - x1 > 100 || x1 - checkpoint.schieber.x > 100) ||*/ (checkpoint.ball.x - ball.x > 100 || ball.x - checkpoint.ball.x > 100) || (checkpoint.ball.y - ball.y > 100 || ball.y - checkpoint.ball.y > 100))) {
         console.log("checkpoint!!!");
         checkpoint.schieber.x = x1;
         checkpoint.schieber.y = y1;
