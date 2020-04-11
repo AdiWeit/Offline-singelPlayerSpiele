@@ -1,11 +1,15 @@
-<title>Geduldspiel</title>
+<title>transport the ball</title>
+<meta charset="utf-8">
 <canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
   <option value="normal">normal</option>
   <option value="magnet">magnet</option>
   <option value="allDirections">all directions</option>
   <option value="slide">slide</option>
-</select>
+  <option value="showScores">show scores</option>
+<br>
+</select><select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
 <div id="ball">
   <style>
     .shape {
@@ -34,10 +38,13 @@
 <div id="content">
   <div class="shape" id="sphere2"></div>
 </div>
-
+<table id="scores"></table>
 
 <script>
   var canvas = textur.getContext('2d'); //Dimension
+  var highscores = {};
+  var checkpoints = {};
+  var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
   var x1 = 10,
     y1 = 177; //window.innerHeight - 150 + 3,
   x2 = 0, y2 = 0,
@@ -82,9 +89,6 @@
       },
       3: {
 
-      },
-      4: {
-
       }
     },
     magnet: {
@@ -93,6 +97,18 @@
     allDirections: {
       1: {
 
+      },
+      2: {
+        spawnPoint: {
+          schieber: {
+            x: 50,
+            y: 333
+          },
+          ball: {
+            x: 100,
+            y: 333
+          }
+        }
       }
     },
     slide: {
@@ -121,6 +137,9 @@
           }//,
           //checkpoint: true
         }]
+      },
+      5: {
+
       }
     }
 
@@ -129,7 +148,6 @@
   level.slide[1] = level.normal[1];
   level.slide[3] = JSON.parse(JSON.stringify(level.slide[4]));
   level.slide[3].ballTeleporter[0].checkpoint = true;
-
   for (var i = 1; i < Object.keys(level.slide).length + 1; i++) {
     if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
     if (!level.slide[i].slideLength) level.slide[i].slideLength = 20;
@@ -138,6 +156,8 @@
     if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
       for (var i1 = 1; i1 < Object.keys(level[Object.keys(level)[i]]).length + 1; i1++) {
         if (!level[Object.keys(level)[i]][i1].sizes) level[Object.keys(level)[i]][i1].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
+        if (!level[Object.keys(level)[i]][i1].bounceUpDown) level[Object.keys(level)[i]][i1].bounceUpDown = 5;
+        if (!level[Object.keys(level)[i]][i1].bounceleftRight) level[Object.keys(level)[i]][i1].bounceleftRight = 2;
         if (!level[Object.keys(level)[i]][i1].spawnPoint) level[Object.keys(level)[i]][i1].spawnPoint =     {
                     schieber: {
                       x: 155,
@@ -153,6 +173,16 @@
   }
   level.slide[1].slidestop = 16;
 
+  dbGet("transportTheBall", "highscores").then(result => {
+    highscores = JSON.parse(result);
+    modeSelected("normal");
+  }).catch(function(e) {
+    levelSelector.style.display = "none";
+    modeSelected("normal");
+  });;
+  dbGet("transportTheBall", "checkpoints " + name).then(result => {
+    checkpoints = JSON.parse(result)
+  });
 
   var Bild = new Image();
   if (window.DeviceMotionEvent != undefined) {
@@ -161,10 +191,11 @@
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
     setInterval(function() {
-      if (x1 > window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width) window.scroll(scrollX + 3, scrollY);
-      if (y1 > window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height) window.scroll(scrollX, scrollY + 3);
-      if (x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-      if (  y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      // zoom: window.parent.document.body.style.zoom = 1.5;
+      // if (x1 > window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width) window.scroll(scrollX + 3, scrollY);
+      // if (y1 > window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height) window.scroll(scrollX, scrollY + 3);
+      // if (x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      // if (  y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
       var landscapeOrientation = window.innerWidth / Bild.width > 1;
       if (landscapeOrientation) {
         vx1 = vx1 + ay1;
@@ -181,6 +212,7 @@
       vy1 = vy1 * 0.98;
       ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
       ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
+      coordinatesBefore = {x1: x1, y1: y1}
       // allDirections
       if (level.mode == "allDirections") {
       var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: 50, height: 50}, ball);
@@ -273,7 +305,7 @@
       }
     }
 
-      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball) && zaehler == 0) moveDirection();
+      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball) && zaehler == 0) moveDirection(directionBefore);
       y1 = parseInt(y1 + vy1 / 50);
       x1 = parseInt(x1 + vx1 / 50);
 
@@ -320,16 +352,18 @@
   };
   var zaehler = 0;
   var geteiltDurch = 0.5;
-  function moveDirection() {
+  var coordinatesBefore;
+  var bounceCoordinates;
+  function moveDirection(directionBefore) {
     if (zaehler != "newLevel") {
-    if (directionBefore == "right" && parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
-    else if (directionBefore == "right") ball.x += (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
-    if (directionBefore == "left" && parseInt(x1 + vx1 / 50) > x1) ball.x -= (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
-    else if (directionBefore == "left") ball.x -= (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
-    if (directionBefore == "down" && parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
-    else if (directionBefore == "down") ball.y += (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
-    if (directionBefore == "up" && parseInt(y1 + vy1 / 50) > y1) ball.y -= (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
-    else if (directionBefore == "up") ball.y -= (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    if (directionBefore.includes( "right") && parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (directionBefore.includes( "right")) ball.x += (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (directionBefore.includes( "left") && parseInt(x1 + vx1 / 50) > x1) ball.x -= (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (directionBefore.includes( "left")) ball.x -= (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (directionBefore.includes( "down") && parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (directionBefore.includes( "down")) ball.y += (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    if (directionBefore.includes( "up") && parseInt(y1 + vy1 / 50) > y1) ball.y -= (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (directionBefore.includes( "up")) ball.y -= (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
     zaehler++;
     sphere.ball.style.top = ball.y + "px";
     sphere.ball.style.left = ball.x + "px";
@@ -337,7 +371,7 @@
     if (zaehler < /*20*/(level.slide[level.aktuell].slideLength) || (geteiltDurch < level.slide[level.aktuell].slidestop)) {
       if (zaehler > (level.slide[level.aktuell].slideLength - 1)/*19*/) geteiltDurch++;
       setTimeout(function () {
-        moveDirection();
+        moveDirection(directionBefore);
       }, 10);
     }
     else {
@@ -346,7 +380,14 @@
     }
   }
   }
+  var directionBeforeScrolling = {x: 0, y: 0};
   function checkColourCollisions() {
+    // scrollWithBall
+    if (directionBeforeScrolling.x > x1) window.scroll(scrollX - (directionBeforeScrolling.x - x1), scrollY);
+    if (directionBeforeScrolling.x < x1) window.scroll(scrollX +  (x1 - directionBeforeScrolling.x), scrollY);
+    if (directionBeforeScrolling.y > y1) window.scroll(scrollX, scrollY - (directionBeforeScrolling.y - y1));
+    if (directionBeforeScrolling.y < y1) window.scroll(scrollX, scrollY +  (y1 - directionBeforeScrolling.y));
+    directionBeforeScrolling = {x: x1, y: y1};
     var numbers = [
       [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
       [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
@@ -372,6 +413,7 @@
       }
       if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
         console.log("Fail!");
+        time = 0;
         zaehler = "newLevel";
         setTimeout(function () {
           zaehler = 0;
@@ -380,6 +422,21 @@
       }
       if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1]) {
         console.log("goal reached (yellow)");
+        if (!highscores[level.mode]) highscores[level.mode] = {};
+        if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
+        if (!highscores[level.mode][level.aktuell][name] || highscores[level.mode][level.aktuell][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][name] = mins + ":" + secs + ":" + "0" + tenths;
+          dbGet("transportTheBall", "highscores").then(result => {
+            highscores = JSON.parse(result);
+            dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
+          }).catch(function(e) {
+            dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
+          });
+        if (checkpoint.schieber.x != level[level.mode][level.aktuell].spawnPoint.schieber.x || checkpoint.schieber.y != level[level.mode][level.aktuell].spawnPoint.schieber.y || checkpoint.ball.x != level[level.mode][level.aktuell].spawnPoint.ball.x || checkpoint.ball.y != level[level.mode][level.aktuell].spawnPoint.ball.y) {
+          checkpoints[level.mode].splice(level.aktuell, 1);
+          setTimeout(function () {
+            dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+          }, 1000);
+        }
         nextLevel();
         i = 8;
       }
@@ -395,11 +452,65 @@
       }
       if (red == 168 && green == 230 && blue == 29 && i > 3 &&  (/*(checkpoint.schieber.y- y1 > 100 || y1 - checkpoint.schieber.y > 100) || (checkpoint.schieber.x - x1 > 100 || x1 - checkpoint.schieber.x > 100) ||*/ (checkpoint.ball.x - ball.x > 100 || ball.x - checkpoint.ball.x > 100) || (checkpoint.ball.y - ball.y > 100 || ball.y - checkpoint.ball.y > 100))) {
         console.log("checkpoint!!!");
+        if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
         checkpoint.schieber.x = x1;
         checkpoint.schieber.y = y1;
         checkpoint.ball.x = ball.x;
         checkpoint.ball.y = ball.y;
+        checkpoints[level.mode][level.aktuell] = checkpoint;
+        dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
       }
+    }
+     numbers = [
+      [ball.x, ball.y],
+      [ball.x + ball.width, ball.y],
+      [ball.x, ball.y + ball.height],
+      [ball.x + ball.width, ball.y + ball.height]
+    ]
+    for (var i = 0; i < 4; i++) {
+      data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+      red = data.data[0];
+      green = data.data[1];
+      blue = data.data[2];
+      alpha = data.data[3];
+      if (red = 255 && green == 126 && blue == 0) {
+        console.log("bouncing");
+        bounceCoordinates = {x1: x1, y1: y1}
+        if (x1 - coordinatesBefore.x1 > -3 && x1 - coordinatesBefore.x1 < 3) bounceCoordinates.x1 = coordinatesBefore.x1 + 3;
+        zaehler = "bouncing";
+        if (i == 0) {bounceBall(["down", "right"], 0);}
+        if (i == 1) {bounceBall(["down", "left"], 0);}
+        if (i == 2) {bounceBall(["up", "right"], 0);}
+        if (i == 3) {bounceBall(["up", "left"], 0);}
+      }
+    }
+  }
+  function bounceBall(direction, time) {
+    console.log("boundce " + direction);
+    if (zaehler != "newLevel") {
+    if (direction.includes("right") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x += (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    else if (direction.includes("right")) ball.x += (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    if (direction.includes("left") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x -= (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    else if (direction.includes("left")) ball.x -= (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    if (direction.includes("down") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y += (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    else if (direction.includes("down")) ball.y += (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    if (direction.includes("up") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y -= (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    else if (direction.includes("up")) ball.y -= (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
+
+  }
+  else {
+    time = 32;
+  }
+    time++;
+    sphere.ball.style.left = ball.x + "px";
+    sphere.ball.style.top = ball.y + "px";
+    if (time < 33) {
+      setTimeout(function () {
+        bounceBall(direction, time + 1);
+      }, 27);
+    }
+    else {
+      zaehler = 0;
     }
   }
   function boundingBoxCheck() {
@@ -478,6 +589,9 @@
     setTimeout(function () {
       zaehler = 0;
     }, 500);
+    setupLevel();
+  }
+  function setupLevel() {
     checkpoint.schieber.x = level[level.mode][level.aktuell].spawnPoint.schieber.x;
     checkpoint.schieber.y = level[level.mode][level.aktuell].spawnPoint.schieber.y;
     checkpoint.ball.x = level[level.mode][level.aktuell].spawnPoint.ball.x;
@@ -490,7 +604,6 @@
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
   }
-
   var directionBefore = [];
 
   function isCollide(a, b) {
@@ -536,25 +649,176 @@
     );
   }
   var inOrAgainstDirection = 1;
-  modeSelected("normal");
 
+  function levelSelected(value) {
+    level.aktuell = JSON.parse(value.toString().split('. level')[0]);
+    if (running == 0) startPause();
+    else time = 0;
+    setupLevel();
+    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) checkpoint = checkpoints[level.mode][level.aktuell];
+  }
   function modeSelected(mode) {
+    if (mode != "showScores") {
+      textur.style.display = "inline";
     level.mode = mode;
     if (mode == "normal") {
       inOrAgainstDirection = 1;
     }
+    while (document.getElementById('levelSelector').options.length > 0) {
+      document.getElementById('levelSelector').options[0] = undefined;
+    }
+    for (var i = 0; ((highscores[level.mode] && i < Object.keys(highscores[level.mode]).length) || (name == "allLevel" && i < Object.keys(level[level.mode]).length)); i++) {
+      if (name == "allLevel" || highscores[level.mode][i + 1][name] != undefined) {
+      opt = document.createElement("option");
+      document.getElementById("levelSelector").options.add(opt);
+      // opt.setAttribute("id", i);
+      opt.text = (i + 1) + ". level";
+    }
+    else if (i == 0) {
+      levelSelector.style.display = "none";
+    }
+    }
+    levelSelected("1. level");
+    if (name != "allLevel") {
+    opt = document.createElement("option");
+    document.getElementById("levelSelector").options.add(opt);
+    // opt.setAttribute("id", i);
+    opt.text = (i + 1) + ". level";
   }
-
-  function removeDirection(direction) {
-    for (var i = 0; i < directionBefore.length; i++) {
-      if (directionBefore[i] == direction) {
-        directionBefore.splice(i, 1);
-        i--;
+}
+  else {
+    showScores(highscores);
+  }
+  }
+  var highscoresDisplayedBefore = {};
+  function showScores(highscores) {
+    scores.style.display = "inline";
+     textur.style.display = "none";
+    for (var i = 0; i < 100; i++) {
+      try {
+        document.getElementById("scores").deleteRow(0);
+      } catch (e) {
+        console.log("wanted to delete too many elements of table");
       }
     }
+    highscoresDisplayedBefore = highscores;
+    console.log("highScores: " + highscores);
+    var cell = [ /*row.insertCell(0)*/ ];
+    var player = []
+    for (var i2 = 0; i2 < Object.keys(highscores).length; i2++) {
+
+      for (var i = 1; i < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i++) {
+        for (var i1 = 0; i1 < Object.keys(highscores[Object.keys(highscores)[i2]][i]).length; i1++) {
+          if (!(player.includes(Object.keys(highscores[Object.keys(highscores)[i2]][i])[i1]))) player.push(Object.keys(highscores[Object.keys(highscores)[i2]][i])[i1]);
+        }
+      }
+
+    for (var i = 0; i < player.length; i++) {
+      // if (!(Object.keys(highscores)[i] == "allMaps")) {
+     if (player[i] != "allLevel") {
+        var table = document.getElementById("scores");
+        var row = table.insertRow(i); // row geht nach unten (Spalt)
+        cell.push(row.insertCell(0)); // cell geht nach rechts (Zeit))
+        cell.push(row.insertCell(1));
+        cell[cell.length - 1].innerHTML = player[i];
+      // }
+      //  var cell = [/*row.insertCell(0)*/];
+        cell[cell.length - 2] = row.insertCell(1);
+      for (var i1 = 1; highscores[Object.keys(highscores)[i2]] && i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i1++) {
+        // if (!(Object.keys(highscores[Object.keys(highscores)[i2]])[i] == "allMaps")) {
+          if (i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1) {
+            cell[cell.length] = row.insertCell(i1 + 2);
+            // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
+            //   i1--;
+            // }
+            if (highscores[Object.keys(highscores)[i2]][i1][player[i]]) cell[cell.length - 1].innerHTML = highscores[Object.keys(highscores)[i2]][i1][player[i]]
+            if (highscores[Object.keys(highscores)[i2]][i1][player[i]] < highscores[Object.keys(highscores)[i2]][i1][name]) cell[cell.length - 1].style.color = "red";
+            else if (highscores[Object.keys(highscores)[i2]][i1][player[i]] > highscores[Object.keys(highscores)[i2]][i1][name]) cell[cell.length - 1].style.color = "green";
+            else if (name == player[i]) cell[cell.length - 1].style.color = "blue";
+            else cell[cell.length - 1].style.color = "black";
+
+          } else {
+            cell[cell.length - 1] = row.insertCell(i1 + 1);
+            //  cell[cell.length - 2].innerHTML = "unmade";
+            //  cell[cell.length - 2].style.color = "black";
+          }
+        // }
+      }
+      var row = table.insertRow(i);
+      //  var row = table.insertRow(i+1);
+      // var row = table.insertRow(i + 1);
+    }
   }
+    var row = table.insertRow(i2);
+    cell[0] = row.insertCell(0);
+    cell[0].innerHTML = "";
+    cell[0] = row.insertCell(0);
+    cell[0].innerHTML = Object.keys(highscores)[i2];
+  }
+    //  var row = table.insertRow(0);
+    //  var cell = [/*row.insertCell(0)*/];
+    // cell.push(row.insertCell(0));
+    // cell[cell.length - 1].innerHTML = "name";
+    var row = table.insertRow(0);
+    cell.push(row.insertCell(0));
+    for (var i1 = 0; i1 < Object.keys(highscores).length + 1; i1++) {
+      cell.push(row.insertCell(i1));
+      if (i1 == 0) cell[cell.length - 1].innerHTML = "mode";
+      else cell[cell.length - 1].innerHTML = (i1) + ". level";
+    }
+    cell.push(row.insertCell(1));
+    cell.push(row.insertCell(2));
+    cell[cell.length - 1].innerHTML = "name"
+  }
+  // function removeDirection(direction) {
+  //   for (var i = 0; i < directionBefore.length; i++) {
+  //     if (directionBefore[i] == direction) {
+  //       directionBefore.splice(i, 1);
+  //       i--;
+  //     }
+  //   }
+  // }
 
   function cssToNumber(cssStyle) {
     return JSON.parse(cssStyle.toString().split('px')[0])
   }
+  var time = 0;
+  var running = 0;
+
+function startPause() {
+if (running == 0) {
+  running = 1;
+  time = 0;
+  increment();
+}
+else {
+  running = 0;
+}
+}
+function reset() {
+running = 0;
+timer = 0;
+}
+var mins = 0;
+var secs = 0;
+var tenths = 0;
+function increment() {
+if (running == 1) {
+setTimeout(function () {
+  time++;
+  mins = Math.floor(time/10/60);
+  secs = Math.floor(time/10);
+      secs -= 60*mins;
+  tenths = time % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  increment();
+}, 100);
+}
+}
+startPause();
 </script>
