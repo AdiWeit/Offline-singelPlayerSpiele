@@ -6,7 +6,7 @@
 <html>
 
 <head>
-  <title>Accelerometer</title>
+  <title>Geduldspiel</title>
   <canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
   <p><img id="preview"></p>
   <meta name="viewport" content="width=device-width,user-scalable=yes" />
@@ -104,6 +104,7 @@
     <option value="growing">growing</option>
     <option value="survive">survive</option>
     <option value="opposite">opposite</option>
+    <option value="againstThePC">against the PC</option>
   </select>
   <br>
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
@@ -305,6 +306,7 @@ function ballColourChanged (value) {
     var zählerListe = [window.innerHeight];
     var offline = false;
     var Bild = new Image();
+    var risingStrengthInterval;
     if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/normal/GeduldsspielMap1.png"
     canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight)
     setTimeout(function() {
@@ -719,6 +721,16 @@ function ballColourChanged (value) {
               radius: 77
             }
           ]
+        },
+        2: {
+          sensibility: 25,
+          spawnPoint: {
+            x: window.innerWidth/2 - JSON.parse(sphere1.style.width.toString().split('px')[0]),
+            y: window.innerHeight/2 - JSON.parse(sphere1.style.height.toString().split('px')[0])
+          },
+          pcStrength: 1,
+          pxPcStrength: 1,
+          risingPxStrength: true,
         }
       }
     },
@@ -735,6 +747,68 @@ function ballColourChanged (value) {
         stepOfHistory: -1,
         worldWideLevel: {},
         levelType: "vorgefertigt"
+      },
+
+      againstThePC: {
+        rotating: {
+          blinkWall: [false] /*, rotatingWall: false*/ ,
+          rotatingDreieck: false
+        },
+        number: 1,
+        editLevel: {
+          selectedLevel: 1
+        },
+        editHistory: [],
+        stepOfHistory: -1,
+        worldWideLevel: {},
+        levelType: "vorgefertigt",
+        vorgefertigt: {
+          1: {
+            sensibility: 25,
+            pcStrength: 33,
+            pxPcStrength: 1,
+            spawnPoint: {
+              x: 10,
+              y: 222
+            },
+          },
+          2: {
+            sensibility: 25,
+            pcStrength: 10,
+            pxPcStrength: 1,
+            spawnPoint: {
+              x: 350,
+              y: 622
+            },
+          },
+          3: {
+            sensibility: 25,
+            pcStrength: 10,
+            pxPcStrength: 1,
+            spawnPoint: {
+              x: 10,
+              y: 422
+            },
+          },
+          4: {
+            sensibility: 25,
+            pcStrength: 8,
+            pxPcStrength: 1,
+            spawnPoint: {
+              x: 10,
+              y: 422
+            },
+          },
+          5: {
+            sensibility: 10,
+            pcStrength: 17,
+            pxPcStrength: 1,
+            spawnPoint: {
+              x: 133,
+              y: 350
+            },
+          }
+        }
       },
       mode: "normal"
     }
@@ -775,8 +849,8 @@ function ballColourChanged (value) {
         }
         localStorage.setItem("uploadScore", false);
       }
-      if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
-        highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
+      if (localStorage.getItem("profileName") == name && localStorage.getItem("highscoresGeduldsspiel") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscoresGeduldsspiel"))[name])) {
+        highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscoresGeduldsspiel"))[level.mode][name];
       }
     }).catch(function(e) {
       console.error(e);
@@ -787,7 +861,7 @@ function ballColourChanged (value) {
         else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
         document.getElementById('saveMaps').style.display = "none";
         window.innerWidth += 832;
-        folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscores")), true);
+        folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscoresGeduldsspiel")), true);
       }
     });
     function folgenDbgetHighscores(result, offline) {
@@ -835,7 +909,7 @@ function ballColourChanged (value) {
       dbGet("Gelduldspiel", "levelBy " + name).then(result => {
         folgenDbGetLevelBy(result, false);
         app._data.db = [];
-        if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
+        if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")) && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
           for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
             level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
             level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel];
@@ -1035,7 +1109,17 @@ function ballColourChanged (value) {
       AblageListe[1] = "uploadLevel";
       testLevel();
     }
-
+    var againstThePCDirection = ["x", 0];
+    function againstThePCFunction() {
+      // if (Math.round(Math.random()*75) < 50) {
+        if (/*Math.round(Math.random()*100) < 50*/againstThePCDirection[0] == "x") x1 += level[level.mode][level[level.mode].levelType][level[level.mode].number].pxPcStrength;
+        else y1 += level[level.mode][level[level.mode].levelType][level[level.mode].number].pxPcStrength;
+      // }
+      againstThePCDirection[1]++;
+      var directions = ["x", "y"]
+      if (againstThePCDirection[1] > 50)  againstThePCDirection = [directions[Math.round(Math.random()*1)], 0];
+    }
+    var againstThePCInterval;
     function courceSelected(ownSelection) {
       setTimeout(function () {
         window.scroll(0, 0);
@@ -1231,15 +1315,22 @@ function ballColourChanged (value) {
         y1 = JSON.parse(JSON.stringify(level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y));
     }
     if (level[level.mode].levelType == "vorgefertigt") {
-      Bild = new Image();
-      if (offline == false)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
-      else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
+      if (level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/] != undefined) Bild = new Image();
+      else  level[level.mode].levelType = "winnerScreen";
+      if (offline == false && level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/] != undefined)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
+      else if (level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/] != undefined) Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
     }
 
         if (level[level.mode].number > 1 &&(document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility) && !(level[level.mode].number == highscores[level.mode][name].length + 1) && ownSelection != true) sensibility(/*level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility*/document.getElementById('sensibility').value);
-        else if ((ownSelection || document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/].sensibility) && !(level[level.mode].number == highscores[level.mode][name].length + 2))  sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, true);
+        else if (level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/] != undefined && (ownSelection || document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number/* - 1*/].sensibility) && !(level[level.mode].number == highscores[level.mode][name].length + 2))  sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, true);
+        clearInterval(againstThePCInterval);
+        if (document.getElementById('courceSelection').value != "" && (document.getElementById('modeSelection').value == "againstThePC" || level[level.mode][level[level.mode].levelType][level[level.mode].number].pcStrength != undefined)) againstThePCInterval = setInterval(againstThePCFunction, level[level.mode][level[level.mode].levelType][level[level.mode].number].pcStrength);
+        clearInterval(risingStrengthInterval);
+        if (document.getElementById('courceSelection').value != "" && level[level.mode][level[level.mode].levelType][level[level.mode].number].risingPxStrength == true) risingStrengthInterval = setInterval(risingStrengthFunction, 1000);
     }
-
+    function risingStrengthFunction() {
+      level[level.mode][level[level.mode].levelType][level[level.mode].number].pxPcStrength += 0.01;
+    }
     function imageLoaded(input) {
       AblageListe[4] = false;
       var reader = new FileReader();
@@ -1301,8 +1392,23 @@ function ballColourChanged (value) {
           alpha = data.data[3];
           if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
             console.log("Fail!");
+            if (document.getElementById('courceSelection').value != "" && level[level.mode][level[level.mode].levelType][level[level.mode].number].risingPxStrength == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].pxPcStrength = 1;
             if (level.mode == "survive") {
               if ((mins + ":" + secs + ":" + "0" + tenths) > "00:09:09" && AblageListe[1] == "uploadLevel") uploadLevel();
+              else if (AblageListe[1] != "uploadLevel" && level.survive.levelType != "editLevel" && level.survive.levelType != "editHistory" && level.survive.levelType != "showScores") {
+                if (level.survive.levelType == "worldWideLevel") {
+                level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name].finished = true;
+                if (level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] == undefined) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+                else if (mins + ":" + secs + ":" + "0" + tenths < level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name][0]) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
+              }
+              if (level[level.mode].levelType == "vorgefertigt") {
+                if (highscores[level.mode][name] == undefined || highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] < mins + ":" + secs + ":" + "0" + tenths) {
+                  highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
+                  // localStorage.setItem("highscoresGeduldsspiel", JSON.stringify(highscores));
+                  if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
+                }
+              }
+              }
             }
             if (level.mode == "growing") {
               if ((mins + ":" + secs + ":" + "0" + tenths) > "00:04:09" && AblageListe[1] == "uploadLevel") uploadLevel();
@@ -1444,7 +1550,7 @@ function ballColourChanged (value) {
       if (level[level.mode].levelType == "vorgefertigt") {
         if (highscores[level.mode][name] == undefined || highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
-          // localStorage.setItem("highscores", JSON.stringify(highscores));
+          // localStorage.setItem("highscoresGeduldsspiel", JSON.stringify(highscores));
           if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
         }
         level[level.mode].number++;
@@ -1515,7 +1621,12 @@ function ballColourChanged (value) {
   }
     function showScores(highscores) {
       for (var i = 0; i < Object.keys(highscoresDisplayedBefore).length + 11 && Object.keys(highscoresDisplayedBefore).length > 0; i++) {
-        document.getElementById("scores").deleteRow(0);
+        try {
+          document.getElementById("scores").deleteRow(0);
+        } catch (e) {
+          console.log("wanted to delete too many elements of table");
+          i = Object.keys(highscoresDisplayedBefore).length + 11
+        }
       }
       highscoresDisplayedBefore = highscores;
       document.getElementById('textur').style.display = "none";
@@ -1529,7 +1640,7 @@ function ballColourChanged (value) {
           cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
         }
         //  var cell = [/*row.insertCell(0)*/];
-        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length && level[level.mode].levelType == "worldWideLevel"); i1++) {
+        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length + 1 && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length && level[level.mode].levelType == "worldWideLevel"); i1++) {
           if (!(Object.keys(highscores)[i] == "allMaps")) {
             if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
@@ -1565,7 +1676,7 @@ function ballColourChanged (value) {
         cell.push(row.insertCell(i1 - 3));
         cell[cell.length - 1].innerHTML = "times";
       }
-      for (var i1 = 1; level[level.mode].levelType != "worldWideLevel" && i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
+      for (var i1 = 1; level[level.mode].levelType != "worldWideLevel" && i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length + 1; i1++) {
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
@@ -1882,7 +1993,7 @@ function ballColourChanged (value) {
 
     function activateBlinkWall() {
       level[level.mode].blinkWall = true;
-      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined) && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
         if (level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].beginningTime == undefined) level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].beginningTime = 0;
         blinkWallFunction(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].beginningTime);
       }
@@ -1903,7 +2014,7 @@ function ballColourChanged (value) {
     }
 
     function activateBullets() {
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
         level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done = 0;
         bulletInterval[i] = true;
         bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPointInSec, level[level.mode].levelType, level[level.mode].number);
@@ -2174,7 +2285,7 @@ function ballColourChanged (value) {
     function saveMapsVorgefertigt() {
       alert("WARNING: wait for all maps been shown on the screen. After that, it finished! you will also get a message then.");
       localStorage.setItem("profileName", name);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
+      localStorage.setItem("highscoresGeduldsspiel", JSON.stringify(highscores));
       localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
       document.getElementById('textur').style.display = "inline";
       setTimeout(function () {
