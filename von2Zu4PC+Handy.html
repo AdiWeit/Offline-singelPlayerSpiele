@@ -1,3 +1,4 @@
+<title>von 2 zu 4</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <meta charset="utf-8">
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
@@ -8,6 +9,7 @@
 </select>
 <button id="BNeueRunde" type="button" onclick="neueRunde(true)" name="button">Neue Runde</button>
 <canvas id="textur" width="2570" height="888" style="touch-action: none"></canvas>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDataPlayer();"offline"'></h1>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -43,7 +45,10 @@
   var scores = [0, 0];
   var zweitBesteScores = {normal: [0, 0], items: [0, 0]};
   var highscores = {normal: [0, 0], items: [0, 0,]};
-  var name = prompt("Wie heißen sie? Diese Information ist nötig, um deine Highscores speichern zu können.");
+  if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie? Diese Information ist nötig, um deine Highscores speichern zu können.");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   var namen = [];
   var mode = "normal";
   var items = {flash: {xp: {needs: 100, needsBeginning: 100, got: 0}}, exchanger: {xp: {needs: 133, needsBeginning: 133, got: 0}}, changer: {xp: {needs: 88, needsBeginning: 88, got: 0}}}
@@ -51,49 +56,52 @@
   var alertSound = true;
   //var turns = 0;
   var diff;
-
-  setTimeout(function () {
-    dbGet("von2Zu4", "highscores" + name).then(result => {
-      if (result == "NOPE" == false) {
-        highscores = JSON.parse(result);
-        localStorage.setItem("highscoresVon2Zu4" + name, JSON.stringify(highscores));
+  getDataPlayer();
+  function getDataPlayer() {
+    setTimeout(function () {
+      dbGet("von2Zu4", "highscores" + name).then(result => {
+        // if (result == "NOPE" == false) {
+          highscores = JSON.parse(result);
+          localStorage.setItem("highscoresVon2Zu4" + name, JSON.stringify(highscores));
+        // }
+      }).catch(function(e) {
+        if (e.message == "Failed to fetch") {
+        console.error("offline mode activated (error: " + e + ")");
+        alert("Offline mode active! The displayed highscores are the ones from the last time, you opened the website with internet connection. If you get a new highscore, it will be uploaded next time, you have access to internet.");
+        highscores = JSON.parse(localStorage.getItem("highscoresVon2Zu4"));
+        if (JSON.parse(localStorage.getItem("uploadScore")) != undefined && JSON.parse(localStorage.getItem("uploadScore")).true == true) {
+          highscores[JSON.parse(localStorage.getItem("uploadScore")).mode] = JSON.parse(localStorage.getItem("uploadScore")).myScores;
+          localStorage.setItem("uploadScore", {true: false});
+        }
+        offline = true;
       }
-    }).catch(function(e) {
-      console.error("offline mode activated (error: " + e + ")");
-      alert("Offline mode active! The displayed highscores are the ones from the last time, you opened the website with internet connection. If you get a new highscore, it will be uploaded next time, you have access to internet.");
-      highscores = JSON.parse(localStorage.getItem("highscoresVon2Zu4"));
-      if (JSON.parse(localStorage.getItem("uploadScore")) != undefined && JSON.parse(localStorage.getItem("uploadScore")).true == true) {
-        highscores[JSON.parse(localStorage.getItem("uploadScore")).mode] = JSON.parse(localStorage.getItem("uploadScore")).myScores;
-        localStorage.setItem("uploadScore", {true: false});
-      }
-      offline = true;
+      });
+    }, 1000);
+    dbGet("von2Zu4", "zweitBesteScores" + name).then(result => {
+      // if (result == "NOPE" == false) {
+        zweitBesteScores = JSON.parse(result);
+      // }
     });
-  }, 1000);
-  dbGet("von2Zu4", "zweitBesteScores" + name).then(result => {
-    if (result == "NOPE" == false) {
-      zweitBesteScores = JSON.parse(result);
-    }
-  });
-  dbGet("von2Zu4", "namen" + name).then(result => {
-    if (result == "NOPE" == false) {
-      namen = result.toString().split(',');
-    }
-  });
+    dbGet("von2Zu4", "namen" + name).then(result => {
+      // if (result == "NOPE" == false) {
+        namen = result.toString().split(',');
+      // }
+    });
 
-  dbGet("von2Zu4", mode + " spielfeld " + name).then(result => {
-    if (result == "NOPE" == false) {
-      spielfeld = result.toString().split(';');
-      zählerListe[0] = 0;
-      spielfeld.pop();
-      while (zählerListe[0] < 4) {
-        spielfeld[zählerListe[0]] = spielfeld[zählerListe[0]].toString().split(',');
-        zählerListe[0]++;
-      }
-    } else {
+    dbGet("von2Zu4", mode + " spielfeld " + name).then(result => {
+        spielfeld = result.toString().split(';');
+        zählerListe[0] = 0;
+        spielfeld.pop();
+        while (zählerListe[0] < 4) {
+          spielfeld[zählerListe[0]] = spielfeld[zählerListe[0]].toString().split(',');
+          zählerListe[0]++;
+        }
+      spielfeldKreieren();
+    }).catch(function(e) {
       zahlenKreieren();
-    }
-    spielfeldKreieren();
-  });
+      spielfeldKreieren();
+    });
+  }
 
   /*canvas.fillStyle = "blue"
   canvas.beginPath();
@@ -104,15 +112,25 @@
   canvas.arc(110,110,90,0,Math.PI*2, false);
   canvas.fill();
   */
-
-  if (gerät == "Handy") {
-    $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
-  }
-
+    if (gerät == "Handy") {
+      $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
+    }
+    else {
+      var zoomRate = 1.0;
+      while (document.body.offsetWidth < 1430 || document.body.offsetHeight < 721) {
+        zoomRate -= 0.1
+        document.body.style.zoom = zoomRate;
+        this.blur();
+      }
+      if (zoomRate != 1.0) alert("You don't have your full field on the screen! Zoom out to " + Math.round(zoomRate*100) + "% or scroll to the right!");
+      document.body.style.zoom = 1.0;
+    }
   function modeSelected(value) {
+    canvas.clearRect(0, 0, screen.width, screen.height);
     audio = new Audio("https://www.mediacollege.com/downloads/sound-effects/star-trek/tos/tos-computer-06.mp3").play();
     mode = value;
     dbGet("von2Zu4", mode + " spielfeld " + name).then(result => {
+      if (result != "NOPE") {
       dbGet("von2Zu4", "items " + name).then(result => {
         if (result == "NOPE" == false) {
           items = JSON.parse(result);
@@ -124,10 +142,9 @@
         //   spielfeldKreieren();
         // });
       });
-      if (result == "NOPE") {
-        neueRunde(false);
-      }
-      else {
+      // if (result == "NOPE") {
+      // }
+      // else {
         if (mode == "items") itemsAnzeigen(0);
         spielfeld = result.toString().split(';');
         zählerListe[0] = 0;
@@ -138,12 +155,16 @@
         }
         spielfeldKreieren();
       }
-    });
+      else neueRunde(false);
+      // }
+    }).catch(function(e) {
+      neueRunde(false);
+  });;
   }
 
-  function namenabfrage(name, included) {
-    if (namen.includes(name)) included = true;
-    namen[namen.length] = name;
+  function namenabfrage(pName, included) {
+    if (namen.includes(pName)) included = true;
+    namen[namen.length] = pName;
     dbGet("von2Zu4", "highscores" + namen[namen.length - 1]).then(result => {
       if (included == true || JSON.parse(result)[mode][0] == "NOPE" || JSON.parse(result)[mode][0] == "" || JSON.parse(result)[mode][0] == "null") {
         namen.pop();
@@ -381,7 +402,7 @@
       while (zählerListe[1] < 8) {
         spielfeld[zählerListe[0]][zählerListe[1]] = Math.floor(Math.random() * 4);
         spielfeld[zählerListe[0]][zählerListe[1]]++;
-        spielfeld[zählerListe[0]][zählerListe[1]] = spielfeld[zählerListe[0]][zählerListe[1]] * 2
+        spielfeld[zählerListe[0]][zählerListe[1]] = spielfeld[zählerListe[0]][zählerListe[1]] * 2;
         zählerListe[1]++;
       }
       zählerListe[1] = 0;
@@ -446,16 +467,18 @@
 
   };
   window.addEventListener('DOMContentLoaded', f, false)
-
+  var abstand = 177;
+  var abstand1 = 0;
   function readMouseMove(e) {
     mausx = e.clientX + mausxScroll;
     mausy = e.clientY + mausyScroll;
+    // mausx -= document.body.offsetWidth - window.innerWidth;
+    // mausy -= document.body.offsetHeight - window.innerHeight;
     //  console.log(e.clientX);
   //  if (gerät == "PC") {
       mousemoveFolgen();
   //  }
   }
-
   function mousemoveFolgen() {
     if (zustände[0] == "Auswahl" && zustände[2] == "inRunde") {
       klickpointCheck();
@@ -714,9 +737,9 @@
             spielfeld[zählerListe[0] - 1][zählerListe[1]] = "empty";
           } else {
             spielfeld[zählerListe[0]][zählerListe[1]] = Math.floor(Math.random() * 4);
-
             spielfeld[zählerListe[0]][zählerListe[1]]++;
             spielfeld[zählerListe[0]][zählerListe[1]] *= 2;
+            spielfeldKreieren();
           }
 
         }
@@ -759,7 +782,9 @@
     }
     if (zählerListe[0] < 5) {
       dbSet("von2Zu4", mode + " spielfeld " + name, "NOPE");
-      dbSet("von2Zu4", "items " + name, "NOPE");
+      setTimeout(function () {
+        dbSet("von2Zu4", "items " + name, "NOPE");
+      }, 1000);
     //  dbSet("von2Zu4", mode + " turns " + name, 0);
       zustände[2] = "beendet"
       zählerListe[0] = 0;
@@ -768,13 +793,15 @@
       zählerListe[2] = 0;
       KoordinatenX = 145;
       KoordinatenY = 110;
-      new Audio("https://soundbible.com/mp3/flyby-Conor-1500306612.mp3").play();
+      new Audio(/*https://soundbible.com/mp3/flyby-Conor-1500306612.mp3*/"https://adi.nicolaiweitkemper.de/Sounds/swoosh-3-sound-effect-download-youtubemp3free.org.mp3").play();
       Endanimation = setInterval(endanimation, 0);
       console.log("beendet");
     } else {
       zuVarSpielfeld();
       dbSet("von2Zu4",mode + " spielfeld " + name, AblageListe[4]);
-      dbSet("von2Zu4", "items " + name, JSON.stringify(items));
+      setTimeout(function () {
+        dbSet("von2Zu4", "items " + name, JSON.stringify(items));
+      }, 1000);
     //  dbSet("von2Zu4", mode + " turns " + name, turns);
     }
   }
@@ -819,7 +846,8 @@
           setTimeout(function () {
             canvas.drawImage(Bild, 277, 20, 437, 437);
           }, 500);
-        audio = new Audio("https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+        audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
+        // https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3
       }
     }
     zählerListe[0] = 0;
@@ -852,14 +880,16 @@
           setTimeout(function () {
             canvas.drawImage(Bild, 277, 180, 430, 430);
           }, 500);
-        audio = new Audio("https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+        audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
       }
     }
     if (newHighscore) {
       if (offline) localStorage.setItem("uploadScore" + name, {true: true, myScores: highscores[mode], mode: mode});
       else {
         dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
-        dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+        setTimeout(function () {
+          dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+        }, 1000);
       }
     }
     scores[1] = AblageListe[2][AblageListe[2].length - 1]
@@ -886,7 +916,7 @@
     eigenenHighscoreAnzeigen();
   }
 
-  while (KoordinatenY < 700) {
+  while (KoordinatenY < 700 && !(AblageListe[2] < 1)) {
     if (AblageListe[2] == "NAN") {
       AblageListe[2] = 69;
     }
