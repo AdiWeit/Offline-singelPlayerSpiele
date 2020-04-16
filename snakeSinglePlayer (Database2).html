@@ -33,7 +33,8 @@
 <body>
 </body>
 </html>
-
+<title>snake game</title>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
 <script>
 
     // debug:
@@ -70,7 +71,10 @@ var directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LE
 // var Bild = new Image();
 // Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
 
-var name = prompt('Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können. Wenn sie damit nicht einverstanden sind, klicken sie bitte auf "abbrechen". ');
+if (!localStorage.getItem("storedName")) var name = prompt('Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können. Wenn sie damit nicht einverstanden sind, klicken sie bitte auf "abbrechen". ');
+else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
 var showTimeInterval;
 
 function startPause() {
@@ -1162,7 +1166,7 @@ setTimeout(function () {
     pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = mins[0] + ":" + secs[0] + ":0" + tenths[0];
     console.log("newHighscore");
     document.getElementById('highscores').style.color = "green";
-    audio = new Audio("https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+    audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
     setTimeout(function () {
       audio = new Audio("http://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
       audio.currentTime = 9.7;
