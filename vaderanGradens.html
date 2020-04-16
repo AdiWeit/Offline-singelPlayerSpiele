@@ -1,3 +1,4 @@
+<title>vederan gardens</title>
 <meta charset="utf-8">
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -58,9 +59,13 @@
   <br>
   <h2 >allow turning cards (by 90°)</h2>
   <input type="checkbox" id="allowTurning" checked="true" onchange="allowTurning(checked)" name="vehicle" >
+  <h2 >field limit per field: </h2>
+  <input type="checkbox" id="fieldLimit" checked="false" onchange="addFieldLimit(checked)" name="vehicle" >
   <button type="button" id="createNewGamestyle" onclick="beginnGame();" name="button">create new gamestyle</button>
 </div>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
 <script>
+  fieldLimit.checked = false;
   visible([["textur", "none"]]);
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -96,16 +101,19 @@
   var selectedCard;
   var turnsLeft = 7;
   var highscores = {};
-  var name = prompt("What's your name? You can type in your nick name as well. (Information used for account-based highscores)");
+  if (!localStorage.getItem("storedName")) var name = prompt("What's your name? You can type in your nick name as well. (Information used for account-based highscores)");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   setTimeout(function () {
     document.getElementById('newHighscore').width = window.innerWidth/(1024/250);
     console.log(window.innerWidth/(1024/250));
     document.getElementById('newHighscore').style.right = window.innerWidth/(1024/50) + "px"
     console.log(window.innerWidth/(1024/611) + "px");
   }, 3000);
-  for (var i = 0; i < 3; i++) {
-    handCards.push(createNewRandomCard());
-  }
+  // for (var i = 0; i < 3; i++) {
+  //   handCards.push(createNewRandomCard());
+  // }
   for (var i = 0; i < 5; i++) {
     for (var i1 = 0; i1 < 22; i1++) {
       if (field[i1] == undefined) field[i1] = [];
@@ -120,8 +128,9 @@
   }, 500);
 
   function restart() {
-    visible([["highscores", "none"], ["ownScore", "none"], ["ownHighscore", "none"]]);
+    visible([["highscores", "none"], ["ownScore", "none"], ["ownHighscore", "none"], ["newHighscore", "none"]]);
     field = [];
+    handCards = [];
     for (var i = 0; i < 5; i++) {
       for (var i1 = 0; i1 < 22; i1++) {
         if (field[i1] == undefined) field[i1] = [];
@@ -136,11 +145,11 @@
     localStorage.setItem("highscoresvaderanGardens", JSON.stringify(highscores));
     AblageListe[0] = [];
     for (var i = 0; i < Object.keys(highscores).length; i++) {
-     AblageListe[0].push([/*Object.keys(highscores)[i].toString().split('(')[1]*/Object.keys(highscores[Object.keys(highscores)[i]]).length + " player played)", Object.keys(highscores)[i].toString().split('|turning: ')[0], Object.keys(highscores)[i]/*.toString().split("(")[0]*/.toString().split("|turning: ")[1]]);
+     AblageListe[0].push([/*Object.keys(highscores)[i].toString().split('(')[1]*/Object.keys(highscores[Object.keys(highscores)[i]]).length + " player played)", Object.keys(highscores)[i].toString().split('|turning: ')[0], Object.keys(highscores)[i]/*.toString().split("(")[0]*/.toString().split("|turning: ")[1]/*, Object.keys(highscores)[i].toString().split("|fieldLimitPerCard: ")[1]*/]);
    }
    AblageListe[0].sort();
     for (var i = 0; i < Object.keys(highscores).length; i++) {
-      placeholder.push(AblageListe[0][i][1] + "|turning: " +  AblageListe[0][i][2] + " (" + AblageListe[0][i][0]);
+      placeholder.push(AblageListe[0][i][1] + "|turning: " +  AblageListe[0][i][2] /*+ "|fieldLimitPerCard: " + AblageListe[0][i][3]*/ + "(" + AblageListe[0][i][0]);
     //  placeholder.push("turns:7|turning allowed (2 player played)");
     }
   }).catch(function(e) {
@@ -155,7 +164,7 @@
   });
 
   function playStyleSelected(value) {
-    if (!(value.includes("turning")) && !(isNaN(value))) {visible([["turnAllower", "inline"]]);allowTurning(document.getElementById('allowTurning').checked);}
+    if (!(value.includes("turning")) && !(isNaN(value))) {visible([["turnAllower", "inline"]]);allowTurning(document.getElementById('allowTurning').checked); addFieldLimit(fieldLimit.checked);}
     else if (isNaN(value) && !(value.includes("turns:") && value.includes("|turning: "))) alert("ungültige Eingabe! Bitte eins der bereits vorhandenen Parameter auswählen, oder ein neues durch Eingebe einer Rundenanzahl hinzufügen.");
     else beginnGame();
   }
@@ -164,10 +173,21 @@
     if (checked) document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: allowed (nobodyPlayed)";
     if (!checked) document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: not allowed (nobodyPlayed)";
   }
+  function addFieldLimit(checked) {
+    if (document.getElementById('playStyleSelection').value.includes("allowed")) document.getElementById('playStyleSelection').value = JSON.parse(document.getElementById('playStyleSelection').value.toString().split('turns:')[1].toString().split('|')[0]);
+    if (document.getElementById('allowTurning').checked) document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: allowed|fieldLimitPerCard: " + fieldLimit.checked + " (nobodyPlayed)";
+    else document.getElementById('playStyleSelection').value = "turns:" + document.getElementById('playStyleSelection').value + "|turning: not allowed|fieldLimitPerCard: " + fieldLimit.checked + " (nobodyPlayed)";
+  }
   function beginnGame() {
+    for (var i = 0; i < 3; i++) {
+      handCards.push(createNewRandomCard());
+    }
     visible([["turnAllower", "none"], ["textur", "inline"]]);
     turnsLeft = JSON.parse(document.getElementById('playStyleSelection').value.toString().split('turns:')[1].toString().split('|')[0]);
-    Layout(field, 0, 0)
+    layoutAll();
+    setTimeout(function () {
+      layoutAll();
+    }, 50);
   }
   function layoutAll() {
     Layout(field, 0, 0, true);
@@ -215,7 +235,7 @@ function createNewRandomCard() {
     for (var i1 = 0; i1 < 3; i1++) {
       colour = "";
       AblageListe[0][i][i1] = createNewRandomField();
-      colourZaehler[AblageListe[0][i][i1].colour]++;
+      if (playStyleSelection.value.toString().split('fieldLimitPerCard: ')[1].toString().split(' (')[0] == "true") colourZaehler[AblageListe[0][i][i1].colour]++;
       if (AblageListe[0][i][i1].item != false) itemZaehler++;
       if (itemZaehler > 1 || colourZaehler[AblageListe[0][i][i1].colour] > 3) {colour = AblageListe[0][i][i1].colour; i1--;}
       if (colourZaehler[colour] > 3) {
@@ -293,14 +313,16 @@ function canvasClicked(byUser) {
   // }
   if (showing == "myCards" && AblageListe[0][1] > 6) {
     if (AblageListe[0][0] > 3) {
-      if (AblageListe[0][0]/4 != 1.5) selectedCard = Math.round(AblageListe[0][0]/4)
-      else selectedCard = Math.floor(AblageListe[0][0]/4);
+        if (AblageListe[0][0]/4 != 1.5 && Math.round(AblageListe[0][0]/4) < handCards.length) selectedCard = Math.round(AblageListe[0][0]/4);
+        else if (Math.floor(AblageListe[0][0]/4) < handCards.length) selectedCard = Math.floor(AblageListe[0][0]/4);
     }
     else {selectedCard = 0;}
+    if (selectedCard != undefined) {
     console.log(selectedCard);
     textur.width = field.length*70 + 10;
     layoutAll();
     showing = "field";
+  }
   }
   if (showing == "field" && byUser && AblageListe[0][0] == 0 && AblageListe[0][1] == 6) turn("left");
   else if (showing == "field" && byUser && AblageListe[0][1] == 6 && AblageListe[0][0] == 12) turn("right");
@@ -343,9 +365,9 @@ function rundeAuswerten() {
     }
   }
   //alert("you got " + points + " points!");
-  if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] == undefined) highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]] = {};
-  if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] == undefined || points > highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name])  {
-    highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name] = points; document.getElementById('newHighscore').style.display = "inline";
+  if (highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]] == undefined) highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]] = {};
+  if (highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name] == undefined || points > highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name])  {
+    highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name] = points; document.getElementById('newHighscore').style.display = "inline";
     if (offline) localStorage.setItem("uploadScore", {true: true, myScores: highscores[mode][name], mode: mode});
     else dbSet("vaderanGradens", "highscores", JSON.stringify(highscores));
     audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/stamp-sound-effects-all-sounds-youtubemp3free.org.mp3");
@@ -353,7 +375,7 @@ function rundeAuswerten() {
     audio.play();
     setTimeout(function () {
       audio.pause();
-      audio = new Audio("http://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3").play();
+      audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
       setTimeout(function () {
         audio = new Audio("https://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
         audio.currentTime = 9.7;
@@ -366,19 +388,22 @@ function rundeAuswerten() {
 function showScores(points) {
   document.getElementById('highscores').style.display = "inline";
   document.getElementById('textur').style.display = "none";
-  document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name];
+  document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name];
   if (points != undefined) document.getElementById('ownScore').innerHTML = "score: " + points;
   else document.getElementById('ownScore').style.display = "none";
-  for (var i = 0; i < Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]]).length; i++) {
-    if (Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] != name) {
-      if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] > highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name]) {
-        document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
+  document.getElementById('highscoresBetterThanYours').innerHTML = "";
+  document.getElementById('highscoresBetterThanYours').innerHTML = "";
+  document.getElementById('highscoresWorseThanYours').innerHTML = "";
+  for (var i = 0; i < Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]]).length; i++) {
+    if (Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i] != name) {
+      if (highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i]] > highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name]) {
+        document.getElementById('highscoresBetterThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i]] + '<br>';
       }
-      else if (highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] < highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][name]) {
-        document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
+      else if (highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i]] < highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name]) {
+        document.getElementById('highscoresWorseThanYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i]] + '<br>';
       }
       else {
-        document.getElementById('highscoresAsGoodAsYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split(' (')[0]])[i]] + '<br>';
+        document.getElementById('highscoresAsGoodAsYours').innerHTML += Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i] + "  " + highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][Object.keys(highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]])[i]] + '<br>';
       }
     }
   }
