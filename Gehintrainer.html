@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<title>Gehirntrainer</title>
 <select name="course" id="Auswahl">
   <option value="Zahlenmerken-1">Zahlenmerken</option>
   <option value="ReihenfolgeButtons-2">Reihenfolge Felder</option>
@@ -56,8 +57,8 @@
 </div>
 <canvas id="textur" width="1582" height="750"></canvas>
 
-<script src="https://adi.nicolaiweitkemper.de/Database/js.js"></script>
-
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
 <script>
 
 document.getElementById('highscoresBetterThanYours').style.color = "red"
@@ -82,7 +83,10 @@ var blinkendesFeld;
 var zustände = [];
 var mausxScroll = 0;
 var mausyScroll = 0;
-var name = prompt("Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können.");
+if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können.");
+else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
 var highscores = {};
 highscores[name] = {};
 highscores[name] = {"Zahlenmerken-1": 0, "ReihenfolgeButtons-2": 0, "ReihenfolgeTöne-3": 0};
@@ -90,12 +94,22 @@ document.getElementById('richtig').style.color = "green"
 document.getElementById('falsch').style.color = "red"
 document.getElementById("Zahlenfolge").style.display = "none";
 document.getElementById('newHighscore').style.display = "none";
-
-dbGet("gehirntrainer", "highscores", function(result) {
-  if (result == "NOPE" == false) {
-    highscores = JSON.parse(result);
-  }
-});
+var offline = false;
+dbGet("gehirntrainer", "highscores").then(result => {
+    if (result == "NOPE" == false) {
+      highscores = JSON.parse(result);
+      localStorage.setItem("highscoresGehirntrainer", JSON.stringify(highscores));
+      if (JSON.parse(localStorage.getItem("uploadScore")) != undefined && JSON.parse(localStorage.getItem("uploadScore")).true == true) {
+        highscores[name] = JSON.parse(localStorage.getItem("uploadScore")).myScores;
+        localStorage.setItem("uploadScore", {true: false});
+      }
+    }
+  }).catch(function(e) {
+    console.error("offline mode activated (error: " + e + ")");
+    alert("Offline mode active! The displayed highscores are the ones from the last time, you opened the website with internet connection. If you get a new highscore, it will be uploaded next time, you have access to internet.");
+    highscores = JSON.parse(localStorage.getItem("highscoresGehirntrainer"));
+    offline = true;
+  });
 
 function start() {
   document.getElementById('newHighscore').style.display = "none";
@@ -118,7 +132,7 @@ function start() {
       zähler[0]++;
     }
     zähler[0] = 0;
-    console.log(zahlen);
+    //console.log(zahlen);
     document.getElementById('richtig').innerHTML = zahlen;
     document.getElementById("falsch").style.display = "inline";
     document.getElementById("richtig").style.display = "inline";
@@ -403,7 +417,8 @@ function showScore() {
     }
     highscores[name][document.getElementById('Auswahl').value] = dataMode[document.getElementById('Auswahl').value]
     console.log("SaveOnServer");
-    dbSet("gehirntrainer", "highscores", JSON.stringify(highscores));
+    if (offline) localStorage.setItem("uploadScore", {true: true, myScores: highscores[name]});
+    else dbSet("gehirntrainer", "highscores", JSON.stringify(highscores));
   }
   document.getElementById('ownHighscore').innerHTML = "Highscore: " + dataMode[document.getElementById('Auswahl').value]
   document.getElementById('ownScore').innerHTML = "Score: " + dataMode[document.getElementById('Auswahl').value]

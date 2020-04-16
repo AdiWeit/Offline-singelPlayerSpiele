@@ -108,6 +108,7 @@
   </select>
   <br>
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
+  <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
   <script type="text/javascript">
 
   visible([
@@ -830,7 +831,12 @@ function ballColourChanged (value) {
     var highscoresDisplayedBefore = {};
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
-    var name = prompt("Wie heißen sie? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! Ihre Zeiten werden auf Anfrage, oder beim Beenden aller Level angezeigt)")
+    if (!localStorage.getItem("storedName")) {
+      var name = prompt("Wie heißen sie? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! Ihre Zeiten werden auf Anfrage, oder beim Beenden aller Level angezeigt)");
+    }
+    else var name = localStorage.getItem("storedName");
+    localStorage.setItem("storedName", name);
+    nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
     for (var i = 0; i < Object.keys(level).length - 1; i++) {
       highscores[Object.keys(level)[i]] = {};
       highscores[Object.keys(level)[i]][name] = [];

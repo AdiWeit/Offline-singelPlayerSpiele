@@ -3,12 +3,13 @@
 <meta charset="utf-8">
 <html>
 <head>
-<title>Accelerometer</title>
+<title>scrolling ball</title>
   <h2 id="data"></h2>
 <meta name="viewport" content="width=device-width,user-scalable=yes" />
 <style>
 .shape {
  position: absolute;
+ z-index: 1;
  width: 30px;
  height: 30px;
  -webkit-radius: 30px;
@@ -20,7 +21,7 @@
  background-color: blue;
 }
 #textur {
-  -ms-transform: rotate(0deg); /* IE 9 */
+  /* -ms-transform: rotate(0deg); /* IE 9 */ */
   transform: rotate(0deg);
 }
 </style>
@@ -68,6 +69,7 @@
   <td>Row3 cell2</td>
 </tr> -->
 </table>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
 <script>
 if (navigator.userAgent.match(/Android/i) ||
 navigator.userAgent.match(/webOS/i) ||
@@ -128,12 +130,15 @@ console.log("PC");
     x2 = parseInt(x2 + vx2 / 30);
 
     boundingBoxCheck();
+    if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1; y1Converted = y1;}
+    else if (direction.stringDirection == "left") {x1Converted = textur.width - y1 - 37 - 10 - 15; y1Converted = x1 - 39;/*780 - x1 - 60 - 33*/}
+    else {x1Converted = y1 + 37; y1Converted = 779 - x1 + 5}
     for (var i = 0; i < 4; i++) {
     var numbers = [
-      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) + 5, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2], //rechts
-      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2)], // oben
-      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) - 5], // unten
-      [(x1 - JSON.parse(sphere1.style.width.replace("px", ""))/2 + 8), (y1 - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
+      [(x1Converted - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) + 5, (y1Converted - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2], //rechts
+      [(x1Converted - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1Converted - JSON.parse(sphere1.style.height.replace("px", ""))/2)], // oben
+      [(x1Converted - JSON.parse(sphere1.style.width.replace("px", ""))/2) + JSON.parse(sphere1.style.width.replace("px", "")) / 2, (y1Converted - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) - 5], // unten
+      [(x1Converted - JSON.parse(sphere1.style.width.replace("px", ""))/2 + 8), (y1Converted - JSON.parse(sphere1.style.height.replace("px", ""))/2) + JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
     ]
     // for (var i1 = 0; i1 < numbers.length; i1++) {
     //   canvas.fillStyle = "red";
@@ -147,7 +152,7 @@ console.log("PC");
     blue = data.data[2];
     alpha = data.data[3];
     if (!highscores[name][modeSelection.value]) highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
-    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (x1 > 683 || x1 < 10 && y1 < 413)))) && countdown.length == 0 && !shield) {
+    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
@@ -163,7 +168,10 @@ console.log("PC");
   }
   }, 25);
   }
-  var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
+  if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   var shield = false;
   var highscores = {};
   function boundingBoxCheck(){
@@ -210,6 +218,7 @@ console.log("PC");
   var countdownInt;
   function beginnRound() {
     if (gerät == "Handy") {
+      textur.style.transform = "rotate(" + 0 + "deg)";
       var directions = [1, 1, -1];
       var selectedDirection = directions[Math.round(Math.random()*1)];
       if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)};}
@@ -314,7 +323,7 @@ console.log("PC");
       if (!(screen[i].y < 400 || screen[i].y > 840)) i1++;
     }
     if (modeSelection.value == "scrollWaagerecht" && (!((pixelMoved/13333 + "").includes(".")) || pixelMoved == 0)) {
-      direction = {direction: 1, /*beginning: pixelMoved,*/ needed: pixelMoved + 2000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/
+      direction = {direction: 1, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + 2000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/
     }
     if (modeSelection.value == "againstThePC" && (!((pixelMoved/13333 + "").includes(".")) || pixelMoved == 0/*|| !(i1 > 0)*/ || screen[1].y < 0)) {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: pixelMoved + 1833}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/}
     if (modeSelection.value == "againstThePC" && pixelMoved >= direction.needed) {
@@ -332,10 +341,13 @@ console.log("PC");
       speed = 0;
       shield = true;
       directionBefore = direction.stringDirection;
-      if (direction.stringDirection == "up" && Math.round(Math.random()*1) == 0) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
-      else if (direction.stringDirection == "up") {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      if ((direction.stringDirection == "up" && Math.round(Math.random()*1) == 0)/* || directionBefore == "left"*/) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      else if (direction.stringDirection == "up"/* || directionBefore == "right"*/) {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
       else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      if (directionBefore == "right") direction.turned = 90;
+      else if (directionBefore == "left") direction.turned = -90;
       rotateInt = setInterval(rotateCanvas, 50);
+      i2 = 0;
     }
     if (speed > 0) pixelMoved += speed;
     else pixelMoved -= speed;
@@ -347,7 +359,7 @@ console.log("PC");
         objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += direction.direction*speed;
       }
       if ((screen[i].y > 852 && modeSelection.value != "againstThePC")) {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
-      if (screen[i].y > 804 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
+      if (screen[i].y > 804 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
       if (screen[i].y < /*-876 - 426*/-1229 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
@@ -360,27 +372,32 @@ console.log("PC");
   var rotateInt;
   var checkTurnedInt;
   var directionBefore;
+  var i2 = 0;
   function rotateCanvas() {
     canvas.fillStyle = "white";
     canvas.fillRect(-1000, -1000, 5000, 5000);
     // canvas.save();
     // canvas.translate(canvas.width/2,canvas.height/2);
-    if (direction.turned < 90 && ((direction.stringDirection == "right") || (direction.stringDirection == "up" && direction.directionBefore == "left"))) canvas.rotate(/*°*/1*Math.PI/180);
-    else if (direction.turned < 90 && ((direction.stringDirection == "left") || (direction.stringDirection == "up" && direction.directionBefore == "right"))) canvas.rotate(/*°*/-1*Math.PI/180);
+    if (i2 < 90 && ((direction.stringDirection == "right") || (direction.stringDirection == "up" && direction.directionBefore == "left"))) textur.style.transform = "rotate(" + (direction.turned + 1) + "deg)"//canvas.rotate(/*°*/1*Math.PI/180);
+    else if (i2 < 90 && ((direction.stringDirection == "left"))) textur.style.transform = "rotate(" + (-(direction.turned + 1)) + "deg)"//canvas.rotate(/*°*/-1*Math.PI/180);
+    else if ((direction.stringDirection == "up" && direction.directionBefore == "right")) textur.style.transform = "rotate(" + (direction.turned) + "deg)";
     else if (direction.stringDirection == "left" || directionBefore == "left") {
     for (var i = 0; i < screen.length; i++) {
-      if (direction.stringDirection == "left") screen[i].x -= 3;
-      else screen[i].x += 3;
+      if (direction.stringDirection == "left") screen[i].x += 3;
+      else screen[i].x -= 3;
     }
     }
   //  canvas.drawImage(image,-image.width/2,-image.width/2);
     moveUp();
     // canvas.restore();
-    direction.turned++;
-    if (direction.turned == 90 && direction.stringDirection != "left" && directionBefore != "left" || (direction.turned == 90 + 390/3 && (direction.stringDirection == "left" || directionBefore == "left"))) {clearInterval(rotateInt); checkTurnedInt = setInterval(checkTurned, 1000);}
+    i2++;
+    if ((direction.stringDirection == "up" || direction.stringDirection == "left") && direction.directionBefore == "right") direction.turned--;
+    else direction.turned++;
+    if (i2 == 90 && direction.stringDirection != "left" && directionBefore != "left" || (i2 == 220 && (direction.stringDirection == "left" || directionBefore == "left"))) {clearInterval(rotateInt); checkTurnedInt = setInterval(checkTurned, 1000);}
   }
   function checkTurned() {
     if ((direction.stringDirection == "up" && window.innerWidth < window.innerHeight) || (direction.stringDirection != "up" && window.innerWidth > window.innerHeight)) {
+      window.scroll(0, 0);
       setTimeout(function () {
         shield = false;
         if (direction.stringDirection == "up") speed = 1;
