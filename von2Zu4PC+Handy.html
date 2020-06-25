@@ -170,7 +170,7 @@ localStorage.setItem("storedName", name);
         namen.pop();
         audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/windows%207%20trash.wav").play();
       }
-      dbSet("von2Zu4", "namen" + name, namen);
+      dbSetWarteschlange.push({tag: "namen" + name, data: namen});//dbSet("von2Zu4", "namen" + name, namen);
       AblageListe[3] = 267 * namen.length
       document.getElementById('textur').height = 888 + 300 * namen.length + "";
       eigenenHighscoreAnzeigen();
@@ -642,7 +642,7 @@ localStorage.setItem("storedName", name);
         if (mausx > 280 + 40 * (namen[zählerListe[0]].length - 2) && mausx < 280 + 40 * (namen[zählerListe[0]].length - 2) + 70 && mausy > 369 + AblageListe[3] && mausy < 369 + 65 + AblageListe[3]) {
           console.log("Löschen " + zählerListe[0]);
           namen.splice(zählerListe[0], 1);
-          dbSet("von2Zu4", "namen" + name, namen);
+          dbSetWarteschlange.push({tag: "namen" + name, data: namen});//dbSet("von2Zu4", "namen" + name, namen);
           canvas.fillStyle = "white";
           canvas.fillRect(0, 337, textur.width, textur.height)
           gespeicherteHighscoresAbfragen();
@@ -656,7 +656,13 @@ localStorage.setItem("storedName", name);
       }
     }
   }
-
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("von2Zu4", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
   function doChanger(number) {
     if (number == 2 || number == 4 || number == 6)  {
       items.changer.xp.got = 0;
@@ -781,10 +787,10 @@ localStorage.setItem("storedName", name);
       zählerListe[1] = 0;
     }
     if (zählerListe[0] < 5) {
-      dbSet("von2Zu4", mode + " spielfeld " + name, "NOPE");
-      setTimeout(function () {
-        dbSet("von2Zu4", "items " + name, "NOPE");
-      }, 1000);
+      dbSetWarteschlange.push({tag: mode + " spielfeld " + name, data: "NOPE"});//dbSet("von2Zu4", mode + " spielfeld " + name, "NOPE");
+      // setTimeout(function () {
+      dbSetWarteschlange.push({tag: "items " + name, data: "NOPE"});//  dbSet("von2Zu4", "items " + name, "NOPE");
+      //}, 1000);
     //  dbSet("von2Zu4", mode + " turns " + name, 0);
       zustände[2] = "beendet"
       zählerListe[0] = 0;
@@ -798,10 +804,10 @@ localStorage.setItem("storedName", name);
       console.log("beendet");
     } else {
       zuVarSpielfeld();
-      dbSet("von2Zu4",mode + " spielfeld " + name, AblageListe[4]);
-      setTimeout(function () {
-        dbSet("von2Zu4", "items " + name, JSON.stringify(items));
-      }, 1000);
+      dbSetWarteschlange.push({tag: mode + " spielfeld " + name, data: AblageListe[4]});//dbSet("von2Zu4",mode + " spielfeld " + name, AblageListe[4]);
+    //  setTimeout(function () {
+        dbSetWarteschlange.push({tag: "items " + name, data: JSON.stringify(items)});//dbSet("von2Zu4", "items " + name, JSON.stringify(items));
+    //  }, 1000);
     //  dbSet("von2Zu4", mode + " turns " + name, turns);
     }
   }
@@ -886,10 +892,10 @@ localStorage.setItem("storedName", name);
     if (newHighscore) {
       if (offline) localStorage.setItem("uploadScore" + name, {true: true, myScores: highscores[mode], mode: mode});
       else {
-        dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
-        setTimeout(function () {
-          dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
-        }, 1000);
+        dbSetWarteschlange.push({tag: "highscores" + name, data: JSON.stringify(highScores)});//dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
+      //  setTimeout(function () {
+          dbSetWarteschlange.push({tag: "zweitBesteScores" + name, data: JSON.stringify(zweitBesteScores)});//dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+      //  }, 1000);
       }
     }
     scores[1] = AblageListe[2][AblageListe[2].length - 1]
@@ -902,7 +908,7 @@ localStorage.setItem("storedName", name);
       zweitBesteScores[mode][1] = scores[1];
       newZweitbesteScores = true;
     }
-    if (newZweitbesteScores)  dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+    if (newZweitbesteScores)  dbSetWarteschlange.push({tag: "zweitBesteScores" + name, data: JSON.stringify("zweitBesteScores")});//dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
     KoordinatenY = 700;
     AblageListe[3] = 0;
     /*    canvas.fillStyle = "blue";

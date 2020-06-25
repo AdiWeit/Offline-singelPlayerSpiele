@@ -156,7 +156,7 @@ function ballColourChanged (value) {
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", i);
       opt.text = "level";
-    for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
+    for (var i = 0; i < Object.keys(/*level[level.mode].vorgefertigt*/highscores[level.mode][name]).length + 1; i++) {
       opt = document.createElement("option");
       document.getElementById("courceSelection").options.add(opt);
       opt.setAttribute("id", i);
@@ -894,7 +894,7 @@ function ballColourChanged (value) {
         highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
       }
     }
-        if (highscores[level.mode][name] != undefined && highscores[level.mode][name].length > 0) {
+        if (highscores[level.mode][name] != undefined && Object.keys(highscores[level.mode][name]).length > 0) {
           level.mode = "inProgress";
           modeSelected("normal");
       }
@@ -923,7 +923,7 @@ function ballColourChanged (value) {
             level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
           }
           localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-          dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+          dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});//dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
           localStorage.setItem("uploadCources", []);
         }
       }).catch(function(e) {
@@ -994,6 +994,13 @@ function ballColourChanged (value) {
         body: "Your level are now ready to be edited, played or uploaded!",
       });
     }
+    var dbSetWarteschlange = [];
+    setInterval(function () {
+      if (dbSetWarteschlange.length > 0) {
+        dbSet("Geduldspiel", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+        dbSetWarteschlange.shift();
+      }
+    }, 2222);
     function folgenDbGetLevelBy(result, offline) {
 
       // if (Object.keys(level[level.mode].editLevel).length > 2) {
@@ -1388,7 +1395,7 @@ function ballColourChanged (value) {
           [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1 + JSON.parse(sphere1.style.height.replace("px", "")) - 7],
           [x1 - 10, y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2]
         ]
-        for (var i = 0; (document.getElementById('courceSelection').value != "" || highscores[level.mode][name] == undefined) && i < 4; i++) {
+        for (var i = 0; (document.getElementById('courceSelection').value != "" || (highscores[level.mode] && highscores[level.mode][name]) == undefined) && i < 4; i++) {
           // canvas.fillStyle = "red";
           // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
           data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
@@ -1411,7 +1418,7 @@ function ballColourChanged (value) {
                 if (highscores[level.mode][name] == undefined || highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] < mins + ":" + secs + ":" + "0" + tenths) {
                   highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
                   // localStorage.setItem("highscoresGeduldsspiel", JSON.stringify(highscores));
-                  if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
+                  if (offline == false) dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("Gelduldspiel", "highscores", highscores);
                 }
               }
               }
@@ -1546,6 +1553,8 @@ function ballColourChanged (value) {
     }
 
     function zielErreicht() {
+      if (!highscores[level.mode]) highscores[level.mode] = {};
+      if (!highscores[level.mode][name])  highscores[level.mode][name] = {};
       if ((document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility) || (level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility == undefined && level[level.mode].levelType == "editLevel")) {
       if (level[level.mode].levelType == "worldWideLevel") {
         level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name].finished = true;
@@ -1557,7 +1566,7 @@ function ballColourChanged (value) {
         if (highscores[level.mode][name] == undefined || highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
           // localStorage.setItem("highscoresGeduldsspiel", JSON.stringify(highscores));
-          if (offline == false) dbSet("Gelduldspiel", "highscores", highscores);
+          if (offline == false) dbSetWarteschlange.push({tag: "highscores", data: highscores}); dbSet("Gelduldspiel", "highscores", highscores);
         }
         level[level.mode].number++;
         document.getElementById('courceSelection').value = level[level.mode].number + ". map";
@@ -1605,7 +1614,7 @@ function ballColourChanged (value) {
     level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
     // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
     if (offline == false) {
-    dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+    dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});//dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
     alert("uploading...");
     var checkLevelUploaded = setInterval(function() {
       dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
@@ -1689,7 +1698,7 @@ function ballColourChanged (value) {
       if (level[level.mode].levelType == "worldWideLevel") {
         // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel));
         if (offline == false) {
-      dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+      dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});//dbSet("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
       alert("uploading (high)score...");
       var checkLevelUploadedHighscore = setInterval(function() {
         dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
@@ -2203,7 +2212,7 @@ function ballColourChanged (value) {
         Layout();
         localStorage.setItem("levelBy " + name, JSON.stringify(AblageListe[0]));
         if (offline == false) {
-        dbSet("Gelduldspiel", "levelBy " + name, AblageListe[0]);
+        dbSetWarteschlange.push({tag: "levelBy " + name, data: AblageListe[0]});//dbSet("Gelduldspiel", "levelBy " + name, AblageListe[0]);
         alert("saving...")
         var checkLevelSaved = setInterval(function() {
           dbGet("Gelduldspiel", "levelBy " + name).then(result => {
