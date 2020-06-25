@@ -1,0 +1,177 @@
+<canvas id="textur" width="1900" height="700"></canvas>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
+<div id="app">
+<li v-for="title in db" id="pixelSpielfelder">
+{{ title }}
+</li>
+</div>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<div id="ball">
+  <style>
+    .shape {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      -webkit-radius: 50px;
+      margin: 0;
+      width padding: 0;
+    }
+
+    #sphere1 {
+      border-radius: 50px;
+      background-color: grey;
+    }
+  </style>
+</div>
+<div id="content">
+  <div class="shape" id="sphere1"></div>
+</div>
+<script>
+  textur.style.display = "none";
+  var canvas = textur.getContext('2d');
+  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
+  getDatabase();
+  console.log(window.innerWidth + " - " + window.innerHeight);
+  var highscores = {normal: {}};
+  function getDatabase() {
+    dbGet("cleanTheRoom", "highscores").then(result => {
+      app._data.db = Object.keys(result.normal);
+      app._data.db.push("create own pixel rate");
+      clickListCheck();
+    }).catch(function(e) {
+      app._data.db = ["create own pixel rate"];
+      clickListCheck();
+    });
+  }
+  function clickListCheck() {
+    setTimeout(function () {
+      var items = document.querySelectorAll("#pixelSpielfelder"),
+      liIndex;
+      tab = [];
+             for(var i = 0; i < items.length; i++){
+                 tab.push(items[i].innerHTML);
+             }
+             for(i = 0; i < items.length; i++){
+                 items[i].onclick = function(){
+                   textur.style.display = "inline";
+                   if (this.innerText == "create own pixel rate") {
+                     selected.pixelRate = window.innerWidth + " x " + window.innerHeight;
+                     selected.gegnstaende = "vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1";
+                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: []}}};
+                     for (var i = 0; i < 2; i++) { // Vertiefung
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(133)) + 51, height: Math.round(Math.random() *(133)) + 51});
+                     }
+                     for (var i = 0; i < 4; i++) { // Möbel
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(155)) + 23, height: Math.round(Math.random() *(155)) + 23});
+                     }
+                     for (var i = 0; i < 1; i++) { // teppich
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(444)) + 33, height: Math.round(Math.random() *(444)) + 33});
+                     }
+                     for (var i = 0; i < 27; i++) { // Staub
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(24)) + 1, collected: false});
+                     }
+                     selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects));
+                   }
+                   else selected.pixelRate = this.innerText;
+                 }
+               }
+    }, 1000);
+  }
+  // ball
+  sphere1.style.width = "50px";
+  sphere1.style.height = "50px";
+  var inOrAgainstDirection = 1;
+  var selected = {pixelRate: window.innerWidth + " x " + window.innerHeight};
+  var x1 = 10,
+    y1 = 177; //window.innerHeight - 150 + 3,
+  vx1 = 0, vy1 = 0,
+    ax1 = 0, ay1 = 0;
+  if (window.DeviceMotionEvent != undefined) {
+    window.ondevicemotion = function(e) {
+      ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
+      ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
+    }
+    setInterval(function() {
+      // scrollingInterac.PC = true;
+      // if (!scrollingInterac.user && sphere1.style.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
+      // if (!scrollingInterac.user && sphere1.style.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
+      // if (!scrollingInterac.user && sphere1.style.y - scrollX < (17*2 + sphere1.style.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      // if (!scrollingInterac.user && sphere1.style.y - scrollY < (17*2 + sphere1.style.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      // setTimeout(function () {
+      //   scrollingInterac.PC = false;
+      // }, 1);
+      var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
+      if (landscapeOrientation) {
+        vx1 = vx1 + ay1;
+        vy1 = vy1 + ax1;
+      } else {
+        vy1 = vy1 - ay1;
+        vx1 = vx1 + ax1;
+      }
+      vx1 = vx1 * 0.98;
+      vy1 = vy1 * 0.98;
+      y1 = parseInt(y1 + vy1 / 50);
+      x1 = parseInt(x1 + vx1 / 50);
+      boundingBoxCheck();
+      sphere1.style.top = y1 + "px";
+      sphere1.style.left = x1 + "px";
+      canvas.fillStyle = "#FF8000";
+      canvas.fillRect(0, 0, textur.width, textur.height);
+      for (var i = 0; selected.objects && i < selected.objects.teppich.length; i++) {
+        canvas.fillStyle = "green";
+        canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
+        canvas.fillStyle = "#2EFE2E";
+        canvas.fillRect(selected.objects.teppich[i].x + 11, selected.objects.teppich[i].y + 11, selected.objects.teppich[i].width - 22, selected.objects.teppich[i].height - 22);
+      }
+      for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+        canvas.fillStyle = "#FACC2E";
+        canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
+      }
+      for (var i = 0; selected.objects && i < selected.objects.vertiefung.length; i++) {
+        canvas.fillStyle = "black";
+        canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
+      }
+      for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
+        canvas.fillStyle = "#A4A4A4";
+        canvas.beginPath();
+        canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
+        if (!selected.objects.staub[i].collected) canvas.fill();
+      }
+      // collect staub
+      for (var i = 0;  selected.objects && i < selected.objects.staub.length; i++) {
+        if (!selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + 50 && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + 50) {
+          selected.objects.staub[i].collected = true;
+        }
+      }
+    }, 25);
+  }
+  function boundingBoxCheck() {
+    if (x1 < 0) {
+      x1 = 0;
+      vx1 = -vx1;
+    }
+    if (y1 < 0) {
+      y1 = 0;
+      vy1 = -vy1;
+    }
+    if (x1 > selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+      x1 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
+      vx1 = -vx1;
+    }
+    if (y1 > selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+      y1 = selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
+      vy1 = -vy1;
+    }
+  }
+  var app = new Vue({
+  el: '#app',
+  data: {
+  db: Object.keys(pixelSpielfelder)
+  }
+  })
+
+</script>
