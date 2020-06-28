@@ -38,6 +38,14 @@
     <br>
     <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
   </div>
+  <p><input checked="true" onchange="if (checked) {SchmuckDiv.style.display = 'inline'; SchmuckDiv.style.display = 'inline';} else {anzahlSchmuck.value = 0; SchmuckDiv.style.display = 'none'; SchmuckDiv.style.display = 'none'}" type="checkbox"><font size="5">Schmuck</font></p>
+  <div id="SchmuckDiv">
+    min. <input value="3" id="minSchmuckSize" oninput="if (JSON.parse(maxSchmuckSize.value) < JSON.parse(value)) {maxSchmuckSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+    <br>
+    max. <input value="24" id="maxSchmuckSize" oninput="minSchmuckSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+    <br>
+    <input id="anzahlSchmuck" value="3" type="text">Schmuckstücke sollen es insgesamt sein!
+  </div>
   <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
   <div id="TeppichDiv">
     min. width <input value="33" min="11" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
@@ -234,7 +242,7 @@ localStorage.setItem("storedName", name);
                      textur.height = window.innerHeight - 9;
                      console.log(window.innerWidth + " - " + textur.width);
                      selected.gegnstaende = "vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1";
-                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [],}}};
+                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}}};
                      for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
                        highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
                      }
@@ -260,6 +268,9 @@ localStorage.setItem("storedName", name);
                      }
                      for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
                        /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
+                     }
+                     for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
+                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
                      }
                      //setTimeout(function () {
                      verfallsdaten = {ladung: 0, füllungLeft: 0};
@@ -555,6 +566,26 @@ localStorage.setItem("storedName", name);
         canvas.fill();
       }
     }
+    for (var i = 0; selected.objects && i < selected.objects.schmuck.length; i++) {
+      // collect spielzeug
+      if (!selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
+        selected.objects.schmuck[i].collected = true;
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
+        audio.currentTime = 60*1 + 29.5;
+        audio.play();
+        setTimeout(function () {
+          audio.pause();
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
+          resetLevel(/*"Schmuck eingesammelt!"*/);
+        }, 500);
+      }
+      canvas.fillStyle = "yellow";
+      canvas.beginPath();
+      canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
+      if (!selected.objects.schmuck[i].collected) {
+        canvas.fill();
+      }
+    }
     // sphere1.style.top = "175";
     // sphere1.style.left = "9";
     // energyBar.style.left = "20";
@@ -621,6 +652,9 @@ localStorage.setItem("storedName", name);
       }
       for (var i = 0; i < selected.objects.spielzeug.length; i++) {
         selected.objects.spielzeug[i].collected = false;
+      }
+      for (var i = 0; i < selected.objects.schmuck.length; i++) {
+        selected.objects.schmuck[i].collected = false;
       }
     }, 1);
   }
