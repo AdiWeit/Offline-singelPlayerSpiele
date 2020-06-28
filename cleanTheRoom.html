@@ -1,3 +1,95 @@
+<meta charset="utf-8">
+<!-- TODO: settings -->
+<div id="settings">
+  Staubsauger Größe<input value="50" min="1" max="222" oninput="minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
+  <br>
+  <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
+  <div id="staubDiv">
+    <br>
+    min. <input id="minStaubSize" oninput="if (JSON.parse(maxStaubSize.value) < JSON.parse(value)) {maxStaubSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+    <br>
+    max. <input id="maxStaubSize" oninput="minStaubSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+    <br>
+    <input id="anzahlStaub" type="text">Staubkörner sollen es insgesamt sein!
+  </div>
+  <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
+  <div id="spielzeugDiv">
+    <input checked="true" type="checkbox">stoppe kurz(zum Entfernen)
+    <br>
+    min. <input id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+    <br>
+    max. <input id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+    <br>
+    <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
+    <!-- <input type="checkbox">werde langsamer -->
+  </div>
+  <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else TeppichDiv.style.display = 'none';" type="checkbox"><font size="5">Teppich</font></p>
+  <div id="TeppichDiv">
+    min. width <input id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. width <input oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
+    <br>
+    min. height <input id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. height <input oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
+    <br>
+    <input id="anzahlTeppich" value="2" type="text">Teppiche sollen es insgesamt sein!
+  </div>
+  <p><input checked="true" onchange="if (checked) moebelDiv.style.display = 'inline'; else moebelDiv.style.display = 'none';" type="checkbox"><font size="5">Möbel</font></p>
+  <div id="moebelDiv">
+    min. width <input id="minMoebelWidth" oninput="if (JSON.parse(maxMoebelWidth.value) < JSON.parse(value)) {maxMoebelWidth.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. width <input oninput="minMoebelWidth.max = JSON.parse(value) - 1" id="maxMoebelWidth" type="range">
+    <br>
+    min. height <input id="minMoebelHeight" oninput="if (JSON.parse(maxMoebelHeight.value) < JSON.parse(value)) {maxMoebelHeight.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. height <input oninput="minMoebelHeight.max = JSON.parse(value) - 1" id="maxMoebelHeight" type="range">
+  </div>
+  <p><input checked="true" onchange="if (checked) LochDiv.style.display = 'inline'; else LochDiv.style.display = 'none';" type="checkbox"><font size="5">Loch</font></p>
+  <div id="LochDiv">
+    min. width <input id="minLochWidth" oninput="if (JSON.parse(maxLochWidth.value) < JSON.parse(value)) {maxLochWidth.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. width <input oninput="minLochWidth.max = JSON.parse(value) - 1" id="maxLochWidth" type="range">
+    <br>
+    min. height <input id="minLochHeight" oninput="if (JSON.parse(maxLochHeight.value) < JSON.parse(value)) {maxLochHeight.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. height <input oninput="minLochHeight.max = JSON.parse(value) - 1" id="maxLochHeight" type="range">
+    <br>
+    <input id="anzahlLoecher" value="2" type="text">Löcher sollen es insgesamt sein!
+  </div>
+  <p><input checked="true" onchange="if (checked) ladestationDiv.style.display = 'inline'; else {ladestationDiv.style.display = 'none';}" type="checkbox"><font size="5">Ladestation</font></p>
+  <div id="ladestationDiv">
+    <input id="pixelBisLaden" onchange="if (checked) StaubAlsLadeBasis.checked = false;" type="checkbox"> nach <input type="text" placeholder="anzahl" value="3333"> Pixeln Akku leer
+    <br>
+    <input onchange="if (checked) pixelBisLaden.checked = false;" id="StaubAlsLadeBasis" checked="true" type="checkbox"> nach <input type="text" placeholder="anzahl" value="11"> mal so vielen Pixeln, wie aller Staub zusammen Akku leer
+    <br>
+    min. width <input id="minLaderWidth" oninput="if (JSON.parse(maxLaderWidth.value) < JSON.parse(value)) {maxLaderWidth.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. width <input oninput="minLaderWidth.max = JSON.parse(value) - 1" id="maxLaderWidth" type="range">
+    <br>
+    min. height <input id="minLaderHeight" oninput="if (JSON.parse(maxLaderHeight.value) < JSON.parse(value)) {maxLaderHeight.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. height <input oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
+    <br>
+    <input id="anzahlLadestationen" value="1" type="text">Ladestationen sollen es insgesamt sein!
+  </div>
+  <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
+  <div id="entleererDiv">
+    <input id="pixelBisLeeren" onchange="if (checked) StaubAlsLeerBasis.checked = false;" type="checkbox"> nach <input type="text" placeholder="anzahl" value="500"> Pixeln keinen Staub mehr aufnehmen
+    <br>
+    <input onchange="if (checked) pixelBisLeeren.checked = false;" id="StaubAlsLeerBasis" checked="true" type="checkbox"> nach <input type="text" placeholder="anzahl" value="2">geteilt durch pixel Anzahl des gesamten Staubes keinen Staub mehr aufnehmen
+    <br>
+    min. width <input id="minLeererWidth" oninput="if (JSON.parse(maxLeererWidth.value) < JSON.parse(value)) {maxLeererWidth.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. width <input oninput="minLeererWidth.max = JSON.parse(value) - 1" id="maxLeererWidth" type="range">
+    <br>
+    min. height <input id="minLeererHeight" oninput="if (JSON.parse(maxLeererHeight.value) < JSON.parse(value)) {maxLeererHeight.value = JSON.parse(value) + 1}" type="range">
+    <br>
+    max. height <input oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
+    <br>
+    <input id="anzahlEntleerer" value="1" type="text">Entleerer sollen es insgesamt sein!
+  </div>
+</div>
 <canvas id="textur" width="1900" height="700"></canvas>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
@@ -22,13 +114,45 @@
       border-radius: 50px;
       background-color: grey;
     }
+    .bars {
+      position: absolute;
+      width: 11px;
+      height: 40px;
+      -webkit-radius: 50px;
+      margin: 0;
+      width padding: 0;
+    }
+    #energyBar {
+      border-radius: 50px;
+      background-color: green;
+    }
+    #trashBar {
+      border-radius: 50px;
+      background-color: #A4A4A4;
+    }
   </style>
 </div>
 <div id="content">
   <div class="shape" id="sphere1"></div>
+  <div class="bars" id="energyBar"></div>
+  <div class="bars" id="trashBar"></div>
 </div>
 <script>
   textur.style.display = "none";
+  staubDiv.style.display = "none";
+  anzahlStaub.value = Math.round(window.innerWidth/25);
+  // spielzeugDiv.style.display = "none";
+
+  // sphere1.style.top = "175";
+  // sphere1.style.left = "9";
+  // energyBar.style.left = "20";
+  // energyBar.style.top = "180";
+  // trashBar.style.left = "37";
+  // trashBar.style.top = "180";
+  // setTimeout(function () {
+  //   energyBar.style.height = 30;
+  //   energyBar.style.top = "190";
+  // }, 3333);
   var canvas = textur.getContext('2d');
   if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
   else var name = localStorage.getItem("storedName");
@@ -58,10 +182,16 @@ localStorage.setItem("storedName", name);
              for(i = 0; i < items.length; i++){
                  items[i].onclick = function(){
                    textur.style.display = "inline";
+                   x1 = 0;
+                   y1 = 0;
+                   window.scroll(0, 9)
                    if (this.innerText == "create own pixel rate") {
-                     selected.pixelRate = window.innerWidth + " x " + window.innerHeight;
+                     selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+                     textur.width = window.innerWidth - 9;
+                     textur.height = window.innerHeight - 9;
+                     console.log(window.innerWidth + " - " + textur.width);
                      selected.gegnstaende = "vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1";
-                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: []}}};
+                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [],}}};
                      for (var i = 0; i < 2; i++) { // Vertiefung
                        highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(133)) + 51, height: Math.round(Math.random() *(133)) + 51});
                      }
@@ -71,12 +201,61 @@ localStorage.setItem("storedName", name);
                      for (var i = 0; i < 1; i++) { // teppich
                        highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(444)) + 33, height: Math.round(Math.random() *(444)) + 33});
                      }
-                     for (var i = 0; i < 27; i++) { // Staub
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(24)) + 1, collected: false});
+                     for (var i = 0; i < 1; i++) { // ladestation
+                       var side = Math.round(Math.random() *(3));
+                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
                      }
+                     for (var i = 0; i < 1; i++) { // leererStation
+                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                     }
+                     for (var i = 0; i < 7; i++) { // hindernisseAufsaugen ("spielzeug")
+                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(22)) + 3, collected: false});
+                     }
+                     //setTimeout(function () {
+                     verfallsdaten = {ladung: 0, füllungLeft: 0};
+                     for (var i = 0; i < 27; i++) { // Staub
+                       var radius = Math.round(Math.random() *(22)) + 3;
+                       verfallsdaten.füllungLeft += radius*2;
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
+                       i2 = "defined";
+                       if (highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1].x > window.innerWidth - radius || highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1].y > window.innerHeight - radius) {
+                         i--;
+                         i2 = "skip";
+                         highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.pop();}
+                       try {
+                         for (var i1 = 0; i2 != "skip" && i1 != -1 && i1 < Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects).length; i1++) {
+                           for (var i2 = 0; i2 != -1 && i2 < highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]].length; i2++) {
+                             // canvas.fillStyle = "red";
+                             // canvas.fillRect(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].x, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].y, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].radius*2, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].radius*2);
+                             //console.log(Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1]))));
+                             if (Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1])))) {
+                               highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.pop();
+                               i--;
+                               verfallsdaten.füllungLeft -= radius*2;
+                               i2 = -2;
+                               i1 = -2;
+                             }
+                           }
+                         }
+                       } catch (e) {
+                         console.log("please debug :( " + e);
+                       }
+                     }
+                     verfallsdaten.füllungLeft /= 2;
+                     verfallsdaten.ladung = verfallsdaten.füllungLeft*11;
+                     highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
+                   //}, 1000);
                      selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects));
+                     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].maxVerfallsdaten;
                    }
                    else selected.pixelRate = this.innerText;
+                   resetLevel();
                  }
                }
     }, 1000);
@@ -114,8 +293,29 @@ localStorage.setItem("storedName", name);
       }
       vx1 = vx1 * 0.98;
       vy1 = vy1 * 0.98;
-      y1 = parseInt(y1 + vy1 / 50);
-      x1 = parseInt(x1 + vx1 / 50);
+      var noMoebelInFront = true;
+      for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+        var ball = {x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: 50, height: 50};
+        if (isCollide(ball, selected.objects.moebel[i])) {
+          noMoebelInFront = false;
+        }
+      }
+      if (stopSpielzeug.boolean) {
+        noMoebelInFront = false;
+        stopSpielzeug.time -= 20;
+        if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
+      }
+      if (noMoebelInFront && inRound) {
+        if (y1 > parseInt(y1 + vy1 / 50)) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / 50)}
+        else {direction.y = 1; speed.y = parseInt(y1 + vy1 / 50) - y1};
+        if (x1 > parseInt(x1 + vx1 / 50)) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / 50);}
+        else {direction.x = 1; speed.x = parseInt(x1 + vx1 / 50) - x1;}
+        if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
+        else speed.highest = {number: speed.y, direction: "y"};
+        y1 = parseInt(y1 + vy1 / 50);
+        x1 = parseInt(x1 + vx1 / 50);
+        verfallsdaten.ladung -= speed.x + speed.y;
+      }
       boundingBoxCheck();
       sphere1.style.top = y1 + "px";
       sphere1.style.left = x1 + "px";
@@ -126,52 +326,232 @@ localStorage.setItem("storedName", name);
         canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
         canvas.fillStyle = "#2EFE2E";
         canvas.fillRect(selected.objects.teppich[i].x + 11, selected.objects.teppich[i].y + 11, selected.objects.teppich[i].width - 22, selected.objects.teppich[i].height - 22);
+        speed.slowDownFinished = false;
+        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
+        var ball = {x: x1, y: y1, width: 50, height: 50};
+        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
+        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+        var teppichRamen = {x: selected.objects.teppich[i].x + selected.objects.teppich[i].width - 11, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
+        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
+        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
       }
+      if (verfallsdaten.ladung < 1) {
+        inRound = false;
+        try {
+          audio.pause();
+        } catch (e) {
+
+        }
+        verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
+        audio.currentTime = 2*60 + 33;
+        audio.play();
+        setTimeout(function () {
+          resetLevel("Akku leer!!!");
+        }, 3000);
+       }
       for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
         canvas.fillStyle = "#FACC2E";
         canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
+        // if (!((x1 >= selected.objects.moebel[i].x && x1 < selected.objects.moebel[i].x + selected.objects.moebel[i].width) || (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)))
+        // if (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height)
+        // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
+        // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
       }
       for (var i = 0; selected.objects && i < selected.objects.vertiefung.length; i++) {
         canvas.fillStyle = "black";
         canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
+        var ball = {x: x1, y: y1, width: 5, height: 5};
+        // if (speed.highest.direction == "x") ball.x = ball.x + (ball.width) - (ball.width/2)*direction.x;
+        // else ball.y = ball.y + (ball.height/2) - (ball.height)*direction.y;
+        // canvas.fillStyle = "blue";
+        // canvas.fillRect(ball.x, ball.y, 22, 22);
+        if (speed.highest.direction == "x") ball.x += 50/2//2*(-direction.x)
+        else ball.y += 50/2//ball.height/2*(-direction.y) + ball.height*2;
+        // canvas.fillStyle = "red";
+        // canvas.fillRect(ball.x, ball.y, ball.width, 100);
+        if (isCollide(ball, selected.objects.vertiefung[i])) {
+          resetLevel("ab ins Loch!!!");
+        }
+        // if (x1 > selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
+        //   console.log("going down from left");
+        // }
+        // if (x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 > selected.objects.vertiefung[i].x && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
+        //   console.log("going down from right");
+        // }
+        // if (y1 > selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
+        //   console.log("going down from up");
+        // }
+        // if (y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 > selected.objects.vertiefung[i].y && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
+        //   console.log("going down from down");
+        // }
+      }
+      var allStaubCollected = true;
+      var ball = {x: x1, y: y1, width: 50, height: 50};
+      if (!selected.objects) allStaubCollected = false;
+      for (var i = 0; selected.objects && i < selected.objects.ladestation.length; i++) {
+        canvas.fillStyle = "#2EFE2E";
+        canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
+        if (isCollide(ball, selected.objects.ladestation[i]) && verfallsdaten.ladung < selected.maxVerfallsdaten.ladung/*177*/) verfallsdaten.ladung += 17;
+      }
+      for (var i = 0; selected.objects && i < selected.objects.leererStation.length; i++) {
+        canvas.fillStyle = "#A4A4A4";
+        canvas.fillRect(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y, selected.objects.leererStation[i].width, selected.objects.leererStation[i].height);
+        if (isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
       }
       for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
+        // collect staub
+        if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + 50 && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + 50) {
+          selected.objects.staub[i].collected = true;
+          verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
+          if (verfallsdaten.füllungLeft < 1) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
+          audio.volume = 1;
+          audio.currentTime = 1;
+          audio.play();
+          setTimeout(function () {
+            audio.pause();
+          }, 777);
+        }
         canvas.fillStyle = "#A4A4A4";
+        canvas.globalAlpha = 1;
+        if (!(verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2)) canvas.globalAlpha = 0.5;
         canvas.beginPath();
         canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
-        if (!selected.objects.staub[i].collected) canvas.fill();
-      }
-      // collect staub
-      for (var i = 0;  selected.objects && i < selected.objects.staub.length; i++) {
-        if (!selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + 50 && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + 50) {
-          selected.objects.staub[i].collected = true;
+        if (!selected.objects.staub[i].collected) {
+          canvas.fill();
+          allStaubCollected = false;
         }
       }
+      if (allStaubCollected == true) console.log("finished!!!");
+      canvas.globalAlpha = 1;
+      for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
+        // collect spielzeug
+        if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + 50 && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + 50) {
+          selected.objects.spielzeug[i].collected = true;
+          verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+          stopSpielzeug = {boolean: true, time: 2000};
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
+          audio.currentTime = 48; audio.play();
+          setTimeout(function () {
+            audio.pause();
+          }, 500);
+          // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+          // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
+        }
+        canvas.fillStyle = "red";
+        canvas.beginPath();
+        canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
+        if (!selected.objects.spielzeug[i].collected) {
+          canvas.fill();
+        }
+      }
+      // sphere1.style.top = "175";
+      // sphere1.style.left = "9";
+      // energyBar.style.left = "20";
+      // energyBar.style.top = "180";
+      // trashBar.style.left = "37";
+      // trashBar.style.top = "180";
+      // setTimeout(function () {
+      //   energyBar.style.height = 30;
+      //   energyBar.style.top = "190";
+      // }, 3333);
+      if (selected.maxVerfallsdaten) {
+      energyBar.style.height = 40*(verfallsdaten.ladung/ /*177*/selected.maxVerfallsdaten.ladung);
+      trashBar.style.height = 40*(verfallsdaten.füllungLeft/ selected.maxVerfallsdaten.füllungLeft/*133*/);
+      energyBar.style.left = cssToNumber(sphere1.style.left) + 11;
+      energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height));
+      trashBar.style.left = cssToNumber(sphere1.style.left) + 28;
+      trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height));
+    }
     }, 25);
+  }
+  var audio;
+  var inRound = false;
+  function resetLevel(type) {
+    if (type) console.log(type);
+    inRound = true;
+    try {
+      audio.pause();
+    } catch (e) {}
+    if (type != "Akku leer!!!" && type != undefined) {
+      var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/wall-hit-sound-effects-all-sounds-2-youtubemp3free.org.mp3");
+      localAudio.currentTime = 29.5;
+      localAudio.play();
+      setTimeout(function () {
+        localAudio.pause();
+      }, 1000);
+    }
+    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3" /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
+    audio.volume = 0.5;
+    audio.currentTime = 1;
+    audio.play();
+    verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
+    for (var i = 0; i < selected.objects.staub.length; i++) {
+      selected.objects.staub[i].collected = false;
+    }
+    for (var i = 0; i < selected.objects.spielzeug.length; i++) {
+      selected.objects.spielzeug[i].collected = false;
+    }
+    setTimeout(function () {
+      x1 = 0;
+      y1 = 0;
+    }, 1);
+  }
+  var stopSpielzeug = {time: 0, boolean: false};
+  var speed = {x: 0, y: 0, highest: 0};
+  var direction = {x: 1, y: 1};
+  function isCollide(a, b) {
+    if (a.radius) {a.height = a.radius*2; a.x -= JSON.parse(JSON.stringify(a.radius)); a.y -= JSON.parse(JSON.stringify(a.radius));}
+    if (b.radius) {b.height = b.radius*2; b.x -= JSON.parse(JSON.stringify(b.radius)); b.y -= JSON.parse(JSON.stringify(b.radius));}
+    return !(
+      ((a.y + a.height) < (b.y)) ||
+      (a.y > (b.y + b.height)) ||
+      ((a.x + a.width) < b.x) ||
+      (a.x > (b.x + b.width))
+    );
+  }
+  function slowDown() {
+    console.log("slow down");
+    y1 -= speed.y/1.1*direction.y;
+    x1 -= speed.x/1.3*direction.x;
+    sphere1.style.top = y1 + "px";
+    sphere1.style.left = x1 + "px";
+    speed.slowDownFinished = true;
+    verfallsdaten.ladung += speed.y/1.1*direction.y + speed.x/1.3*direction.x;
   }
   function boundingBoxCheck() {
     if (x1 < 0) {
+      if (speed.highest.number > 5) {resetLevel("broken");}
       x1 = 0;
       vx1 = -vx1;
     }
     if (y1 < 0) {
+      if (speed.highest.number > 5) {resetLevel("broken");}
       y1 = 0;
       vy1 = -vy1;
     }
     if (x1 > selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
-      x1 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
+      if (speed.highest.number > 5) {resetLevel("broken");}
+      x1 = /*window.innerWidth*/selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2 - 1;
       vx1 = -vx1;
     }
     if (y1 > selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+      if (speed.highest.number > 5) {resetLevel("broken");}
       y1 = selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
       vy1 = -vy1;
     }
   }
+  var verfallsdaten = {ladung: 177, füllungLeft: 133};
   var app = new Vue({
   el: '#app',
   data: {
   db: Object.keys(pixelSpielfelder)
   }
   })
-
+  function cssToNumber(string) {
+    return JSON.parse(string.toString().split("px")[0]);
+  }
 </script>
