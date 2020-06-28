@@ -7,6 +7,8 @@
   <br>
   bounce von Wänden ab<input type="checkbox" id="bounceWalls">
   <br>
+  <p id="joyStickPlayP">play with joy-stick<input id="joyStickPlay" type="checkbox"></p>
+  <br>
   <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
   <div id="staubDiv">
     <br>
@@ -208,7 +210,7 @@ localStorage.setItem("storedName", name);
                    x1 = 0;
                    y1 = 0;
                    window.scroll(8, 8);
-                   if (gerät == "PC") {alert("please click to set a joy-stick!"); joyStick = "place";}
+                   if (gerät == "PC"/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
                    if (this.innerText == "create own pixel rate") {
                      settings.style.display = "none";
                      if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
@@ -304,6 +306,7 @@ localStorage.setItem("storedName", name);
     sensibility.style.display = "none";
   } else {
     var gerät = "PC"
+    joyStickPlayP.style.display = "none";
     console.log("PC");
   }
   sphere1.style.width = "50px";
@@ -368,11 +371,11 @@ localStorage.setItem("storedName", name);
       if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
       else speed.highest = {number: speed.y, direction: "y"};
       y1 = nextCoordinates.y;
-      x1 = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
-      if (joyStick && joyStick.coordinates) {
-        x1 += (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value); //25;
-        y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
-      }
+      x1 = nextCoordinates.x;//parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
+      // if (joyStick && joyStick.coordinates) {
+      //   x1 += (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value); //25;
+      //   y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
+      // }
       verfallsdaten.ladung -= speed.x + speed.y;
     }
     if (joyStick && joyStick.coordinates) {
@@ -656,4 +659,29 @@ localStorage.setItem("storedName", name);
     mausy = e.clientY + scrollY;
   }
   document.onmousemove = readMouseMove
+  document.addEventListener('touchmove', touch);
+  document.addEventListener('touchstart', touch);
+  document.addEventListener('touchend', touch);
+// }
+function touch(ev) {
+  // if (!ev.touches[0]) {
+  //   console.log(":((()))");
+  // }
+    if (joyStickPlay.checked && ev.touches[0] != undefined) {
+      mausx = ev.touches[0]["pageX"]// + scrollX;
+      mausy = ev.touches[0]["pageY"]// + scrollY;
+    }
+  if (joyStickPlay.checked && ev.type == "touchend") {
+    //textur.style.touchAction = '';
+    mausx = joyStick.coordinates.x;
+    mausy = joyStick.coordinates.y;
+  }
+    if (joyStickPlay.checked && ev.type == "touchstart") {
+      joyStick = {coordinates : {x: mausx, y: mausy}};
+      textur.style.touchAction = 'none';
+    }
+    // if (ev.type == "touchmove") {
+    //   mousemoveFolgen();
+    // }
+}
 </script>
