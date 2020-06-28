@@ -6,86 +6,87 @@
   <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
   <div id="staubDiv">
     <br>
-    min. <input id="minStaubSize" oninput="if (JSON.parse(maxStaubSize.value) < JSON.parse(value)) {maxStaubSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+    min. <input value="3" id="minStaubSize" oninput="if (JSON.parse(maxStaubSize.value) < JSON.parse(value)) {maxStaubSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
     <br>
-    max. <input id="maxStaubSize" oninput="minStaubSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+    max. <input value="24" id="maxStaubSize" oninput="minStaubSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
     <br>
-    <input id="anzahlStaub" type="text">Staubkörner sollen es insgesamt sein!
+    <input id="anzahlStaub" value="27" type="text">Staubkörner sollen es insgesamt sein!
   </div>
-  <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
+  <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {anzahlSpielzeug.value = 0; spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
   <div id="spielzeugDiv">
     <input checked="true" type="checkbox">stoppe kurz(zum Entfernen)
     <br>
-    min. <input id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+    min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
     <br>
-    max. <input id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+    max. <input value="24" id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
     <br>
     <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
     <!-- <input type="checkbox">werde langsamer -->
   </div>
-  <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else TeppichDiv.style.display = 'none';" type="checkbox"><font size="5">Teppich</font></p>
+  <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
   <div id="TeppichDiv">
-    min. width <input id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="33" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
+    max. width <input value="100" oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
     <br>
-    min. height <input id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="33" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. height <input oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
+    max. height <input value="100" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
     <br>
-    <input id="anzahlTeppich" value="2" type="text">Teppiche sollen es insgesamt sein!
+    <input id="anzahlTeppich" value="1" type="text">Teppiche sollen es insgesamt sein!
   </div>
-  <p><input checked="true" onchange="if (checked) moebelDiv.style.display = 'inline'; else moebelDiv.style.display = 'none';" type="checkbox"><font size="5">Möbel</font></p>
+  <p><input checked="true" onchange="if (checked) moebelDiv.style.display = 'inline'; else {moebelDiv.style.display = 'none'; anzahlMoebel.value = 0;}" type="checkbox"><font size="5">Möbel</font></p>
   <div id="moebelDiv">
-    min. width <input id="minMoebelWidth" oninput="if (JSON.parse(maxMoebelWidth.value) < JSON.parse(value)) {maxMoebelWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="23" id="minMoebelWidth" oninput="if (JSON.parse(maxMoebelWidth.value) < JSON.parse(value)) {maxMoebelWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input oninput="minMoebelWidth.max = JSON.parse(value) - 1" id="maxMoebelWidth" type="range">
+    max. width <input value="155" oninput="minMoebelWidth.max = JSON.parse(value) - 1" id="maxMoebelWidth" type="range">
     <br>
-    min. height <input id="minMoebelHeight" oninput="if (JSON.parse(maxMoebelHeight.value) < JSON.parse(value)) {maxMoebelHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="23" id="minMoebelHeight" oninput="if (JSON.parse(maxMoebelHeight.value) < JSON.parse(value)) {maxMoebelHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. height <input oninput="minMoebelHeight.max = JSON.parse(value) - 1" id="maxMoebelHeight" type="range">
+    max. height <input value="155" oninput="minMoebelHeight.max = JSON.parse(value) - 1" id="maxMoebelHeight" type="range">
+    <input id="anzahlMoebel" value="4" type="text">Möbel sollen es insgesamt sein!
   </div>
-  <p><input checked="true" onchange="if (checked) LochDiv.style.display = 'inline'; else LochDiv.style.display = 'none';" type="checkbox"><font size="5">Loch</font></p>
+  <p><input checked="true" onchange="if (checked) LochDiv.style.display = 'inline'; else {LochDiv.style.display = 'none'; anzahlLoecher.value = 0;}" type="checkbox"><font size="5">Loch</font></p>
   <div id="LochDiv">
-    min. width <input id="minLochWidth" oninput="if (JSON.parse(maxLochWidth.value) < JSON.parse(value)) {maxLochWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="51" id="minLochWidth" oninput="if (JSON.parse(maxLochWidth.value) < JSON.parse(value)) {maxLochWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input oninput="minLochWidth.max = JSON.parse(value) - 1" id="maxLochWidth" type="range">
+    max. width <input value="133" oninput="minLochWidth.max = JSON.parse(value) - 1" id="maxLochWidth" type="range">
     <br>
-    min. height <input id="minLochHeight" oninput="if (JSON.parse(maxLochHeight.value) < JSON.parse(value)) {maxLochHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="51" id="minLochHeight" oninput="if (JSON.parse(maxLochHeight.value) < JSON.parse(value)) {maxLochHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
     max. height <input oninput="minLochHeight.max = JSON.parse(value) - 1" id="maxLochHeight" type="range">
     <br>
     <input id="anzahlLoecher" value="2" type="text">Löcher sollen es insgesamt sein!
   </div>
-  <p><input checked="true" onchange="if (checked) ladestationDiv.style.display = 'inline'; else {ladestationDiv.style.display = 'none';}" type="checkbox"><font size="5">Ladestation</font></p>
+  <p><input checked="true" onchange="if (checked) ladestationDiv.style.display = 'inline'; else {anzahlLadestationen.value = 0; ladestationDiv.style.display = 'none';}" type="checkbox"><font size="5">Ladestation</font></p>
   <div id="ladestationDiv">
     <input id="pixelBisLaden" onchange="if (checked) StaubAlsLadeBasis.checked = false;" type="checkbox"> nach <input type="text" placeholder="anzahl" value="3333"> Pixeln Akku leer
     <br>
     <input onchange="if (checked) pixelBisLaden.checked = false;" id="StaubAlsLadeBasis" checked="true" type="checkbox"> nach <input type="text" placeholder="anzahl" value="11"> mal so vielen Pixeln, wie aller Staub zusammen Akku leer
     <br>
-    min. width <input id="minLaderWidth" oninput="if (JSON.parse(maxLaderWidth.value) < JSON.parse(value)) {maxLaderWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="33" id="minLaderWidth" oninput="if (JSON.parse(maxLaderWidth.value) < JSON.parse(value)) {maxLaderWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input oninput="minLaderWidth.max = JSON.parse(value) - 1" id="maxLaderWidth" type="range">
+    max. width <input value="100" oninput="minLaderWidth.max = JSON.parse(value) - 1" id="maxLaderWidth" type="range">
     <br>
-    min. height <input id="minLaderHeight" oninput="if (JSON.parse(maxLaderHeight.value) < JSON.parse(value)) {maxLaderHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="33" id="minLaderHeight" oninput="if (JSON.parse(maxLaderHeight.value) < JSON.parse(value)) {maxLaderHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. height <input oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
+    max. height <input value="100" oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
     <br>
     <input id="anzahlLadestationen" value="1" type="text">Ladestationen sollen es insgesamt sein!
   </div>
-  <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
+  <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {anzahlEntleerer.value = 0; entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
   <div id="entleererDiv">
     <input id="pixelBisLeeren" onchange="if (checked) StaubAlsLeerBasis.checked = false;" type="checkbox"> nach <input type="text" placeholder="anzahl" value="500"> Pixeln keinen Staub mehr aufnehmen
     <br>
     <input onchange="if (checked) pixelBisLeeren.checked = false;" id="StaubAlsLeerBasis" checked="true" type="checkbox"> nach <input type="text" placeholder="anzahl" value="2">geteilt durch pixel Anzahl des gesamten Staubes keinen Staub mehr aufnehmen
     <br>
-    min. width <input id="minLeererWidth" oninput="if (JSON.parse(maxLeererWidth.value) < JSON.parse(value)) {maxLeererWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="33" id="minLeererWidth" oninput="if (JSON.parse(maxLeererWidth.value) < JSON.parse(value)) {maxLeererWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input oninput="minLeererWidth.max = JSON.parse(value) - 1" id="maxLeererWidth" type="range">
+    max. width <input value="100" oninput="minLeererWidth.max = JSON.parse(value) - 1" id="maxLeererWidth" type="range">
     <br>
-    min. height <input id="minLeererHeight" oninput="if (JSON.parse(maxLeererHeight.value) < JSON.parse(value)) {maxLeererHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="33" id="minLeererHeight" oninput="if (JSON.parse(maxLeererHeight.value) < JSON.parse(value)) {maxLeererHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. height <input oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
+    max. height <input value="100" oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
     <br>
     <input id="anzahlEntleerer" value="1" type="text">Entleerer sollen es insgesamt sein!
   </div>
@@ -186,41 +187,47 @@ localStorage.setItem("storedName", name);
                    y1 = 0;
                    window.scroll(0, 9)
                    if (this.innerText == "create own pixel rate") {
+                     settings.style.display = "none";
+                     if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
+                     else energyBar.style.display = "none";
+                     if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
+                     else trashBar.style.display = "none";
                      selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
                      textur.width = window.innerWidth - 9;
                      textur.height = window.innerHeight - 9;
                      console.log(window.innerWidth + " - " + textur.width);
                      selected.gegnstaende = "vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1";
                      highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [],}}};
-                     for (var i = 0; i < 2; i++) { // Vertiefung
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(133)) + 51, height: Math.round(Math.random() *(133)) + 51});
+                     for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
                      }
-                     for (var i = 0; i < 4; i++) { // Möbel
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(155)) + 23, height: Math.round(Math.random() *(155)) + 23});
+                     for (var i = 0; i < JSON.parse(anzahlMoebel.value)/*4*/; i++) { // Möbel
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
                      }
-                     for (var i = 0; i < 1; i++) { // teppich
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(444)) + 33, height: Math.round(Math.random() *(444)) + 33});
+                     for (var i = 0; i < /*1*/JSON.parse(anzahlTeppich.value); i++) { // teppich
+                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
                      }
-                     for (var i = 0; i < 1; i++) { // ladestation
+                     for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
                        var side = Math.round(Math.random() *(3));
-                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                     /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
                      }
-                     for (var i = 0; i < 1; i++) { // leererStation
-                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(50)) + 50, height: Math.round(Math.random() *(50)) + 33});
+                     for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
+                       var side = Math.round(Math.random() *(3));
+                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
                      }
-                     for (var i = 0; i < 7; i++) { // hindernisseAufsaugen ("spielzeug")
-                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(22)) + 3, collected: false});
+                     for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
+                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
                      }
                      //setTimeout(function () {
                      verfallsdaten = {ladung: 0, füllungLeft: 0};
-                     for (var i = 0; i < 27; i++) { // Staub
-                       var radius = Math.round(Math.random() *(22)) + 3;
+                     for (var i = 0; i < /*27*/JSON.parse(anzahlStaub.value); i++) { // Staub
+                       var radius = Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minStaubSize.value))) + JSON.parse(minStaubSize.value)/*3*/;
                        verfallsdaten.füllungLeft += radius*2;
                        highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
                        i2 = "defined";
@@ -337,7 +344,7 @@ localStorage.setItem("storedName", name);
         var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
         if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
       }
-      if (verfallsdaten.ladung < 1) {
+      if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
         inRound = false;
         try {
           audio.pause();
@@ -406,7 +413,7 @@ localStorage.setItem("storedName", name);
         if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + 50 && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + 50) {
           selected.objects.staub[i].collected = true;
           verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
-          if (verfallsdaten.füllungLeft < 1) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
+          if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
           var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
           audio.volume = 1;
           audio.currentTime = 1;
