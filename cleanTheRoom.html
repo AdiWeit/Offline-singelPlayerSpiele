@@ -20,14 +20,23 @@
   </div>
   <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {anzahlSpielzeug.value = 0; spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
   <div id="spielzeugDiv">
-    <input checked="true" type="checkbox">stoppe kurz(zum Entfernen)
+    <input checked="true" id="stoppeBeiSpielzeug" type="checkbox">stoppe kurz(zum Entfernen)
+    <br>
+    <input id="langsamerBeiSpielzeug" onchange="if (checked) verlangsamungSpielzeugP.style.display = 'inline'; else verlangsamungSpielzeugP.style.display = 'none';" type="checkbox">werde langsamer
+    <br>
+    <p id="verlangsamungSpielzeugP">
+      time<input id="zeitLansamer"value="endless" onchange="if (isNaN(value)) value = 'endless';" type="text">
+      <br>
+      restart when speed gets too low<input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">
+      <br>
+      stay still when speed gets too low and continue with normal speed afterfords<input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">
+    </p>
     <br>
     min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
     <br>
     max. <input value="24" id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
     <br>
     <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
-    <!-- <input type="checkbox">werde langsamer -->
   </div>
   <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
   <div id="TeppichDiv">
@@ -38,6 +47,8 @@
     min. height <input value="33" min="11" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
     max. height <input value="411" min="11" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
+    <br>
+    Verlangsamung (rechts ist weniger)<input value="11" id="verlangsamungTeppich" min="11" max="19" type="range">
     <br>
     <input id="anzahlTeppich" value="1" type="text">Teppiche sollen es insgesamt sein!
   </div>
@@ -153,6 +164,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 <script>
   textur.style.display = "none";
   staubDiv.style.display = "none";
+  verlangsamungSpielzeugP.style.display = "none";
   anzahlStaub.value = Math.round(window.innerWidth/25);
   maxTeppichWidth.max = window.innerWidth;
   maxTeppichHeight.max = window.innerHeight;
@@ -361,7 +373,14 @@ localStorage.setItem("storedName", name);
     if (stopSpielzeug.boolean) {
       noMoebelInFront = false;
       stopSpielzeug.time -= 20;
-      if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
+      if (stopSpielzeug.time < 1) {
+        stopSpielzeug.boolean = false;
+        if (stopSpielzeug.clearing) slowDownSpielzeug = {boolean: false, time: "endless"};
+      }
+    }
+    if (slowDownSpielzeug.boolean) {
+      if (slowDownSpielzeug.time != "endless") slowDownSpielzeug.time -= 20;
+      if (slowDownSpielzeug.time < 1) slowDownSpielzeug.boolean = false;
     }
     if (noMoebelInFront && inRound) {
       if (y1 > nextCoordinates.y) {direction.y = -1; speed.y = y1 - nextCoordinates.y}
@@ -378,18 +397,7 @@ localStorage.setItem("storedName", name);
       // }
       verfallsdaten.ladung -= speed.x + speed.y;
     }
-    if (joyStick && joyStick.coordinates) {
-      canvas.fillStyle = "blue";
-      canvas.beginPath();
-      canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
-      canvas.fill();
-      canvas.strokeStyle = "green";
-      canvas.beginPath();
-      canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
-      canvas.lineTo(mausx, mausy);
-      canvas.stroke();
-      canvas.closePath();
-    }
+    if (slowDownSpielzeug.boolean && !stopSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
     boundingBoxCheck();
     sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
@@ -401,13 +409,13 @@ localStorage.setItem("storedName", name);
       speed.slowDownFinished = false;
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
       var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x + selected.objects.teppich[i].width - 11, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
     }
     if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
       inRound = false;
@@ -521,7 +529,17 @@ localStorage.setItem("storedName", name);
       if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.spielzeug[i].collected = true;
         if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
-        stopSpielzeug = {boolean: true, time: 2000};
+        if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
+        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: "endless", speed: 1.9};
+        else if (langsamerBeiSpielzeug.checked && slowDownSpielzeug.speed - 0.1 >= 1.1) slowDownSpielzeug.speed -= 0.1;
+        else if (langsamerBeiSpielzeug.checked) {
+          if (restartWhenSlow.checked) resetLevel();
+          if (clearWhenSlow.checked) stopSpielzeug = {boolean: true, time: 2000, clearing: true};
+        }
+        /*
+        if (slowDownSpielzeug.boolean && ) {slowDown(slowDownSpielzeug.speed - 0.1); slowDownSpielzeug.speed -= 1.1;}
+        else if (slowDownSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
+        */
         var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
         audio.currentTime = 48; audio.play();
         setTimeout(function () {
@@ -560,6 +578,18 @@ localStorage.setItem("storedName", name);
     trashBar.style.left = cssToNumber(sphere1.style.left) + 28 + cssToNumber(trashBar.style.width)//cssToNumber(sphere1.style.width) - 50;
     trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
   }
+  if (joyStick && joyStick.coordinates) {
+    canvas.fillStyle = "blue";
+    canvas.beginPath();
+    canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
+    canvas.fill();
+    canvas.strokeStyle = "green";
+    canvas.beginPath();
+    canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
+    canvas.lineTo(mausx, mausy);
+    canvas.stroke();
+    canvas.closePath();
+  }
   }, 25);
   var audio;
   var inRound = false;
@@ -582,6 +612,7 @@ localStorage.setItem("storedName", name);
     audio.currentTime = 1;
     audio.play();
     verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
+    slowDownSpielzeug = {boolean: false, time: "endless"}
     setTimeout(function () {
       x1 = 0;
       y1 = 0;
@@ -594,6 +625,7 @@ localStorage.setItem("storedName", name);
     }, 1);
   }
   var stopSpielzeug = {time: 0, boolean: false};
+  var slowDownSpielzeug = {time: 0, boolean: false};
   var speed = {x: 0, y: 0, highest: 0};
   var direction = {x: 1, y: 1};
   function isCollide(a, b) {
@@ -606,10 +638,11 @@ localStorage.setItem("storedName", name);
       (a.x > (b.x + b.width))
     );
   }
-  function slowDown() {
+  function slowDown(pSpeed) {
     console.log("slow down");
-    y1 -= speed.y/1.1*direction.y;
-    x1 -= speed.x/1.3*direction.x;
+    //if (!pSpeed) var pSpeed = "Test";
+    y1 -= speed.y/ /*1.1*/ pSpeed*direction.y;
+    x1 -= speed.x/ pSpeed/*1.3*/ *direction.x;
     sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
     speed.slowDownFinished = true;
