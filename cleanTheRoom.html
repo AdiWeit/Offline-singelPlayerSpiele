@@ -1,7 +1,7 @@
 <meta charset="utf-8">
 <!-- TODO: settings -->
 <div id="settings">
-  Staubsauger Größe<input value="50" min="1" max="222" oninput="minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
+  Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
   <br>
   <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
   <div id="staubDiv">
@@ -25,13 +25,13 @@
   </div>
   <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
   <div id="TeppichDiv">
-    min. width <input value="33" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
+    min. width <input value="33" min="11" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. width <input value="100" oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
+    max. width <input value="411" min="11" oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
     <br>
-    min. height <input value="33" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
+    min. height <input value="33" min="11" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
     <br>
-    max. height <input value="100" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
+    max. height <input value="411" min="11" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
     <br>
     <input id="anzahlTeppich" value="1" type="text">Teppiche sollen es insgesamt sein!
   </div>
@@ -73,6 +73,8 @@
     max. height <input value="100" oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
     <br>
     <input id="anzahlLadestationen" value="1" type="text">Ladestationen sollen es insgesamt sein!
+    <br>
+    <input id="showWayLadestation" type="checkbox">Weg dahin kennzeichnen
   </div>
   <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {anzahlEntleerer.value = 0; entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
   <div id="entleererDiv">
@@ -89,6 +91,8 @@
     max. height <input value="100" oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
     <br>
     <input id="anzahlEntleerer" value="1" type="text">Entleerer sollen es insgesamt sein!
+    <br>
+    <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
   </div>
 </div>
 <canvas id="textur" width="1900" height="700"></canvas>
@@ -142,6 +146,17 @@
   textur.style.display = "none";
   staubDiv.style.display = "none";
   anzahlStaub.value = Math.round(window.innerWidth/25);
+  maxTeppichWidth.max = window.innerWidth;
+  maxTeppichHeight.max = window.innerHeight;
+  minTeppichWidth.max = window.innerWidth - 1;
+  minTeppichHeight.max = window.innerHeight - 1;
+  maxLochWidth.max = window.innerWidth;
+  maxLochHeight.max = window.innerHeight;
+  minLochWidth.max = window.innerWidth - 1;
+  minLochHeight.max = window.innerHeight - 1;
+
+  maxTeppichHeight.value = 411;
+  minTeppichWidth.value = 410;
   // spielzeugDiv.style.display = "none";
 
   // sphere1.style.top = "175";
@@ -209,17 +224,17 @@ localStorage.setItem("storedName", name);
                      }
                      for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
                        var side = Math.round(Math.random() *(3));
-                     /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                     /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
                      }
                      for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
                        var side = Math.round(Math.random() *(3));
-                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - 50)), y: window.innerHeight - 50, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - 50, y: Math.round(Math.random() *(window.innerHeight - 50)), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
                      }
                      for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
                        /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
@@ -302,7 +317,7 @@ localStorage.setItem("storedName", name);
       vy1 = vy1 * 0.98;
       var noMoebelInFront = true;
       for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
-        var ball = {x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: 50, height: 50};
+        var ball = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)), width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
         if (isCollide(ball, selected.objects.moebel[i])) {
           noMoebelInFront = false;
         }
@@ -313,14 +328,14 @@ localStorage.setItem("storedName", name);
         if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
       }
       if (noMoebelInFront && inRound) {
-        if (y1 > parseInt(y1 + vy1 / 50)) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / 50)}
-        else {direction.y = 1; speed.y = parseInt(y1 + vy1 / 50) - y1};
-        if (x1 > parseInt(x1 + vx1 / 50)) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / 50);}
-        else {direction.x = 1; speed.x = parseInt(x1 + vx1 / 50) - x1;}
+        if (y1 > parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))}
+        else {direction.y = 1; speed.y = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)) - y1};
+        if (x1 > parseInt(x1 + vx1 / cssToNumber(sphere1.style.width))) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));}
+        else {direction.x = 1; speed.x = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)) - x1;}
         if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
         else speed.highest = {number: speed.y, direction: "y"};
-        y1 = parseInt(y1 + vy1 / 50);
-        x1 = parseInt(x1 + vx1 / 50);
+        y1 = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width));
+        x1 = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
         verfallsdaten.ladung -= speed.x + speed.y;
       }
       boundingBoxCheck();
@@ -335,7 +350,7 @@ localStorage.setItem("storedName", name);
         canvas.fillRect(selected.objects.teppich[i].x + 11, selected.objects.teppich[i].y + 11, selected.objects.teppich[i].width - 22, selected.objects.teppich[i].height - 22);
         speed.slowDownFinished = false;
         var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
-        var ball = {x: x1, y: y1, width: 50, height: 50};
+        var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
         if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
         var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
         if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
@@ -375,8 +390,8 @@ localStorage.setItem("storedName", name);
         // else ball.y = ball.y + (ball.height/2) - (ball.height)*direction.y;
         // canvas.fillStyle = "blue";
         // canvas.fillRect(ball.x, ball.y, 22, 22);
-        if (speed.highest.direction == "x") ball.x += 50/2//2*(-direction.x)
-        else ball.y += 50/2//ball.height/2*(-direction.y) + ball.height*2;
+        if (speed.highest.direction == "x") ball.x += cssToNumber(sphere1.style.width)/2//2*(-direction.x)
+        else ball.y += cssToNumber(sphere1.style.width)/2//ball.height/2*(-direction.y) + ball.height*2;
         // canvas.fillStyle = "red";
         // canvas.fillRect(ball.x, ball.y, ball.width, 100);
         if (isCollide(ball, selected.objects.vertiefung[i])) {
@@ -396,21 +411,38 @@ localStorage.setItem("storedName", name);
         // }
       }
       var allStaubCollected = true;
-      var ball = {x: x1, y: y1, width: 50, height: 50};
+      var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
       if (!selected.objects) allStaubCollected = false;
       for (var i = 0; selected.objects && i < selected.objects.ladestation.length; i++) {
-        canvas.fillStyle = "#2EFE2E";
+        canvas.fillStyle = "green";//"#2EFE2E";
         canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
+        if (showWayLadestation.checked) {
+          canvas.strokeStyle = "green";
+          canvas.beginPath();
+          canvas.moveTo(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y);
+          canvas.lineTo(x1, y1);
+          canvas.stroke();
+          canvas.closePath();
+        }
         if (isCollide(ball, selected.objects.ladestation[i]) && verfallsdaten.ladung < selected.maxVerfallsdaten.ladung/*177*/) verfallsdaten.ladung += 17;
       }
       for (var i = 0; selected.objects && i < selected.objects.leererStation.length; i++) {
         canvas.fillStyle = "#A4A4A4";
         canvas.fillRect(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y, selected.objects.leererStation[i].width, selected.objects.leererStation[i].height);
+        if (showWayEntleerer.checked) {
+          canvas.strokeStyle = "#A4A4A4";
+          canvas.lineWidth = 4;
+          canvas.beginPath();
+          canvas.moveTo(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y);
+          canvas.lineTo(x1, y1);
+          canvas.stroke();
+          canvas.closePath();
+        }
         if (isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
       }
       for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
         // collect staub
-        if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + 50 && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + 50) {
+        if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
           selected.objects.staub[i].collected = true;
           verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
           if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
@@ -436,9 +468,9 @@ localStorage.setItem("storedName", name);
       canvas.globalAlpha = 1;
       for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
         // collect spielzeug
-        if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + 50 && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + 50) {
+        if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
           selected.objects.spielzeug[i].collected = true;
-          verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+          if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
           stopSpielzeug = {boolean: true, time: 2000};
           var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
           audio.currentTime = 48; audio.play();
@@ -466,12 +498,17 @@ localStorage.setItem("storedName", name);
       //   energyBar.style.top = "190";
       // }, 3333);
       if (selected.maxVerfallsdaten) {
-      energyBar.style.height = 40*(verfallsdaten.ladung/ /*177*/selected.maxVerfallsdaten.ladung);
-      trashBar.style.height = 40*(verfallsdaten.füllungLeft/ selected.maxVerfallsdaten.füllungLeft/*133*/);
-      energyBar.style.left = cssToNumber(sphere1.style.left) + 11;
-      energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height));
-      trashBar.style.left = cssToNumber(sphere1.style.left) + 28;
-      trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height));
+      energyBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
+      energyBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
+      trashBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
+      trashBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
+      energyBar.style.height = cssToNumber(energyBar.style.height)*(verfallsdaten.ladung/ /*177*/selected.maxVerfallsdaten.ladung);
+      trashBar.style.height = cssToNumber(trashBar.style.height)*(verfallsdaten.füllungLeft/ selected.maxVerfallsdaten.füllungLeft/*133*/);
+
+      energyBar.style.left = cssToNumber(sphere1.style.left) + 11// + cssToNumber(sphere1.style.width) - 50;
+      energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
+      trashBar.style.left = cssToNumber(sphere1.style.left) + 28 + cssToNumber(trashBar.style.width)//cssToNumber(sphere1.style.width) - 50;
+      trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
     }
     }, 25);
   }
@@ -496,15 +533,15 @@ localStorage.setItem("storedName", name);
     audio.currentTime = 1;
     audio.play();
     verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
-    for (var i = 0; i < selected.objects.staub.length; i++) {
-      selected.objects.staub[i].collected = false;
-    }
-    for (var i = 0; i < selected.objects.spielzeug.length; i++) {
-      selected.objects.spielzeug[i].collected = false;
-    }
     setTimeout(function () {
       x1 = 0;
       y1 = 0;
+      for (var i = 0; i < selected.objects.staub.length; i++) {
+        selected.objects.staub[i].collected = false;
+      }
+      for (var i = 0; i < selected.objects.spielzeug.length; i++) {
+        selected.objects.spielzeug[i].collected = false;
+      }
     }, 1);
   }
   var stopSpielzeug = {time: 0, boolean: false};
