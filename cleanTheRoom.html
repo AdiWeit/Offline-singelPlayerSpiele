@@ -95,7 +95,9 @@
     <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
   </div>
 </div>
-<canvas id="textur" width="1900" height="700"></canvas>
+<canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
+<br>
+Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(0, 9)" type="range" min="1" max="27">
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
 <li v-for="title in db" id="pixelSpielfelder">
@@ -187,6 +189,7 @@ localStorage.setItem("storedName", name);
       clickListCheck();
     });
   }
+  var joyStick;
   function clickListCheck() {
     setTimeout(function () {
       var items = document.querySelectorAll("#pixelSpielfelder"),
@@ -196,11 +199,12 @@ localStorage.setItem("storedName", name);
                  tab.push(items[i].innerHTML);
              }
              for(i = 0; i < items.length; i++){
-                 items[i].onclick = function(){
+                 items[i].onclick = function() {
                    textur.style.display = "inline";
                    x1 = 0;
                    y1 = 0;
-                   window.scroll(0, 9)
+                   window.scroll(0, 9);
+                   if (gerät == "PC") {alert("please click to set a joy-stick!"); joyStick = "place";}
                    if (this.innerText == "create own pixel rate") {
                      settings.style.display = "none";
                      if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
@@ -283,6 +287,21 @@ localStorage.setItem("storedName", name);
     }, 1000);
   }
   // ball
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+    sensibility.style.display = "none";
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+  }
   sphere1.style.width = "50px";
   sphere1.style.height = "50px";
   var inOrAgainstDirection = 1;
@@ -296,222 +315,238 @@ localStorage.setItem("storedName", name);
       ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
-    setInterval(function() {
-      // scrollingInterac.PC = true;
-      // if (!scrollingInterac.user && sphere1.style.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
-      // if (!scrollingInterac.user && sphere1.style.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
-      // if (!scrollingInterac.user && sphere1.style.y - scrollX < (17*2 + sphere1.style.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-      // if (!scrollingInterac.user && sphere1.style.y - scrollY < (17*2 + sphere1.style.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
-      // setTimeout(function () {
-      //   scrollingInterac.PC = false;
-      // }, 1);
-      var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
-      if (landscapeOrientation) {
-        vx1 = vx1 + ay1;
-        vy1 = vy1 + ax1;
-      } else {
-        vy1 = vy1 - ay1;
-        vx1 = vx1 + ax1;
-      }
-      vx1 = vx1 * 0.98;
-      vy1 = vy1 * 0.98;
-      var noMoebelInFront = true;
-      for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
-        var ball = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)), width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
-        if (isCollide(ball, selected.objects.moebel[i])) {
-          noMoebelInFront = false;
-        }
-      }
-      if (stopSpielzeug.boolean) {
-        noMoebelInFront = false;
-        stopSpielzeug.time -= 20;
-        if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
-      }
-      if (noMoebelInFront && inRound) {
-        if (y1 > parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))}
-        else {direction.y = 1; speed.y = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)) - y1};
-        if (x1 > parseInt(x1 + vx1 / cssToNumber(sphere1.style.width))) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));}
-        else {direction.x = 1; speed.x = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)) - x1;}
-        if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
-        else speed.highest = {number: speed.y, direction: "y"};
-        y1 = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width));
-        x1 = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
-        verfallsdaten.ladung -= speed.x + speed.y;
-      }
-      boundingBoxCheck();
-      sphere1.style.top = y1 + "px";
-      sphere1.style.left = x1 + "px";
-      canvas.fillStyle = "#FF8000";
-      canvas.fillRect(0, 0, textur.width, textur.height);
-      for (var i = 0; selected.objects && i < selected.objects.teppich.length; i++) {
-        canvas.fillStyle = "green";
-        canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
-        canvas.fillStyle = "#2EFE2E";
-        canvas.fillRect(selected.objects.teppich[i].x + 11, selected.objects.teppich[i].y + 11, selected.objects.teppich[i].width - 22, selected.objects.teppich[i].height - 22);
-        speed.slowDownFinished = false;
-        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
-        var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
-        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
-        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
-        var teppichRamen = {x: selected.objects.teppich[i].x + selected.objects.teppich[i].width - 11, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
-        var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
-        if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
-      }
-      if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
-        inRound = false;
-        try {
-          audio.pause();
-        } catch (e) {
+  }
+  setInterval(function() {
+    canvas.fillStyle = "#FF8000";
+    canvas.fillRect(0, 0, textur.width, textur.height);
+    // joy-stick:
+    if (joyStick && joyStick.coordinates) {
+      canvas.fillStyle = "blue";
+      canvas.beginPath();
+      canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
+      canvas.fill();
+      canvas.strokeStyle = "green";
+      canvas.beginPath();
+      canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
+      canvas.lineTo(mausx, mausy);
+      canvas.stroke();
+      canvas.closePath();
+      x1 += (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value); //25;
+      y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
+    }
 
-        }
-        verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
-        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
-        audio.currentTime = 2*60 + 33;
+    // scrollingInterac.PC = true;
+    // if (!scrollingInterac.user && sphere1.style.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
+    // if (!scrollingInterac.user && sphere1.style.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
+    // if (!scrollingInterac.user && sphere1.style.y - scrollX < (17*2 + sphere1.style.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+    // if (!scrollingInterac.user && sphere1.style.y - scrollY < (17*2 + sphere1.style.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+    // setTimeout(function () {
+    //   scrollingInterac.PC = false;
+    // }, 1);
+    var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
+    if (landscapeOrientation) {
+      vx1 = vx1 + ay1;
+      vy1 = vy1 + ax1;
+    } else {
+      vy1 = vy1 - ay1;
+      vx1 = vx1 + ax1;
+    }
+    vx1 = vx1 * 0.98;
+    vy1 = vy1 * 0.98;
+    var noMoebelInFront = true;
+    for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+      var ball = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)), width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
+      if (isCollide(ball, selected.objects.moebel[i])) {
+        noMoebelInFront = false;
+      }
+    }
+    if (stopSpielzeug.boolean) {
+      noMoebelInFront = false;
+      stopSpielzeug.time -= 20;
+      if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
+    }
+    if (noMoebelInFront && inRound) {
+      if (y1 > parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))}
+      else {direction.y = 1; speed.y = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)) - y1};
+      if (x1 > parseInt(x1 + vx1 / cssToNumber(sphere1.style.width))) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));}
+      else {direction.x = 1; speed.x = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)) - x1;}
+      if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
+      else speed.highest = {number: speed.y, direction: "y"};
+      y1 = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width));
+      x1 = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
+      verfallsdaten.ladung -= speed.x + speed.y;
+    }
+    boundingBoxCheck();
+    sphere1.style.top = y1 + "px";
+    sphere1.style.left = x1 + "px";
+    for (var i = 0; selected.objects && i < selected.objects.teppich.length; i++) {
+      canvas.fillStyle = "green";
+      canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
+      canvas.fillStyle = "#2EFE2E";
+      canvas.fillRect(selected.objects.teppich[i].x + 11, selected.objects.teppich[i].y + 11, selected.objects.teppich[i].width - 22, selected.objects.teppich[i].height - 22);
+      speed.slowDownFinished = false;
+      var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
+      var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      var teppichRamen = {x: selected.objects.teppich[i].x + selected.objects.teppich[i].width - 11, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+      var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
+      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown();
+    }
+    if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
+      inRound = false;
+      try {
+        audio.pause();
+      } catch (e) {
+
+      }
+      verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
+      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
+      audio.currentTime = 2*60 + 33;
+      audio.play();
+      setTimeout(function () {
+        resetLevel("Akku leer!!!");
+      }, 3000);
+     }
+    for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+      canvas.fillStyle = "#FACC2E";
+      canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
+      // if (!((x1 >= selected.objects.moebel[i].x && x1 < selected.objects.moebel[i].x + selected.objects.moebel[i].width) || (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)))
+      // if (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height)
+      // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
+      // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
+    }
+    for (var i = 0; selected.objects && i < selected.objects.vertiefung.length; i++) {
+      canvas.fillStyle = "black";
+      canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
+      var ball = {x: x1, y: y1, width: 5, height: 5};
+      // if (speed.highest.direction == "x") ball.x = ball.x + (ball.width) - (ball.width/2)*direction.x;
+      // else ball.y = ball.y + (ball.height/2) - (ball.height)*direction.y;
+      // canvas.fillStyle = "blue";
+      // canvas.fillRect(ball.x, ball.y, 22, 22);
+      if (speed.highest.direction == "x") ball.x += cssToNumber(sphere1.style.width)/2//2*(-direction.x)
+      else ball.y += cssToNumber(sphere1.style.width)/2//ball.height/2*(-direction.y) + ball.height*2;
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(ball.x, ball.y, ball.width, 100);
+      if (isCollide(ball, selected.objects.vertiefung[i])) {
+        resetLevel("ab ins Loch!!!");
+      }
+      // if (x1 > selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
+      //   console.log("going down from left");
+      // }
+      // if (x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 > selected.objects.vertiefung[i].x && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
+      //   console.log("going down from right");
+      // }
+      // if (y1 > selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
+      //   console.log("going down from up");
+      // }
+      // if (y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 > selected.objects.vertiefung[i].y && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
+      //   console.log("going down from down");
+      // }
+    }
+    var allStaubCollected = true;
+    var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
+    if (!selected.objects) allStaubCollected = false;
+    for (var i = 0; selected.objects && i < selected.objects.ladestation.length; i++) {
+      canvas.fillStyle = "green";//"#2EFE2E";
+      canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
+      if (showWayLadestation.checked) {
+        canvas.strokeStyle = "green";
+        canvas.beginPath();
+        canvas.moveTo(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y);
+        canvas.lineTo(x1, y1);
+        canvas.stroke();
+        canvas.closePath();
+      }
+      if (isCollide(ball, selected.objects.ladestation[i]) && verfallsdaten.ladung < selected.maxVerfallsdaten.ladung/*177*/) verfallsdaten.ladung += 17;
+    }
+    for (var i = 0; selected.objects && i < selected.objects.leererStation.length; i++) {
+      canvas.fillStyle = "#A4A4A4";
+      canvas.fillRect(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y, selected.objects.leererStation[i].width, selected.objects.leererStation[i].height);
+      if (showWayEntleerer.checked) {
+        canvas.strokeStyle = "#A4A4A4";
+        canvas.lineWidth = 4;
+        canvas.beginPath();
+        canvas.moveTo(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y);
+        canvas.lineTo(x1, y1);
+        canvas.stroke();
+        canvas.closePath();
+      }
+      if (isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
+    }
+    for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
+      // collect staub
+      if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
+        selected.objects.staub[i].collected = true;
+        verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
+        if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
+        var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
+        audio.volume = 1;
+        audio.currentTime = 1;
         audio.play();
         setTimeout(function () {
-          resetLevel("Akku leer!!!");
-        }, 3000);
-       }
-      for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
-        canvas.fillStyle = "#FACC2E";
-        canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
-        // if (!((x1 >= selected.objects.moebel[i].x && x1 < selected.objects.moebel[i].x + selected.objects.moebel[i].width) || (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)))
-        // if (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height)
-        // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
-        // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
+          audio.pause();
+        }, 777);
       }
-      for (var i = 0; selected.objects && i < selected.objects.vertiefung.length; i++) {
-        canvas.fillStyle = "black";
-        canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
-        var ball = {x: x1, y: y1, width: 5, height: 5};
-        // if (speed.highest.direction == "x") ball.x = ball.x + (ball.width) - (ball.width/2)*direction.x;
-        // else ball.y = ball.y + (ball.height/2) - (ball.height)*direction.y;
-        // canvas.fillStyle = "blue";
-        // canvas.fillRect(ball.x, ball.y, 22, 22);
-        if (speed.highest.direction == "x") ball.x += cssToNumber(sphere1.style.width)/2//2*(-direction.x)
-        else ball.y += cssToNumber(sphere1.style.width)/2//ball.height/2*(-direction.y) + ball.height*2;
-        // canvas.fillStyle = "red";
-        // canvas.fillRect(ball.x, ball.y, ball.width, 100);
-        if (isCollide(ball, selected.objects.vertiefung[i])) {
-          resetLevel("ab ins Loch!!!");
-        }
-        // if (x1 > selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
-        //   console.log("going down from left");
-        // }
-        // if (x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 > selected.objects.vertiefung[i].x && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
-        //   console.log("going down from right");
-        // }
-        // if (y1 > selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
-        //   console.log("going down from up");
-        // }
-        // if (y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height/2 && y1 > selected.objects.vertiefung[i].y && x1 > selected.objects.vertiefung[i].x && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width) {
-        //   console.log("going down from down");
-        // }
-      }
-      var allStaubCollected = true;
-      var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
-      if (!selected.objects) allStaubCollected = false;
-      for (var i = 0; selected.objects && i < selected.objects.ladestation.length; i++) {
-        canvas.fillStyle = "green";//"#2EFE2E";
-        canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
-        if (showWayLadestation.checked) {
-          canvas.strokeStyle = "green";
-          canvas.beginPath();
-          canvas.moveTo(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y);
-          canvas.lineTo(x1, y1);
-          canvas.stroke();
-          canvas.closePath();
-        }
-        if (isCollide(ball, selected.objects.ladestation[i]) && verfallsdaten.ladung < selected.maxVerfallsdaten.ladung/*177*/) verfallsdaten.ladung += 17;
-      }
-      for (var i = 0; selected.objects && i < selected.objects.leererStation.length; i++) {
-        canvas.fillStyle = "#A4A4A4";
-        canvas.fillRect(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y, selected.objects.leererStation[i].width, selected.objects.leererStation[i].height);
-        if (showWayEntleerer.checked) {
-          canvas.strokeStyle = "#A4A4A4";
-          canvas.lineWidth = 4;
-          canvas.beginPath();
-          canvas.moveTo(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y);
-          canvas.lineTo(x1, y1);
-          canvas.stroke();
-          canvas.closePath();
-        }
-        if (isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
-      }
-      for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
-        // collect staub
-        if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
-          selected.objects.staub[i].collected = true;
-          verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
-          if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
-          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
-          audio.volume = 1;
-          audio.currentTime = 1;
-          audio.play();
-          setTimeout(function () {
-            audio.pause();
-          }, 777);
-        }
-        canvas.fillStyle = "#A4A4A4";
-        canvas.globalAlpha = 1;
-        if (!(verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2)) canvas.globalAlpha = 0.5;
-        canvas.beginPath();
-        canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
-        if (!selected.objects.staub[i].collected) {
-          canvas.fill();
-          allStaubCollected = false;
-        }
-      }
-      if (allStaubCollected == true) console.log("finished!!!");
+      canvas.fillStyle = "#A4A4A4";
       canvas.globalAlpha = 1;
-      for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
-        // collect spielzeug
-        if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
-          selected.objects.spielzeug[i].collected = true;
-          if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
-          stopSpielzeug = {boolean: true, time: 2000};
-          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
-          audio.currentTime = 48; audio.play();
-          setTimeout(function () {
-            audio.pause();
-          }, 500);
-          // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
-          // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
-        }
-        canvas.fillStyle = "red";
-        canvas.beginPath();
-        canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
-        if (!selected.objects.spielzeug[i].collected) {
-          canvas.fill();
-        }
+      if (!(verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2)) canvas.globalAlpha = 0.5;
+      canvas.beginPath();
+      canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
+      if (!selected.objects.staub[i].collected) {
+        canvas.fill();
+        allStaubCollected = false;
       }
-      // sphere1.style.top = "175";
-      // sphere1.style.left = "9";
-      // energyBar.style.left = "20";
-      // energyBar.style.top = "180";
-      // trashBar.style.left = "37";
-      // trashBar.style.top = "180";
-      // setTimeout(function () {
-      //   energyBar.style.height = 30;
-      //   energyBar.style.top = "190";
-      // }, 3333);
-      if (selected.maxVerfallsdaten) {
-      energyBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
-      energyBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
-      trashBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
-      trashBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
-      energyBar.style.height = cssToNumber(energyBar.style.height)*(verfallsdaten.ladung/ /*177*/selected.maxVerfallsdaten.ladung);
-      trashBar.style.height = cssToNumber(trashBar.style.height)*(verfallsdaten.füllungLeft/ selected.maxVerfallsdaten.füllungLeft/*133*/);
-
-      energyBar.style.left = cssToNumber(sphere1.style.left) + 11// + cssToNumber(sphere1.style.width) - 50;
-      energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
-      trashBar.style.left = cssToNumber(sphere1.style.left) + 28 + cssToNumber(trashBar.style.width)//cssToNumber(sphere1.style.width) - 50;
-      trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
     }
-    }, 25);
+    if (allStaubCollected == true) console.log("finished!!!");
+    canvas.globalAlpha = 1;
+    for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
+      // collect spielzeug
+      if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
+        selected.objects.spielzeug[i].collected = true;
+        if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+        stopSpielzeug = {boolean: true, time: 2000};
+        var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
+        audio.currentTime = 48; audio.play();
+        setTimeout(function () {
+          audio.pause();
+        }, 500);
+        // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+        // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
+      }
+      canvas.fillStyle = "red";
+      canvas.beginPath();
+      canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
+      if (!selected.objects.spielzeug[i].collected) {
+        canvas.fill();
+      }
+    }
+    // sphere1.style.top = "175";
+    // sphere1.style.left = "9";
+    // energyBar.style.left = "20";
+    // energyBar.style.top = "180";
+    // trashBar.style.left = "37";
+    // trashBar.style.top = "180";
+    // setTimeout(function () {
+    //   energyBar.style.height = 30;
+    //   energyBar.style.top = "190";
+    // }, 3333);
+    if (selected.maxVerfallsdaten) {
+    energyBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
+    energyBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
+    trashBar.style.width = 11 + (cssToNumber(sphere1.style.width) - 50)/2;
+    trashBar.style.height = 40 + (cssToNumber(sphere1.style.height) - 50);
+    energyBar.style.height = cssToNumber(energyBar.style.height)*(verfallsdaten.ladung/ /*177*/selected.maxVerfallsdaten.ladung);
+    trashBar.style.height = cssToNumber(trashBar.style.height)*(verfallsdaten.füllungLeft/ selected.maxVerfallsdaten.füllungLeft/*133*/);
+
+    energyBar.style.left = cssToNumber(sphere1.style.left) + 11// + cssToNumber(sphere1.style.width) - 50;
+    energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
+    trashBar.style.left = cssToNumber(sphere1.style.left) + 28 + cssToNumber(trashBar.style.width)//cssToNumber(sphere1.style.width) - 50;
+    trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
   }
+  }, 25);
   var audio;
   var inRound = false;
   function resetLevel(type) {
@@ -598,4 +633,16 @@ localStorage.setItem("storedName", name);
   function cssToNumber(string) {
     return JSON.parse(string.toString().split("px")[0]);
   }
+  function canvasClicked() {
+    if (joyStick == "place" && gerät == "PC") {
+      joyStick = {coordinates : {x: mausx, y: mausy}};
+    }
+  }
+  var mausx;
+  var mausy;
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY;
+  }
+  document.onmousemove = readMouseMove
 </script>
