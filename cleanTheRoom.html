@@ -3,6 +3,10 @@
 <div id="settings">
   Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
   <br>
+  restart round when hitting wall<input checked="true" type="checkbox" id="brokenCheck">
+  <br>
+  bounce von Wänden ab<input type="checkbox" id="bounceWalls">
+  <br>
   <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
   <div id="staubDiv">
     <br>
@@ -97,7 +101,7 @@
 </div>
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
 <br>
-Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(0, 9)" type="range" min="1" max="27">
+Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(8, 8);" type="range" min="1" max="27">
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
 <li v-for="title in db" id="pixelSpielfelder">
@@ -203,7 +207,7 @@ localStorage.setItem("storedName", name);
                    textur.style.display = "inline";
                    x1 = 0;
                    y1 = 0;
-                   window.scroll(0, 9);
+                   window.scroll(8, 8);
                    if (gerät == "PC") {alert("please click to set a joy-stick!"); joyStick = "place";}
                    if (this.innerText == "create own pixel rate") {
                      settings.style.display = "none";
@@ -306,7 +310,7 @@ localStorage.setItem("storedName", name);
   sphere1.style.height = "50px";
   var inOrAgainstDirection = 1;
   var selected = {pixelRate: window.innerWidth + " x " + window.innerHeight};
-  var x1 = 10,
+  var x1 = 300,
     y1 = 177; //window.innerHeight - 150 + 3,
   vx1 = 0, vy1 = 0,
     ax1 = 0, ay1 = 0;
@@ -316,25 +320,16 @@ localStorage.setItem("storedName", name);
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
   }
+  else if (gerät == "Handy") alert("Die seite muss als sicher (https am Anfang, im Moment http) aufgerufen werden, damit Bewegungssteuerung erlaubt wird!");
   setInterval(function() {
     canvas.fillStyle = "#FF8000";
     canvas.fillRect(0, 0, textur.width, textur.height);
     // joy-stick:
+    var nextCoordinates = {x: 0, y: 0};
     if (joyStick && joyStick.coordinates) {
-      canvas.fillStyle = "blue";
-      canvas.beginPath();
-      canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
-      canvas.fill();
-      canvas.strokeStyle = "green";
-      canvas.beginPath();
-      canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
-      canvas.lineTo(mausx, mausy);
-      canvas.stroke();
-      canvas.closePath();
-      x1 += (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value); //25;
-      y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
+      var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 + (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
     }
-
+    else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
     // scrollingInterac.PC = true;
     // if (!scrollingInterac.user && sphere1.style.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
     // if (!scrollingInterac.user && sphere1.style.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
@@ -355,7 +350,7 @@ localStorage.setItem("storedName", name);
     vy1 = vy1 * 0.98;
     var noMoebelInFront = true;
     for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
-      var ball = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)), width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
+      var ball = {x: nextCoordinates.x, y: nextCoordinates.y, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
       if (isCollide(ball, selected.objects.moebel[i])) {
         noMoebelInFront = false;
       }
@@ -366,15 +361,31 @@ localStorage.setItem("storedName", name);
       if (stopSpielzeug.time < 1) stopSpielzeug.boolean = false;
     }
     if (noMoebelInFront && inRound) {
-      if (y1 > parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))) {direction.y = -1; speed.y = y1 - parseInt(y1 + vy1 / cssToNumber(sphere1.style.width))}
-      else {direction.y = 1; speed.y = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width)) - y1};
-      if (x1 > parseInt(x1 + vx1 / cssToNumber(sphere1.style.width))) {direction.x = -1; speed.x = x1 - parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));}
-      else {direction.x = 1; speed.x = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)) - x1;}
+      if (y1 > nextCoordinates.y) {direction.y = -1; speed.y = y1 - nextCoordinates.y}
+      else {direction.y = 1; speed.y = nextCoordinates.y - y1};
+      if (x1 > nextCoordinates.x) {direction.x = -1; speed.x = x1 - nextCoordinates.x;}
+      else {direction.x = 1; speed.x = nextCoordinates.x - x1;}
       if (speed.x > speed.y) {speed.highest = {number: speed.x, direction: "x"};}
       else speed.highest = {number: speed.y, direction: "y"};
-      y1 = parseInt(y1 + vy1 / cssToNumber(sphere1.style.width));
+      y1 = nextCoordinates.y;
       x1 = parseInt(x1 + vx1 / cssToNumber(sphere1.style.width));
+      if (joyStick && joyStick.coordinates) {
+        x1 += (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value); //25;
+        y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
+      }
       verfallsdaten.ladung -= speed.x + speed.y;
+    }
+    if (joyStick && joyStick.coordinates) {
+      canvas.fillStyle = "blue";
+      canvas.beginPath();
+      canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
+      canvas.fill();
+      canvas.strokeStyle = "green";
+      canvas.beginPath();
+      canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
+      canvas.lineTo(mausx, mausy);
+      canvas.stroke();
+      canvas.closePath();
     }
     boundingBoxCheck();
     sphere1.style.top = y1 + "px";
@@ -603,24 +614,24 @@ localStorage.setItem("storedName", name);
   }
   function boundingBoxCheck() {
     if (x1 < 0) {
-      if (speed.highest.number > 5) {resetLevel("broken");}
+      if (speed.highest.number > 5 && brokenCheck.checked) {resetLevel("broken");}
       x1 = 0;
-      vx1 = -vx1;
+      if (bounceWalls.checked) vx1 = -vx1;
     }
     if (y1 < 0) {
-      if (speed.highest.number > 5) {resetLevel("broken");}
+      if (speed.highest.number > 5 && brokenCheck.checked) {resetLevel("broken");}
       y1 = 0;
-      vy1 = -vy1;
+      if (bounceWalls.checked) vy1 = -vy1;
     }
     if (x1 > selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
-      if (speed.highest.number > 5) {resetLevel("broken");}
+      if (speed.highest.number > 5 && brokenCheck.checked) {resetLevel("broken");}
       x1 = /*window.innerWidth*/selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2 - 1;
-      vx1 = -vx1;
+      if (bounceWalls.checked) vx1 = -vx1;
     }
     if (y1 > selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
-      if (speed.highest.number > 5) {resetLevel("broken");}
+      if (speed.highest.number > 5 && brokenCheck.checked) {resetLevel("broken");}
       y1 = selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
-      vy1 = -vy1;
+      if (bounceWalls.checked) vy1 = -vy1;
     }
   }
   var verfallsdaten = {ladung: 177, füllungLeft: 133};
