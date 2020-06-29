@@ -119,15 +119,19 @@
     <br>
     <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
   </div>
+  <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
 </div>
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
 <br>
 Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(8, 8);" type="range" min="1" max="27">
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
-<li v-for="title in db" id="pixelSpielfelder">
-{{ title }}
-</li>
+  <div id="authors" style="font-size: 25px" v-for="genre in genres">
+    <h2 onclick="if (innerHTML == 'create own pixel rate') settings.style.display = 'inline';">{{ genre }}</h2>
+<ul id="db">
+  <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
+</ul>
+</div>
 </div>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -173,6 +177,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   textur.style.display = "none";
   staubDiv.style.display = "none";
   verlangsamungSpielzeugP.style.display = "none";
+  settings.style.display = "none";
   anzahlStaub.value = Math.round(window.innerWidth/25);
   maxTeppichWidth.max = window.innerWidth;
   maxTeppichHeight.max = window.innerHeight;
@@ -207,114 +212,162 @@ localStorage.setItem("storedName", name);
   var highscores = {normal: {}};
   function getDatabase() {
     dbGet("cleanTheRoom", "highscores").then(result => {
-      app._data.db = Object.keys(result.normal);
-      app._data.db.push("create own pixel rate");
-      clickListCheck();
+      highscores = result;
+      var format = JSON.parse(JSON.stringify(result.normal));
+      format["create own pixel rate"] = {};
+      for (var i = 0; i < Object.keys(format).length; i++) {
+        format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
+      }
+      app = new Vue({
+        el: '#app',
+        data: {
+          db: format,
+          genres: Object.keys(format),
+          input: '',
+        }
+      })
+      //clickListCheck();
     }).catch(function(e) {
-      app._data.db = ["create own pixel rate"];
-      clickListCheck();
+      app = new Vue({
+        el: '#app',
+        data: {
+          db: {"create own pixel rate": {}},
+          genres: ["create own pixel rate"],
+          input: '',
+        }
+      })
+      //clickListCheck();
     });
   }
   var joyStick;
-  function clickListCheck() {
-    setTimeout(function () {
-      var items = document.querySelectorAll("#pixelSpielfelder"),
-      liIndex;
-      tab = [];
-             for(var i = 0; i < items.length; i++){
-                 tab.push(items[i].innerHTML);
-             }
-             for(i = 0; i < items.length; i++){
-                 items[i].onclick = function() {
-                   textur.style.display = "inline";
-                   x1 = 0;
-                   y1 = 0;
-                   window.scroll(8, 8);
-                   if (gerät == "PC"/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
-                   if (this.innerText == "create own pixel rate") {
-                     settings.style.display = "none";
-                     if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
-                     else energyBar.style.display = "none";
-                     if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
-                     else trashBar.style.display = "none";
-                     selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
-                     textur.width = window.innerWidth - 9;
-                     textur.height = window.innerHeight - 9;
-                     console.log(window.innerWidth + " - " + textur.width);
-                     selected.gegnstaende = "vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1";
-                     highscores.normal[selected.pixelRate] = {"vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1": {objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}}};
-                     for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
-                     }
-                     for (var i = 0; i < JSON.parse(anzahlMoebel.value)/*4*/; i++) { // Möbel
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
-                     }
-                     for (var i = 0; i < /*1*/JSON.parse(anzahlTeppich.value); i++) { // teppich
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
-                     }
-                     for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
-                       var side = Math.round(Math.random() *(3));
-                     /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-                     }
-                     for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
-                       var side = Math.round(Math.random() *(3));
-                       /*todo: */if (side == 0) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 1) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 2) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                       else if (side == 3) highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-                     }
-                     for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
-                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
-                     }
-                     for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
-                       /*todo: */highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
-                     }
-                     //setTimeout(function () {
-                     verfallsdaten = {ladung: 0, füllungLeft: 0};
-                     for (var i = 0; i < /*27*/JSON.parse(anzahlStaub.value); i++) { // Staub
-                       var radius = Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minStaubSize.value))) + JSON.parse(minStaubSize.value)/*3*/;
-                       verfallsdaten.füllungLeft += radius*2;
-                       highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
-                       i2 = "defined";
-                       if (highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1].x > window.innerWidth - radius || highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1].y > window.innerHeight - radius) {
-                         i--;
-                         i2 = "skip";
-                         highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.pop();}
-                       try {
-                         for (var i1 = 0; i2 != "skip" && i1 != -1 && i1 < Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects).length; i1++) {
-                           for (var i2 = 0; i2 != -1 && i2 < highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]].length; i2++) {
-                             // canvas.fillStyle = "red";
-                             // canvas.fillRect(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].x, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].y, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].radius*2, highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[i].radius*2);
-                             //console.log(Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1]))));
-                             if (Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects[Object.keys(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub[highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.length - 1])))) {
-                               highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects.staub.pop();
-                               i--;
-                               verfallsdaten.füllungLeft -= radius*2;
-                               i2 = -2;
-                               i1 = -2;
-                             }
-                           }
-                         }
-                       } catch (e) {
-                         console.log("please debug :( " + e);
-                       }
-                     }
-                     verfallsdaten.füllungLeft /= 2;
-                     verfallsdaten.ladung = verfallsdaten.füllungLeft*11;
-                     highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
-                   //}, 1000);
-                     selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].objects));
-                     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate]["vertiefung: 2, Staub: 27, Möbel: 4, Teppich: 1"].maxVerfallsdaten;
-                   }
-                   else selected.pixelRate = this.innerText;
-                   resetLevel();
-                 }
-               }
-    }, 1000);
+  function createNewPixelRate() {
+    x1 = 0;
+    y1 = 0;
+    window.scroll(8, 8);
+    settings.style.display = "none";
+    if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
+    else energyBar.style.display = "none";
+    if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
+    else trashBar.style.display = "none";
+    selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+    textur.width = window.innerWidth - 9;
+    textur.height = window.innerHeight - 9;
+    console.log(window.innerWidth + " - " + textur.width);
+    selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
+    highscores.normal[selected.pixelRate] = {};
+    highscores.normal[selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
+    for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
+    }
+    for (var i = 0; i < JSON.parse(anzahlMoebel.value)/*4*/; i++) { // Möbel
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
+    }
+    for (var i = 0; i < /*1*/JSON.parse(anzahlTeppich.value); i++) { // teppich
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
+    }
+    for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
+      var side = Math.round(Math.random() *(3));
+    /*todo: */if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+    }
+    for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
+      var side = Math.round(Math.random() *(3));
+      /*todo: */if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+    }
+    for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
+      /*todo: */highscores.normal[selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
+    }
+    for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
+      /*todo: */highscores.normal[selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
+    }
+    //setTimeout(function () {
+    verfallsdaten = {ladung: 0, füllungLeft: 0};
+    for (var i = 0; i < /*27*/JSON.parse(anzahlStaub.value); i++) { // Staub
+      var radius = Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minStaubSize.value))) + JSON.parse(minStaubSize.value)/*3*/;
+      verfallsdaten.füllungLeft += radius*2;
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
+      i2 = "defined";
+      if (highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].x > window.innerWidth - radius || highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].y > window.innerHeight - radius) {
+        i--;
+        i2 = "skip";
+        highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.pop();}
+      try {
+        for (var i1 = 0; i2 != "skip" && i1 != -1 && i1 < Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects).length; i1++) {
+          for (var i2 = 0; i2 != -1 && i2 < highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]].length; i2++) {
+            // canvas.fillStyle = "red";
+            // canvas.fillRect(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].x, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].y, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2);
+            //console.log(Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1]))));
+            if (Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1])))) {
+              highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.pop();
+              i--;
+              verfallsdaten.füllungLeft -= radius*2;
+              i2 = -2;
+              i1 = -2;
+            }
+          }
+        }
+      } catch (e) {
+        console.log("please debug :( " + e);
+      }
+    }
+    verfallsdaten.füllungLeft /= 2;
+    verfallsdaten.ladung = verfallsdaten.füllungLeft*11;
+    highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
+  //}, 1000);
+    selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects));
+    selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
+    resetLevel();
+    getDatabase();
+    dbSetWarteschlange.push({tag: "highscores", data: highscores});
   }
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("cleanTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
+  function levelSelected(name) {
+    for (var i = 0; i < Object.keys(highscores.normal).length; i++) {
+      if (Object.keys(highscores.normal)[i] == highscores.normal[Object.keys(highscores.normal)[i]][name].pixelRate) {
+        console.log("level " + name + " with pixel rate " + Object.keys(highscores.normal)[i] + " selected!");
+        selected = {maxVerfallsdaten: highscores.normal[Object.keys(highscores.normal)[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores.normal)[i], objects: highscores.normal[Object.keys(highscores.normal)[i]][name].objects, settings: highscores.normal[Object.keys(highscores.normal)[i]][name].settings};
+        alert("Regeln: " + replaceAll(replaceAll(selected.settings, "false", "⛔"), "true", "✅"));
+        if (gerät == "Handy" && confirm("Wollen sie mit Jo-Stick spielen?")) joyStickPlay.checked = true;
+        resetLevel();
+      }
+    }
+  }
+  // function clickListCheck() {
+  //   setTimeout(function () {
+  //     var items = document.querySelectorAll("#db"),
+  //     liIndex;
+  //     tab = [];
+  //            for(var i = 0; i < items.length; i++){
+  //                tab.push(items[i].innerHTML);
+  //            }
+  //            for(i = 0; i < items.length; i++){
+  //                items[i].onclick = function() {
+  //                  textur.style.display = "inline";
+  //                  x1 = 0;
+  //                  y1 = 0;
+  //                  window.scroll(8, 8);
+  //                  if (gerät == "PC"/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
+  //                  if (this.innerText == "create own pixel rate") {
+  //
+  //                  }
+  //                  else selected.pixelRate = this.innerText;
+  //                  // "brokenCheck: " + brokenCheck.checked + ", bounceWalls: " + bounceWalls.checked + ", stoppeBeiSpielzeug: " + stoppeBeiSpielzeug.checked + ", langsamerBeiSpielzeug: " + langsamerBeiSpielzeug.checked
+  //
+  //                }
+  //              }
+  //   }, 1000);
+  // }
   // ball
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -346,7 +399,10 @@ localStorage.setItem("storedName", name);
       ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
     }
   }
-  else if (gerät == "Handy") alert("Die seite muss als sicher (https am Anfang, im Moment http) aufgerufen werden, damit Bewegungssteuerung erlaubt wird!");
+  else if (gerät == "Handy") {
+    alert("Die seite muss als sicher (https am Anfang, im Moment http) aufgerufen werden, damit Bewegungssteuerung erlaubt wird! Sie können jedoch auch wenn die Website nicht sicher ist mit Joy-Stick spielen!");
+    joyStickPlay.checked = true;
+  }
   setInterval(function() {
     canvas.fillStyle = "#FF8000";
     canvas.fillRect(0, 0, textur.width, textur.height);
@@ -515,7 +571,7 @@ localStorage.setItem("storedName", name);
         selected.objects.staub[i].collected = true;
         verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
         if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
-        var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
         audio.volume = 1;
         audio.currentTime = 1;
         audio.play();
@@ -625,6 +681,8 @@ localStorage.setItem("storedName", name);
   var audio;
   var inRound = false;
   function resetLevel(type) {
+    textur.style.display = "inline";
+    if (gerät == "PC" && (!joyStick || !joyStick.coordinates)/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
     if (type) console.log(type);
     inRound = true;
     try {
@@ -705,12 +763,6 @@ localStorage.setItem("storedName", name);
     }
   }
   var verfallsdaten = {ladung: 177, füllungLeft: 133};
-  var app = new Vue({
-  el: '#app',
-  data: {
-  db: Object.keys(pixelSpielfelder)
-  }
-  })
   function cssToNumber(string) {
     return JSON.parse(string.toString().split("px")[0]);
   }
@@ -750,5 +802,8 @@ function touch(ev) {
     // if (ev.type == "touchmove") {
     //   mousemoveFolgen();
     // }
+}
+function replaceAll(str, find, replace) {
+    return str.replace(new RegExp(find, 'g'), replace);
 }
 </script>
