@@ -174,6 +174,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <div class="bars" id="trashBar"></div>
 </div>
 <script>
+  var realHeight = window.innerHeight;
   textur.style.display = "none";
   staubDiv.style.display = "none";
   verlangsamungSpielzeugP.style.display = "none";
@@ -210,7 +211,7 @@ localStorage.setItem("storedName", name);
   getDatabase();
   console.log(window.innerWidth + " - " + window.innerHeight);
   var highscores = {normal: {}};
-  function getDatabase() {
+  function getDatabase(sync) {
     dbGet("cleanTheRoom", "highscores").then(result => {
       highscores = result;
       var format = JSON.parse(JSON.stringify(result.normal));
@@ -227,6 +228,8 @@ localStorage.setItem("storedName", name);
         }
       })
       //clickListCheck();
+      if (sync) syncFinished = true;
+      console.log("sync finished!");
     }).catch(function(e) {
       app = new Vue({
         el: '#app',
@@ -237,10 +240,13 @@ localStorage.setItem("storedName", name);
         }
       })
       //clickListCheck();
+      if (sync) syncFinished = true;
     });
   }
   var joyStick;
   function createNewPixelRate() {
+    getDatabase();
+    setTimeout(function () {
     x1 = 0;
     y1 = 0;
     window.scroll(8, 8);
@@ -322,8 +328,8 @@ localStorage.setItem("storedName", name);
     selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects));
     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
-    getDatabase();
     dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    }, 1111);
   }
   var dbSetWarteschlange = [];
   setInterval(function () {
@@ -336,7 +342,7 @@ localStorage.setItem("storedName", name);
     for (var i = 0; i < Object.keys(highscores.normal).length; i++) {
       if (Object.keys(highscores.normal)[i] == highscores.normal[Object.keys(highscores.normal)[i]][name].pixelRate) {
         console.log("level " + name + " with pixel rate " + Object.keys(highscores.normal)[i] + " selected!");
-        selected = {maxVerfallsdaten: highscores.normal[Object.keys(highscores.normal)[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores.normal)[i], objects: highscores.normal[Object.keys(highscores.normal)[i]][name].objects, settings: highscores.normal[Object.keys(highscores.normal)[i]][name].settings};
+        selected = {gegenstaende: name, maxVerfallsdaten: highscores.normal[Object.keys(highscores.normal)[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores.normal)[i], objects: highscores.normal[Object.keys(highscores.normal)[i]][name].objects, settings: highscores.normal[Object.keys(highscores.normal)[i]][name].settings};
         alert("Regeln: " + replaceAll(replaceAll(selected.settings, "false", "⛔"), "true", "✅"));
         if (gerät == "Handy" && confirm("Wollen sie mit Jo-Stick spielen?")) joyStickPlay.checked = true;
         resetLevel();
@@ -404,12 +410,16 @@ localStorage.setItem("storedName", name);
     joyStickPlay.checked = true;
   }
   setInterval(function() {
+    if (selected.pixelRate) {
+    textur.width = selected.pixelRate.toString().split(" x ")[0];
+    textur.height = selected.pixelRate.toString().split(" x ")[1];
+  }
     canvas.fillStyle = "#FF8000";
     canvas.fillRect(0, 0, textur.width, textur.height);
     // joy-stick:
     var nextCoordinates = {x: 0, y: 0};
-    if (joyStick && joyStick.coordinates) {
-      var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 + (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
+    if (joyStickPlay.checked) {
+      if (joyStick && joyStick.coordinates) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 + (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
     }
     else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
     // scrollingInterac.PC = true;
@@ -589,7 +599,27 @@ localStorage.setItem("storedName", name);
         allStaubCollected = false;
       }
     }
-    if (allStaubCollected == true) console.log("finished!!!");
+    if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning")) {
+      console.log("finished!!!");
+      if (syncFinished != true) {syncFinished = "inProgress";getDatabase(true);}
+      // else {
+      //   if (syncFinished == "beginning") syncFinished = false;
+      //   setTimeout(function () {
+      //     syncFinished = false;
+      //   }, 1);
+      // }
+      if (syncFinished == true) {
+        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores = {};
+        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name]) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name] = {};
+        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät]) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät] = {};
+        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] || mins + ":" + secs + ":" + "0" + tenths < highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][joyStickPlay.checked]) {
+          highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] = mins + ":" + secs + ":" + "0" + tenths;
+          dbSetWarteschlange.push({tag: "highscores", data: highscores});
+          alert("So schnell haben sie noch nie gesaugt!!!");
+        }
+        syncFinished = false;
+      }
+    }
     canvas.globalAlpha = 1;
     for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
       // collect spielzeug
@@ -681,8 +711,10 @@ localStorage.setItem("storedName", name);
   var audio;
   var inRound = false;
   function resetLevel(type) {
+    textur.style.touchAction = 'none';
+    time = 0;
     textur.style.display = "inline";
-    if (gerät == "PC" && (!joyStick || !joyStick.coordinates)/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
+    if (gerät == "PC" && (!joyStick || !joyStick.coordinates)/* || joyStickPlay.checked*/) {joyStickPlay.checked = true; alert("please click to set a joy-stick!"); joyStick = "place";}
     if (type) console.log(type);
     inRound = true;
     try {
@@ -738,8 +770,9 @@ localStorage.setItem("storedName", name);
     sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
     speed.slowDownFinished = true;
-    verfallsdaten.ladung += speed.y/1.1*direction.y + speed.x/1.3*direction.x;
+    verfallsdaten.ladung += speed.y/1.1 + speed.x/1.3;
   }
+  var syncFinished = "beginning";
   function boundingBoxCheck() {
     if (x1 < 0) {
       if (speed.highest.number > 5 && brokenCheck.checked) {resetLevel("broken");}
@@ -805,5 +838,45 @@ function touch(ev) {
 }
 function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
+}
+// topp uhr
+var time = 0;
+// var running = 0;
+var mins;
+var secs;
+var tenths;
+increment();
+
+// function startPause() {
+// if (running == 0) {
+//   running = 1;
+//   time = 0;
+//   increment();
+// }
+// else {
+//   running = 0;
+// }
+// }
+// function reset() {
+// running = 0;
+// timer = 0;
+// }
+function increment() {
+// if (running == 1) {
+setTimeout(function () {
+  time++;
+  mins = Math.floor(time/10/60);
+  secs = Math.floor(time/10);
+      secs -= 60*mins;
+  tenths = time % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  increment();
+}, 100);
+// }
 }
 </script>
