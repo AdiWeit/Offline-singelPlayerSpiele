@@ -1,5 +1,18 @@
 <meta charset="utf-8">
-<!-- TODO: settings -->
+<table id="scores">
+  <!-- <tr>
+  <td>Row1 cell1</td>
+  <td>Row1 cell2</td>
+</tr>
+<tr>
+  <td>Row2 cell1</td>
+  <td>Row2 cell2</td>
+</tr>
+<tr>
+  <td>Row3 cell1</td>
+  <td>Row3 cell2</td>
+</tr> -->
+</table>
 <div id="settings">
   Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
   <br>
@@ -128,6 +141,10 @@
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
 <br>
 Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(9, 9);" type="range" min="1" max="27">
+<br>
+<input id="cleanerAudio" onchange="playCleanerSound();" type="checkbox"checked="true">Staubsauger Audio
+<br>
+<input id="clenerFiepAudio" onchange="playCleanerSound();" type="checkbox"checked="true">mit leichtem Piepen
 <div id="wegWeiser">
   <br>
   <input onchange="showWayLadestation.checked = checked" type="checkbox">Weg zu Ladestation kennzeichnen
@@ -446,6 +463,9 @@ localStorage.setItem("storedName", name);
     joyStickPlay.checked = true;
   }
   setInterval(function() {
+    if (audio && audio.currentTime >= 2*60 + 31) {
+      playCleanerSound();
+    }
     if (selected.pixelRate) {
     textur.width = selected.pixelRate.toString().split(" x ")[0];
     textur.height = selected.pixelRate.toString().split(" x ")[1];
@@ -666,6 +686,14 @@ localStorage.setItem("storedName", name);
           dbSetWarteschlange.push({tag: "highscores", data: highscores});
           alert("So schnell haben sie noch nie gesaugt!!!");
         }
+        if (confirm("Wollen sie sich die Leistungen der anderen Spieler ansehen?")) {
+          var highscoresShow = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].highscores));
+          for (var i = 0; i < Object.keys(highscoresShow).length; i++) {
+            if (!highscoresShow[Object.keys(highscoresShow)[i]].Handy) highscoresShow[Object.keys(highscoresShow)[i]].Handy = {};
+            highscoresShow[Object.keys(highscoresShow)[i]] = {"PC with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].PC["joy-stick"], "Handy with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["joy-stick"], "Handy without joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["no joy-stick"]};
+          }
+          showScores(highscoresShow);
+        }
         syncFinished = false;
       }
     }
@@ -759,6 +787,16 @@ localStorage.setItem("storedName", name);
   }, 25);
   var audio;
   var inRound = false;
+  function playCleanerSound() {
+    try {
+      audio.pause();
+    } catch (e) {}
+    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
+    if (clenerFiepAudio.checked) audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
+    audio.volume = 0.5;
+    audio.currentTime = 1;
+    if (cleanerAudio.checked) audio.play();
+  }
   function resetLevel(type) {
     setTimeout(function () {
       window.scroll(9, 9);
@@ -780,10 +818,7 @@ localStorage.setItem("storedName", name);
         localAudio.pause();
       }, 1000);
     }
-    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
-    audio.volume = 0.5;
-    audio.currentTime = 1;
-    audio.play();
+    playCleanerSound();
     verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
     slowDownSpielzeug = {boolean: false, time: "endless"}
     setTimeout(function () {
@@ -930,5 +965,67 @@ setTimeout(function () {
   increment();
 }, 100);
 // }
+}
+var highscoresDisplayedBefore = {};
+function showScores(highscores, mode) {
+  scores.style.display = "inline";
+  for (var i = 0; i < Object.keys(highscoresDisplayedBefore).length + 11 && Object.keys(highscoresDisplayedBefore).length > 0; i++) {
+    try {
+      document.getElementById("scores").deleteRow(0);
+    } catch (e) {
+      console.log("wanted to delete too many elements of table");
+      i = Object.keys(highscoresDisplayedBefore).length + 11
+    }
+  }
+  highscoresDisplayedBefore = highscores;
+  document.getElementById('textur').style.display = "none";
+  //console.log("scores: " + highscores);
+  var cell = [ /*row.insertCell(0)*/ ];
+  var highestLives = {lives: 0, number: 3};
+  for (var i = 0; i < Object.keys(highscores).length; i++) {
+    // if (!(Object.keys(highscores)[i] == "allMaps")) {
+      var table = document.getElementById("scores");
+      var row = table.insertRow(i);
+      cell.push(row.insertCell(0));
+      cell[cell.length - 1].innerHTML = Object.keys(highscores)[i]
+    // }
+    //  var cell = [/*row.insertCell(0)*/];
+    for (var i1 = 1; i1 < Object.keys(highscores[Object.keys(highscores)[i]]).length + 1; i1++) {
+      // if (!(Object.keys(highscores)[i] == "allMaps")) {
+        if (i1 < Object.keys(highscores[Object.keys(highscores)[i]]).length + 1) {
+          cell[cell.length - 2] = row.insertCell(i1);
+          // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
+          //   i1--;
+          // }
+          if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] != undefined) cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]];
+          else cell[cell.length - 2].innerHTML = "/";
+          if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] >  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1/* - 1*/]]) cell[cell.length - 2].style.color = "red";
+          else if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] <  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1/* - 1*/]]) cell[cell.length - 2].style.color = "green";
+          else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
+          else cell[cell.length - 2].style.color = "black";
+
+        } else {
+          cell[cell.length - 2] = row.insertCell(i1);
+          //  cell[cell.length - 2].innerHTML = "unmade";
+          //  cell[cell.length - 2].style.color = "black";
+        }
+      // }
+    }
+    var row = table.insertRow(i);
+    //  var row = table.insertRow(i+1);
+    // var row = table.insertRow(i + 1);
+    if (Object.keys(highscores[Object.keys(highscores)[i]]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]]).length}
+  }
+  //  var row = table.insertRow(0);
+  //  var cell = [/*row.insertCell(0)*/];
+  // cell.push(row.insertCell(0));
+  // cell[cell.length - 1].innerHTML = "name";
+  var row = table.insertRow(0);
+  cell.push(row.insertCell(0));
+  for (var i1 = 0; i1 < highestLives.lives + 1; i1++) {
+    cell.push(row.insertCell(i1));
+    if (i1 == 0) cell[cell.length - 1].innerHTML = "name";
+    else cell[cell.length - 1].innerHTML = Object.keys(highscoresShow[name])[i1 - 1];
+  }
 }
 </script>
