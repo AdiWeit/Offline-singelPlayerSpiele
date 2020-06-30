@@ -482,16 +482,22 @@ localStorage.setItem("storedName", name);
       }
     }
     if (slowDownSpielzeug.boolean) {
-      if (slowDownSpielzeug.time != "endless") slowDownSpielzeug.time -= 20;
-      if (slowDownSpielzeug.time < 1) {
-        slowDownSpielzeug.speed += 0.1;//slowDownSpielzeug.boolean = false;
-        console.log("regain speed");
+    for (var i = 0; i < slowDownSpielzeug.time.length; i++) {
+      if (slowDownSpielzeug.time[i] != "endless") {
+        slowDownSpielzeug.time[i] -= 20;
+        if (slowDownSpielzeug.time[i] < 1) {
+          slowDownSpielzeug.speed += 0.1;//slowDownSpielzeug.boolean = false;
+          slowDownSpielzeug.time.splice(i, 1);
+          console.log("regain speed! speed now is " + slowDownSpielzeug.speed);
+        }
       }
       if (slowDownSpielzeug.speed > 1.9) {
         slowDownSpielzeug.boolean = false;
         console.log("original speed reached");
+
       }
     }
+  }
     if (noMoebelInFront && inRound) {
       if (y1 > nextCoordinates.y) {direction.y = -1; speed.y = y1 - nextCoordinates.y}
       else {direction.y = 1; speed.y = nextCoordinates.y - y1};
@@ -660,8 +666,8 @@ localStorage.setItem("storedName", name);
         selected.objects.spielzeug[i].collected = true;
         if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
-        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: zeitLangsamer.value, speed: 1.9};
-        else if (langsamerBeiSpielzeug.checked && slowDownSpielzeug.speed - 0.1 >= 1.1) slowDownSpielzeug.speed -= 0.1;
+        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [JSON.parse(zeitLangsamer.value)], speed: 1.9};
+        else if (langsamerBeiSpielzeug.checked && slowDownSpielzeug.speed - 0.1 >= 1.1) {slowDownSpielzeug.speed -= 0.1; slowDownSpielzeug.time.push(JSON.parse(zeitLangsamer.value));}
         else if (langsamerBeiSpielzeug.checked) {
           if (restartWhenSlow.checked) resetLevel();
           if (clearWhenSlow.checked) stopSpielzeug = {boolean: true, time: 2000, clearing: true};
