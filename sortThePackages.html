@@ -1,0 +1,99 @@
+<div id="settings">
+<input type="text" value="3" id="width" placeholder="width">
+<br>
+<input type="text" value="3" id="height" placeholder="height">
+<br>
+vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
+<button type="button" onclick="createPackage();" name="button">createPackages</button>
+</div>
+<canvas id="textur" width="1848" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
+<script>
+  var packages = [];
+  function createPackage() {
+    settings.style.display = "none";
+    var number = 0;
+    for (var i = 0; i < JSON.parse(width.value); i++) {
+      packages[i] = [];
+      for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+        packages[i][i1] = [];
+        for (var i2 = 0; i2 < 3; i2++) {
+          number++;
+          packages[i][i1][i2] = number
+        }
+      }
+    }
+    // vertausche
+    for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
+      var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
+      var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
+      //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
+      packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
+      packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
+    }
+    layout();
+  }
+  var canvas = textur.getContext('2d');
+  function layout() {
+    canvas.fillStyle = "black";
+    canvas.fillRect(0, 0, textur.width, textur.height);
+    canvas.fillStyle = "gray";
+    canvas.fillRect(0, i1*60*3, 3*60, 10);
+    canvas.fillStyle = "gray";
+    canvas.fillRect(0, 0, 10, 10 + JSON.parse(height.value)*60*3);
+    for (var i = 0; i < JSON.parse(width.value); i++) {
+      canvas.fillStyle = "gray";
+      canvas.fillRect(60*(i + 1), 0, 10, 10 + JSON.parse(height.value)*60*3);
+      for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+        for (var i2 = 0; i2 < 3; i2++) {
+          drawPackage(i, i1, i2);
+        }
+      }
+    }
+    canvas.fillStyle = "gray";
+    canvas.fillRect(0, i1*60*3, 3*60, 10);
+  }
+  function drawPackage(i, i1, i2) {
+    canvas.fillStyle = "gray";
+    canvas.fillRect(0, i1*60*3, 3*60, 10);
+    canvas.fillStyle = "orange";
+    canvas.fillRect(10 + i*60, 10 + i1*60*3 + 60*i2, 50, 50);
+    canvas.fillStyle = "white";
+    canvas.font = "32px Georgia";
+    canvas.fillText(packages[i][i1][i2], 10 + i*60 + 32/2, 10 + i1*60*3 + 60*i2 + 30);
+  }
+  var selected = {x: 0, y: 0, height: 0}
+  var selectedStore = {};
+  function mousedownOnCanvas() {
+    selected = {x: 0, y: 0, height: 0, selecting: true};
+    if (clickCheck()) {selected = clickCheck(); selected.beginningHeight = clickCheck().height;}
+  }
+  function mouseUpOnCanvas() {
+    selected.selecting = false;
+  }
+  var mausx;
+  var mausy;
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY;
+    if (selected.selecting) {
+    if (clickCheck() && selected.selecting && (selected.x == clickCheck().x && selected.y == clickCheck().y && selected.height < clickCheck().height)) selected.height += (clickCheck().height - selected.height);
+    layout();
+    canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
+    canvas.fillRect(selected.x*60, selected.y*60*3 + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
+      // for (var i = 0; i < selected.height - selected.beginningHeight; i++) {
+      //   drawPackage(selected.x, selected.y, i);
+      // }
+    }
+  }
+  document.onmousemove = readMouseMove
+  function clickCheck() {
+    for (var i = 0; i < JSON.parse(width.value); i++) {
+      for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+        for (var i2 = 0; i2 < 3; i2++) {
+          // canvas.fillRect(10 + i*60, 10 + i1*60*3 + 60*i2, 50, 50);
+          if (mausx > 10 + i*60 && mausx < 10 + i*60 + 50 && mausy > 10 + i1*60*3 + 60*i2 && mausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true}
+        }
+      }
+    }
+  }
+</script>
