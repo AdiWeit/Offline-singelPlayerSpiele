@@ -23,14 +23,18 @@
     <input checked="true" id="stoppeBeiSpielzeug" type="checkbox">stoppe kurz(zum Entfernen)
     <br>
     <input id="langsamerBeiSpielzeug" onchange="if (checked) verlangsamungSpielzeugP.style.display = 'inline'; else verlangsamungSpielzeugP.style.display = 'none';" type="checkbox">werde langsamer
-    <br>
     <p id="verlangsamungSpielzeugP">
       time<input id="zeitLansamer"value="endless" onchange="if (isNaN(value)) value = 'endless';" type="text">
       <br>
-      restart when speed gets too low<input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">
+      <input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">restart when speed gets too low
       <br>
-      stay still when speed gets too low and continue with normal speed afterfords<input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">
+      <input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">stay still when speed gets too low and continue with normal speed afterfords
+      <br>
     </p>
+    <br>
+    <input type="checkbox" id="spielzeugWenigPlatz" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
+    <br>
+    <input id="spielzeugPlatz" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
     <br>
     min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
     <br>
@@ -123,7 +127,7 @@
 </div>
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
 <br>
-Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(8, 8);" type="range" min="1" max="27">
+Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(9, 9);" type="range" min="1" max="27">
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
@@ -249,7 +253,6 @@ localStorage.setItem("storedName", name);
     setTimeout(function () {
     x1 = 0;
     y1 = 0;
-    window.scroll(8, 8);
     settings.style.display = "none";
     if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
     else energyBar.style.display = "none";
@@ -340,7 +343,7 @@ localStorage.setItem("storedName", name);
   }, 2222);
   function levelSelected(name) {
     for (var i = 0; i < Object.keys(highscores.normal).length; i++) {
-      if (Object.keys(highscores.normal)[i] == highscores.normal[Object.keys(highscores.normal)[i]][name].pixelRate) {
+      if (highscores.normal[Object.keys(highscores.normal)[i]][name] != undefined && Object.keys(highscores.normal)[i] == highscores.normal[Object.keys(highscores.normal)[i]][name].pixelRate) {
         console.log("level " + name + " with pixel rate " + Object.keys(highscores.normal)[i] + " selected!");
         selected = {gegenstaende: name, maxVerfallsdaten: highscores.normal[Object.keys(highscores.normal)[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores.normal)[i], objects: highscores.normal[Object.keys(highscores.normal)[i]][name].objects, settings: highscores.normal[Object.keys(highscores.normal)[i]][name].settings};
         alert("Regeln: " + replaceAll(replaceAll(selected.settings, "false", "⛔"), "true", "✅"));
@@ -362,7 +365,7 @@ localStorage.setItem("storedName", name);
   //                  textur.style.display = "inline";
   //                  x1 = 0;
   //                  y1 = 0;
-  //                  window.scroll(8, 8);
+  //                  window.scroll(9, 9);
   //                  if (gerät == "PC"/* || joyStickPlay.checked*/) {alert("please click to set a joy-stick!"); joyStick = "place";}
   //                  if (this.innerText == "create own pixel rate") {
   //
@@ -581,13 +584,13 @@ localStorage.setItem("storedName", name);
         selected.objects.staub[i].collected = true;
         verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
         if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
-        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.org.mp3");
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.mp3");
         audio.volume = 1;
-        audio.currentTime = 1;
+        //audio.currentTime = 1;
         audio.play();
-        setTimeout(function () {
-          audio.pause();
-        }, 777);
+        // setTimeout(function () {
+        //   audio.pause();
+        // }, 777);
       }
       canvas.fillStyle = "#A4A4A4";
       canvas.globalAlpha = 1;
@@ -623,9 +626,9 @@ localStorage.setItem("storedName", name);
     canvas.globalAlpha = 1;
     for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
       // collect spielzeug
-      if (!selected.objects.spielzeug[i].collected && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
+      if (!selected.objects.spielzeug[i].collected && ((!spielzeugWenigPlatz.checked && verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) || spielzeugWenigPlatz.checked) && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.spielzeug[i].collected = true;
-        if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+        if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
         if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: "endless", speed: 1.9};
         else if (langsamerBeiSpielzeug.checked && slowDownSpielzeug.speed - 0.1 >= 1.1) slowDownSpielzeug.speed -= 0.1;
@@ -653,7 +656,7 @@ localStorage.setItem("storedName", name);
       }
     }
     for (var i = 0; selected.objects && i < selected.objects.schmuck.length; i++) {
-      // collect spielzeug
+      // collect Schmuck
       if (!selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
         selected.objects.schmuck[i].collected = true;
         audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
@@ -711,6 +714,9 @@ localStorage.setItem("storedName", name);
   var audio;
   var inRound = false;
   function resetLevel(type) {
+    setTimeout(function () {
+      window.scroll(9, 9);
+    }, 500);
     textur.style.touchAction = 'none';
     time = 0;
     textur.style.display = "inline";
