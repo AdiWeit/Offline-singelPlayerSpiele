@@ -1,24 +1,27 @@
 <div id="settings">
 <input type="text" value="3" id="width" placeholder="width">
 <br>
-<input type="text" value="3" id="height" placeholder="height">
+<input type="text" value="2" id="height" placeholder="height">
 <br>
 vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
+lösche <input type="text" value="3" id="anzahlLöschen">
 <button type="button" onclick="createPackage();" name="button">createPackages</button>
 </div>
 <canvas id="textur" width="1848" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
 <script>
   var packages = [];
+  var storage = [];
   function createPackage() {
     settings.style.display = "none";
-    var number = 0;
+    var number = 1;
     for (var i = 0; i < JSON.parse(width.value); i++) {
+      number = i + 1;
       packages[i] = [];
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         packages[i][i1] = [];
         for (var i2 = 0; i2 < 3; i2++) {
-          number++;
-          packages[i][i1][i2] = number
+          packages[i][i1][i2] = number;
+          number += JSON.parse(width.value);
         }
       }
     }
@@ -30,45 +33,103 @@ vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
       packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
       packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
     }
-    layout();
+    for (var i = 0; i < JSON.parse(anzahlLöschen.value); i++) {
+      packages[Math.round(Math.random() *(packages.length - 1))][Math.round(Math.random() *(packages[0].length - 1))].splice(Math.round(Math.random() *(packages[0][0].length - 1)), 1);
+    }
+    layoutAll();
   }
   var canvas = textur.getContext('2d');
-  function layout() {
-    canvas.fillStyle = "black";
-    canvas.fillRect(0, 0, textur.width, textur.height);
+  function layoutAll() {
+    // canvas.fillStyle = "black";
+    // canvas.fillRect(0, 0, textur.width, textur.height);
+    var Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/space.jpeg";
+    canvas.drawImage(Bild, 0, 0, textur.width, textur.height);
+    layout(packages, 0);
+    layout(storage, 10 + 60*JSON.parse(width.value) + 33);
+  }
+  function layout(type, position) {
     canvas.fillStyle = "gray";
-    canvas.fillRect(0, i1*60*3, 3*60, 10);
+    canvas.fillRect(0 + position, i1*60*3, JSON.parse(width.value)*60, 10);
     canvas.fillStyle = "gray";
-    canvas.fillRect(0, 0, 10, 10 + JSON.parse(height.value)*60*3);
+    canvas.fillRect(0 + position, 0, 10, 10 + JSON.parse(height.value)*60*3);
     for (var i = 0; i < JSON.parse(width.value); i++) {
       canvas.fillStyle = "gray";
-      canvas.fillRect(60*(i + 1), 0, 10, 10 + JSON.parse(height.value)*60*3);
+      canvas.fillRect(60*(i + 1) + position, 0, 10, 10 + JSON.parse(height.value)*60*3);
+      if (!type[i]) type[i] = [];
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+        if (!type[i][i1]) type[i][i1] = [];
         for (var i2 = 0; i2 < 3; i2++) {
-          drawPackage(i, i1, i2);
+          drawPackage(10 + i*60 + position, 10 + i1*60*3 + 60*i2, position, type, true, i, i1, i2);
         }
       }
     }
     canvas.fillStyle = "gray";
-    canvas.fillRect(0, i1*60*3, 3*60, 10);
+    canvas.fillRect(0 + position, i1*60*3, JSON.parse(width.value)*60, 10);
   }
-  function drawPackage(i, i1, i2) {
+  function drawPackage(x, y, startX, type, grayIncluded, i, i1, i2) {
     canvas.fillStyle = "gray";
-    canvas.fillRect(0, i1*60*3, 3*60, 10);
+    if (grayIncluded) canvas.fillRect(0 + startX, i1*60*3, JSON.parse(width.value)*60, 10);
     canvas.fillStyle = "orange";
-    canvas.fillRect(10 + i*60, 10 + i1*60*3 + 60*i2, 50, 50);
+    if (type[i][i1][i2] == undefined) {
+      // canvas.fillStyle = "black";
+      var Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/space.jpeg";
+      canvas.drawImage(Bild, x, y, 50, 70, x, y, 50, 70);
+    }
+    else canvas.fillRect(x, y, 50, 50);
     canvas.fillStyle = "white";
     canvas.font = "32px Georgia";
-    canvas.fillText(packages[i][i1][i2], 10 + i*60 + 32/2, 10 + i1*60*3 + 60*i2 + 30);
+    if (!(type[i][i1][i2] == undefined)) canvas.fillText(type[i][i1][i2], x + 32/2, y + 30);
   }
   var selected = {x: 0, y: 0, height: 0}
   var selectedStore = {};
   function mousedownOnCanvas() {
+    if (!selected.grabbing || (clickCheck() && clickCheck().type == "sorting")) {
     selected = {x: 0, y: 0, height: 0, selecting: true};
     if (clickCheck()) {selected = clickCheck(); selected.beginningHeight = clickCheck().height;}
   }
+  else {
+    // canvas.fillStyle = "blue";
+    // canvas.fillRect(mausx + 30, mausy + 30, 10, 10);
+    if (clickCheck(mausx + 30, mausy + 30) && clickCheck(mausx + 30, mausy + 30).type == "Ablage") {
+      movePackages(storage, "storage");
+    }
+    if (clickCheck(mausx + 30, mausy + 30) && clickCheck(mausx + 30, mausy + 30).type == "sorting") {
+      movePackages(packages, "packages");
+    }
+    }
+  }
+  function movePackages(type, typeString) {
+    console.log("in Zwischenlager");
+    console.log(clickCheck(mausx + 30, mausy + 30));
+    var enoughSpace = true;
+    for (var i = clickCheck(mausx + 30, mausy + 30).height; i < /*3*/(selected.height - selected.beginningHeight + 1); i++) {
+      if (type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][i] != undefined) enoughSpace = false;
+    }
+    if (typeString == "packages") {
+      for (var i = selected.beginningHeight; i < selected.height + 1; i++) {
+        if (packages[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][clickCheck(mausx + 30, mausy + 30).height + i] != undefined) enoughSpace = false;
+      }
+    }
+    if (enoughSpace) console.log("enoughSpace");
+    var atTop = true;
+    for (var i = clickCheck(mausx + 30, mausy + 30).height - (selected.height - selected.beginningHeight + 1); i < clickCheck(mausx + 30, mausy + 30).height; i++) {
+      if (i > -1 && type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][i] == undefined) atTop = false;
+    }
+    if (atTop) console.log("atTop");
+    if (atTop && enoughSpace) {
+      console.log("lockBox");
+      for (var i = clickCheck(mausx + 30, mausy + 30).height; i < (selected.height - selected.beginningHeight + 1) + clickCheck(mausx + 30, mausy + 30).height; i++) {
+        type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][/*clickCheck(mausx + 30, mausy + 30).height*/ + i/* - (selected.height - selected.beginningHeight)*/] = JSON.parse(JSON.stringify(packages[selected.x][selected.y][selected.beginningHeight + (i - clickCheck(mausx + 30, mausy + 30).height)/* - (3 - (selected.height - selected.beginningHeight + 1))*//* - (selected.height - selected.beginningHeight)*/]));
+      }
+      packages[selected.x][selected.y].splice(selected.beginningHeight, (selected.height - selected.beginningHeight + 1));
+      selected = {x: 0, y: 0, height: 0, grabbing: false}
+    }
+  }
   function mouseUpOnCanvas() {
     selected.selecting = false;
+    selected.grabbing = true;
   }
   var mausx;
   var mausy;
@@ -77,21 +138,32 @@ vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
     mausy = e.clientY + scrollY;
     if (selected.selecting) {
     if (clickCheck() && selected.selecting && (selected.x == clickCheck().x && selected.y == clickCheck().y && selected.height < clickCheck().height)) selected.height += (clickCheck().height - selected.height);
-    layout();
+    layoutAll();
     canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
     canvas.fillRect(selected.x*60, selected.y*60*3 + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
       // for (var i = 0; i < selected.height - selected.beginningHeight; i++) {
       //   drawPackage(selected.x, selected.y, i);
       // }
     }
+    else {
+      layoutAll();
+      for (var i = 0; i < selected.height - selected.beginningHeight + 1; i++) {
+        drawPackage(mausx + 10, mausy + 10 + 60*(i), 0, packages, false, selected.x, selected.y, selected.beginningHeight + i);
+      }
+      canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
+      canvas.fillRect(mausx/*selected.x*60*/, mausy/*selected.y*60*3 + 60*selected.beginningHeight*/, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
+    }
   }
   document.onmousemove = readMouseMove
-  function clickCheck() {
+  function clickCheck(pMausx, pMausy) {
+    if (!pMausx) pMausx = mausx;
+    if (!pMausy) pMausy = mausy;
     for (var i = 0; i < JSON.parse(width.value); i++) {
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         for (var i2 = 0; i2 < 3; i2++) {
           // canvas.fillRect(10 + i*60, 10 + i1*60*3 + 60*i2, 50, 50);
-          if (mausx > 10 + i*60 && mausx < 10 + i*60 + 50 && mausy > 10 + i1*60*3 + 60*i2 && mausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true}
+          if (pMausx > 10 + i*60 && pMausx < 10 + i*60 + 50 && pMausy > 10 + i1*60*3 + 60*i2 && pMausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "sorting"};
+          if (pMausx > 10 + i*60 + 10 + 60*JSON.parse(width.value) + 33 && pMausx < 10 + i*60 + 50 + 10 + 60*JSON.parse(width.value) + 33 && pMausy > 10 + i1*60*3 + 60*i2 && pMausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "Ablage"};
         }
       }
     }
