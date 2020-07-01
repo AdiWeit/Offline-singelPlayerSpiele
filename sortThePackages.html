@@ -4,7 +4,7 @@
 <input type="text" value="2" id="height" placeholder="height">
 <br>
 vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
-lösche <input type="text" value="3" id="anzahlLöschen">
+auf Ablage <input type="text" value="3" id="anzahlLöschen">
 <button type="button" onclick="createPackage();" name="button">createPackages</button>
 </div>
 <canvas id="textur" width="1848" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
@@ -12,6 +12,7 @@ lösche <input type="text" value="3" id="anzahlLöschen">
   var packages = [];
   var storage = [];
   function createPackage() {
+    gebrauchteZuege = 0;
     settings.style.display = "none";
     var number = 1;
     for (var i = 0; i < JSON.parse(width.value); i++) {
@@ -26,15 +27,18 @@ lösche <input type="text" value="3" id="anzahlLöschen">
       }
     }
     // vertausche
-    for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
-      var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
-      var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
-      //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
-      packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
-      packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
-    }
+    // for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
+    //   var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
+    //   var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
+    //   //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
+    //   packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
+    //   packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
+    // }
+    // Idee: auf Ablage statt löschen
     for (var i = 0; i < JSON.parse(anzahlLöschen.value); i++) {
-      packages[Math.round(Math.random() *(packages.length - 1))][Math.round(Math.random() *(packages[0].length - 1))].splice(Math.round(Math.random() *(packages[0][0].length - 1)), 1);
+      var randomNumbers = {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))};
+      missingNumbers.push(JSON.parse(JSON.stringify(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe])))
+      packages[randomNumbers.x][randomNumbers.y].splice(randomNumbers.höhe, 1);
     }
     layoutAll();
   }
@@ -85,7 +89,7 @@ lösche <input type="text" value="3" id="anzahlLöschen">
   var selected = {x: 0, y: 0, height: 0}
   var selectedStore = {};
   function mousedownOnCanvas() {
-    if (!selected.grabbing || (clickCheck() && clickCheck().type == "sorting")) {
+    if (!selected.grabbing || (clickCheck() && ((clickCheck().type == "sorting" && packages[clickCheck().x][clickCheck().y][clickCheck().height] != undefined) || (clickCheck().type != "sorting" && storage[clickCheck().x][clickCheck().y][clickCheck().height] != undefined)))) {
     selected = {x: 0, y: 0, height: 0, selecting: true};
     if (clickCheck()) {selected = clickCheck(); selected.beginningHeight = clickCheck().height;}
   }
@@ -93,14 +97,16 @@ lösche <input type="text" value="3" id="anzahlLöschen">
     // canvas.fillStyle = "blue";
     // canvas.fillRect(mausx + 30, mausy + 30, 10, 10);
     if (clickCheck(mausx + 30, mausy + 30) && clickCheck(mausx + 30, mausy + 30).type == "Ablage") {
-      movePackages(storage, "storage");
+      if (selected.type == "sorting") movePackages(storage, "storage", packages);
+      else movePackages(storage, "storage", storage);
     }
     if (clickCheck(mausx + 30, mausy + 30) && clickCheck(mausx + 30, mausy + 30).type == "sorting") {
-      movePackages(packages, "packages");
+      if (selected.type == "sorting") movePackages(packages, "packages", packages);
+      else movePackages(packages, "packages", storage);
     }
     }
   }
-  function movePackages(type, typeString) {
+  function movePackages(type, typeString, typeAt) {
     console.log("in Zwischenlager");
     console.log(clickCheck(mausx + 30, mausy + 30));
     var enoughSpace = true;
@@ -120,16 +126,34 @@ lösche <input type="text" value="3" id="anzahlLöschen">
     if (atTop) console.log("atTop");
     if (atTop && enoughSpace) {
       console.log("lockBox");
+      gebrauchteZuege++;
       for (var i = clickCheck(mausx + 30, mausy + 30).height; i < (selected.height - selected.beginningHeight + 1) + clickCheck(mausx + 30, mausy + 30).height; i++) {
-        type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][/*clickCheck(mausx + 30, mausy + 30).height*/ + i/* - (selected.height - selected.beginningHeight)*/] = JSON.parse(JSON.stringify(packages[selected.x][selected.y][selected.beginningHeight + (i - clickCheck(mausx + 30, mausy + 30).height)/* - (3 - (selected.height - selected.beginningHeight + 1))*//* - (selected.height - selected.beginningHeight)*/]));
+        type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][/*clickCheck(mausx + 30, mausy + 30).height*/ + i/* - (selected.height - selected.beginningHeight)*/] = JSON.parse(JSON.stringify(typeAt[selected.x][selected.y][selected.beginningHeight + (i - clickCheck(mausx + 30, mausy + 30).height)/* - (3 - (selected.height - selected.beginningHeight + 1))*//* - (selected.height - selected.beginningHeight)*/]));
       }
-      packages[selected.x][selected.y].splice(selected.beginningHeight, (selected.height - selected.beginningHeight + 1));
+      typeAt[selected.x][selected.y].splice(selected.beginningHeight, (selected.height - selected.beginningHeight + 1));
       selected = {x: 0, y: 0, height: 0, grabbing: false}
+      selected.grabbing = false;
+      finishedCheck();
     }
   }
+  var missingNumbers = [];
+  function finishedCheck() {
+    var zahlAktuell = 1;
+    var rightOrder = true;
+    for (var i = 0; i < JSON.parse(width.value); i++) {
+      zahlAktuell = i + 1;
+      for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+        for (var i2 = 0; i2 < 3; i2++) {
+          if (packages[i][i1][i2] != undefined && packages[i][i1][i2] != zahlAktuell && !(missingNumbers.includes(zahlAktuell))) rightOrder = false;
+          zahlAktuell += JSON.parse(width.value);
+        }
+      }
+    }
+    if (rightOrder) console.log("rightOrder!!!");
+  }
   function mouseUpOnCanvas() {
+    if (selected.selecting) selected.grabbing = true;
     selected.selecting = false;
-    selected.grabbing = true;
   }
   var mausx;
   var mausy;
@@ -139,22 +163,27 @@ lösche <input type="text" value="3" id="anzahlLöschen">
     if (selected.selecting) {
     if (clickCheck() && selected.selecting && (selected.x == clickCheck().x && selected.y == clickCheck().y && selected.height < clickCheck().height)) selected.height += (clickCheck().height - selected.height);
     layoutAll();
+    var xDrauf = 0;
+    if (selected.type == "Ablage") xDrauf = 60*JSON.parse(width.value) + 33 + 10;
     canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
-    canvas.fillRect(selected.x*60, selected.y*60*3 + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
+    canvas.fillRect(selected.x*60 + xDrauf, selected.y*60*3 + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
       // for (var i = 0; i < selected.height - selected.beginningHeight; i++) {
       //   drawPackage(selected.x, selected.y, i);
       // }
     }
     else {
       layoutAll();
+      if (selected.type == "Ablage") var pPackages = JSON.parse(JSON.stringify(storage));
+      else var pPackages = packages;
       for (var i = 0; i < selected.height - selected.beginningHeight + 1; i++) {
-        drawPackage(mausx + 10, mausy + 10 + 60*(i), 0, packages, false, selected.x, selected.y, selected.beginningHeight + i);
+        drawPackage(mausx + 10, mausy + 10 + 60*(i), 0, pPackages, false, selected.x, selected.y, selected.beginningHeight + i);
       }
       canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
       canvas.fillRect(mausx/*selected.x*60*/, mausy/*selected.y*60*3 + 60*selected.beginningHeight*/, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
     }
   }
   document.onmousemove = readMouseMove
+  var gebrauchteZuege = 0;
   function clickCheck(pMausx, pMausy) {
     if (!pMausx) pMausx = mausx;
     if (!pMausy) pMausy = mausy;
