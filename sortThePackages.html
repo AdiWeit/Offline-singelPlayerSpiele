@@ -4,7 +4,11 @@
 <input type="text" value="2" id="height" placeholder="height">
 <br>
 vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
+<br>
 auf Ablage <input type="text" value="3" id="anzahlLöschen">
+<br>
+<input id="auffüllen" type="checkbox">stattdessen Kartons ohne Nummern, falls Zahl nicht erreichbar
+<br>
 <button type="button" onclick="createPackage();" name="button">createPackages</button>
 </div>
 <canvas id="textur" width="1848" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
@@ -27,21 +31,55 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       }
     }
     // vertausche
-    // for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
-    //   var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
-    //   var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
-    //   //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
-    //   packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
-    //   packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
-    // }
+    for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
+      var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
+      var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
+      //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
+      packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
+      packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
+    }
     // Idee: auf Ablage statt löschen
     for (var i = 0; i < JSON.parse(anzahlLöschen.value); i++) {
-      var randomNumbers = {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))};
-      missingNumbers.push(JSON.parse(JSON.stringify(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe])))
+      var allPossibilitys = [];
+      for (var i5 = 0; i5 < JSON.parse(width.value); i5++) {
+        for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
+          for (var i2 = 0; i2 < 3; i2++) {
+            if (packages[i5][i1][i2] != undefined) allPossibilitys.push({x: i5, y: i1, höhe: i2});
+          }
+        }
+      }
+      var j;
+      var x;
+      for (var i4 = allPossibilitys.length - 1; i4 > 0; i4--) {
+        j = Math.floor(Math.random() * (i4 + 1));
+        x = allPossibilitys[i4];
+        allPossibilitys[i4] = allPossibilitys[j];
+        allPossibilitys[j] = x;
+      }
+      //var randomNumbers = {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))};
+      var randomNumbers = allPossibilitys[0];
+      console.log(allPossibilitys.length);
+      console.log(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]);
+      if (packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe] != undefined) {
+      var i3 = 0; var i1 = 0; var i2 = 0;
+      // var done = false;
+      while (storage[i3][i1][i2] != undefined) {
+        // storage[i3][i1][i2] = JSON.parse(JSON.stringify(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]));
+        // packages[randomNumbers.x][randomNumbers.y].splice(randomNumbers.höhe);
+        i2++;
+        if (i2 > 2) {i2 = 0; i3++;}
+        if (i3 >= JSON.parse(width.value)) {i3 = 0; i1++;}
+      }
+      console.log(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]);
+      if (!auffüllen.checked) storage[i3][i1][i2] = JSON.parse(JSON.stringify(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]));
+      else storage[i3][i1][i2] = "filling";
       packages[randomNumbers.x][randomNumbers.y].splice(randomNumbers.höhe, 1);
+      allPossibilitys.shift();
     }
-    layoutAll();
+    else i--;
   }
+  layoutAll();
+}
   var canvas = textur.getContext('2d');
   function layoutAll() {
     // canvas.fillStyle = "black";
@@ -84,7 +122,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     else canvas.fillRect(x, y, 50, 50);
     canvas.fillStyle = "white";
     canvas.font = "32px Georgia";
-    if (!(type[i][i1][i2] == undefined)) canvas.fillText(type[i][i1][i2], x + 32/2, y + 30);
+    if (!(type[i][i1][i2] == undefined) && type[i][i1][i2] != "filling") canvas.fillText(type[i][i1][i2], x + 32/2, y + 30);
   }
   var selected = {x: 0, y: 0, height: 0}
   var selectedStore = {};
@@ -136,7 +174,6 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       finishedCheck();
     }
   }
-  var missingNumbers = [];
   function finishedCheck() {
     var zahlAktuell = 1;
     var rightOrder = true;
@@ -144,17 +181,41 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       zahlAktuell = i + 1;
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         for (var i2 = 0; i2 < 3; i2++) {
-          if (packages[i][i1][i2] != undefined && packages[i][i1][i2] != zahlAktuell && !(missingNumbers.includes(zahlAktuell))) rightOrder = false;
+          if (packages[i][i1][i2] != undefined && packages[i][i1][i2] != zahlAktuell && (!auffüllen.checked || (auffüllen.checked && packages[i][i1][i2] != "filling"))) rightOrder = false;
           zahlAktuell += JSON.parse(width.value);
         }
       }
     }
-    if (rightOrder) console.log("rightOrder!!!");
+    if (rightOrder) {console.log("rightOrder!!!"); alert("you got it in " + gebrauchteZuege + " turns!")}
   }
   function mouseUpOnCanvas() {
     if (selected.selecting) selected.grabbing = true;
     selected.selecting = false;
   }
+
+  document.addEventListener('touchmove', touch);
+  document.addEventListener('touchstart', touch);
+  document.addEventListener('touchend', touch);
+// }
+function touch(ev) {
+  // if (!ev.touches[0]) {
+  //   console.log(":((()))");
+  // }
+    if (ev.touches[0] != undefined) {
+      // mausx = ev.touches[0]["pageX"]// + scrollX;
+      // mausy = ev.touches[0]["pageY"]// + scrollY;
+      readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"]});
+    }
+  if (ev.type == "touchend") {
+    mouseUpOnCanvas();
+  }
+    if (ev.type == "touchstart") {
+      mousedownOnCanvas();
+    }
+    // if (ev.type == "touchmove") {
+    //   mousemoveFolgen();
+    // }
+}
   var mausx;
   var mausy;
   function readMouseMove(e) {
