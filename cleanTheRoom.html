@@ -158,7 +158,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
-    <h2 onclick="useSameRate = false; if (innerHTML == 'create own pixel rate') settings.style.display = 'inline'; else if (confirm('Wollen sie genau diese Größe als pixelRate verwenden?')) {settings.style.display = 'inline'; useSameRate = innerHTML}">{{ genre }}</h2>
+    <h2 onclick="useSameRate = false; if (innerHTML == 'create own pixel rate') settings.style.display = 'inline'; else if (confirm('Wollen sie genau diese Größe als pixelRate verwenden?')) {settings.style.display = 'inline'; useSameRate = innerHTML} settingsAnpassen();">{{ genre }}</h2>
 <ul id="db">
   <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
 </ul>
@@ -212,20 +212,23 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   verlangsamungSpielzeugP.style.display = "none";
   settings.style.display = "none";
   wegWeiser.style.display = "none";
-  anzahlStaub.value = Math.round(window.innerWidth/25);
-  maxTeppichWidth.max = window.innerWidth;
-  maxTeppichHeight.max = window.innerHeight;
-  minTeppichWidth.max = window.innerWidth - 1;
-  minTeppichHeight.max = window.innerHeight - 1;
-  maxLochWidth.max = window.innerWidth;
-  maxLochHeight.max = window.innerHeight;
-  minLochWidth.max = window.innerWidth - 1;
-  minLochHeight.max = window.innerHeight - 1;
 
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
+  function settingsAnpassen() {
+    var pWindow = {innerWidth: window.innerWidth, innerHeight: window.innerHeight};
+    if (useSameRate != false) {pWindow.innerWidth = JSON.parse(useSameRate.toString().split(" x ")[0]); pWindow.innerHeight = JSON.parse(useSameRate.toString().split(" x ")[1]);}
+    anzahlStaub.value = Math.round(pWindow.innerWidth/25);
+    maxTeppichWidth.max = pWindow.innerWidth;
+    maxTeppichHeight.max = pWindow.innerHeight;
+    minTeppichWidth.max = pWindow.innerWidth - 1;
+    minTeppichHeight.max = pWindow.innerHeight - 1;
+    maxLochWidth.max = pWindow.innerWidth;
+    maxLochHeight.max = pWindow.innerHeight;
+    minLochWidth.max = pWindow.innerWidth - 1;
+    minLochHeight.max = pWindow.innerHeight - 1;
+  }
   // spielzeugDiv.style.display = "none";
-
   // sphere1.style.top = "175";
   // sphere1.style.left = "9";
   // energyBar.style.left = "20";
@@ -341,6 +344,7 @@ localStorage.setItem("storedName", name);
     textur.height = window.innerHeight - 9;
     console.log(window.innerWidth + " - " + textur.width);
     selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
+    if (highscores.normal[selected.pixelRate] != undefined && Object.keys(highscores.normal[selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
     if (!highscores.normal[selected.pixelRate]) highscores.normal[selected.pixelRate] = {};
     highscores.normal[selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
     var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: [/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz"]}
