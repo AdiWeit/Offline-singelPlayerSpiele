@@ -14,8 +14,6 @@
 </tr> -->
 </table>
 <div id="settings">
-  <button type="button" id="saveData" name="button">Highscores und Pixel rates für offline Modus speichern</button>
-  <input type="checkbox" onchange="localStorage.setItem('saveAutomaticly', checked);" id="saveAutomaticly">
   Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
   <br>
   restart round when hitting wall<input checked="true" type="checkbox" id="brokenCheck">
@@ -141,6 +139,9 @@
   <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
 </div>
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
+<button type="button" onclick="saveData();" id="saveData" name="button">Highscores und Pixel rates für offline Modus speichern</button>
+<br>
+<p id="pSaveAutomaticly"><input type="checkbox" onchange="localStorage.setItem('saveAutomaticly', checked);" id="saveAutomaticly">autosave</p>
 <br>
 Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gelegt werden)<input id="sensibility" onchange="window.scroll(9, 9);" type="range" min="1" max="27">
 <br>
@@ -163,6 +164,10 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
 </ul>
 </div>
+</div>
+<div id="offlineSelector">
+  <h3>gespeicherte pixel rates (anklicken, um die Optionen zu sehen)</h3>
+  <select name="course" value="please select" onchange="levelSelected(value.toString().split('-->')[1]);" id="Auswahl"></select>
 </div>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -212,7 +217,6 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   verlangsamungSpielzeugP.style.display = "none";
   settings.style.display = "none";
   wegWeiser.style.display = "none";
-
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
   function settingsAnpassen() {
@@ -250,34 +254,41 @@ localStorage.setItem("storedName", name);
   function getDatabase(sync) {
     dbGet("cleanTheRoom", "highscores").then(result => {
       highscores = result;
-      highscoresToList(highscores);
+      offlineSelector.style.display = "none";
       //clickListCheck();
-      if (sync) syncFinished = true;
-      else if (localStorage.getItem("saveAutomaticly") != undefined) {
-          saveAutomaticly.checked = localStorage.getItem("saveAutomaticly");
-          if (saveAutomaticly.checked) localStorage.setItem("highscoresCleanTheRoom", JSON.stringify(highscores));
-          saveAutomaticly.style.display = "inline";
-        }
-        else saveAutomaticly.style.display = "none";
         // pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths
         if (localStorage.getItem("newPixelRate") != undefined) {
           // newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
           for (var i = 0; i < JSON.parse(localStorage.getItem("newPixelRate")).length; i++) {
-            if (!highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)]) highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)] = {};
-            if (!highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)]) highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)] = {};
-            highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)] = JSON.parse(localStorage.getItem("newPixelRate")[i].data);
+            if (!highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate]) highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate] = {};
+            if (!highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende]) highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende] = {};
+            highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende] = JSON.parse(localStorage.getItem("newPixelRate"))[i].data;
           }
           localStorage.setItem("newPixelRate", JSON.stringify([]));
+          if (i > 0) dbSetWarteschlange.push({tag: "highscores", data: highscores});
         }
         if (!sync && localStorage.getItem("newHighscores") != undefined) {
-          for (var i = 0; i < localStorage.getItem("newHighscores").length; i++) {
-            if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)] = {};
-             if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)] = {highscores: {}};
-             if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)] = {};
-             highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)][JSON.parse(localStorage.getItem("newHighscores")[i].joyStick)] = JSON.parse(localStorage.getItem("newHighscores")[i].data);
+          for (var i = 0; i < JSON.parse(localStorage.getItem("newHighscores")).length; i++) {
+            if (highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate] && highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende]) {
+            // if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate] = {};
+             // if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende] = {highscores: {}};
+             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores = {};
+             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name] = {};
+             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät] = {};
+             highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät][JSON.parse(localStorage.getItem("newHighscores"))[i].joyStick] = JSON.parse(localStorage.getItem("newHighscores"))[i].data;
              localStorage.setItem("newHighscores", JSON.stringify([]));
+           }
           }
+          if (i > 0) dbSetWarteschlange.push({tag: "highscores", data: highscores});
         }
+        if (sync) syncFinished = true;
+        else if (localStorage.getItem("saveAutomaticly") != undefined) {
+            saveAutomaticly.checked = localStorage.getItem("saveAutomaticly");
+            if (saveAutomaticly.checked) localStorage.setItem("highscoresCleanTheRoom", JSON.stringify(highscores));
+            pSaveAutomaticly.style.display = "inline";
+          }
+          else pSaveAutomaticly.style.display = "none";
+          highscoresToList(highscores);
       console.log("sync finished!");
     }).catch(function(e) {
       app = new Vue({
@@ -291,8 +302,11 @@ localStorage.setItem("storedName", name);
       //clickListCheck();
       if (sync) syncFinished = true;
       else if (e == "TypeError: Failed to fetch") {
-        alert("Der offline Modus ist aktiviert! Sie können neue zufällige Level erstellen (auch ohne dass sie gespeichert werden). Zudem können sie falls sie mit dieser Datei schon Mal die daten heruntergeladen haben die damaligen highscores angezeigen und neue, falls sie neue aufstellen, wenn sie mit dieser Datei später ins Internet gehen hochgeladen!");
+        alert("Der offline Modus ist aktiviert! Sie können neue zufällige Level erstellen (auch ohne dass sie gespeichert werden). Zudem können sie falls sie mit dieser Datei schon Mal die daten heruntergeladen haben die damaligen highscores angezeigen und neue, falls sie neue aufstellen, wenn sie mit dieser Datei später ins Internet gehen hochgeladen! Leider können sie nicht mit Bewegungssteuerung spielen, weil die Seite dafür sicher sein muss und das bei lokalen Dateien nicht möglich ist. Das Audio wird erst gespeichert, wenn sie es bereits auf der Seite abgespielt haben.");
         offline = true;
+        document.getElementById("saveData").style.display = "none";
+        joyStickPlayP.style.display = "none";
+        joyStickPlay.checked = true;
         if (localStorage.getItem("highscoresCleanTheRoom")) {
           highscores = JSON.parse(localStorage.getItem("highscoresCleanTheRoom"));
           highscoresToList(highscores);
@@ -304,8 +318,22 @@ localStorage.setItem("storedName", name);
   function highscoresToList(result) {
     var format = JSON.parse(JSON.stringify(result.normal));
     format["create own pixel rate"] = {};
+    var list = [];
     for (var i = 0; i < Object.keys(format).length; i++) {
       format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
+      for (var i1 = 0; Object.keys(result.normal)[i] && i1 < Object.keys(result.normal[Object.keys(result.normal)[i]]).length; i1++) {
+        if (offline) list.push(Object.keys(result.normal)[i] + "-->" + Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]);
+      }
+    }
+    if (offline) {
+      console.log(list);
+      for (var i = 0; i < list.length; i++) {
+        opt = document.createElement("option");
+        document.getElementById("Auswahl").options.add(opt);
+        //opt.setAttribute("id", Id);
+        opt.text = list[i];
+      }
+      Auswahl.value = "please select";
     }
     app = new Vue({
       el: '#app',
@@ -318,7 +346,7 @@ localStorage.setItem("storedName", name);
   }
   function saveData() {
     if (confirm("WARNUNG: Sie müssen die Website schon jetzt über die Datei geöffnet haben, mit der sie später offline spielen wollen!")) {
-      saveAutomaticly.style.display = "inline";
+      pSaveAutomaticly.style.display = "inline";
       if (!localStorage.getItem("saveAutomaticly")) {
         saveAutomaticly.checked = confirm("Wollen sie, dass die Daten immer hochgeladen werden, wenn sie diese Datei öffnen?");
         localStorage.setItem("saveAutomaticly", saveAutomaticly.checked);
@@ -329,7 +357,7 @@ localStorage.setItem("storedName", name);
   var offline = false;
   var joyStick;
   function createNewPixelRate() {
-    getDatabase();
+    getDatabase(true);
     setTimeout(function () {
     x1 = 0;
     y1 = 0;
@@ -423,7 +451,7 @@ localStorage.setItem("storedName", name);
     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
     if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
-    else/*TODO*/ {
+    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird?"))/*TODO*/ {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
       newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
@@ -633,9 +661,11 @@ localStorage.setItem("storedName", name);
 
       }
       verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
-      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
-      audio.currentTime = 2*60 + 33;
-      audio.play();
+      try {
+        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
+        audio.currentTime = 2*60 + 33;
+        audio.play();
+      } catch (e) {console.log("audio not playable!")}
       setTimeout(function () {
         resetLevel("Akku leer!!!");
       }, 3000);
@@ -712,10 +742,12 @@ localStorage.setItem("storedName", name);
         selected.objects.staub[i].collected = true;
         verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
         if (verfallsdaten.füllungLeft < 1 && JSON.parse(anzahlEntleerer.value) > 0) {console.log("Sauger voll! Keinen neuen Staub mehr aufnehmen!!!");}
-        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.mp3");
-        audio.volume = 1;
-        //audio.currentTime = 1;
-        audio.play();
+        try {
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/knistern-crackle-rascheln-rustle-gerusche-noise-audio-klnge-hd-soundeffekte-youtubemp3free.mp3");
+          audio.volume = 1;
+          //audio.currentTime = 1;
+          audio.play();
+        } catch (e) {console.log("audio not playable!")}
         // setTimeout(function () {
         //   audio.pause();
         // }, 777);
@@ -749,7 +781,7 @@ localStorage.setItem("storedName", name);
           else {
             var newHighscores = [];
             if (localStorage.getItem("newHighscores")) newHighscores = JSON.parse(localStorage.getItem("newHighscores"));
-            newHighscores.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths});
+            newHighscores.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths});
             localStorage.setItem("newHighscores", JSON.stringify(newHighscores));
           }
           alert("So schnell haben sie noch nie gesaugt!!!");
@@ -782,11 +814,13 @@ localStorage.setItem("storedName", name);
         if (slowDownSpielzeug.boolean && ) {slowDown(slowDownSpielzeug.speed - 0.1); slowDownSpielzeug.speed -= 1.1;}
         else if (slowDownSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
         */
-        var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
-        audio.currentTime = 48; audio.play();
-        setTimeout(function () {
-          audio.pause();
-        }, 500);
+        try {
+          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
+          audio.currentTime = 48; audio.play();
+          setTimeout(function () {
+            audio.pause();
+          }, 500);
+        } catch (e) {console.log("audio not playable!")}
         // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
       }
@@ -801,14 +835,20 @@ localStorage.setItem("storedName", name);
       // collect Schmuck
       if (!selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
         selected.objects.schmuck[i].collected = true;
-        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
-        audio.currentTime = 60*1 + 29.5;
-        audio.play();
-        setTimeout(function () {
-          audio.pause();
-          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
-          resetLevel(/*"Schmuck eingesammelt!"*/);
+        try {
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
+          audio.currentTime = 60*1 + 29.5;
+          audio.play();
+          setTimeout(function () {
+            audio.pause();
+            audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
+            resetLevel(/*"Schmuck eingesammelt!"*/);
+          }, 500);
+        } catch (e) {
+          setTimeout(function () {
+          resetLevel();
         }, 500);
+        }
       }
       canvas.fillStyle = "yellow";
       canvas.beginPath();
@@ -858,12 +898,12 @@ localStorage.setItem("storedName", name);
   function playCleanerSound() {
     try {
       audio.pause();
-    } catch (e) {}
-    audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
-    if (clenerFiepAudio.checked) audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
-    audio.volume = 0.5;
-    audio.currentTime = 1;
-    if (cleanerAudio.checked) audio.play();
+      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
+      if (clenerFiepAudio.checked) audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
+      audio.volume = 0.5;
+      audio.currentTime = 1;
+      if (cleanerAudio.checked) audio.play();
+    } catch (e) {console.log("audio not playable!")}
   }
   function resetLevel(type) {
     setTimeout(function () {
@@ -877,14 +917,16 @@ localStorage.setItem("storedName", name);
     inRound = true;
     try {
       audio.pause();
-    } catch (e) {}
+    } catch (e) {console.log("audio not playable!")}
     if (type != "Akku leer!!!" && type != undefined) {
-      var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/wall-hit-sound-effects-all-sounds-2-youtubemp3free.org.mp3");
-      localAudio.currentTime = 29.5;
-      localAudio.play();
-      setTimeout(function () {
-        localAudio.pause();
-      }, 1000);
+      try {
+        var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/wall-hit-sound-effects-all-sounds-2-youtubemp3free.org.mp3");
+        localAudio.currentTime = 29.5;
+        localAudio.play();
+        setTimeout(function () {
+          localAudio.pause();
+        }, 1000);
+      } catch (e) {console.log("audio not playable!")}
     }
     playCleanerSound();
     verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
