@@ -158,7 +158,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
-    <h2 onclick="if (innerHTML == 'create own pixel rate') settings.style.display = 'inline';">{{ genre }}</h2>
+    <h2 onclick="useSameRate = false; if (innerHTML == 'create own pixel rate') settings.style.display = 'inline'; else if (confirm('Wollen sie genau diese Größe als pixelRate verwenden?')) {settings.style.display = 'inline'; useSameRate = innerHTML}">{{ genre }}</h2>
 <ul id="db">
   <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
 </ul>
@@ -205,6 +205,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <div class="bars" id="trashBar"></div>
 </div>
 <script>
+  var useSameRate = false;
   var realHeight = window.innerHeight;
   textur.style.display = "none";
   staubDiv.style.display = "none";
@@ -245,7 +246,8 @@ localStorage.setItem("storedName", name);
   var highscores = {normal: {}};
   function getDatabase(sync) {
     dbGet("cleanTheRoom", "highscores").then(result => {
-      highscoresToList();
+      highscores = result;
+      highscoresToList(highscores);
       //clickListCheck();
       if (sync) syncFinished = true;
       else if (localStorage.getItem("saveAutomaticly") != undefined) {
@@ -290,14 +292,13 @@ localStorage.setItem("storedName", name);
         offline = true;
         if (localStorage.getItem("highscoresCleanTheRoom")) {
           highscores = JSON.parse(localStorage.getItem("highscoresCleanTheRoom"));
-          highscoresToList();
+          highscoresToList(highscores);
         }
         else alert("Es wurde keine Aufzeichnung der Highscores oder pixel rates gefunden!");
       }
     });
   }
-  function highscoresToList() {
-    highscores = result;
+  function highscoresToList(result) {
     var format = JSON.parse(JSON.stringify(result.normal));
     format["create own pixel rate"] = {};
     for (var i = 0; i < Object.keys(format).length; i++) {
@@ -334,12 +335,13 @@ localStorage.setItem("storedName", name);
     else energyBar.style.display = "none";
     if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
     else trashBar.style.display = "none";
-    selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+    if (useSameRate == false) selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+    else selected.pixelRate = useSameRate;
     textur.width = window.innerWidth - 9;
     textur.height = window.innerHeight - 9;
     console.log(window.innerWidth + " - " + textur.width);
     selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
-    highscores.normal[selected.pixelRate] = {};
+    if (!highscores.normal[selected.pixelRate]) highscores.normal[selected.pixelRate] = {};
     highscores.normal[selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
     var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: [/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz"]}
     for (var i = 0; i < Object.keys(convertList).length; i++) {
