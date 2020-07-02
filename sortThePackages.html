@@ -4,6 +4,8 @@
 <br>
 <input type="text" value="2" id="height" placeholder="height">
 <br>
+Pakete in einem y-Sektor <input type="text" value="3" id="anzahlInSektor">
+<br>
 vertausche <input type="text" value="3" id="anzahlVertauschen"> mal
 <br>
 auf Ablage <input type="text" value="3" id="anzahlLöschen">
@@ -26,7 +28,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       packages[i] = [];
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         packages[i][i1] = [];
-        for (var i2 = 0; i2 < 3; i2++) {
+        for (var i2 = 0; i2 < JSON.parse(anzahlInSektor.value); i2++) {
           packages[i][i1][i2] = number;
           number += JSON.parse(width.value);
         }
@@ -45,7 +47,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       var allPossibilitys = [];
       for (var i5 = 0; i5 < JSON.parse(width.value); i5++) {
         for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
-          for (var i2 = 0; i2 < 3; i2++) {
+          for (var i2 = 0; i2 < JSON.parse(anzahlInSektor.value); i2++) {
             if (packages[i5][i1][i2] != undefined) allPossibilitys.push({x: i5, y: i1, höhe: i2});
           }
         }
@@ -69,7 +71,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
         // storage[i3][i1][i2] = JSON.parse(JSON.stringify(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]));
         // packages[randomNumbers.x][randomNumbers.y].splice(randomNumbers.höhe);
         i2++;
-        if (i2 > 2) {i2 = 0; i3++;}
+        if (i2 > JSON.parse(anzahlInSektor.value) - 1) {i2 = 0; i3++;}
         if (i3 >= JSON.parse(width.value)) {i3 = 0; i1++;}
       }
       console.log(packages[randomNumbers.x][randomNumbers.y][randomNumbers.höhe]);
@@ -94,26 +96,26 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
   }
   function layout(type, position) {
     canvas.fillStyle = "gray";
-    canvas.fillRect(0 + position, i1*60*3, JSON.parse(width.value)*60, 10);
+    canvas.fillRect(0 + position, i1*60*JSON.parse(anzahlInSektor.value), JSON.parse(width.value)*60, 10);
     canvas.fillStyle = "gray";
-    canvas.fillRect(0 + position, 0, 10, 10 + JSON.parse(height.value)*60*3);
+    canvas.fillRect(0 + position, 0, 10, 10 + JSON.parse(height.value)*60*JSON.parse(anzahlInSektor.value));
     for (var i = 0; i < JSON.parse(width.value); i++) {
       canvas.fillStyle = "gray";
-      canvas.fillRect(60*(i + 1) + position, 0, 10, 10 + JSON.parse(height.value)*60*3);
+      canvas.fillRect(60*(i + 1) + position, 0, 10, 10 + JSON.parse(height.value)*60*JSON.parse(anzahlInSektor.value));
       if (!type[i]) type[i] = [];
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         if (!type[i][i1]) type[i][i1] = [];
-        for (var i2 = 0; i2 < 3; i2++) {
-          drawPackage(10 + i*60 + position, 10 + i1*60*3 + 60*i2, position, type, true, i, i1, i2);
+        for (var i2 = 0; i2 < JSON.parse(anzahlInSektor.value); i2++) {
+          drawPackage(10 + i*60 + position, 10 + i1*60*JSON.parse(anzahlInSektor.value) + 60*i2, position, type, true, i, i1, i2);
         }
       }
     }
     canvas.fillStyle = "gray";
-    canvas.fillRect(0 + position, i1*60*3, JSON.parse(width.value)*60, 10);
+    canvas.fillRect(0 + position, i1*60*JSON.parse(anzahlInSektor.value), JSON.parse(width.value)*60, 10);
   }
   function drawPackage(x, y, startX, type, grayIncluded, i, i1, i2) {
     canvas.fillStyle = "gray";
-    if (grayIncluded) canvas.fillRect(0 + startX, i1*60*3, JSON.parse(width.value)*60, 10);
+    if (grayIncluded) canvas.fillRect(0 + startX, i1*60*JSON.parse(anzahlInSektor.value), JSON.parse(width.value)*60, 10);
     canvas.fillStyle = "orange";
     if (type[i][i1][i2] == undefined) {
       // canvas.fillStyle = "black";
@@ -202,7 +204,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     for (var i = 0; i < JSON.parse(width.value); i++) {
       zahlAktuell = i + 1;
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
-        for (var i2 = 0; i2 < 3; i2++) {
+        for (var i2 = 0; i2 < JSON.parse(anzahlInSektor.value); i2++) {
           if (storage[i][i1][i2] != undefined && storage[i][i1][i2] != "filling") alleDrinne = false;
           if (packages[i][i1][i2] != undefined && packages[i][i1][i2] != zahlAktuell && (!auffüllen.checked || (auffüllen.checked && packages[i][i1][i2] != "filling"))) rightOrder = false;
           zahlAktuell += JSON.parse(width.value);
@@ -253,7 +255,7 @@ function touch(ev) {
     var xDrauf = 0;
     if (selected.type == "Ablage") xDrauf = 60*JSON.parse(width.value) + 33 + 10;
     canvas.fillStyle = "rgba(255, 0, 0, 0.4)";
-    canvas.fillRect(selected.x*60 + xDrauf, selected.y*60*3 + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
+    canvas.fillRect(selected.x*60 + xDrauf, selected.y*60*JSON.parse(anzahlInSektor.value) + 60*selected.beginningHeight, 70, 50*(selected.height - selected.beginningHeight + 1) + 10*(selected.height - selected.beginningHeight + 1));
       // for (var i = 0; i < selected.height - selected.beginningHeight; i++) {
       //   drawPackage(selected.x, selected.y, i);
       // }
@@ -276,10 +278,10 @@ function touch(ev) {
     if (!pMausy) pMausy = mausy;
     for (var i = 0; i < JSON.parse(width.value); i++) {
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
-        for (var i2 = 0; i2 < 3; i2++) {
+        for (var i2 = 0; i2 < JSON.parse(anzahlInSektor.value); i2++) {
           // canvas.fillRect(10 + i*60, 10 + i1*60*3 + 60*i2, 50, 50);
-          if (pMausx > 10 + i*60 && pMausx < 10 + i*60 + 50 && pMausy > 10 + i1*60*3 + 60*i2 && pMausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "sorting"};
-          if (pMausx > 10 + i*60 + 10 + 60*JSON.parse(width.value) + 33 && pMausx < 10 + i*60 + 50 + 10 + 60*JSON.parse(width.value) + 33 && pMausy > 10 + i1*60*3 + 60*i2 && pMausy < 10 + i1*60*3 + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "Ablage"};
+          if (pMausx > 10 + i*60 && pMausx < 10 + i*60 + 50 && pMausy > 10 + i1*60*JSON.parse(anzahlInSektor.value) + 60*i2 && pMausy < 10 + i1*60*JSON.parse(anzahlInSektor.value) + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "sorting"};
+          if (pMausx > 10 + i*60 + 10 + 60*JSON.parse(width.value) + 33 && pMausx < 10 + i*60 + 50 + 10 + 60*JSON.parse(width.value) + 33 && pMausy > 10 + i1*60*JSON.parse(anzahlInSektor.value) + 60*i2 && pMausy < 10 + i1*60*JSON.parse(anzahlInSektor.value) + 60*i2 + 50) return {x: i, y: i1, height: i2, selecting: true, grabbing: false, type: "Ablage"};
         }
       }
     }
