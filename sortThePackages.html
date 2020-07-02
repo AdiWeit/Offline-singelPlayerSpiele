@@ -1,3 +1,4 @@
+<meta charset="utf-8">
 <div id="settings">
 <input type="text" value="3" id="width" placeholder="width">
 <br>
@@ -11,8 +12,9 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
 <br>
 <button type="button" onclick="createPackage();" name="button">createPackages</button>
 </div>
-<canvas id="textur" width="1848" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
+<canvas id="textur" width="1848" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
 <script>
+  textur.style.touchAction = "none";
   var packages = [];
   var storage = [];
   function createPackage() {
@@ -144,6 +146,7 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     }
     }
   }
+  var positionBefore = {point: [], left: [], right: [], alleVerschiebenMöglich: false};
   function movePackages(type, typeString, typeAt) {
     console.log("in Zwischenlager");
     console.log(clickCheck(mausx + 30, mausy + 30));
@@ -165,6 +168,19 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     if (atTop && enoughSpace) {
       console.log("lockBox");
       gebrauchteZuege++;
+      if (selected.type == "sorting" && positionBefore.alleVerschiebenMöglich == true && clickCheck(mausx + 30, mausy + 30).x == positionBefore.x && clickCheck(mausx + 30, mausy + 30).type == "sorting" && ((packages[clickCheck(mausx + 30, mausy + 30).x + 1] && equals(positionBefore.point, packages[clickCheck(mausx + 30, mausy + 30).x + 1][clickCheck(mausx + 30, mausy + 30).y]) != false/*moved right*/) || (packages[clickCheck(mausx + 30, mausy + 30).x - 1] && equals(positionBefore.point, packages[clickCheck(mausx + 30, mausy + 30).x - 1][clickCheck(mausx + 30, mausy + 30).y]) != false/*moved left*/))) {
+        console.log("weil alle verschoben erbraucht es keinen extra Zug!");
+        gebrauchteZuege--;
+      }
+      if (/*(selected.height - selected.beginningHeight + 1) == 3 && */selected.x > 0 && selected.x + 1 < JSON.parse(width.value) && (selected.x - clickCheck(mausx + 30, mausy + 30).x == -1 || selected.x - clickCheck(mausx + 30, mausy + 30).x == 1) && selected.type == "sorting" && clickCheck(mausx + 30, mausy + 30).type == "sorting") {
+        console.log("alleVerschiebenMöglich");
+        positionBefore.point = JSON.parse(JSON.stringify(packages[selected.x][selected.y]));
+        positionBefore.left = JSON.parse(JSON.stringify(packages[selected.x - 1][selected.y]));
+        positionBefore.right = JSON.parse(JSON.stringify(packages[selected.x + 1][selected.y]));
+        positionBefore.x = JSON.parse(JSON.stringify(selected.x));
+        positionBefore.alleVerschiebenMöglich = true;
+      }
+      else positionBefore.alleVerschiebenMöglich = false;
       for (var i = clickCheck(mausx + 30, mausy + 30).height; i < (selected.height - selected.beginningHeight + 1) + clickCheck(mausx + 30, mausy + 30).height; i++) {
         type[clickCheck(mausx + 30, mausy + 30).x][clickCheck(mausx + 30, mausy + 30).y][/*clickCheck(mausx + 30, mausy + 30).height*/ + i/* - (selected.height - selected.beginningHeight)*/] = JSON.parse(JSON.stringify(typeAt[selected.x][selected.y][selected.beginningHeight + (i - clickCheck(mausx + 30, mausy + 30).height)/* - (3 - (selected.height - selected.beginningHeight + 1))*//* - (selected.height - selected.beginningHeight)*/]));
       }
@@ -174,20 +190,30 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
       finishedCheck();
     }
   }
+  function equals(data, data1) {
+    for (var i = 0; i < data.length; i++) {
+      if (data[i] != data1[i]) return false
+    }
+  }
   function finishedCheck() {
     var zahlAktuell = 1;
     var rightOrder = true;
+    var alleDrinne = true;
     for (var i = 0; i < JSON.parse(width.value); i++) {
       zahlAktuell = i + 1;
       for (var i1 = 0; i1 < JSON.parse(height.value); i1++) {
         for (var i2 = 0; i2 < 3; i2++) {
+          if (storage[i][i1][i2] != undefined && storage[i][i1][i2] != "filling") alleDrinne = false;
           if (packages[i][i1][i2] != undefined && packages[i][i1][i2] != zahlAktuell && (!auffüllen.checked || (auffüllen.checked && packages[i][i1][i2] != "filling"))) rightOrder = false;
           zahlAktuell += JSON.parse(width.value);
         }
       }
     }
-    if (rightOrder) {console.log("rightOrder!!!"); alert("you got it in " + gebrauchteZuege + " turns!")}
+    if (rightOrder && alleDrinne) {console.log("rightOrder!!!"); alert("you got it in " + gebrauchteZuege + " turns!")}
   }
+  window.addEventListener('mousedown', function() {
+    mousedownOnCanvas();
+  });
   function mouseUpOnCanvas() {
     if (selected.selecting) selected.grabbing = true;
     selected.selecting = false;
