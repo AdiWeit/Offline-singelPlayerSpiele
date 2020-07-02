@@ -14,6 +14,8 @@
 </tr> -->
 </table>
 <div id="settings">
+  <button type="button" id="saveData" name="button">Highscores und Pixel rates für offline Modus speichern</button>
+  <input type="checkbox" onchange="localStorage.setItem('saveAutomaticly', checked);" id="saveAutomaticly">
   Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
   <br>
   restart round when hitting wall<input checked="true" type="checkbox" id="brokenCheck">
@@ -243,22 +245,34 @@ localStorage.setItem("storedName", name);
   var highscores = {normal: {}};
   function getDatabase(sync) {
     dbGet("cleanTheRoom", "highscores").then(result => {
-      highscores = result;
-      var format = JSON.parse(JSON.stringify(result.normal));
-      format["create own pixel rate"] = {};
-      for (var i = 0; i < Object.keys(format).length; i++) {
-        format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
-      }
-      app = new Vue({
-        el: '#app',
-        data: {
-          db: format,
-          genres: Object.keys(format),
-          input: '',
-        }
-      })
+      highscoresToList();
       //clickListCheck();
       if (sync) syncFinished = true;
+      else if (localStorage.getItem("saveAutomaticly") != undefined) {
+          saveAutomaticly.checked = localStorage.getItem("saveAutomaticly");
+          if (saveAutomaticly.checked) localStorage.setItem("highscoresCleanTheRoom", JSON.stringify(highscores));
+          saveAutomaticly.style.display = "inline";
+        }
+        else saveAutomaticly.style.display = "none";
+        // pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths
+        if (localStorage.getItem("newPixelRate") != undefined) {
+          // newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
+          for (var i = 0; i < JSON.parse(localStorage.getItem("newPixelRate")).length; i++) {
+            if (!highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)]) highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)] = {};
+            if (!highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)]) highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)] = {};
+            highscores[JSON.parse(localStorage.getItem("newPixelRate")[i].pixelRate)][JSON.parse(localStorage.getItem("newPixelRate")[i].gegenstaende)] = JSON.parse(localStorage.getItem("newPixelRate")[i].data);
+          }
+          localStorage.setItem("newPixelRate", JSON.stringify([]));
+        }
+        if (!sync && localStorage.getItem("newHighscores") != undefined) {
+          for (var i = 0; i < localStorage.getItem("newHighscores").length; i++) {
+            if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)] = {};
+             if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)] = {highscores: {}};
+             if (!highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)]) highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)] = {};
+             highscores[JSON.parse(localStorage.getItem("newHighscores")[i].pixelRate)][JSON.parse(localStorage.getItem("newHighscores")[i].gegenstaende)].highscores[JSON.parse(localStorage.getItem("newHighscores")[i].gerät)][JSON.parse(localStorage.getItem("newHighscores")[i].joyStick)] = JSON.parse(localStorage.getItem("newHighscores")[i].data);
+             localStorage.setItem("newHighscores", JSON.stringify([]));
+          }
+        }
       console.log("sync finished!");
     }).catch(function(e) {
       app = new Vue({
@@ -271,8 +285,44 @@ localStorage.setItem("storedName", name);
       })
       //clickListCheck();
       if (sync) syncFinished = true;
+      else if (e == "TypeError: Failed to fetch") {
+        alert("Der offline Modus ist aktiviert! Sie können neue zufällige Level erstellen (auch ohne dass sie gespeichert werden). Zudem können sie falls sie mit dieser Datei schon Mal die daten heruntergeladen haben die damaligen highscores angezeigen und neue, falls sie neue aufstellen, wenn sie mit dieser Datei später ins Internet gehen hochgeladen!");
+        offline = true;
+        if (localStorage.getItem("highscoresCleanTheRoom")) {
+          highscores = JSON.parse(localStorage.getItem("highscoresCleanTheRoom"));
+          highscoresToList();
+        }
+        else alert("Es wurde keine Aufzeichnung der Highscores oder pixel rates gefunden!");
+      }
     });
   }
+  function highscoresToList() {
+    highscores = result;
+    var format = JSON.parse(JSON.stringify(result.normal));
+    format["create own pixel rate"] = {};
+    for (var i = 0; i < Object.keys(format).length; i++) {
+      format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
+    }
+    app = new Vue({
+      el: '#app',
+      data: {
+        db: format,
+        genres: Object.keys(format),
+        input: '',
+      }
+    })
+  }
+  function saveData() {
+    if (confirm("WARNUNG: Sie müssen die Website schon jetzt über die Datei geöffnet haben, mit der sie später offline spielen wollen!")) {
+      saveAutomaticly.style.display = "inline";
+      if (!localStorage.getItem("saveAutomaticly")) {
+        saveAutomaticly.checked = confirm("Wollen sie, dass die Daten immer hochgeladen werden, wenn sie diese Datei öffnen?");
+        localStorage.setItem("saveAutomaticly", saveAutomaticly.checked);
+      }
+      localStorage.setItem("highscoresCleanTheRoom", JSON.stringify(highscores));
+    }
+  }
+  var offline = false;
   var joyStick;
   function createNewPixelRate() {
     getDatabase();
@@ -309,23 +359,23 @@ localStorage.setItem("storedName", name);
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
       var side = Math.round(Math.random() *(3));
-    /*todo: */if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
       else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
       else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
       else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
       var side = Math.round(Math.random() *(3));
-      /*todo: */if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
       else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
       else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
       else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      /*todo: */highscores.normal[selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      /*todo: */highscores.normal[selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
+      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
     }
     //setTimeout(function () {
     verfallsdaten = {ladung: 0, füllungLeft: 0};
@@ -366,7 +416,13 @@ localStorage.setItem("storedName", name);
     selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects));
     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
-    dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    else/*TODO*/ {
+      var newPixelRates = [];
+      if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
+      newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
+      localStorage.setItem("newPixelRate", JSON.stringify(newPixelRates));
+    }
     }, 1111);
   }
   var dbSetWarteschlange = [];
@@ -683,7 +739,13 @@ localStorage.setItem("storedName", name);
         if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät]) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät] = {};
         if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] || mins + ":" + secs + ":" + "0" + tenths < highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][joyStickPlay.checked]) {
           highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] = mins + ":" + secs + ":" + "0" + tenths;
-          dbSetWarteschlange.push({tag: "highscores", data: highscores});
+          if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
+          else {
+            var newHighscores = [];
+            if (localStorage.getItem("newHighscores")) newHighscores = JSON.parse(localStorage.getItem("newHighscores"));
+            newHighscores.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths});
+            localStorage.setItem("newHighscores", JSON.stringify(newHighscores));
+          }
           alert("So schnell haben sie noch nie gesaugt!!!");
         }
         if (confirm("Wollen sie sich die Leistungen der anderen Spieler ansehen?")) {
