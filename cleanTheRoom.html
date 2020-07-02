@@ -20,6 +20,10 @@
   <br>
   bounce von Wänden ab<input type="checkbox" id="bounceWalls">
   <br>
+  <p id="pPixelRateWidth">pixel rate width <input id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
+  <br>
+  <p id="pPixelRateHeight">pixel rate height <input id="pixelRateHeight" type="text"> <button type="button" onclick="resetPixelRate(['height']);" name="button">reset</button> </p>
+  <br>
   <p id="joyStickPlayP">play with joy-stick<input id="joyStickPlay" type="checkbox"></p>
   <br>
   <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
@@ -139,6 +143,7 @@
   <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
 </div>
 <canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
+<br>
 <button type="button" onclick="saveData();" id="saveData" name="button">Highscores und Pixel rates für offline Modus speichern</button>
 <br>
 <p id="pSaveAutomaticly"><input type="checkbox" onchange="localStorage.setItem('saveAutomaticly', checked);" id="saveAutomaticly">autosave</p>
@@ -159,7 +164,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="app">
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
-    <h2 onclick="useSameRate = false; if (innerHTML == 'create own pixel rate') settings.style.display = 'inline'; else if (confirm('Wollen sie genau diese Größe als pixelRate verwenden?')) {settings.style.display = 'inline'; useSameRate = innerHTML} settingsAnpassen();">{{ genre }}</h2>
+    <h2 onclick="pixelRateSettings(innerHTML);">{{ genre }}</h2>
 <ul id="db">
   <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
 </ul>
@@ -219,6 +224,30 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   wegWeiser.style.display = "none";
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
+  function resetPixelRate(rates) {
+    /*
+    if (useSameRate == false) {pixelRateWidth.value = (window.innerWidth - 9); pixelRateHeight.value = (window.innerHeight - 9);}//selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+    else selected.pixelRate = useSameRate;
+    */
+    if (rates.includes("width")) {
+      if (useSameRate == false) pixelRateWidth.value = (window.innerWidth - 9);
+      else pixelRateWidth.value = useSameRate.toString().split(" x ")[0];
+    }
+    if (rates.includes("height")) {
+      if (useSameRate == false) pixelRateHeight.value = (window.innerHeight - 9);
+      else pixelRateHeight.value = useSameRate.toString().split(" x ")[1];
+    }
+  }
+  function pixelRateSettings(innerHTML) {
+    useSameRate = false;
+     if (innerHTML == 'create own pixel rate') settings.style.display = 'inline';
+     else if (confirm('Wollen sie genau diese Größe als pixelRate verwenden?')) {
+       settings.style.display = 'inline';
+        useSameRate = innerHTML
+      }
+      settingsAnpassen();
+      resetPixelRate(["width", "height"]);
+  }
   function settingsAnpassen() {
     var pWindow = {innerWidth: window.innerWidth, innerHeight: window.innerHeight};
     if (useSameRate != false) {pWindow.innerWidth = JSON.parse(useSameRate.toString().split(" x ")[0]); pWindow.innerHeight = JSON.parse(useSameRate.toString().split(" x ")[1]);}
@@ -257,25 +286,30 @@ localStorage.setItem("storedName", name);
       offlineSelector.style.display = "none";
       //clickListCheck();
         // pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths
+        var doublePixelRates = [];
         if (localStorage.getItem("newPixelRate") != undefined) {
           // newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
           for (var i = 0; i < JSON.parse(localStorage.getItem("newPixelRate")).length; i++) {
-            if (!highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate]) highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate] = {};
-            if (!highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende]) highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende] = {};
-            highscores.normal[JSON.parse(localStorage.getItem("newPixelRate"))[i].pixelRate][JSON.parse(localStorage.getItem("newPixelRate"))[i].gegenstaende] = JSON.parse(localStorage.getItem("newPixelRate"))[i].data;
+            var newPixelRate = JSON.parse(localStorage.getItem("newPixelRate"))[i];
+            if (!highscores.normal[newPixelRate.pixelRate]) highscores.normal[newPixelRate.pixelRate] = {};
+            if (!highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende]) highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende] = {};
+            else {doublePixelRates.push(JSON.parse(JSON.stringify(newPixelRate))); newPixelRate += "|";}
+            highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende] = newPixelRate.data;
           }
           localStorage.setItem("newPixelRate", JSON.stringify([]));
           if (i > 0) dbSetWarteschlange.push({tag: "highscores", data: highscores});
         }
         if (!sync && localStorage.getItem("newHighscores") != undefined) {
           for (var i = 0; i < JSON.parse(localStorage.getItem("newHighscores")).length; i++) {
-            if (highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate] && highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende]) {
-            // if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate] = {};
-             // if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende] = {highscores: {}};
-             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores = {};
-             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name] = {};
-             if (!highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät]) highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät] = {};
-             highscores.normal[JSON.parse(localStorage.getItem("newHighscores"))[i].pixelRate][JSON.parse(localStorage.getItem("newHighscores"))[i].gegenstaende].highscores[name][JSON.parse(localStorage.getItem("newHighscores"))[i].gerät][JSON.parse(localStorage.getItem("newHighscores"))[i].joyStick] = JSON.parse(localStorage.getItem("newHighscores"))[i].data;
+            var newHighscore = JSON.parse(localStorage.getItem("newHighscores"))[i]
+            if (doublePixelRates.includes(newHighscore)) newHighscore += "|";
+            if (highscores.normal[newHighscore.pixelRate] && highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende]) {
+            // if (!highscores.normal[newHighscore.pixelRate]) highscores.normal[newHighscore.pixelRate] = {};
+             // if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende] = {highscores: {}};
+             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores = {};
+             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name] = {};
+             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät] = {};
+             highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät][newHighscore.joyStick] = newHighscore.data;
              localStorage.setItem("newHighscores", JSON.stringify([]));
            }
           }
@@ -366,11 +400,10 @@ localStorage.setItem("storedName", name);
     else energyBar.style.display = "none";
     if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
     else trashBar.style.display = "none";
-    if (useSameRate == false) selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
-    else selected.pixelRate = useSameRate;
     textur.width = window.innerWidth - 9;
     textur.height = window.innerHeight - 9;
     console.log(window.innerWidth + " - " + textur.width);
+    selected.pixelRate = pixelRateWidth.value + " x " + pixelRateHeight.value;
     selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
     if (highscores.normal[selected.pixelRate] != undefined && Object.keys(highscores.normal[selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
     if (!highscores.normal[selected.pixelRate]) highscores.normal[selected.pixelRate] = {};
@@ -451,7 +484,7 @@ localStorage.setItem("storedName", name);
     selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
     if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
-    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird?"))/*TODO*/ {
+    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
       newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
