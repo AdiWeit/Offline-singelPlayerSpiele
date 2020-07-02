@@ -1,0 +1,380 @@
+<meta charset="utf-8">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
+<p id="imageSettings">
+<input type="text" value="4" id="anzahl" onchange="anzahlVerschieben.value = value*value" placeholder="Puzzle Teile je x und y achse">
+<input type="file" onchange="imageLoaded(this);">
+<br>
+<input type="range" width="window.innerWidth" oninput="zeigeGröße();" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
+<br>
+<input type="range" width="window.innerHeight"  max="window.innerHeight" onInput="zeigeGröße();" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
+<br>
+<button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
+<br>
+<button type="button" onclick="create();" name="button">create puzzle</button>
+</p>
+<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">more settings</button>
+<div id="settings">
+  <br>
+  <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <br>
+  <input type="checkbox" onchange="layout();" id="richtigPlazierte" checked="true"> markiere richtig plazierte
+  <br>
+  <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout();"> <font size="5"> zeige Ränder</font>
+  <p id="randSettings">
+    <br>
+    <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiterRand"> Breite des Randes
+    <br>
+    <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
+  </p>
+  <br>
+  <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font>
+  <p id="schiebenSettings">
+    <br>
+    <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
+    <br>
+    <input type="checkbox" onchange="if (checked) {anzahlRichtige.style.display = 'inline'; anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', '')} else {anzahlRichtige.style.display = 'none'; anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis Anzahl an vertauschten (nicht mehr an origineller Stelle)__ <input type="text" id="anzahlRichtige" value="10" placeholder="Wert"> erreicht
+    <br>
+    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
+    <br>
+    <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
+    <br>
+    <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird)
+  </p>
+  <br>
+  <button type="button" id="aufgebenId" onclick="aufgeben(schieben.checked);" name="button">aufgeben</button>
+</div>
+<br>
+<canvas id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
+<p><img id="preview"></p>
+<script>
+  anzahlVerschieben.value = anzahl.value*anzahl.value;
+  settings.style.display = "none";
+  aufgebenId.style.display = "none";
+  anzahlRichtige.style.display = "none";
+  // schiebenSettings.style.display  = "inline"
+  randSettings.style.display = "none";
+  schiebenSettings.style.display = "none";
+  größeAnpassenX.max = window.innerWidth
+  größeAnpassenY.max = window.innerHeight
+  var canvas = textur.getContext('2d');
+  function aufgeben(schieben) {
+    // if (schieben) {
+      alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + höchstRichtige + " von " + (anzahl.value*anzahl.value - 1) + " Teilen");
+      // }
+  }
+  function zuBildschirmgröße() {
+    größeAnpassenX.value = window.innerWidth;
+    größeAnpassenY.value = window.innerHeight;
+    zeigeGröße();
+  }
+  function zeigeGröße() {
+    textur.width = größeAnpassenX.value;
+    textur.height = größeAnpassenY.value
+    // canvas.clearRect(0, 0, textur.width, textur.height);
+    if (preview.src == "") {
+    canvas.fillStyle = "blue";
+    canvas.fillRect(0, 0, größeAnpassenX.value, größeAnpassenY.value);
+  }
+  else {
+    canvas.drawImage(document.getElementById('preview'), 0, 0, größeAnpassenX.value, größeAnpassenY.value);
+  }
+  }
+  var originalSize = {width: 0, height: 0};
+  function create() {
+    //finished = false;
+    // if (swipeSteuerung.checked) textur.style.touchAction = 'none';
+    /*if (swipeSteuerung.checked) {
+      alert("Please zoom out as far as possible! You have 5 sec. for that!");
+      // textur.style.touchAction = '';
+      setTimeout(function () {
+        textur.style.touchAction = 'none';
+        create2();
+      }, 5000);
+    }
+    else */create2();
+  }
+  function create2() {
+    aufgebenId.style.display = "inline";
+    showSettings.innerHTML = "settings und Möglichkeit Aufzugeben";
+    imageSettings.style.display = "none";
+    schieben.style.display = "none";
+    schiebenSettings.style.display = "none";
+    missing = undefined;
+    settings.style.display = 'none';
+    originalSize.width = preview.width;
+    originalSize.height = preview.height;
+    preview.width = größeAnpassenX.value;
+    preview.height = größeAnpassenY.value;
+    textur.width = preview.width// + 111;
+    textur.height = preview.height// + 111;
+    lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
+    breiterRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
+    randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiterRand.value;
+    positions = {right: []};
+    for (var i = 0; i < anzahl.value; i++) {
+      for (var i1 = 0; i1 < anzahl.value; i1++) {
+        positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
+        positions.right[positions.right.length - 1].border = [];
+        if (i == 0) positions.right[positions.right.length - 1].border.push("left");
+        if (i == anzahl.value - 1) positions.right[positions.right.length - 1].border.push("right");
+        if (i1 == 0) positions.right[positions.right.length - 1].border.push("up");
+        if (i1 == anzahl.value - 1) positions.right[positions.right.length - 1].border.push("down");
+      }
+    }
+    positions.wrong = JSON.parse(JSON.stringify(positions.right));
+    for (i = positions.wrong.length - 1; !schieben.checked && i > 0; i--) {
+      j = Math.floor(Math.random() * (i + 1));
+      x = positions.wrong[i].edit;
+      positions.wrong[i].edit = positions.wrong[j].edit;
+      positions.wrong[j].edit = x;
+    }
+    //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
+    window.scroll(0, /*96 50*/32);
+    if (schieben.checked) {
+      alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil de Bildes!");
+      layout(true);
+    }
+    else layout();
+  }
+  function imageLoaded(input) {
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      document.getElementById('preview').setAttribute("src", e.target.result)
+    };
+    reader.readAsDataURL(input.files[0])
+    setTimeout(function () {
+       canvas.drawImage(document.getElementById('preview'), 0, 0);
+       textur.width = preview.width// + 111;
+       textur.height = preview.height// + 111;
+       größeAnpassenX.max = preview.width;
+       größeAnpassenY.max = preview.width;
+       größeAnpassenX.value = preview.width;
+       größeAnpassenY.value = preview.height;
+       zeigeGröße();
+    }, 500);
+  }
+  var lengthPerTeil = {};
+  var positions = {right: []};
+  var finished = false;
+  var missing;
+  function layout(withoutAlert) {
+    richtige = 0;
+    for (var i = 0; i < positions.wrong.length; i++) {
+      drawPictureSegment(positions.wrong[i], positions.right[i]);
+    }
+    if (höchstRichtige < richtige && !withoutAlert) {
+      höchstRichtige = JSON.parse(JSON.stringify(richtige));
+    }
+    if (richtige == positions.wrong.length) {
+      richtige = 0;
+      finished = true;
+      layout(true);
+      finished = false;
+      if(!withoutAlert) {
+        alert("Bitte laden sie die Seite neu, wenn sie ein weiteres Puzzle erstellen wollen!");
+      if (schieben.checked) alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+    }
+  }
+}
+  var richtige = 0;
+  function drawPictureSegment(position, segmentPosition) {
+    canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    if (position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y && !finished) {
+      canvas.fillStyle = "rgba(0, 255, 0, 0.3)";
+      if (richtigPlazierte.checked) canvas.fillRect(position.edit.x, position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+      richtige++;
+    }
+    canvas.fillStyle = "rgba(0, 0, 255, 0.35)";
+    if (raender.checked && segmentPosition.border.includes("right")) canvas.fillRect(position.edit.x - JSON.parse(breiterRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value), position.edit.y, JSON.parse(breiterRand.value), lengthPerTeil.edit.y);
+    if (raender.checked && segmentPosition.border.includes("left")) canvas.fillRect(position.edit.x + JSON.parse(randPosition.value), position.edit.y, JSON.parse(breiterRand.value), lengthPerTeil.edit.y);
+    if (raender.checked && segmentPosition.border.includes("up")) canvas.fillRect(position.edit.x, position.edit.y + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiterRand.value));
+    if (raender.checked && segmentPosition.border.includes("down")) canvas.fillRect(position.edit.x, position.edit.y - JSON.parse(breiterRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiterRand.value));
+  }
+  var selected = {boolean: false, position: {x: 0, y: 0}}
+  function canvasClicked() {
+    if (checkSelected() && settings.style.display == "inline") settings.style.display = "none";
+    if (checkSelected() && selected.boolean && !schieben.checked) {
+      for (var i = 0; i < positions.wrong.length; i++) {
+        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.position.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.position.y) {
+              console.log("vertausche " + checkSelected().x + "-" + checkSelected().y + " mit " + selected.position.x + "-" + selected.position.y);
+              playerMoved++;
+              vertauscheZwei(i, i1);
+              i = positions.wrong.length;
+              i1 = positions.wrong.length;
+            }
+          }
+        }
+      }
+      selected.boolean = false;
+    }
+    else if (schieben.checked && checkSelected()/* && selected.boolean*/ && missing) {
+        if ((missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x + lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x - lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y + lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*down*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y - lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*up*/) {
+          for (var i = 0; i < positions.wrong.length; i++) {
+            if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+              console.log("schiebe...");
+              playerMoved++;
+              var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
+              positions.wrong[i].edit = JSON.parse(JSON.stringify(missing.data.edit));//.splice(side, 1);
+              missing.data = ablage;
+              i = positions.wrong.length;
+              selected.boolean = false;
+            }
+          }
+        }
+        // canvas.clearRect(0, 0, 10000, 10000);
+        // layout();
+    }
+    else if (checkSelected() && (!schieben.checked/* || missing*/)) {
+      selected.position = {x: checkSelected().x, y: checkSelected().y};
+      selected.boolean = true;
+    }
+    if (checkSelected() && schieben.checked && !missing) {
+      for (var i = 0; i < positions.wrong.length; i++) {
+        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+          missing = {data: JSON.parse(JSON.stringify(positions.wrong[i]))};
+          positions.wrong.splice(i, 1);
+          positions.right.splice(i, 1);
+        }
+      }
+        var missingArray = [];
+        var workingNumbers = [];
+        var maleZurrück = {number: 0, normalSlide: 0};
+        for (var i = 0; i < positions.wrong.length; i++) {
+          workingNumbers.push(i);
+        }
+        for (var i = 0; i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value); i++) {
+          var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
+          try {
+          if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((missing.data.edit.x == positions.wrong[side].edit.x + lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y) /*right*/ || (missing.data.edit.x ==
+          positions.wrong[side].edit.x - lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y)/*left*/ || (missing.data.edit.y == positions.wrong[side].edit.y + lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*down*/ || (missing.data.edit.y == positions.wrong[side].edit.y - lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*up*/)) {
+          if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y))) {
+            maleZurrück.number++;
+          }
+          else maleZurrück.normalSlide++;
+          missingArray.push(missing.data.edit.x + "-" + missing.data.edit.y);
+          //console.log(missingArray);
+          movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
+          movement.missing.unshift(JSON.parse(JSON.stringify(missing)));
+          var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
+          positions.wrong[side].edit = missing.data.edit;//.splice(side, 1);
+          textur.width = textur.width;
+          layout(true);
+          for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
+            if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
+              positions = JSON.parse(JSON.stringify(movement.positions[/*1*/0]));
+              missing = JSON.parse(JSON.stringify(movement.missing[/*1*/0]));
+              movement.positions.splice(0, 1);
+              movement.missing.splice(0, 1);
+              maleZurrück.number++;
+              i1 = movement.positions.length;
+              i--;
+              for (var i2 = 0; i2 < workingNumbers.length; i2++) {
+                if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
+              }
+            }
+          }
+          if (i1 != movement.positions.length + 1) {
+              missing.data = ablage
+              var workingNumbers = [];
+              for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+                workingNumbers.push(i1);
+              }
+          }
+        }
+          else {
+            i--;
+            for (var i1 = 0; i1 < workingNumbers.length; i1++) {
+              if (workingNumbers[i1] == side) workingNumbers.splice(i1, 1);
+            }
+          }
+        } catch (e) {
+          //console.log("ein Error bei der if Abfrage!!! + (" + e + ")");
+          i = positions.wrong.length;
+        }
+        }
+        // canvas.clearRect(0, 0, 10000, 10000);
+        // layout();
+      }
+      canvas.clearRect(0, 0, 10000, 10000);
+      layout();
+  }
+  var movement = {missing: [], positions: []};
+  var mausx;
+  var mausy;
+  var playerMoved = 0;
+  var höchstRichtige = 0;
+  document.onmousemove = readMouseMove
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY - /*96*/32// - 43;
+    if (scrollY > 32) mausy += 32;
+  }
+  // if (gerät == "Handy") {
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+    document.addEventListener('touchend', touch);
+  // }
+  function touch(ev) {
+    if (!ev.touches[0]) {
+      console.log(":((()))");
+    }
+    if ((ev.type == "touchend" && swipeSteuerung.checked && !schieben.checked && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
+      // textur.style.touchAction = '';
+      canvasClicked();
+    }
+    else if (swipeSteuerung.checked && !schieben.checked && ev.touches[0]) {
+      mausx = ev.touches[0]["pageX"]// + scrollX;
+      mausy = ev.touches[0]["pageY"]// + scrollY;
+    }
+      if (ev.type == "touchstart" && swipeSteuerung.checked && !schieben.checked && checkSelected() && ev.touches[0]) {
+        if (textur.style.touchAction != 'none') {
+        setTimeout(function () {
+          window.scroll(0, /*96 50*/32);
+          textur.style.touchAction = 'none';
+          selected.position = {x: checkSelected().x, y: checkSelected().y};
+          selected.boolean = true;
+        }, 3000);
+      }
+      else {
+        selected.position = {x: checkSelected().x, y: checkSelected().y};
+        selected.boolean = true;
+      }
+
+      }
+      // if (ev.type == "touchmove") {
+      //   mousemoveFolgen();
+      // }
+  }
+  function vertauscheZwei(i, i1) {
+    var ablage = JSON.parse(JSON.stringify(positions.wrong[i].edit));
+    positions.wrong[i].edit = JSON.parse(JSON.stringify(positions.wrong[i1].edit));
+    positions.wrong[i1].edit = JSON.parse(JSON.stringify(ablage));
+    if (positions.wrong[i1].edit == undefined) positions.wrong.splice(i1, 1);
+  }
+  function checkSelected() {
+    try {
+    for (var i = 0; i < anzahl.value; i++) {
+      for (var i1 = 0; i1 < anzahl.value; i1++) {
+        if (mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
+      }
+    }
+  } catch (e) {
+    console.log("pleaseDebug :)");
+  }
+  }
+  function scrollDownFunction() {
+  if (mausy - scrollY > window.innerHeight - 10)  {
+  window.scroll(0, scrollY + 3);
+  mausy += 3;
+}
+}
+scrollDownInt = setInterval(scrollDownFunction, 10);
+scrollUpInt = setInterval(function () {
+  if ((mausy - scrollY < 50/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    window.scroll(0, scrollY - 3);
+    mausy -= 3;
+}
+}, 10);
+</script>
