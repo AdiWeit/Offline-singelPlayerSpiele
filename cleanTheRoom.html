@@ -355,9 +355,33 @@ localStorage.setItem("storedName", name);
     var list = [];
     for (var i = 0; i < Object.keys(format).length; i++) {
       format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
+      var highscore = {};
       for (var i1 = 0; Object.keys(result.normal)[i] && i1 < Object.keys(result.normal[Object.keys(result.normal)[i]]).length; i1++) {
         if (offline) list.push(Object.keys(result.normal)[i] + "-->" + Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]);
+        else {
+          //var anzahlSpieler = Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length;
+          try {
+            for (var i2 = 0; highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores && i2 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length; i2++) {
+              for (var i3 = 0; i3 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]]).length; i3++) {
+                for (var i4 = 0; i4 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]]).length; i4++) {
+                  var wert = highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]])[i4]];
+                  console.log(wert);
+                  if (!highscore.general || wert < highscore.general.number) highscore.general = {number: JSON.parse(JSON.stringify(wert)), name: Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]};
+                  if ((!highscore.mine || wert < highscore.mine) && Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2] == name) highscore.mine = wert;
+                }
+              }
+            }
+          } catch (e) {
+            console.error(e);
+            console.log("ufffffff");
+          }
+        }
+        if (!highscore.general) highscore.general = {};
+        if (highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length + "player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
+        else var info = "";
+        format[Object.keys(format)[i]][i1] += info;
       }
+      //if (!offline)
     }
     if (offline) {
       console.log(list);
