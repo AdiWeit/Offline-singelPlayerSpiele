@@ -20,6 +20,8 @@
   <br>
   bounce von Wänden ab<input type="checkbox" id="bounceWalls">
   <br>
+  opposite direction<input id="oppsositeDirection" type="checkbox">
+  <br>
   <p id="pPixelRateWidth">pixel rate width <input id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
   <br>
   <p id="pPixelRateHeight">pixel rate height <input id="pixelRateHeight" type="text"> <button type="button" onclick="resetPixelRate(['height']);" name="button">reset</button> </p>
@@ -166,7 +168,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
     <h2 onclick="pixelRateSettings(innerHTML);">{{ genre }}</h2>
 <ul id="db">
-  <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText);" v-for="abc in db[genre]"> {{ abc }} </li>
+  <li id="titles" style="font-size: 23px" onclick="levelSelected(innerText.toString().split(' (')[0]);" v-for="abc in db[genre]"> {{ abc }} </li>
 </ul>
 </div>
 </div>
@@ -215,13 +217,14 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <div class="bars" id="trashBar"></div>
 </div>
 <script>
+  var mode = "normal"
   var useSameRate = false;
   var realHeight = window.innerHeight;
   textur.style.display = "none";
   staubDiv.style.display = "none";
   verlangsamungSpielzeugP.style.display = "none";
   settings.style.display = "none";
-  wegWeiser.style.display = "none";
+  //wegWeiser.style.display = "none";
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
   function resetPixelRate(rates) {
@@ -288,13 +291,13 @@ localStorage.setItem("storedName", name);
         // pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths
         var doublePixelRates = [];
         if (localStorage.getItem("newPixelRate") != undefined) {
-          // newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
+          // newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores[mode][selected.pixelRate][selected.gegenstaende]});
           for (var i = 0; i < JSON.parse(localStorage.getItem("newPixelRate")).length; i++) {
             var newPixelRate = JSON.parse(localStorage.getItem("newPixelRate"))[i];
-            if (!highscores.normal[newPixelRate.pixelRate]) highscores.normal[newPixelRate.pixelRate] = {};
-            if (!highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende]) highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende] = {};
+            if (!highscores[mode][newPixelRate.pixelRate]) highscores[mode][newPixelRate.pixelRate] = {};
+            if (!highscores[mode][newPixelRate.pixelRate][newPixelRate.gegenstaende]) highscores[mode][newPixelRate.pixelRate][newPixelRate.gegenstaende] = {};
             else {doublePixelRates.push(JSON.parse(JSON.stringify(newPixelRate))); newPixelRate += "|";}
-            highscores.normal[newPixelRate.pixelRate][newPixelRate.gegenstaende] = newPixelRate.data;
+            highscores[mode][newPixelRate.pixelRate][newPixelRate.gegenstaende] = newPixelRate.data;
           }
           localStorage.setItem("newPixelRate", JSON.stringify([]));
           if (i > 0) dbSetWarteschlange.push({tag: "highscores", data: highscores});
@@ -303,13 +306,13 @@ localStorage.setItem("storedName", name);
           for (var i = 0; i < JSON.parse(localStorage.getItem("newHighscores")).length; i++) {
             var newHighscore = JSON.parse(localStorage.getItem("newHighscores"))[i]
             if (doublePixelRates.includes(newHighscore)) newHighscore += "|";
-            if (highscores.normal[newHighscore.pixelRate] && highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende]) {
-            // if (!highscores.normal[newHighscore.pixelRate]) highscores.normal[newHighscore.pixelRate] = {};
-             // if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende] = {highscores: {}};
-             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores = {};
-             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name] = {};
-             if (!highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät]) highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät] = {};
-             highscores.normal[newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät][newHighscore.joyStick] = newHighscore.data;
+            if (highscores[mode][newHighscore.pixelRate] && highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende]) {
+            // if (!highscores[mode][newHighscore.pixelRate]) highscores[mode][newHighscore.pixelRate] = {};
+             // if (!highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende]) highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende] = {highscores: {}};
+             if (!highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores) highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores = {};
+             if (!highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name]) highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name] = {};
+             if (!highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät]) highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät] = {};
+             highscores[mode][newHighscore.pixelRate][newHighscore.gegenstaende].highscores[name][newHighscore.gerät][newHighscore.joyStick] = newHighscore.data;
              localStorage.setItem("newHighscores", JSON.stringify([]));
            }
           }
@@ -350,36 +353,34 @@ localStorage.setItem("storedName", name);
     });
   }
   function highscoresToList(result) {
-    var format = JSON.parse(JSON.stringify(result.normal));
-    format["create own pixel rate"] = {};
+    var fromFormat = JSON.parse(JSON.stringify(result.normal));
+    var format = {"create own pixel rate": {}};
     var list = [];
-    for (var i = 0; i < Object.keys(format).length; i++) {
-      format[Object.keys(format)[i]] = Object.keys(format[Object.keys(format)[i]]);
+    try {
+    for (var i = 0; i < Object.keys(fromFormat).length; i++) {
+      if ((Object.keys(fromFormat)[i] != "create own pixel rate") && (JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[1]) <= window.innerHeight)) format[Object.keys(fromFormat)[i]] = Object.keys(fromFormat[Object.keys(fromFormat)[i]]);
+
       var highscore = {};
-      for (var i1 = 0; Object.keys(result.normal)[i] && i1 < Object.keys(result.normal[Object.keys(result.normal)[i]]).length; i1++) {
+      for (var i1 = 0; Object.keys(fromFormat)[i] != "create own pixel rate" && (JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[1]) <= window.innerHeight && Object.keys(result.normal)[i]) && i1 < Object.keys(result.normal[Object.keys(result.normal)[i]]).length; i1++) {
         if (offline) list.push(Object.keys(result.normal)[i] + "-->" + Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]);
         else {
-          //var anzahlSpieler = Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length;
-          try {
-            for (var i2 = 0; highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores && i2 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length; i2++) {
-              for (var i3 = 0; i3 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]]).length; i3++) {
-                for (var i4 = 0; i4 < Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]]).length; i4++) {
-                  var wert = highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]])[i4]];
+          //var anzahlSpieler = Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length;
+            highscore = {};
+            for (var i2 = 0; highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores && i2 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length; i2++) {
+              for (var i3 = 0; i3 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]]).length; i3++) {
+                for (var i4 = 0; i4 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]]).length; i4++) {
+                  var wert = highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]])[i4]];
                   console.log(wert);
-                  if (!highscore.general || wert < highscore.general.number) highscore.general = {number: JSON.parse(JSON.stringify(wert)), name: Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]};
-                  if ((!highscore.mine || wert < highscore.mine) && Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2] == name) highscore.mine = wert;
+                  if (!highscore.general || wert < highscore.general.number) highscore.general = {number: JSON.parse(JSON.stringify(wert)), name: Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]};
+                  if ((!highscore.mine || wert < highscore.mine) && Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2] == name) highscore.mine = wert;
                 }
               }
             }
-          } catch (e) {
-            console.error(e);
-            console.log("ufffffff");
-          }
         }
         if (!highscore.general) highscore.general = {};
-        if (highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores.normal[Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length + "player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
+        if (highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length + " player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
         else var info = "";
-        format[Object.keys(format)[i]][i1] += info;
+        if (format[Object.keys(fromFormat)[i]]) format[Object.keys(fromFormat)[i]][i1] += info;
       }
       //if (!offline)
     }
@@ -392,6 +393,10 @@ localStorage.setItem("storedName", name);
         opt.text = list[i];
       }
       Auswahl.value = "please select";
+    }
+  } catch (e) {
+      console.error(e);
+      console.log("ufffffff");
     }
     app = new Vue({
       el: '#app',
@@ -429,64 +434,64 @@ localStorage.setItem("storedName", name);
     console.log(window.innerWidth + " - " + textur.width);
     selected.pixelRate = pixelRateWidth.value + " x " + pixelRateHeight.value;
     selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
-    if (highscores.normal[selected.pixelRate] != undefined && Object.keys(highscores.normal[selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
-    if (!highscores.normal[selected.pixelRate]) highscores.normal[selected.pixelRate] = {};
-    highscores.normal[selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
-    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: [/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz"]}
+    if (highscores[mode][selected.pixelRate] != undefined && Object.keys(highscores[mode][selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
+    if (!highscores[mode][selected.pixelRate]) highscores[mode][selected.pixelRate] = {};
+    highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
+    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection",/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz"]}
     for (var i = 0; i < Object.keys(convertList).length; i++) {
       for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
-        if (Object.keys(convertList)[i] == "value") highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
-        else highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
+        if (Object.keys(convertList)[i] == "value") highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
+        else highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
       }
     }
     for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
     }
     for (var i = 0; i < JSON.parse(anzahlMoebel.value)/*4*/; i++) { // Möbel
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlTeppich.value); i++) { // teppich
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
       var side = Math.round(Math.random() *(3));
-      if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
       var side = Math.round(Math.random() *(3));
-      if (side == 0) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 1) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 2) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 3) highscores.normal[selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
     }
     //setTimeout(function () {
     verfallsdaten = {ladung: 0, füllungLeft: 0};
     for (var i = 0; i < /*27*/JSON.parse(anzahlStaub.value); i++) { // Staub
       var radius = Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minStaubSize.value))) + JSON.parse(minStaubSize.value)/*3*/;
       verfallsdaten.füllungLeft += radius*2;
-      highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
       i2 = "defined";
-      if (highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].x > window.innerWidth - radius || highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].y > window.innerHeight - radius) {
+      if (highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].x > window.innerWidth - radius || highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].y > window.innerHeight - radius) {
         i--;
         i2 = "skip";
-        highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.pop();}
+        highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.pop();}
       try {
-        for (var i1 = 0; i2 != "skip" && i1 != -1 && i1 < Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects).length; i1++) {
-          for (var i2 = 0; i2 != -1 && i2 < highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]].length; i2++) {
+        for (var i1 = 0; i2 != "skip" && i1 != -1 && i1 < Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects).length; i1++) {
+          for (var i2 = 0; i2 != -1 && i2 < highscores[mode][selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1]].length; i2++) {
             // canvas.fillStyle = "red";
-            // canvas.fillRect(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].x, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].y, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2, highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2);
-            //console.log(Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1]))));
-            if (Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores.normal[selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub[highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.length - 1])))) {
-              highscores.normal[selected.pixelRate][selected.gegenstaende].objects.staub.pop();
+            // canvas.fillRect(highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[i].x, highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[i].y, highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2, highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[i].radius*2);
+            //console.log(Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1]))));
+            if (Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1] != "staub" && Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1] != "spielzeug" && isCollide(JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects[Object.keys(highscores[mode][selected.pixelRate][selected.gegenstaende].objects)[i1]][i2])), JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1])))) {
+              highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.pop();
               i--;
               verfallsdaten.füllungLeft -= radius*2;
               i2 = -2;
@@ -502,16 +507,16 @@ localStorage.setItem("storedName", name);
     else verfallsdaten.ladung = JSON.parse(pixelBisLadenT.value);
     verfallsdaten.füllungLeft /= JSON.parse(StaubAlsLeerBasisT.value);//2;
     if (pixelBisLeerenCheck.checked) verfallsdaten.füllungLeft = JSON.parse(pixelBisLeerenT.value);
-    highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
+    highscores[mode][selected.pixelRate][selected.gegenstaende].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
   //}, 1000);
-    selected.objects = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].objects));
-    selected.maxVerfallsdaten = highscores.normal[selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
+    selected.objects = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects));
+    selected.maxVerfallsdaten = highscores[mode][selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
     if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
     else if (confirm("Wollen sie die pixel rate auf ihrem Gerät speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
-      newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores.normal[selected.pixelRate][selected.gegenstaende]});
+      newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores[mode][selected.pixelRate][selected.gegenstaende]});
       localStorage.setItem("newPixelRate", JSON.stringify(newPixelRates));
     }
     }, 1111);
@@ -524,22 +529,22 @@ localStorage.setItem("storedName", name);
     }
   }, 2222);
   function levelSelected(name) {
-    wegWeiser.style.display = "inline";
-    for (var i = 0; i < Object.keys(highscores.normal).length; i++) {
-      if (highscores.normal[Object.keys(highscores.normal)[i]][name] != undefined && Object.keys(highscores.normal)[i] == highscores.normal[Object.keys(highscores.normal)[i]][name].pixelRate) {
-        console.log("level " + name + " with pixel rate " + Object.keys(highscores.normal)[i] + " selected!");
-        selected = {gegenstaende: name, maxVerfallsdaten: highscores.normal[Object.keys(highscores.normal)[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores.normal)[i], objects: highscores.normal[Object.keys(highscores.normal)[i]][name].objects, settings: highscores.normal[Object.keys(highscores.normal)[i]][name].settings, settingsConverted: highscores.normal[Object.keys(highscores.normal)[i]][name].settingsConverted};
+    //wegWeiser.style.display = "inline";
+    for (var i = 0; i < Object.keys(highscores[mode]).length; i++) {
+      if (highscores[mode][Object.keys(highscores[mode])[i]][name] != undefined && Object.keys(highscores[mode])[i] == highscores[mode][Object.keys(highscores[mode])[i]][name].pixelRate) {
+        console.log("level " + name + " with pixel rate " + Object.keys(highscores[mode])[i] + " selected!");
+        selected = {gegenstaende: name, maxVerfallsdaten: highscores[mode][Object.keys(highscores[mode])[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores[mode])[i], objects: highscores[mode][Object.keys(highscores[mode])[i]][name].objects, settings: highscores[mode][Object.keys(highscores[mode])[i]][name].settings, settingsConverted: highscores[mode][Object.keys(highscores[mode])[i]][name].settingsConverted};
         for (var i = 0; i < Object.keys(selected.settingsConverted).length; i++) {
           for (var i1 = 0; i1 < Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]]).length; i1++) {
-            if (Object.keys(selected.settingsConverted)[i] == "value") document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).value = highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
-            else document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).checked = highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
+            if (Object.keys(selected.settingsConverted)[i] == "value") document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).value = highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
+            else document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).checked = highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
           }
         }
         /*
         for (var i = 0; i < Object.keys(convertList).length; i++) {
           for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
-            if (Object.keys(convertList)[i] == "value") highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
-            else highscores.normal[selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
+            if (Object.keys(convertList)[i] == "value") highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
+            else highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
           }
         }
         */
@@ -610,8 +615,10 @@ localStorage.setItem("storedName", name);
     joyStickPlay.checked = true;
   }
   setInterval(function() {
+    if (oppsositeDirection.checked) inOrAgainstDirection = -1;
+    else inOrAgainstDirection = 1;
     if (audio && audio.currentTime >= 2*60 + 31) {
-      playCleanerSound();
+      playCleanerSound(true);
     }
     if (selected.pixelRate) {
     textur.width = selected.pixelRate.toString().split(" x ")[0];
@@ -622,7 +629,10 @@ localStorage.setItem("storedName", name);
     // joy-stick:
     var nextCoordinates = {x: 0, y: 0};
     if (joyStickPlay.checked) {
-      if (joyStick && joyStick.coordinates) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 + (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
+      if (joyStick && joyStick.coordinates) {
+        if (!oppsositeDirection.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 + (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
+        else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/JSON.parse(sensibility.value), y: y1 - (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value)};
+      }
     }
     else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
     // scrollingInterac.PC = true;
@@ -714,9 +724,7 @@ localStorage.setItem("storedName", name);
       inRound = false;
       try {
         audio.pause();
-      } catch (e) {
-
-      }
+      } catch (e) {}
       verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
       try {
         audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
@@ -829,11 +837,11 @@ localStorage.setItem("storedName", name);
       //   }, 1);
       // }
       if (syncFinished == true) {
-        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores = {};
-        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name]) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name] = {};
-        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät]) highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät] = {};
-        if (!highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] || mins + ":" + secs + ":" + "0" + tenths < highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][joyStickPlay.checked]) {
-          highscores.normal[selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] = mins + ":" + secs + ":" + "0" + tenths;
+        if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores = {};
+        if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name]) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name] = {};
+        if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät]) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät] = {};
+        if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] || mins + ":" + secs + ":" + "0" + tenths < highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät][joyStickPlay.checked]) {
+          highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät][(joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick")] = mins + ":" + secs + ":" + "0" + tenths;
           if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
           else {
             var newHighscores = [];
@@ -844,7 +852,7 @@ localStorage.setItem("storedName", name);
           alert("So schnell haben sie noch nie gesaugt!!!");
         }
         if (confirm("Wollen sie sich die Leistungen der anderen Spieler ansehen?")) {
-          var highscoresShow = JSON.parse(JSON.stringify(highscores.normal[selected.pixelRate][selected.gegenstaende].highscores));
+          var highscoresShow = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].highscores));
           for (var i = 0; i < Object.keys(highscoresShow).length; i++) {
             if (!highscoresShow[Object.keys(highscoresShow)[i]].Handy) highscoresShow[Object.keys(highscoresShow)[i]].Handy = {};
             highscoresShow[Object.keys(highscoresShow)[i]] = {"PC with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].PC["joy-stick"], "Handy with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["joy-stick"], "Handy without joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["no joy-stick"]};
@@ -872,10 +880,11 @@ localStorage.setItem("storedName", name);
         else if (slowDownSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
         */
         try {
-          var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
-          audio.currentTime = 48; audio.play();
+          var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
+          localAudio.currentTime = 48;
+          localAudio.play();
           setTimeout(function () {
-            audio.pause();
+            localAudio.pause();
           }, 500);
         } catch (e) {console.log("audio not playable!")}
         // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
@@ -952,13 +961,16 @@ localStorage.setItem("storedName", name);
   }, 25);
   var audio;
   var inRound = false;
-  function playCleanerSound() {
+  function playCleanerSound(repeat) {
     try {
       audio.pause();
+    } catch (e) {}
+    try {
       audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
       if (clenerFiepAudio.checked) audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
       audio.volume = 0.5;
       audio.currentTime = 1;
+      if (repeat) audio.currentTime = 2;
       if (cleanerAudio.checked) audio.play();
     } catch (e) {console.log("audio not playable!")}
   }
