@@ -144,7 +144,22 @@
   </div>
   <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
 </div>
-<canvas onclick="canvasClicked();" id="textur" width="1900" height="700"></canvas>
+<canvas onclick="canvasClicked();" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" id="textur" width="1900" height="700"></canvas>
+<div id="creationDiv">
+  <button type="button" onclick="elementSelected(id);" id="staub" name="button">Staub</button>
+  <button type="button" onclick="elementSelected(id);" id="schmuck" name="button">Schmuck</button>
+  <button type="button" onclick="elementSelected(id);" id="spielzeug" name="button">Spielzeug</button>
+  <button type="button" onclick="elementSelected(id);" id="teppich" name="button">Teppich</button>
+  <button type="button" onclick="elementSelected(id);" id="moebel" name="button">Möbel</button>
+  <button type="Löcher" onclick="elementSelected(id);" id="vertiefung" name="button">Loch</button>
+  <button type="button" onclick="elementSelected(id);" id="ladestation" name="button">Ladestation</button>
+  <button type="button" onclick="elementSelected(id);" id="leererStation" name="button">Entleerer</button>
+</div>
+<br>
+<select name="course" id="modeSelection" value="normal" onchange="modeSelected(value);">
+  <option value="normal">normal</option>
+  <option value="creator">level creator</option>
+</select>
 <br>
 <button type="button" onclick="saveData();" id="saveData" name="button">Highscores und Pixel rates für offline Modus speichern</button>
 <br>
@@ -227,6 +242,93 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   //wegWeiser.style.display = "none";
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
+  var creationHistory = [[]];
+  function modeSelected(value) {
+    if (value == "normal") document.getElementById('app').style.display = "inline";
+    else document.getElementById('app').style.display = "none";
+    if (value == "creator") {
+      creationDiv.style.display = "inline";
+      selected.objects = {}
+    }
+    else creationDiv.style.display = "none";
+    mode = value;
+  }
+  var beginningPoint = {};
+  function mousedownOnCanvas() {// window.addEventListener('mousedown', function() {
+    if (mode == "creator") {
+      beginningPoint.x = mausx;
+      beginningPoint.y = mausy;
+    }
+  }// });
+  function mouseUpOnCanvas() {// window.addEventListener('mouseup', function() {
+    if (mode == "creator") {
+      if (pointOfCreationHistory != creationHistory.length) {
+        creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
+        console.log("extra schritt, weil nicht aktuell war");
+      }
+      pointOfCreationHistory = creationHistory.length;
+      if (selected.radius > 0 && (selected.element == "staub" || selected.element == "schmuck" || selected.element == "spielzeug")) selected.objects[selected.element].push({x: beginningPoint.x, y:  beginningPoint.y, radius: selected.radius, collected: false});
+      else selected.objects[selected.element].push({x: beginningPoint.x, y: beginningPoint.y, width: mausx - beginningPoint.x, height: mausy - beginningPoint.y});
+      creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
+      console.log("new point of history created");
+      beginningPoint = {};
+      pointOfCreationHistory++;
+    }
+  }// });
+  document.onmousemove = readMouseMove
+  var mausx;
+  var mausy;
+  function readMouseMove(e) {
+    mausx = e.clientX + scrollX;
+    mausy = e.clientY + scrollY;
+    if (Object.keys(beginningPoint).length > 0) {
+      selected.ablage = JSON.parse(JSON.stringify(beginningPoint));
+      if (selected.positionNow && (selected.positionNow.x > mausx || selected.positionNow.y > mausy)) {
+        beginningPoint = {};
+        setTimeout(function () {
+          preview();
+      }, 20);
+      }
+      else preview();
+    }
+  }
+  var pointOfCreationHistory = 0;
+  document.onkeydown = function(event) {
+    if (event.key == "z" && event.ctrlKey && (pointOfCreationHistory > 0)) {
+      pointOfCreationHistory--;
+      selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
+    }
+    if ((event.key == "y" || event.key == "Z") && event.ctrlKey && (pointOfCreationHistory < creationHistory.length - 1)) {
+      pointOfCreationHistory++;
+      selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
+    }
+  }
+  textur.style.display = "inline";
+  function preview() {
+    beginningPoint = selected.ablage;
+    var elementColor = {staub: "gray", schmuck: "yellow", spielzeug: "red", moebel: "#FACC2E", vertiefung: "black", ladestation: "green", leererStation: "gray", teppich: "#2EFE2E"};
+    if (elementColor[selected.element]) canvas.fillStyle = elementColor[selected.element];
+    selected.positionNow = {x: mausx, y: mausy};
+    if (selected.element == "staub" || selected.element == "schmuck" || selected.element == "spielzeug") {
+      if ((mausx - beginningPoint.x)*2 < JSON.parse(staubsaugerSize.value) && !((mausx - beginningPoint.x)*2 < 1 && (mausx - beginningPoint.x)*(-2) > JSON.parse(staubsaugerSize.value))) selected.radius = mausx - beginningPoint.x;
+      if (selected.radius < 1) selected.radius *= (-1);
+      canvas.beginPath();
+      canvas.arc(beginningPoint.x, beginningPoint.y, selected.radius, 0, Math.PI*2, false);
+      canvas.fill();
+    }
+    else {
+      canvas.fillRect(beginningPoint.x, beginningPoint.y, mausx - beginningPoint.x, mausy - beginningPoint.y);
+    }
+  }
+  var allElements = ["staub", "schmuck", "spielzeug", "teppich", "moebel", "vertiefung", "ladestation", "leererStation"];
+  function elementSelected(id) {
+    selected.element = id;
+    for (var i = 0; i < allElements.length; i++) {
+      document.getElementById(allElements[i]).style.background = "";
+      if (!selected.objects[allElements[i]]) selected.objects[allElements[i]] = [];
+    }
+    document.getElementById(id).style.background = "#00FFFF";
+  }
   function resetPixelRate(rates) {
     /*
     if (useSameRate == false) {pixelRateWidth.value = (window.innerWidth - 9); pixelRateHeight.value = (window.innerHeight - 9);}//selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
@@ -615,6 +717,7 @@ localStorage.setItem("storedName", name);
     joyStickPlay.checked = true;
   }
   setInterval(function() {
+    if (mode != "creator" || Object.keys(beginningPoint).length < 1) {
     if (oppsositeDirection.checked) inOrAgainstDirection = -1;
     else inOrAgainstDirection = 1;
     if (audio && audio.currentTime >= 2*60 + 31) {
@@ -704,7 +807,7 @@ localStorage.setItem("storedName", name);
     boundingBoxCheck();
     sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
-    for (var i = 0; selected.objects && i < selected.objects.teppich.length; i++) {
+    for (var i = 0; selected.objects &&  i < selected.objects.teppich.length; i++) {
       canvas.fillStyle = "green";
       canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
       canvas.fillStyle = "#2EFE2E";
@@ -712,13 +815,13 @@ localStorage.setItem("storedName", name);
       speed.slowDownFinished = false;
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, width: selected.objects.teppich[i].width, height: 11}
       var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
+      if (mode != "creator" && isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
+      if (mode != "creator" && isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x + selected.objects.teppich[i].width - 11, y: selected.objects.teppich[i].y, height: selected.objects.teppich[i].height, width: 11}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
+      if (mode != "creator" && isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
-      if (isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
+      if (mode != "creator" && isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
     }
     if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
       inRound = false;
@@ -827,7 +930,7 @@ localStorage.setItem("storedName", name);
         allStaubCollected = false;
       }
     }
-    if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning")) {
+    if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning") && mode != "creator") {
       console.log("finished!!!");
       if (syncFinished != true) {syncFinished = "inProgress";getDatabase(true);}
       // else {
@@ -958,6 +1061,7 @@ localStorage.setItem("storedName", name);
     canvas.stroke();
     canvas.closePath();
   }
+}
   }, 25);
   var audio;
   var inRound = false;
@@ -1070,13 +1174,6 @@ localStorage.setItem("storedName", name);
       joyStick = {coordinates : {x: mausx, y: mausy}};
     }
   }
-  var mausx;
-  var mausy;
-  function readMouseMove(e) {
-    mausx = e.clientX + scrollX;
-    mausy = e.clientY + scrollY;
-  }
-  document.onmousemove = readMouseMove
   document.addEventListener('touchmove', touch);
   document.addEventListener('touchstart', touch);
   document.addEventListener('touchend', touch);
