@@ -13,8 +13,10 @@
   <td>Row3 cell2</td>
 </tr> -->
 </table>
+<canvas onclick="canvasClicked();" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" id="textur" width="1900" height="700"></canvas>
+<br>
 <div id="settings">
-  Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value;" id="staubsaugerSize" type="range">
+  Staubsauger Größe<input value="50" min="1" max="222" oninput="maxLochHeight.min = JSON.parse(value)*1.5; maxLochWidth.min = JSON.parse(value)*1.5; minLochHeight.min = JSON.parse(value)*1.5; minLochWidth.min = JSON.parse(value)*1.5; minStaubSize.max = JSON.parse(value) - 1; maxStaubSize.max = JSON.parse(value); sphere1.style.width = value; sphere1.style.height = value; " id="staubsaugerSize" type="range">
   <br>
   restart round when hitting wall<input checked="true" type="checkbox" id="brokenCheck">
   <br>
@@ -22,129 +24,132 @@
   <br>
   opposite direction<input id="oppsositeDirection" type="checkbox">
   <br>
-  <p id="pPixelRateWidth">pixel rate width <input id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
+  <p id="pPixelRateWidth">pixel rate width <input oninput="if (mode == 'creator') pixelRateChanged({width: value});" id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
   <br>
-  <p id="pPixelRateHeight">pixel rate height <input id="pixelRateHeight" type="text"> <button type="button" onclick="resetPixelRate(['height']);" name="button">reset</button> </p>
+  <p id="pPixelRateHeight">pixel rate height <input id="pixelRateHeight" oninput="if (mode == 'creator') pixelRateChanged({height: value});" type="text"> <button type="button" onclick="resetPixelRate(['height']);" name="button">reset</button> </p>
   <br>
   <p id="joyStickPlayP">play with joy-stick<input id="joyStickPlay" type="checkbox"></p>
   <br>
-  <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
-  <div id="staubDiv">
-    <br>
-    min. <input value="3" id="minStaubSize" oninput="if (JSON.parse(maxStaubSize.value) < JSON.parse(value)) {maxStaubSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
-    <br>
-    max. <input value="24" id="maxStaubSize" oninput="minStaubSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
-    <br>
-    <input id="anzahlStaub" value="27" type="text">Staubkörner sollen es insgesamt sein!
-  </div>
-  <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {anzahlSpielzeug.value = 0; spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
-  <div id="spielzeugDiv">
-    <input checked="true" id="stoppeBeiSpielzeug" type="checkbox">stoppe kurz(zum Entfernen)
-    <br>
-    <input id="langsamerBeiSpielzeug" onchange="if (checked) verlangsamungSpielzeugP.style.display = 'inline'; else verlangsamungSpielzeugP.style.display = 'none';" type="checkbox">werde langsamer
-    <p id="verlangsamungSpielzeugP">
-      time<input id="zeitLangsamer"value="endless" onchange="if (isNaN(value)) value = 'endless';" type="text">
+  <div id="spezifischeSettings">
+    <font size="5">Staub</font><font onclick="var opposite = {visibility: {'none': 'inline', 'inline': 'none'}, innerHTML: {'⌃': '⌄', '⌄': '⌃'}}; staubDiv.style.display = opposite.visibility[staubDiv.style.display]; innerHTML = opposite.innerHTML[innerHTML];" size="6">⌄</font>
+    <div id="staubDiv">
       <br>
-      <input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">restart when speed gets too low
+      min. <input value="3" id="minStaubSize" oninput="if (JSON.parse(maxStaubSize.value) < JSON.parse(value)) {maxStaubSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
       <br>
-      <input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">stay still when speed gets too low and continue with normal speed afterfords
+      max. <input value="24" id="maxStaubSize" oninput="minStaubSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
       <br>
-    </p>
-    <br>
-    <input type="checkbox" id="spielzeugWenigPlatz" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
-    <br>
-    <input id="spielzeugPlatz" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
-    <br>
-    min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
-    <br>
-    max. <input value="24" id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
-    <br>
-    <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
+      <input id="anzahlStaub" value="27" type="text">Staubkörner sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) {spielzeugDiv.style.display = 'inline'; spielzeugDiv.style.display = 'inline';} else {anzahlSpielzeug.value = 0; spielzeugDiv.style.display = 'none'; spielzeugDiv.style.display = 'none'}" type="checkbox"><font size="5">Spielzeug</font></p>
+    <div id="spielzeugDiv">
+      <input checked="true" id="stoppeBeiSpielzeug" type="checkbox">stoppe kurz(zum Entfernen)
+      <br>
+      <input id="langsamerBeiSpielzeug" onchange="if (checked) verlangsamungSpielzeugP.style.display = 'inline'; else verlangsamungSpielzeugP.style.display = 'none';" type="checkbox">werde langsamer
+      <p id="verlangsamungSpielzeugP">
+        time (in mili sec. (1000 mili sec. ist 1 sec.))<input id="zeitLangsamer"value="endless" onchange="if (isNaN(value)) value = 'endless';" type="text">
+        <br>
+        slowest speed (1.1 - 1.8 möglich, 1.8 ist direkt nach erstem Treffer, danach pro Spielzeug 0.1)<input id="slowestSpeed" value="1.3" type="text">
+        <br>
+        <input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">restart when speed gets too low
+        <br>
+        <input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">stay still when speed gets too low and continue with normal speed afterfords
+        <br>
+      </p>
+      <br>
+      <input type="checkbox" id="spielzeugWenigPlatz" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
+      <br>
+      <input id="spielzeugPlatz" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
+      <br>
+      min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+      <br>
+      max. <input value="24" id="maxSpielzeugSize" oninput="minSpielzeugSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+      <br>
+      <input id="anzahlSpielzeug" value="22" type="text">Spielzeuge sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) {SchmuckDiv.style.display = 'inline'; SchmuckDiv.style.display = 'inline';} else {anzahlSchmuck.value = 0; SchmuckDiv.style.display = 'none'; SchmuckDiv.style.display = 'none'}" type="checkbox"><font size="5">Schmuck</font></p>
+    <div id="SchmuckDiv">
+      min. <input value="3" id="minSchmuckSize" oninput="if (JSON.parse(maxSchmuckSize.value) < JSON.parse(value)) {maxSchmuckSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
+      <br>
+      max. <input value="24" id="maxSchmuckSize" oninput="minSchmuckSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
+      <br>
+      <input id="anzahlSchmuck" value="3" type="text">Schmuckstücke sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
+    <div id="TeppichDiv">
+      min. width <input value="33" min="11" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. width <input value="411" min="11" oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
+      <br>
+      min. height <input value="33" min="11" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. height <input value="411" min="11" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
+      <br>
+      Verlangsamung (rechts ist weniger)<input value="11" id="verlangsamungTeppich" min="11" max="19" type="range">
+      <br>
+      <input id="anzahlTeppich" value="1" type="text">Teppiche sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) moebelDiv.style.display = 'inline'; else {moebelDiv.style.display = 'none'; anzahlMoebel.value = 0;}" type="checkbox"><font size="5">Möbel</font></p>
+    <div id="moebelDiv">
+      min. width <input value="23" id="minMoebelWidth" oninput="if (JSON.parse(maxMoebelWidth.value) < JSON.parse(value)) {maxMoebelWidth.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. width <input value="155" oninput="minMoebelWidth.max = JSON.parse(value) - 1" id="maxMoebelWidth" type="range">
+      <br>
+      min. height <input value="23" id="minMoebelHeight" oninput="if (JSON.parse(maxMoebelHeight.value) < JSON.parse(value)) {maxMoebelHeight.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. height <input value="155" oninput="minMoebelHeight.max = JSON.parse(value) - 1" id="maxMoebelHeight" type="range">
+      <input id="anzahlMoebel" value="4" type="text">Möbel sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) LochDiv.style.display = 'inline'; else {LochDiv.style.display = 'none'; anzahlLoecher.value = 0;}" type="checkbox"><font size="5">Loch</font></p>
+    <div id="LochDiv">
+      min. width <input value="51" id="minLochWidth" oninput="if (JSON.parse(maxLochWidth.value) < JSON.parse(value)) {maxLochWidth.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. width <input value="133" oninput="minLochWidth.max = JSON.parse(value) - 1" id="maxLochWidth" type="range">
+      <br>
+      min. height <input value="51" id="minLochHeight" oninput="if (JSON.parse(maxLochHeight.value) < JSON.parse(value)) {maxLochHeight.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. height <input oninput="minLochHeight.max = JSON.parse(value) - 1" id="maxLochHeight" type="range">
+      <br>
+      <input id="anzahlLoecher" value="2" type="text">Löcher sollen es insgesamt sein!
+    </div>
+    <p><input checked="true" onchange="if (checked) ladestationDiv.style.display = 'inline'; else {anzahlLadestationen.value = 0; ladestationDiv.style.display = 'none';}" type="checkbox"><font size="5">Ladestation</font></p>
+    <div id="ladestationDiv">
+      <input id="pixelBisLadenCheck" onchange="if (checked) StaubAlsLadeBasisCheck.checked = false;" type="checkbox"> nach <input type="text" id="pixelBisLadenT" placeholder="anzahl" value="3333"> Pixeln Akku leer
+      <br>
+      <input onchange="if (checked) pixelBisLadenCheck.checked = false;" id="StaubAlsLadeBasisCheck" checked="true" type="checkbox"> nach <input id="staubAlsLadeBasisT" type="text" placeholder="anzahl" value="5.5"> mal so vielen Pixeln, wie aller Staub zusammen Akku leer
+      <br>
+      min. width <input value="33" id="minLaderWidth" oninput="if (JSON.parse(maxLaderWidth.value) < JSON.parse(value)) {maxLaderWidth.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. width <input value="100" oninput="minLaderWidth.max = JSON.parse(value) - 1" id="maxLaderWidth" type="range">
+      <br>
+      min. height <input value="33" id="minLaderHeight" oninput="if (JSON.parse(maxLaderHeight.value) < JSON.parse(value)) {maxLaderHeight.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. height <input value="100" oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
+      <br>
+      <input id="anzahlLadestationen" value="1" type="text">Ladestationen sollen es insgesamt sein!
+      <br>
+      <input id="showWayLadestation" type="checkbox">Weg dahin kennzeichnen
+    </div>
+    <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {anzahlEntleerer.value = 0; entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
+    <div id="entleererDiv">
+      <input id="pixelBisLeerenCheck" onchange="if (checked) StaubAlsLeerBasisCheck.checked = false;" type="checkbox"> nach <input  id="pixelBisLeerenT" type="text" placeholder="anzahl" value="500"> Pixeln keinen Staub mehr aufnehmen
+      <br>
+      <input onchange="if (checked) pixelBisLeerenCheck.checked = false;" id="StaubAlsLeerBasisCheck" checked="true" type="checkbox"> nach <input id="StaubAlsLeerBasisT" type="text" placeholder="anzahl" value="2">geteilt durch pixel Anzahl des gesamten Staubes keinen Staub mehr aufnehmen
+      <br>
+      min. width <input value="33" id="minLeererWidth" oninput="if (JSON.parse(maxLeererWidth.value) < JSON.parse(value)) {maxLeererWidth.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. width <input value="100" oninput="minLeererWidth.max = JSON.parse(value) - 1" id="maxLeererWidth" type="range">
+      <br>
+      min. height <input value="33" id="minLeererHeight" oninput="if (JSON.parse(maxLeererHeight.value) < JSON.parse(value)) {maxLeererHeight.value = JSON.parse(value) + 1}" type="range">
+      <br>
+      max. height <input value="100" oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
+      <br>
+      <input id="anzahlEntleerer" value="1" type="text">Entleerer sollen es insgesamt sein!
+      <br>
+      <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
+    </div>
+    <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
   </div>
-  <p><input checked="true" onchange="if (checked) {SchmuckDiv.style.display = 'inline'; SchmuckDiv.style.display = 'inline';} else {anzahlSchmuck.value = 0; SchmuckDiv.style.display = 'none'; SchmuckDiv.style.display = 'none'}" type="checkbox"><font size="5">Schmuck</font></p>
-  <div id="SchmuckDiv">
-    min. <input value="3" id="minSchmuckSize" oninput="if (JSON.parse(maxSchmuckSize.value) < JSON.parse(value)) {maxSchmuckSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
-    <br>
-    max. <input value="24" id="maxSchmuckSize" oninput="minSchmuckSize.max = JSON.parse(value) - 1" min="1" value="22" type="range">
-    <br>
-    <input id="anzahlSchmuck" value="3" type="text">Schmuckstücke sollen es insgesamt sein!
-  </div>
-  <p><input checked="true" onchange="if (checked) TeppichDiv.style.display = 'inline'; else {anzahlTeppich.value = 0; TeppichDiv.style.display = 'none';}" type="checkbox"><font size="5">Teppich</font></p>
-  <div id="TeppichDiv">
-    min. width <input value="33" min="11" id="minTeppichWidth" oninput="if (JSON.parse(maxTeppichWidth.value) < JSON.parse(value)) {maxTeppichWidth.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. width <input value="411" min="11" oninput="minTeppichWidth.max = JSON.parse(value) - 1" id="maxTeppichWidth" type="range">
-    <br>
-    min. height <input value="33" min="11" id="minTeppichHeight" oninput="if (JSON.parse(maxTeppichHeight.value) < JSON.parse(value)) {maxTeppichHeight.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. height <input value="411" min="11" oninput="minTeppichHeight.max = JSON.parse(value) - 1" id="maxTeppichHeight" type="range">
-    <br>
-    Verlangsamung (rechts ist weniger)<input value="11" id="verlangsamungTeppich" min="11" max="19" type="range">
-    <br>
-    <input id="anzahlTeppich" value="1" type="text">Teppiche sollen es insgesamt sein!
-  </div>
-  <p><input checked="true" onchange="if (checked) moebelDiv.style.display = 'inline'; else {moebelDiv.style.display = 'none'; anzahlMoebel.value = 0;}" type="checkbox"><font size="5">Möbel</font></p>
-  <div id="moebelDiv">
-    min. width <input value="23" id="minMoebelWidth" oninput="if (JSON.parse(maxMoebelWidth.value) < JSON.parse(value)) {maxMoebelWidth.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. width <input value="155" oninput="minMoebelWidth.max = JSON.parse(value) - 1" id="maxMoebelWidth" type="range">
-    <br>
-    min. height <input value="23" id="minMoebelHeight" oninput="if (JSON.parse(maxMoebelHeight.value) < JSON.parse(value)) {maxMoebelHeight.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. height <input value="155" oninput="minMoebelHeight.max = JSON.parse(value) - 1" id="maxMoebelHeight" type="range">
-    <input id="anzahlMoebel" value="4" type="text">Möbel sollen es insgesamt sein!
-  </div>
-  <p><input checked="true" onchange="if (checked) LochDiv.style.display = 'inline'; else {LochDiv.style.display = 'none'; anzahlLoecher.value = 0;}" type="checkbox"><font size="5">Loch</font></p>
-  <div id="LochDiv">
-    min. width <input value="51" id="minLochWidth" oninput="if (JSON.parse(maxLochWidth.value) < JSON.parse(value)) {maxLochWidth.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. width <input value="133" oninput="minLochWidth.max = JSON.parse(value) - 1" id="maxLochWidth" type="range">
-    <br>
-    min. height <input value="51" id="minLochHeight" oninput="if (JSON.parse(maxLochHeight.value) < JSON.parse(value)) {maxLochHeight.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. height <input oninput="minLochHeight.max = JSON.parse(value) - 1" id="maxLochHeight" type="range">
-    <br>
-    <input id="anzahlLoecher" value="2" type="text">Löcher sollen es insgesamt sein!
-  </div>
-  <p><input checked="true" onchange="if (checked) ladestationDiv.style.display = 'inline'; else {anzahlLadestationen.value = 0; ladestationDiv.style.display = 'none';}" type="checkbox"><font size="5">Ladestation</font></p>
-  <div id="ladestationDiv">
-    <input id="pixelBisLadenCheck" onchange="if (checked) StaubAlsLadeBasisCheck.checked = false;" type="checkbox"> nach <input type="text" id="pixelBisLadenT" placeholder="anzahl" value="3333"> Pixeln Akku leer
-    <br>
-    <input onchange="if (checked) pixelBisLadenCheck.checked = false;" id="StaubAlsLadeBasisCheck" checked="true" type="checkbox"> nach <input id="staubAlsLadeBasisT" type="text" placeholder="anzahl" value="5.5"> mal so vielen Pixeln, wie aller Staub zusammen Akku leer
-    <br>
-    min. width <input value="33" id="minLaderWidth" oninput="if (JSON.parse(maxLaderWidth.value) < JSON.parse(value)) {maxLaderWidth.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. width <input value="100" oninput="minLaderWidth.max = JSON.parse(value) - 1" id="maxLaderWidth" type="range">
-    <br>
-    min. height <input value="33" id="minLaderHeight" oninput="if (JSON.parse(maxLaderHeight.value) < JSON.parse(value)) {maxLaderHeight.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. height <input value="100" oninput="minLaderHeight.max = JSON.parse(value) - 1" id="maxLaderHeight" type="range">
-    <br>
-    <input id="anzahlLadestationen" value="1" type="text">Ladestationen sollen es insgesamt sein!
-    <br>
-    <input id="showWayLadestation" type="checkbox">Weg dahin kennzeichnen
-  </div>
-  <p><input checked="true" onchange="if (checked) {entleererDiv.style.display = 'inline';} else {anzahlEntleerer.value = 0; entleererDiv.style.display = 'none';}" type="checkbox"><font size="5">Entleerer (Staub behälter entleeren, um neuen aufsammeln zu können)</font></p>
-  <div id="entleererDiv">
-    <input id="pixelBisLeerenCheck" onchange="if (checked) StaubAlsLeerBasisCheck.checked = false;" type="checkbox"> nach <input  id="pixelBisLeerenT" type="text" placeholder="anzahl" value="500"> Pixeln keinen Staub mehr aufnehmen
-    <br>
-    <input onchange="if (checked) pixelBisLeerenCheck.checked = false;" id="StaubAlsLeerBasisCheck" checked="true" type="checkbox"> nach <input id="StaubAlsLeerBasisT" type="text" placeholder="anzahl" value="2">geteilt durch pixel Anzahl des gesamten Staubes keinen Staub mehr aufnehmen
-    <br>
-    min. width <input value="33" id="minLeererWidth" oninput="if (JSON.parse(maxLeererWidth.value) < JSON.parse(value)) {maxLeererWidth.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. width <input value="100" oninput="minLeererWidth.max = JSON.parse(value) - 1" id="maxLeererWidth" type="range">
-    <br>
-    min. height <input value="33" id="minLeererHeight" oninput="if (JSON.parse(maxLeererHeight.value) < JSON.parse(value)) {maxLeererHeight.value = JSON.parse(value) + 1}" type="range">
-    <br>
-    max. height <input value="100" oninput="minLeererHeight.max = JSON.parse(value) - 1" id="maxLeererHeight" type="range">
-    <br>
-    <input id="anzahlEntleerer" value="1" type="text">Entleerer sollen es insgesamt sein!
-    <br>
-    <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
-  </div>
-  <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
 </div>
-<canvas onclick="canvasClicked();" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" id="textur" width="1900" height="700"></canvas>
 <div id="creationDiv">
   <button type="button" onclick="elementSelected(id);" id="staub" name="button">Staub</button>
   <button type="button" onclick="elementSelected(id);" id="schmuck" name="button">Schmuck</button>
@@ -154,10 +159,44 @@
   <button type="Löcher" onclick="elementSelected(id);" id="vertiefung" name="button">Loch</button>
   <button type="button" onclick="elementSelected(id);" id="ladestation" name="button">Ladestation</button>
   <button type="button" onclick="elementSelected(id);" id="leererStation" name="button">Entleerer</button>
+  <br>
+  <h3>Spielzeug</h3>
+  <input checked="true" id="stoppeBeiSpielzeugEdit" type="checkbox">stoppe kurz(zum Entfernen)
+  <br>
+  <input id="langsamerBeiSpielzeugEdit" onchange="if (checked) verlangsamungSpielzeugPEdit.style.display = 'inline'; else verlangsamungSpielzeugPEdit.style.display = 'none';" type="checkbox">werde langsamer
+  <p id="verlangsamungSpielzeugPEdit">
+    time<input id="zeitLangsamerEdit"value="endless" onchange="if (isNaN(value)) value = 'endless';" type="text">
+    slowest speed (1.1 - 1.8 möglich, 1.8 ist direkt nach erstem Treffer, danach pro Spielzeug 0.1)<input id="slowestSpeedEdit" value="1.3" type="text">
+    <br>
+    <br>
+    <input checked="true" onchange="if (checked) clearWhenSlowEdit.checked = false;" id="restartWhenSlowEdit" type="checkbox">restart when speed gets too low
+    <br>
+    <input onchange="if (checked) restartWhenSlowEdit.checked = false;" id="clearWhenSlowEdit" type="checkbox">stay still when speed gets too low and continue with normal speed afterfords
+    <br>
+  </p>
+  <br>
+  <input type="checkbox" id="spielzeugWenigPlatzEdit" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
+  <br>
+  <input id="spielzeugPlatzEdit" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
+  <br>
+  <h3>Teppich</h3>
+  Verlangsamung (rechts ist weniger)<input value="11" id="verlangsamungTeppichEdit" min="11" max="19" type="range">
+  <h3>Ladestation</h3>
+  <input id="pixelBisLadenCheckEdit" onchange="if (checked) StaubAlsLadeBasisCheckEdit.checked = false;" type="checkbox"> nach <input type="text" id="pixelBisLadenTEdit" placeholder="anzahl" value="3333"> Pixeln Akku leer
+  <br>
+  <input onchange="if (checked) pixelBisLadenCheckEdit.checked = false;" id="StaubAlsLadeBasisCheckEdit" checked="true" type="checkbox"> nach <input id="staubAlsLadeBasisTEdit" type="text" placeholder="anzahl" value="5.5"> mal so vielen Pixeln, wie aller Staub zusammen Akku leer
+  <br>
+  <h3>Entleerer</h3>
+  <input id="pixelBisLeerenCheckEdit" onchange="if (checked) StaubAlsLeerBasisCheckEdit.checked = false;" type="checkbox"> nach <input  id="pixelBisLeerenTEdit" type="text" placeholder="anzahl" value="500"> Pixeln keinen Staub mehr aufnehmen
+  <br>
+  <input onchange="if (checked) pixelBisLeerenCheckEdit.checked = false;" id="StaubAlsLeerBasisCheckEdit" checked="true" type="checkbox"> nach <input id="StaubAlsLeerBasisTEdit" type="text" placeholder="anzahl" value="2">geteilt durch pixel Anzahl des gesamten Staubes keinen Staub mehr aufnehmen
+  <br>
 </div>
 <br>
 <select name="course" id="modeSelection" value="normal" onchange="modeSelected(value);">
-  <option value="normal">normal</option>
+  <option value="normal">random</option>
+  <option value="vorgefertigt">vorgefertigt</option>
+  <!-- <option value="ausAllerWelt">aus aller Welt</option> -->
   <option value="creator">level creator</option>
 </select>
 <br>
@@ -233,6 +272,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 </div>
 <script>
   var mode = "normal"
+  modeSelected("normal");
   var useSameRate = false;
   var realHeight = window.innerHeight;
   textur.style.display = "none";
@@ -242,15 +282,33 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   //wegWeiser.style.display = "none";
   maxTeppichHeight.value = 411;
   minTeppichWidth.value = 410;
-  var creationHistory = [[]];
+  var creationHistory = [{}];
+  function pixelRateChanged(value) {
+    if (value.width) textur.width = JSON.parse(value.width);
+    if (value.height) textur.height = JSON.parse(value.height);
+    selected.pixelRate = textur.width + " x " + textur.height;
+  }
   function modeSelected(value) {
     if (value == "normal") document.getElementById('app').style.display = "inline";
     else document.getElementById('app').style.display = "none";
     if (value == "creator") {
       creationDiv.style.display = "inline";
-      selected.objects = {}
+      textur.style.display = "inline";
+      selected.objects = {};
+      elementSelected("staub");
+      settings.style.display = "inline";
+      spezifischeSettings.style.display = "none";
+      useSameRate = false;
+      resetPixelRate(["width", "height"]);
+      // pixelRateWidth.value = window.innerWidth;
+      // pixelRateHeight.value = window.innerHeight;
     }
-    else creationDiv.style.display = "none";
+    else {
+      creationDiv.style.display = "none";
+      settings.style.display = "none";
+      spezifischeSettings.style.display = "inline";
+      textur.style.display = "none";
+    }
     mode = value;
   }
   var beginningPoint = {};
@@ -303,7 +361,6 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
     }
   }
-  textur.style.display = "inline";
   function preview() {
     beginningPoint = selected.ablage;
     var elementColor = {staub: "gray", schmuck: "yellow", spielzeug: "red", moebel: "#FACC2E", vertiefung: "black", ladestation: "green", leererStation: "gray", teppich: "#2EFE2E"};
@@ -385,9 +442,15 @@ localStorage.setItem("storedName", name);
   getDatabase();
   console.log(window.innerWidth + " - " + window.innerHeight);
   var highscores = {normal: {}};
+  function getVorgefertigteLevel() {
+    // my level:
+    highscores.vorgefertigt = JSON.parse('{"1422 x 700":{"loecher: 1, Moebel: 6, Teppich: 2, Ladestationen: 1, Entleerer: 1, Spielzeug: 2, schmuck: 1, Staub: 36":{"pixelRate":"1422 x 700","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false}},"objects":{"staub":[{"x":670,"y":354,"radius":22,"collected":false},{"x":1199,"y":332,"radius":22,"collected":false},{"x":1208,"y":438,"radius":24,"collected":false},{"x":1200,"y":261,"radius":20,"collected":false},{"x":168,"y":86,"radius":24,"collected":false},{"x":192,"y":374,"radius":24,"collected":false},{"x":192,"y":598,"radius":24,"collected":false},{"x":895,"y":98,"radius":24,"collected":false},{"x":920,"y":235,"radius":24,"collected":false},{"x":936,"y":444,"radius":24,"collected":false},{"x":940,"y":613,"radius":24,"collected":false},{"x":1300,"y":593,"radius":24,"collected":false},{"x":1329,"y":72,"radius":24,"collected":false},{"x":1333,"y":373,"radius":24,"collected":false},{"x":914,"y":144,"radius":5,"collected":false},{"x":934,"y":293,"radius":5,"collected":false},{"x":934,"y":362,"radius":5,"collected":false},{"x":917,"y":191,"radius":5,"collected":false},{"x":944,"y":481,"radius":5,"collected":false},{"x":944,"y":551,"radius":5,"collected":false},{"x":1301,"y":546,"radius":5,"collected":false},{"x":1349,"y":415,"radius":5,"collected":false},{"x":1330,"y":500,"radius":5,"collected":false},{"x":1340,"y":256,"radius":5,"collected":false},{"x":1340,"y":189,"radius":5,"collected":false},{"x":1340,"y":151,"radius":5,"collected":false},{"x":1275,"y":92,"radius":5,"collected":false},{"x":1189,"y":92,"radius":5,"collected":false},{"x":1104,"y":98,"radius":5,"collected":false},{"x":1036,"y":103,"radius":5,"collected":false},{"x":989,"y":103,"radius":5,"collected":false},{"x":1009,"y":609,"radius":5,"collected":false},{"x":1063,"y":617,"radius":5,"collected":false},{"x":1112,"y":616,"radius":5,"collected":false},{"x":1196,"y":620,"radius":5,"collected":false},{"x":1244,"y":620,"radius":5,"collected":false}],"schmuck":[{"x":578,"y":352,"radius":19,"collected":false}],"spielzeug":[{"x":488,"y":596,"radius":23,"collected":false},{"x":499,"y":113,"radius":22,"collected":false}],"teppich":[{"x":500,"y":179,"width":212,"height":379},{"x":1154,"y":216,"width":102,"height":290}],"moebel":[{"x":638,"y":423,"width":63,"height":124},{"x":650,"y":198,"width":51,"height":101},{"x":384,"y":656,"width":97,"height":45},{"width":null,"height":null},{"x":436,"y":9,"width":60,"height":63},{"x":1176,"y":374,"width":66,"height":38}],"vertiefung":[{"x":1159,"y":127,"width":91,"height":85}],"ladestation":[{"x":746,"y":726,"width":97,"height":30}],"leererStation":[{"x":1159,"y":9,"width":92,"height":30}]},"maxVerfallsdaten":{"ladung":2409,"füllungLeft":219}}}}');
+
+  }
   function getDatabase(sync) {
     dbGet("cleanTheRoom", "highscores").then(result => {
       highscores = result;
+      getVorgefertigteLevel();
       offlineSelector.style.display = "none";
       //clickListCheck();
         // pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, gerät: selected.gerät, joyStick: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), data: mins + ":" + secs + ":" + "0" + tenths
@@ -430,6 +493,7 @@ localStorage.setItem("storedName", name);
           highscoresToList(highscores);
       console.log("sync finished!");
     }).catch(function(e) {
+      getVorgefertigteLevel();
       app = new Vue({
         el: '#app',
         data: {
@@ -527,25 +591,37 @@ localStorage.setItem("storedName", name);
     x1 = 0;
     y1 = 0;
     settings.style.display = "none";
-    if (JSON.parse(anzahlLadestationen.value) > 0) energyBar.style.display = "inline";
+    if (JSON.parse(anzahlLadestationen.value) > 0 || (mode == "creator" && Object.keys(selected.objects.ladestation).length > 0)) energyBar.style.display = "inline";
     else energyBar.style.display = "none";
-    if (JSON.parse(anzahlEntleerer.value)) trashBar.style.display = "inline";
+    if (JSON.parse(anzahlEntleerer.value) || (mode == "creator" && Object.keys(selected.objects.leererStation).length > 0)) trashBar.style.display = "inline";
     else trashBar.style.display = "none";
-    textur.width = window.innerWidth - 9;
-    textur.height = window.innerHeight - 9;
+    textur.width = JSON.parse(pixelRateWidth.value); // window.innerWidth - 9;
+    textur.height = JSON.parse(pixelRateHeight.value); // window.innerHeight - 9;
     console.log(window.innerWidth + " - " + textur.width);
     selected.pixelRate = pixelRateWidth.value + " x " + pixelRateHeight.value;
-    selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
+    if (mode == "normal") selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
+    if (mode == "creator") selected.gegenstaende = "loecher: " + Object.keys(selected.objects.vertiefung).length + ", Moebel: " + Object.keys(selected.objects.moebel).length + ", Teppich: " + Object.keys(selected.objects.teppich).length + ", Ladestationen: " + Object.keys(selected.objects.ladestation).length + ", Entleerer: " + Object.keys(selected.objects.leererStation).length + ", Spielzeug: " + Object.keys(selected.objects.spielzeug).length + ", schmuck: " + Object.keys(selected.objects.schmuck).length + ", Staub: " + Object.keys(selected.objects.staub).length;
+    if (!highscores[mode]) highscores[mode] = {};
     if (highscores[mode][selected.pixelRate] != undefined && Object.keys(highscores[mode][selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
     if (!highscores[mode][selected.pixelRate]) highscores[mode][selected.pixelRate] = {};
-    highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
-    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection",/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz"]}
+    if (mode == "normal") highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlow.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlow.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
+    else highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeugEdit.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeugEdit.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlowEdit.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlowEdit.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatzEdit.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatzEdit.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
+    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "slowestSpeed", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection",/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz", "clearWhenSlow", "restartWhenSlow"]}
     for (var i = 0; i < Object.keys(convertList).length; i++) {
       for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
-        if (Object.keys(convertList)[i] == "value") highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
-        else highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
+        if (mode == "normal") {
+          if (Object.keys(convertList)[i] == "value") highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
+          else highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
+        }
+        else {
+          if (Object.keys(convertList)[i] == "value" && document.getElementById(convertList[Object.keys(convertList)[i]][i1] + "Edit") != undefined) highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1] + "Edit").value;
+          else if (Object.keys(convertList)[i] == "value") highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).value;
+          else if (document.getElementById(convertList[Object.keys(convertList)[i]][i1] + "Edit") == undefined) highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1]).checked;
+          else highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(convertList)[i]][convertList[Object.keys(convertList)[i]][i1]] = document.getElementById(convertList[Object.keys(convertList)[i]][i1] + "Edit").checked;
+        }
       }
     }
+    if (mode == "normal") {
     for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
       highscores[mode][selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
     }
@@ -605,17 +681,23 @@ localStorage.setItem("storedName", name);
         console.log("please debug :( " + e);
       }
     }
-    if (StaubAlsLadeBasisCheck.checked) verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisT.value)//11;
-    else verfallsdaten.ladung = JSON.parse(pixelBisLadenT.value);
-    verfallsdaten.füllungLeft /= JSON.parse(StaubAlsLeerBasisT.value);//2;
-    if (pixelBisLeerenCheck.checked) verfallsdaten.füllungLeft = JSON.parse(pixelBisLeerenT.value);
+  }
+    if (StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisT.value)//11;
+    else if (StaubAlsLadeBasisCheck.checked && mode == "creator") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisTEdit.value)//11;
+    else if (!StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = JSON.parse(pixelBisLadenT.value);
+    else if (!StaubAlsLadeBasisCheck.checked) verfallsdaten.ladung = JSON.parse(pixelBisLadenTEdit.value);
+    if (mode != "creator") verfallsdaten.füllungLeft /= JSON.parse(StaubAlsLeerBasisT.value);//2;
+    else verfallsdaten.füllungLeft /= JSON.parse(StaubAlsLeerBasisTEdit.value);//2;
+    if (pixelBisLeerenCheck.checked && mode == "normal") verfallsdaten.füllungLeft = JSON.parse(pixelBisLeerenT.value);
+    else if (pixelBisLeerenCheck.checked) verfallsdaten.füllungLeft = JSON.parse(pixelBisLeerenTEdit.value);
     highscores[mode][selected.pixelRate][selected.gegenstaende].maxVerfallsdaten = JSON.parse(JSON.stringify(verfallsdaten));
   //}, 1000);
-    selected.objects = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects));
+    if (mode == "normal") selected.objects = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].objects));
+    else highscores[mode][selected.pixelRate][selected.gegenstaende].objects = JSON.parse(JSON.stringify(selected.objects));
     selected.maxVerfallsdaten = highscores[mode][selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
     if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
-    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
+    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät  speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
       newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores[mode][selected.pixelRate][selected.gegenstaende]});
@@ -757,7 +839,7 @@ localStorage.setItem("storedName", name);
     vx1 = vx1 * 0.98;
     vy1 = vy1 * 0.98;
     var noMoebelInFront = true;
-    for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
       var ball = {x: nextCoordinates.x, y: nextCoordinates.y, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
       if (isCollide(ball, selected.objects.moebel[i])) {
         noMoebelInFront = false;
@@ -807,7 +889,7 @@ localStorage.setItem("storedName", name);
     boundingBoxCheck();
     sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
-    for (var i = 0; selected.objects &&  i < selected.objects.teppich.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.teppich && i < selected.objects.teppich.length; i++) {
       canvas.fillStyle = "green";
       canvas.fillRect(selected.objects.teppich[i].x, selected.objects.teppich[i].y, selected.objects.teppich[i].width, selected.objects.teppich[i].height);
       canvas.fillStyle = "#2EFE2E";
@@ -838,7 +920,7 @@ localStorage.setItem("storedName", name);
         resetLevel("Akku leer!!!");
       }, 3000);
      }
-    for (var i = 0; selected.objects && i < selected.objects.moebel.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
       canvas.fillStyle = "#FACC2E";
       canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
       // if (!((x1 >= selected.objects.moebel[i].x && x1 < selected.objects.moebel[i].x + selected.objects.moebel[i].width) || (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)))
@@ -846,7 +928,7 @@ localStorage.setItem("storedName", name);
       // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
       // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
     }
-    for (var i = 0; selected.objects && i < selected.objects.vertiefung.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.vertiefung && i < selected.objects.vertiefung.length; i++) {
       canvas.fillStyle = "black";
       canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
       var ball = {x: x1, y: y1, width: 5, height: 5};
@@ -877,7 +959,7 @@ localStorage.setItem("storedName", name);
     var allStaubCollected = true;
     var ball = {x: x1, y: y1, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
     if (!selected.objects) allStaubCollected = false;
-    for (var i = 0; selected.objects && i < selected.objects.ladestation.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.ladestation && i < selected.objects.ladestation.length; i++) {
       canvas.fillStyle = "green";//"#2EFE2E";
       canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
       if (showWayLadestation.checked || (verfallsdaten.ladung < window.innerWidth + window.innerHeight/5 && showWayLaderWhenLow.checked)) {
@@ -890,7 +972,7 @@ localStorage.setItem("storedName", name);
       }
       if (isCollide(ball, selected.objects.ladestation[i]) && verfallsdaten.ladung < selected.maxVerfallsdaten.ladung/*177*/) verfallsdaten.ladung += 17;
     }
-    for (var i = 0; selected.objects && i < selected.objects.leererStation.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.leererStation && i < selected.objects.leererStation.length; i++) {
       canvas.fillStyle = "#A4A4A4";
       canvas.fillRect(selected.objects.leererStation[i].x, selected.objects.leererStation[i].y, selected.objects.leererStation[i].width, selected.objects.leererStation[i].height);
       if (showWayEntleerer.checked || (verfallsdaten.füllungLeft < 222 && showWayEntleererWhenLow.checked)) {
@@ -904,8 +986,10 @@ localStorage.setItem("storedName", name);
       }
       if (isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
     }
-    for (var i = 0; selected.objects && i < selected.objects.staub.length; i++) {
+    var allStaubPixel = 0;
+    for (var i = 0; selected.objects && selected.objects.staub && i < selected.objects.staub.length; i++) {
       // collect staub
+      allStaubPixel += selected.objects.staub[i].radius*2;
       if (verfallsdaten.füllungLeft > selected.objects.staub[i].radius*2 && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.staub[i].collected = true;
         verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
@@ -930,6 +1014,7 @@ localStorage.setItem("storedName", name);
         allStaubCollected = false;
       }
     }
+    if (mode == "creator" && StaubAlsLeerBasisCheckEdit.checked) verfallsdaten.füllungLeft = allStaubPixel/JSON.parse(StaubAlsLeerBasisT.value);//2;
     if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning") && mode != "creator") {
       console.log("finished!!!");
       if (syncFinished != true) {syncFinished = "inProgress";getDatabase(true);}
@@ -966,15 +1051,15 @@ localStorage.setItem("storedName", name);
       }
     }
     canvas.globalAlpha = 1;
-    for (var i = 0; selected.objects && i < selected.objects.spielzeug.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
       // collect spielzeug
       if (!selected.objects.spielzeug[i].collected && ((!spielzeugWenigPlatz.checked && verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) || spielzeugWenigPlatz.checked) && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.spielzeug[i].collected = true;
         if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
-        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [JSON.parse(zeitLangsamer.value)], speed: 1.9};
-        else if (langsamerBeiSpielzeug.checked && slowDownSpielzeug.speed - 0.1 >= 1.1) {slowDownSpielzeug.speed -= 0.1; slowDownSpielzeug.time.push(JSON.parse(zeitLangsamer.value));}
-        else if (langsamerBeiSpielzeug.checked) {
+        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [/*JSON.parse(*/zeitLangsamer.value/*)*/], speed: 1.9};
+        else if (langsamerBeiSpielzeug.checked && ((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {slowDownSpielzeug.speed -= 0.1; slowDownSpielzeug.time.push(/*JSON.parse(*/zeitLangsamer.value/*)*/);}
+        if (langsamerBeiSpielzeug.checked && !((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {
           if (restartWhenSlow.checked) resetLevel();
           if (clearWhenSlow.checked) stopSpielzeug = {boolean: true, time: 2000, clearing: true};
         }
@@ -1000,7 +1085,7 @@ localStorage.setItem("storedName", name);
         canvas.fill();
       }
     }
-    for (var i = 0; selected.objects && i < selected.objects.schmuck.length; i++) {
+    for (var i = 0; selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
       // collect Schmuck
       if (!selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
         selected.objects.schmuck[i].collected = true;
@@ -1104,6 +1189,7 @@ localStorage.setItem("storedName", name);
     playCleanerSound();
     verfallsdaten = {ladung: selected.maxVerfallsdaten.ladung, füllungLeft: /*133*/selected.maxVerfallsdaten.füllungLeft};
     slowDownSpielzeug = {boolean: false, time: "endless"}
+    stopSpielzeug = {time: 0, boolean: false};
     setTimeout(function () {
       x1 = 0;
       y1 = 0;
