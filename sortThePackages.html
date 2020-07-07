@@ -1,5 +1,7 @@
 <meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <div id="settings">
+<ul id="settingsL" font-size:30px></ul>
 <input type="text" value="3" id="width" placeholder="width">
 <br>
 <input type="text" value="2" id="height" placeholder="height">
@@ -15,13 +17,53 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
 <button type="button" onclick="createPackage();" name="button">createPackages</button>
 </div>
 <canvas id="textur" width="1848" onmouseup="mouseUpOnCanvas();" height="700"></canvas>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <script>
   textur.style.touchAction = "none";
+  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+  getDatabase();
   var packages = [];
   var storage = [];
+  var highscores = {};
+  function getDatabase(sync) {
+    dbGet("sortThePackages", "highscores").then(result => {
+      highscores = result;
+      var li = document.createElement("li");
+      for (var i = 0; i < Object.keys(highscores).length; i++) {
+        li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
+         li.setAttribute("onclick", "changeSetings(innerHTML)");
+        document.getElementById("settingsL").appendChild(li);
+      }
+    });
+  }
+  var isSelected = {boolean: false};
+  function changeSetings(text) {
+    isSelected.boolean = true;
+    isSelected.data = text;
+    width.value = text.split(" x ")[0];
+    height.value = text.split(" x ")[1].split(",")[0];
+    anzahlInSektor.value = text.split("pro y-Sektor: ")[1].split(",")[0];
+    anzahlVertauschen.value = text.split(" mal vertauscht")[0].split("Sektor: " + anzahlInSektor.value + ", ")[1];
+    anzahlLöschen.value = text.split("und ")[1].split(" rausgenommen")[0];
+    if (text.includes('nicht')) auffüllen.checked = true;
+    else auffüllen.checked = false;
+  }
   function createPackage() {
     gebrauchteZuege = 0;
     settings.style.display = "none";
+    if (!isSelected.boolean) {
+    if (Object.keys(highscores).includes((width.value + " x " + height.value + ", pakete pro y-Sektor: " + anzahlInSektor.value + ", " + anzahlVertauschen.value + " mal vertauscht und " + anzahlLöschen.value + " rausgenommen, wobei die Kartons " + auffüllen.checked + "eingesetzt werden müssen." ).replace("false", "").replace("true", "nicht"))) {
+      if (!confirm("Diese Einstellung wurde bereits verwendet! Sie können jedoch trotzdem fortfahren und eine neue zufällige Anordnung erschaffen!")) {settings.style.display = "inline"; return "cancel!";}
+      isSelected.ownSelection = (width.value + " x " + height.value + ", pakete pro y-Sektor: " + anzahlInSektor.value + ", " + anzahlVertauschen.value + " mal vertauscht und " + anzahlLöschen.value + " rausgenommen, wobei die Kartons " + auffüllen.checked + "eingesetzt werden müssen." ).replace("false", "").replace("true", "nicht");
+      for (var i = 0; i < Object.keys(highscores).includes(isSelected.ownSelection); i++) {
+        isSelected.ownSelection += "|";
+      }
+    }
+    packages = [];
+    //storage = [];
     var number = 1;
     for (var i = 0; i < JSON.parse(width.value); i++) {
       number = i + 1;
@@ -37,10 +79,15 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     // vertausche
     for (var i = 0; i < JSON.parse(anzahlVertauschen.value); i++) {
       var randomNumbers = [{x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}, {x: Math.round(Math.random() *(packages.length - 1)), y: Math.round(Math.random() *(packages[0].length - 1)), höhe: Math.round(Math.random() *(packages[0][0].length - 1))}];
-      var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
+      try {
+        var ablage = JSON.parse(JSON.stringify(packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe]));
+        packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
+        packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
+
+      } catch (e) {
+        console.log("please debug :(");
+      }
       //packages[Math.round(Math.random() *(packages.length))][Math.round(Math.random() *(packages[0].length))][Math.round(Math.random() *(packages[0][0].length))]packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = ablage;
-      packages[randomNumbers[0].x][randomNumbers[0].y][randomNumbers[0].höhe] = JSON.parse(JSON.stringify(packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe]));
-      packages[randomNumbers[1].x][randomNumbers[1].y][randomNumbers[1].höhe] = JSON.parse(JSON.stringify(ablage));
     }
     // Idee: auf Ablage statt löschen
     for (var i = 0; i < JSON.parse(anzahlLöschen.value); i++) {
@@ -83,7 +130,15 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
     else i--;
   }
   layoutAll();
+  beginning = {storage: storage, packages: packages};
+  isSelected.ownSelection = (width.value + " x " + height.value + ", pakete pro y-Sektor: " + anzahlInSektor.value + ", " + anzahlVertauschen.value + " mal vertauscht und " + anzahlLöschen.value + " rausgenommen, wobei die Kartons " + auffüllen.checked + "eingesetzt werden müssen." ).replace("false", "").replace("true", "nicht");
 }
+else {
+  packages = JSON.parse(JSON.stringify(highscores[isSelected.data].data.packages));
+  storage = JSON.parse(JSON.stringify(highscores[isSelected.data].data.storage));
+}
+}
+  var beginning = {};
   var canvas = textur.getContext('2d');
   function layoutAll() {
     // canvas.fillStyle = "black";
@@ -211,8 +266,25 @@ auf Ablage <input type="text" value="3" id="anzahlLöschen">
         }
       }
     }
-    if (rightOrder && alleDrinne) {console.log("rightOrder!!!"); alert("you got it in " + gebrauchteZuege + " turns!")}
+    if (rightOrder && alleDrinne) {
+      console.log("rightOrder!!!");
+      alert("you got it in " + gebrauchteZuege + " turns!");
+      if (!highscores[isSelected.ownSelection]) {
+        highscores[isSelected.ownSelection] = {data: beginning};
+        highscores[isSelected.ownSelection][name] = gebrauchteZuege;
+      }
+      else if (highscores[isSelected.ownSelection][name] > gebrauchteZuege) highscores[isSelected.ownSelection][name] = gebrauchteZuege;
+      if (highscores[isSelected.ownSelection][name] == gebrauchteZuege) dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    }
+    console.log(highscores);
   }
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("sortThePackages", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
   window.addEventListener('mousedown', function() {
     mousedownOnCanvas();
   });
