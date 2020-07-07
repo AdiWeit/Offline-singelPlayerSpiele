@@ -147,7 +147,7 @@
       <br>
       <input id="showWayEntleerer" type="checkbox">Weg dahin kennzeichnen
     </div>
-    <button type="button" onclick="createNewPixelRate();" id="createButton" name="button">create</button>
+    <button type="button" onclick="createNewPixelRate(true);" id="createButton" name="button">create</button>
   </div>
 </div>
 <div id="creationDiv">
@@ -160,6 +160,7 @@
   <button type="button" onclick="elementSelected(id);" id="ladestation" name="button">Ladestation</button>
   <button type="button" onclick="elementSelected(id);" id="leererStation" name="button">Entleerer</button>
   <br>
+  <button type="button" id="tryLevel" onclick="if (mode == 'creator') {createNewPixelRate(); mode = 'testLevel'; innerHTML = 'stop test';} else {innerHTML = 'try out your level'; resetAfterTrying();}" name="button">try out your level</button>
   <h3>Spielzeug</h3>
   <input checked="true" id="stoppeBeiSpielzeugEdit" type="checkbox">stoppe kurz(zum Entfernen)
   <br>
@@ -217,7 +218,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <input onchange="showWayEntleerer.checked = checked;" type="checkbox">Weg zu Entleerer kennzeichnen
   <input id="showWayEntleererWhenLow" type="checkbox">Nur anzeigen, wenn Füllstad zu hoch
 </div>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase(undefined, true);'></h1>
 <div id="app">
   <div id="authors" style="font-size: 25px" v-for="genre in genres">
     <h2 onclick="pixelRateSettings(innerHTML);">{{ genre }}</h2>
@@ -272,7 +273,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 </div>
 <script>
   var mode = "normal"
-  modeSelected("normal");
+  var highscores = {normal: {}};
   var useSameRate = false;
   var realHeight = window.innerHeight;
   textur.style.display = "none";
@@ -284,14 +285,14 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   minTeppichWidth.value = 410;
   var creationHistory = [{}];
   function pixelRateChanged(value) {
-    if (value.width) textur.width = JSON.parse(value.width);
-    if (value.height) textur.height = JSON.parse(value.height);
+    if (value.width) {textur.width = JSON.parse(value.width); pixelRateWidth.value = JSON.parse(JSON.stringify(value.width));}
+    if (value.height) {textur.height = JSON.parse(value.height); pixelRateHeight.value = JSON.parse(JSON.stringify(value.height));}
     selected.pixelRate = textur.width + " x " + textur.height;
   }
   function modeSelected(value) {
-    if (value == "normal") document.getElementById('app').style.display = "inline";
-    else document.getElementById('app').style.display = "none";
+    document.getElementById('app').style.display = "inline";
     if (value == "creator") {
+      document.getElementById('app').style.display = "none";
       creationDiv.style.display = "inline";
       textur.style.display = "inline";
       selected.objects = {};
@@ -310,14 +311,27 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       textur.style.display = "none";
     }
     mode = value;
+    highscoresToList(highscores[mode]);
   }
   var beginningPoint = {};
   function mousedownOnCanvas() {// window.addEventListener('mousedown', function() {
-    if (mode == "creator") {
+    if (mode == "creator"/* || (mode == "testLevel" && joyStick != "place")*/) {
       beginningPoint.x = mausx;
       beginningPoint.y = mausy;
     }
   }// });
+  function resetAfterTrying() {
+    try {
+      audio.pause();
+    } catch (e) {}
+    verfallsdaten.ladung = 3;
+    selected = {objects: selected.objects, pixelRate: selected.pixelRate, element: selected.element}
+    joyStick = undefined;
+    highscores.creator = {};
+    energyBar.style.width = 0;
+    trashBar.style.width = 0;
+    mode = "creator";
+  }
   function mouseUpOnCanvas() {// window.addEventListener('mouseup', function() {
     if (mode == "creator") {
       if (pointOfCreationHistory != creationHistory.length) {
@@ -325,8 +339,9 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
         console.log("extra schritt, weil nicht aktuell war");
       }
       pointOfCreationHistory = creationHistory.length;
+      console.log(beginningPoint);
       if (selected.radius > 0 && (selected.element == "staub" || selected.element == "schmuck" || selected.element == "spielzeug")) selected.objects[selected.element].push({x: beginningPoint.x, y:  beginningPoint.y, radius: selected.radius, collected: false});
-      else selected.objects[selected.element].push({x: beginningPoint.x, y: beginningPoint.y, width: mausx - beginningPoint.x, height: mausy - beginningPoint.y});
+      else if (!(isNaN(mausx - beginningPoint.x)) && !(isNaN(mausy - beginningPoint.y)) && mausx - beginningPoint.x != 0 && mausy - beginningPoint.y != 0) selected.objects[selected.element].push({x: beginningPoint.x, y: beginningPoint.y, width: mausx - beginningPoint.x, height: mausy - beginningPoint.y});
       creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
       console.log("new point of history created");
       beginningPoint = {};
@@ -352,13 +367,24 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   }
   var pointOfCreationHistory = 0;
   document.onkeydown = function(event) {
+    var rateAblage = {width: pixelRateWidth.value, height: pixelRateHeight.value};
     if (event.key == "z" && event.ctrlKey && (pointOfCreationHistory > 0)) {
       pointOfCreationHistory--;
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
+      setTimeout(function () {
+        if (pixelRateWidth.value != rateAblage.width || pixelRateHeight.value != rateAblage.height) pixelRateChanged(rateAblage);
+        // pixelRateWidth.value = rateAblage.width;
+        // pixelRateHeight.value = rateAblage.height;
+      }, 1);
     }
     if ((event.key == "y" || event.key == "Z") && event.ctrlKey && (pointOfCreationHistory < creationHistory.length - 1)) {
       pointOfCreationHistory++;
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
+      setTimeout(function () {
+        // pixelRateWidth.value = JSON.parse(JSON.stringify(rateAblage.width));
+        // pixelRateHeight.value = JSON.parse(JSON.stringify(rateAblage.height));
+        if (pixelRateWidth.value != rateAblage.width || pixelRateHeight.value != rateAblage.height) pixelRateChanged(rateAblage);
+      }, 1);
     }
   }
   function preview() {
@@ -375,6 +401,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     }
     else {
       canvas.fillRect(beginningPoint.x, beginningPoint.y, mausx - beginningPoint.x, mausy - beginningPoint.y);
+      console.log("width: " + (mausx - beginningPoint.x) + ", height: " + (mausy - beginningPoint.y));
     }
   }
   var allElements = ["staub", "schmuck", "spielzeug", "teppich", "moebel", "vertiefung", "ladestation", "leererStation"];
@@ -439,17 +466,17 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   else var name = localStorage.getItem("storedName");
 localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
-  getDatabase();
+  getDatabase(undefined, true);
   console.log(window.innerWidth + " - " + window.innerHeight);
-  var highscores = {normal: {}};
   function getVorgefertigteLevel() {
     // my level:
-    highscores.vorgefertigt = JSON.parse('{"1422 x 700":{"loecher: 1, Moebel: 6, Teppich: 2, Ladestationen: 1, Entleerer: 1, Spielzeug: 2, schmuck: 1, Staub: 36":{"pixelRate":"1422 x 700","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false}},"objects":{"staub":[{"x":670,"y":354,"radius":22,"collected":false},{"x":1199,"y":332,"radius":22,"collected":false},{"x":1208,"y":438,"radius":24,"collected":false},{"x":1200,"y":261,"radius":20,"collected":false},{"x":168,"y":86,"radius":24,"collected":false},{"x":192,"y":374,"radius":24,"collected":false},{"x":192,"y":598,"radius":24,"collected":false},{"x":895,"y":98,"radius":24,"collected":false},{"x":920,"y":235,"radius":24,"collected":false},{"x":936,"y":444,"radius":24,"collected":false},{"x":940,"y":613,"radius":24,"collected":false},{"x":1300,"y":593,"radius":24,"collected":false},{"x":1329,"y":72,"radius":24,"collected":false},{"x":1333,"y":373,"radius":24,"collected":false},{"x":914,"y":144,"radius":5,"collected":false},{"x":934,"y":293,"radius":5,"collected":false},{"x":934,"y":362,"radius":5,"collected":false},{"x":917,"y":191,"radius":5,"collected":false},{"x":944,"y":481,"radius":5,"collected":false},{"x":944,"y":551,"radius":5,"collected":false},{"x":1301,"y":546,"radius":5,"collected":false},{"x":1349,"y":415,"radius":5,"collected":false},{"x":1330,"y":500,"radius":5,"collected":false},{"x":1340,"y":256,"radius":5,"collected":false},{"x":1340,"y":189,"radius":5,"collected":false},{"x":1340,"y":151,"radius":5,"collected":false},{"x":1275,"y":92,"radius":5,"collected":false},{"x":1189,"y":92,"radius":5,"collected":false},{"x":1104,"y":98,"radius":5,"collected":false},{"x":1036,"y":103,"radius":5,"collected":false},{"x":989,"y":103,"radius":5,"collected":false},{"x":1009,"y":609,"radius":5,"collected":false},{"x":1063,"y":617,"radius":5,"collected":false},{"x":1112,"y":616,"radius":5,"collected":false},{"x":1196,"y":620,"radius":5,"collected":false},{"x":1244,"y":620,"radius":5,"collected":false}],"schmuck":[{"x":578,"y":352,"radius":19,"collected":false}],"spielzeug":[{"x":488,"y":596,"radius":23,"collected":false},{"x":499,"y":113,"radius":22,"collected":false}],"teppich":[{"x":500,"y":179,"width":212,"height":379},{"x":1154,"y":216,"width":102,"height":290}],"moebel":[{"x":638,"y":423,"width":63,"height":124},{"x":650,"y":198,"width":51,"height":101},{"x":384,"y":656,"width":97,"height":45},{"width":null,"height":null},{"x":436,"y":9,"width":60,"height":63},{"x":1176,"y":374,"width":66,"height":38}],"vertiefung":[{"x":1159,"y":127,"width":91,"height":85}],"ladestation":[{"x":746,"y":726,"width":97,"height":30}],"leererStation":[{"x":1159,"y":9,"width":92,"height":30}]},"maxVerfallsdaten":{"ladung":2409,"füllungLeft":219}}}}');
+    highscores.vorgefertigt = JSON.parse('{"1465 x 692":{"loecher: 1, Moebel: 5, Teppich: 2, Ladestationen: 1, Entleerer: 1, Spielzeug: 2, schmuck: 1, Staub: 36":{"pixelRate":"1465 x 692","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"staub":[{"x":670,"y":354,"radius":22,"collected":false},{"x":1199,"y":332,"radius":22,"collected":false},{"x":1208,"y":438,"radius":24,"collected":false},{"x":1200,"y":261,"radius":20,"collected":false},{"x":168,"y":86,"radius":24,"collected":false},{"x":192,"y":374,"radius":24,"collected":true},{"x":192,"y":598,"radius":24,"collected":false},{"x":895,"y":98,"radius":24,"collected":false},{"x":920,"y":235,"radius":24,"collected":false},{"x":936,"y":444,"radius":24,"collected":false},{"x":940,"y":613,"radius":24,"collected":false},{"x":1300,"y":593,"radius":24,"collected":false},{"x":1329,"y":72,"radius":24,"collected":false},{"x":1333,"y":373,"radius":24,"collected":false},{"x":914,"y":144,"radius":5,"collected":false},{"x":934,"y":293,"radius":5,"collected":false},{"x":934,"y":362,"radius":5,"collected":false},{"x":917,"y":191,"radius":5,"collected":false},{"x":944,"y":481,"radius":5,"collected":false},{"x":944,"y":551,"radius":5,"collected":false},{"x":1301,"y":546,"radius":5,"collected":false},{"x":1349,"y":415,"radius":5,"collected":false},{"x":1330,"y":500,"radius":5,"collected":false},{"x":1340,"y":256,"radius":5,"collected":false},{"x":1340,"y":189,"radius":5,"collected":false},{"x":1340,"y":151,"radius":5,"collected":false},{"x":1275,"y":92,"radius":5,"collected":false},{"x":1189,"y":92,"radius":5,"collected":false},{"x":1104,"y":98,"radius":5,"collected":false},{"x":1036,"y":103,"radius":5,"collected":false},{"x":989,"y":103,"radius":5,"collected":false},{"x":1009,"y":609,"radius":5,"collected":false},{"x":1063,"y":617,"radius":5,"collected":false},{"x":1112,"y":616,"radius":5,"collected":false},{"x":1196,"y":620,"radius":5,"collected":false},{"x":1244,"y":620,"radius":5,"collected":false}],"schmuck":[{"x":578,"y":352,"radius":19,"collected":false}],"spielzeug":[{"x":488,"y":596,"radius":23,"collected":false},{"x":499,"y":113,"radius":22,"collected":false}],"teppich":[{"x":500,"y":179,"width":212,"height":379},{"x":1154,"y":216,"width":102,"height":290}],"moebel":[{"x":638,"y":423,"width":63,"height":124},{"x":650,"y":198,"width":51,"height":101},{"x":384,"y":656,"width":97,"height":45},{"x":436,"y":9,"width":60,"height":63},{"x":1176,"y":374,"width":66,"height":38}],"vertiefung":[{"x":1159,"y":127,"width":91,"height":85}],"ladestation":[{"x":746,"y":666,"width":97,"height":30}],"leererStation":[{"x":1159,"y":9,"width":92,"height":30}]},"maxVerfallsdaten":{"ladung":3372.6,"füllungLeft":219}}}}');
 
   }
-  function getDatabase(sync) {
+  function getDatabase(sync, first) {
     dbGet("cleanTheRoom", "highscores").then(result => {
       highscores = result;
+      if (first) modeSelected("normal");
       getVorgefertigteLevel();
       offlineSelector.style.display = "none";
       //clickListCheck();
@@ -490,9 +517,10 @@ localStorage.setItem("storedName", name);
             pSaveAutomaticly.style.display = "inline";
           }
           else pSaveAutomaticly.style.display = "none";
-          highscoresToList(highscores);
+          highscoresToList(highscores[mode]);
       console.log("sync finished!");
     }).catch(function(e) {
+      if (first) modeSelected("normal");
       getVorgefertigteLevel();
       app = new Vue({
         el: '#app',
@@ -512,39 +540,48 @@ localStorage.setItem("storedName", name);
         joyStickPlay.checked = true;
         if (localStorage.getItem("highscoresCleanTheRoom")) {
           highscores = JSON.parse(localStorage.getItem("highscoresCleanTheRoom"));
-          highscoresToList(highscores);
+          highscoresToList(highscores[mode]);
         }
         else alert("Es wurde keine Aufzeichnung der Highscores oder pixel rates gefunden!");
       }
     });
   }
+  app = new Vue({
+    el: '#app',
+    data: {
+      db: {"create new pixel rate": []},
+      genres: ["create new pixel rate"],
+      input: '',
+    }
+  })
   function highscoresToList(result) {
-    var fromFormat = JSON.parse(JSON.stringify(result.normal));
-    var format = {"create own pixel rate": {}};
+    var fromFormat = JSON.parse(JSON.stringify(result));
+    var format = {};
+    if(mode == "normal") format["create own pixel rate"] = [];
     var list = [];
     try {
     for (var i = 0; i < Object.keys(fromFormat).length; i++) {
-      if ((Object.keys(fromFormat)[i] != "create own pixel rate") && (JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[1]) <= window.innerHeight)) format[Object.keys(fromFormat)[i]] = Object.keys(fromFormat[Object.keys(fromFormat)[i]]);
+      if ((Object.keys(fromFormat)[i] != "create own pixel rate") && (JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= window.innerHeight)) format[Object.keys(fromFormat)[i]] = Object.keys(fromFormat[Object.keys(fromFormat)[i]]);
 
       var highscore = {};
-      for (var i1 = 0; Object.keys(fromFormat)[i] != "create own pixel rate" && (JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result.normal)[i].toString().split(' x ')[1]) <= window.innerHeight && Object.keys(result.normal)[i]) && i1 < Object.keys(result.normal[Object.keys(result.normal)[i]]).length; i1++) {
-        if (offline) list.push(Object.keys(result.normal)[i] + "-->" + Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]);
+      for (var i1 = 0; Object.keys(fromFormat)[i] != "create own pixel rate" && (JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= window.innerHeight && Object.keys(result)[i]) && i1 < Object.keys(result[Object.keys(result)[i]]).length; i1++) {
+        if (offline) list.push(Object.keys(result)[i] + "-->" + Object.keys(result[Object.keys(result)[i]])[i1]);
         else {
-          //var anzahlSpieler = Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length;
+          //var anzahlSpieler = Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores).length;
             highscore = {};
-            for (var i2 = 0; highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores && i2 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length; i2++) {
-              for (var i3 = 0; i3 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]]).length; i3++) {
-                for (var i4 = 0; i4 < Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]]).length; i4++) {
-                  var wert = highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]])[i3]])[i4]];
+            for (var i2 = 0; highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores && i2 < Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores).length; i2++) {
+              for (var i3 = 0; i3 < Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]]).length; i3++) {
+                for (var i4 = 0; i4 < Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]])[i3]]).length; i4++) {
+                  var wert = highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]])[i3]][Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]][Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores[Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]])[i3]])[i4]];
                   console.log(wert);
-                  if (!highscore.general || wert < highscore.general.number) highscore.general = {number: JSON.parse(JSON.stringify(wert)), name: Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2]};
-                  if ((!highscore.mine || wert < highscore.mine) && Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores)[i2] == name) highscore.mine = wert;
+                  if (!highscore.general || wert < highscore.general.number) highscore.general = {number: JSON.parse(JSON.stringify(wert)), name: Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2]};
+                  if ((!highscore.mine || wert < highscore.mine) && Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores)[i2] == name) highscore.mine = wert;
                 }
               }
             }
         }
         if (!highscore.general) highscore.general = {};
-        if (highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores[mode][Object.keys(result.normal)[i]][Object.keys(result.normal[Object.keys(result.normal)[i]])[i1]].highscores).length + " player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
+        if (highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores).length + " player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
         else var info = "";
         if (format[Object.keys(fromFormat)[i]]) format[Object.keys(fromFormat)[i]][i1] += info;
       }
@@ -564,14 +601,10 @@ localStorage.setItem("storedName", name);
       console.error(e);
       console.log("ufffffff");
     }
-    app = new Vue({
-      el: '#app',
-      data: {
-        db: format,
-        genres: Object.keys(format),
-        input: '',
-      }
-    })
+    app._data.db = format;
+    app._data.genres = Object.keys(format);
+    // app.data.db = format;
+    // app.data.genres = Object.keys(format);
   }
   function saveData() {
     if (confirm("WARNUNG: Sie müssen die Website schon jetzt über die Datei geöffnet haben, mit der sie später offline spielen wollen!")) {
@@ -585,9 +618,9 @@ localStorage.setItem("storedName", name);
   }
   var offline = false;
   var joyStick;
-  function createNewPixelRate() {
+  function createNewPixelRate(save) {
     getDatabase(true);
-    setTimeout(function () {
+    // setTimeout(function () {
     x1 = 0;
     y1 = 0;
     settings.style.display = "none";
@@ -696,14 +729,14 @@ localStorage.setItem("storedName", name);
     else highscores[mode][selected.pixelRate][selected.gegenstaende].objects = JSON.parse(JSON.stringify(selected.objects));
     selected.maxVerfallsdaten = highscores[mode][selected.pixelRate][selected.gegenstaende].maxVerfallsdaten;
     resetLevel();
-    if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
-    else if (confirm("Wollen sie die pixel rate auf ihrem Gerät  speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
+    if (!offline && save) dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    else if (save && confirm("Wollen sie die pixel rate auf ihrem Gerät  speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
       newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores[mode][selected.pixelRate][selected.gegenstaende]});
       localStorage.setItem("newPixelRate", JSON.stringify(newPixelRates));
     }
-    }, 1111);
+    // }, 1111);
   }
   var dbSetWarteschlange = [];
   setInterval(function () {
@@ -912,12 +945,12 @@ localStorage.setItem("storedName", name);
       } catch (e) {}
       verfallsdaten.ladung = selected.maxVerfallsdaten.ladung;
       try {
-        audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
-        audio.currentTime = 2*60 + 33;
-        audio.play();
+        var shutDownAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3");
+        shutDownAudio.currentTime = 2*60 + 33;
+        shutDownAudio.play();
       } catch (e) {console.log("audio not playable!")}
       setTimeout(function () {
-        resetLevel("Akku leer!!!");
+        if (mode != "creator") resetLevel("Akku leer!!!");
       }, 3000);
      }
     for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
