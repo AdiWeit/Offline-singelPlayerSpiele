@@ -279,9 +279,9 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       setTimeout(function () {
         mode = 'testLevel';
       }, 1133);
-      innerHTML = 'stop test';
+      document.getElementById('tryLevel').innerHTML = 'stop test';
     } else {
-      innerHTML = 'try out your level';
+      document.getElementById('tryLevel').innerHTML = 'try out your level';
        resetAfterTrying();
      }
   }
@@ -793,6 +793,11 @@ localStorage.setItem("storedName", name);
       }
     }
   }
+  // if (mode == "creator") {
+  //   for (var i = 0; i < selected.objects.staub.length; i++) {
+  //     verfallsdaten.füllungLeft += selected.objects.staub[i].radius*2;
+  //   }
+  // }
     if (StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisT.value)//11;
     else if (StaubAlsLadeBasisCheck.checked && mode == "creator") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisTEdit.value)//11;
     else if (!StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = JSON.parse(pixelBisLadenT.value);
@@ -1017,7 +1022,7 @@ localStorage.setItem("storedName", name);
       var teppichRamen = {x: selected.objects.teppich[i].x, y: selected.objects.teppich[i].y + selected.objects.teppich[i].height - 11, height: 11, width: selected.objects.teppich[i].width}
       if (mode != "creator" && isCollide(teppichRamen, ball) && !speed.slowDownFinished) slowDown(JSON.parse(verlangsamungTeppich.value)/10);
     }
-    if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0) {
+    if (verfallsdaten.ladung < 1 && JSON.parse(anzahlLadestationen.value) > 0 && mode != "creator") {
       inRound = false;
       try {
         shutDownAudio.pause();
@@ -1132,7 +1137,7 @@ localStorage.setItem("storedName", name);
       }
       checkMark(selected.objects.staub[i], "cycle")
     }
-    if (mode == "creator" && StaubAlsLeerBasisCheckEdit.checked) verfallsdaten.füllungLeft = allStaubPixel/JSON.parse(StaubAlsLeerBasisT.value);//2;
+    if (mode == "creator" && StaubAlsLeerBasisCheckEdit.checked) verfallsdaten.füllungLeft = allStaubPixel/JSON.parse(StaubAlsLeerBasisTEdit.value);//2;
     if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning") && mode != "creator") {
       console.log("finished!!!");
       if (syncFinished != true) {syncFinished = "inProgress";getDatabase(true);}
@@ -1269,18 +1274,19 @@ localStorage.setItem("storedName", name);
 }
   }, 25);
   var audio;
+  var cleanerAudioVar;
   var inRound = false;
   function playCleanerSound(repeat) {
     try {
-      audio.pause();
+      cleanerAudioVar.pause();
     } catch (e) {}
     try {
-      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
-      if (clenerFiepAudio.checked) audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
-      audio.volume = 0.5;
-      audio.currentTime = 1;
-      if (repeat) audio.currentTime = 2;
-      if (cleanerAudio.checked) audio.play();
+      cleanerAudioVar = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-without-piep-sound-effect-youtubemp3free.mp3"/*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.mp3"*//*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/pitch-shifted-vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/ /*"https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuum-cleaner-sound-effect-youtubemp3free.org.mp3"*/);
+      if (clenerFiepAudio.checked) cleanerAudioVar = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/low%20pitch-shifted-vacuum-cleaner-little-piep-sound-effect-youtubemp3free.mp3");
+      cleanerAudioVar.volume = 0.5;
+      cleanerAudioVar.currentTime = 1;
+      if (repeat) cleanerAudioVar.currentTime = 2;
+      if (cleanerAudio.checked) cleanerAudioVar.play();
     } catch (e) {console.log("audio not playable!")}
   }
   function resetLevel(type) {
@@ -1294,8 +1300,8 @@ localStorage.setItem("storedName", name);
     if (type) console.log(type);
     inRound = true;
     try {
-      localAudio.pause();
       audio.pause();
+      localAudio.pause();
     } catch (e) {console.log("audio not playable!")}
     if (type != "Akku leer!!!" && type != undefined) {
       try {
