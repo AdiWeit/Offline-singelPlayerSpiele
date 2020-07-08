@@ -31,8 +31,8 @@ localStorage.setItem("storedName", name);
   function getDatabase(sync) {
     dbGet("sortThePackages", "highscores").then(result => {
       highscores = result;
-      var li = document.createElement("li");
       for (var i = 0; i < Object.keys(highscores).length; i++) {
+        var li = document.createElement("li");
         li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
          li.setAttribute("onclick", "changeSetings(innerHTML)");
         document.getElementById("settingsL").appendChild(li);
@@ -50,6 +50,7 @@ localStorage.setItem("storedName", name);
     anzahlLöschen.value = text.split("und ")[1].split(" rausgenommen")[0];
     if (text.includes('nicht')) auffüllen.checked = true;
     else auffüllen.checked = false;
+    createPackage();
   }
   function createPackage() {
     gebrauchteZuege = 0;
@@ -130,7 +131,7 @@ localStorage.setItem("storedName", name);
     else i--;
   }
   layoutAll();
-  beginning = {storage: storage, packages: packages};
+  beginning = {storage: JSON.parse(JSON.stringify(storage)), packages: JSON.parse(JSON.stringify(packages))};
   isSelected.ownSelection = (width.value + " x " + height.value + ", pakete pro y-Sektor: " + anzahlInSektor.value + ", " + anzahlVertauschen.value + " mal vertauscht und " + anzahlLöschen.value + " rausgenommen, wobei die Kartons " + auffüllen.checked + "eingesetzt werden müssen." ).replace("false", "").replace("true", "nicht");
 }
 else {
