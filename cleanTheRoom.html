@@ -1039,8 +1039,11 @@ localStorage.setItem("storedName", name);
       }, 4000);
      }
     for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
-      canvas.fillStyle = "#FACC2E";
-      canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
+      //canvas.fillStyle = "#FACC2E";
+      var Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/moebel.png";
+      canvas.drawImage(Bild, selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
+      //canvas.fillRect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
       checkMark(selected.objects.moebel[i], "rectangle");
       // if (!((x1 >= selected.objects.moebel[i].x && x1 < selected.objects.moebel[i].x + selected.objects.moebel[i].width) || (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x) || (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)))
       // if (y1 >= selected.objects.moebel[i].y && y1 < selected.objects.moebel[i].y + selected.objects.moebel[i].height)
@@ -1048,8 +1051,11 @@ localStorage.setItem("storedName", name);
       // if (x1 <= selected.objects.moebel[i].x + selected.objects.moebel[i].width && x1 > selected.objects.moebel[i].x)
     }
     for (var i = 0; selected.objects && selected.objects.vertiefung && i < selected.objects.vertiefung.length; i++) {
-      canvas.fillStyle = "black";
-      canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
+      // canvas.fillStyle = "black";
+      // canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
+      var Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/vertiefung.png";
+      canvas.drawImage(Bild, selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
       checkMark(selected.objects.vertiefung[i], "rectangle");
       var ball = {x: x1, y: y1, width: 5, height: 5};
       // if (speed.highest.direction == "x") ball.x = ball.x + (ball.width) - (ball.width/2)*direction.x;
@@ -1201,11 +1207,14 @@ localStorage.setItem("storedName", name);
         // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
       }
-      canvas.fillStyle = "red";
-      canvas.beginPath();
-      canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
+      // canvas.fillStyle = "red";
+      // canvas.beginPath();
+      // canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
       if (!selected.objects.spielzeug[i].collected) {
-        canvas.fill();
+        // canvas.fill();
+        var Bild = new Image();
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/spielzeug.png";
+        canvas.drawImage(Bild, selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius*2, selected.objects.spielzeug[i].radius*2);
       }
       checkMark(selected.objects.spielzeug[i], "cycle");
     }
@@ -1228,11 +1237,14 @@ localStorage.setItem("storedName", name);
         }, 500);
         }
       }
-      canvas.fillStyle = "yellow";
-      canvas.beginPath();
-      canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
+      // canvas.fillStyle = "yellow";
+      // canvas.beginPath();
+      // canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
       if (!selected.objects.schmuck[i].collected) {
-        canvas.fill();
+        // canvas.fill();
+        var Bild = new Image();
+        Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/schmuck.png";
+        canvas.drawImage(Bild, selected.objects.schmuck[i].x - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].radius*2, selected.objects.schmuck[i].radius*2);
         checkMark(selected.objects.schmuck[i], "cycle");
       }
     }
