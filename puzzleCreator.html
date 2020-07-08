@@ -15,6 +15,8 @@
 <button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">more settings</button>
 <div id="settings">
   <br>
+  <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">reload page automaticly when puzzle finished
+  <br>
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   <br>
   <input type="checkbox" onchange="layout();" id="richtigPlazierte" checked="true"> markiere richtig plazierte
@@ -47,6 +49,7 @@
 <canvas id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
 <p><img id="preview"></p>
 <script>
+  reloadWhenFinished.checked = localStorage.getItem("reloadWhenFinished");
   anzahlVerschieben.value = anzahl.value*anzahl.value;
   settings.style.display = "none";
   aufgebenId.style.display = "none";
@@ -157,7 +160,7 @@
   var positions = {right: []};
   var finished = false;
   var missing;
-  function layout(withoutAlert) {
+  function layout(withoutAlert, pReturn) {
     richtige = 0;
     for (var i = 0; i < positions.wrong.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
@@ -171,8 +174,14 @@
       layout(true);
       finished = false;
       if(!withoutAlert) {
-        alert("Bitte laden sie die Seite neu, wenn sie ein weiteres Puzzle erstellen wollen!");
-      if (schieben.checked) alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (pReturn) return "noChange!";
+        if (schieben.checked) alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (reloadWhenFinished.checked) {
+          setTimeout(function () {
+            window.location.reload(false);
+          }, 3000);
+        }
+        else alert("Bitte laden sie die Seite neu, wenn sie ein weiteres Puzzle erstellen wollen!");
     }
   }
 }
@@ -238,67 +247,72 @@
           positions.right.splice(i, 1);
         }
       }
-        var missingArray = [];
-        var workingNumbers = [];
-        var maleZurrück = {number: 0, normalSlide: 0};
-        for (var i = 0; i < positions.wrong.length; i++) {
-          workingNumbers.push(i);
-        }
-        for (var i = 0; i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value); i++) {
-          var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
-          try {
-          if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((missing.data.edit.x == positions.wrong[side].edit.x + lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y) /*right*/ || (missing.data.edit.x ==
-          positions.wrong[side].edit.x - lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y)/*left*/ || (missing.data.edit.y == positions.wrong[side].edit.y + lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*down*/ || (missing.data.edit.y == positions.wrong[side].edit.y - lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*up*/)) {
-          if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y))) {
-            maleZurrück.number++;
-          }
-          else maleZurrück.normalSlide++;
-          missingArray.push(missing.data.edit.x + "-" + missing.data.edit.y);
-          //console.log(missingArray);
-          movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
-          movement.missing.unshift(JSON.parse(JSON.stringify(missing)));
-          var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
-          positions.wrong[side].edit = missing.data.edit;//.splice(side, 1);
-          textur.width = textur.width;
-          layout(true);
-          for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
-            if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
-              positions = JSON.parse(JSON.stringify(movement.positions[/*1*/0]));
-              missing = JSON.parse(JSON.stringify(movement.missing[/*1*/0]));
-              movement.positions.splice(0, 1);
-              movement.missing.splice(0, 1);
-              maleZurrück.number++;
-              i1 = movement.positions.length;
-              i--;
-              for (var i2 = 0; i2 < workingNumbers.length; i2++) {
-                if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
-              }
-            }
-          }
-          if (i1 != movement.positions.length + 1) {
-              missing.data = ablage
-              var workingNumbers = [];
-              for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-                workingNumbers.push(i1);
-              }
-          }
-        }
-          else {
-            i--;
-            for (var i1 = 0; i1 < workingNumbers.length; i1++) {
-              if (workingNumbers[i1] == side) workingNumbers.splice(i1, 1);
-            }
-          }
-        } catch (e) {
-          //console.log("ein Error bei der if Abfrage!!! + (" + e + ")");
-          i = positions.wrong.length;
-        }
-        }
-        // canvas.clearRect(0, 0, 10000, 10000);
-        // layout();
+      verschiebenPC();
       }
-      canvas.clearRect(0, 0, 10000, 10000);
-      layout();
+      else {
+        canvas.clearRect(0, 0, 10000, 10000);
+        layout();
+      }
+  }
+  function verschiebenPC() {
+    var missingArray = [];
+    var workingNumbers = [];
+    var maleZurrück = {number: 0, normalSlide: 0};
+    for (var i = 0; i < positions.wrong.length; i++) {
+      workingNumbers.push(i);
+    }
+    for (var i = 0; i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value); i++) {
+      var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
+      try {
+      if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((missing.data.edit.x == positions.wrong[side].edit.x + lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y) /*right*/ || (missing.data.edit.x ==
+      positions.wrong[side].edit.x - lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y)/*left*/ || (missing.data.edit.y == positions.wrong[side].edit.y + lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*down*/ || (missing.data.edit.y == positions.wrong[side].edit.y - lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*up*/)) {
+      if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y))) {
+        maleZurrück.number++;
+      }
+      else maleZurrück.normalSlide++;
+      missingArray.push(missing.data.edit.x + "-" + missing.data.edit.y);
+      //console.log(missingArray);
+      movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
+      movement.missing.unshift(JSON.parse(JSON.stringify(missing)));
+      var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
+      positions.wrong[side].edit = missing.data.edit;//.splice(side, 1);
+      textur.width = textur.width;
+      layout(true);
+      for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
+        if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
+          positions = JSON.parse(JSON.stringify(movement.positions[/*1*/0]));
+          missing = JSON.parse(JSON.stringify(movement.missing[/*1*/0]));
+          movement.positions.splice(0, 1);
+          movement.missing.splice(0, 1);
+          maleZurrück.number++;
+          i1 = movement.positions.length;
+          i--;
+          for (var i2 = 0; i2 < workingNumbers.length; i2++) {
+            if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
+          }
+        }
+      }
+      if (i1 != movement.positions.length + 1) {
+          missing.data = ablage
+          var workingNumbers = [];
+          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+            workingNumbers.push(i1);
+          }
+      }
+    }
+      else {
+        i--;
+        for (var i1 = 0; i1 < workingNumbers.length; i1++) {
+          if (workingNumbers[i1] == side) workingNumbers.splice(i1, 1);
+        }
+      }
+    } catch (e) {
+      //console.log("ein Error bei der if Abfrage!!! + (" + e + ")");
+      i = positions.wrong.length;
+    }
+    }
+    canvas.clearRect(0, 0, 10000, 10000);
+    if (layout(undefined, true) != undefined) verschiebenPC();
   }
   var movement = {missing: [], positions: []};
   var mausx;
