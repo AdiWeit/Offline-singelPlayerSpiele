@@ -151,6 +151,7 @@
   </div>
 </div>
 <div id="creationDiv">
+  <button type="button" onclick='document.onkeydown({key: "z", ctrlKey: true})'' name="button"> <-- </button>
   <button type="button" onclick="elementSelected(id);" id="staub" name="button">Staub</button>
   <button type="button" onclick="elementSelected(id);" id="schmuck" name="button">Schmuck</button>
   <button type="button" onclick="elementSelected(id);" id="spielzeug" name="button">Spielzeug</button>
@@ -160,6 +161,7 @@
   <button type="button" onclick="elementSelected(id);" id="ladestation" name="button">Ladestation</button>
   <button type="button" onclick="elementSelected(id);" id="leererStation" name="button">Entleerer</button>
   <button type="button" onclick="elementSelected(id);" id="multiSelector" name="button">multi selector</button>
+  <button type="button" onclick='document.onkeydown({key: "y", ctrlKey: true})' name="button"> --> </button>
   <br>
   <button type="button" id="tryLevel" onclick="tryLevel();" name="button">try out your level (clear it to be able to upload it)</button>
   <h3>Spielzeug</h3>
@@ -370,18 +372,20 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   }
   function mouseUpOnCanvas() {// window.addEventListener('mouseup', function() {
     if (mode == "creator" && selected.element != "multiSelector") {
-      if (pointOfCreationHistory != creationHistory.length) {
+      if (pointOfCreationHistory + 1 != creationHistory.length) {
         creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
         console.log("extra schritt, weil nicht aktuell war");
       }
       pointOfCreationHistory = creationHistory.length;
       console.log(beginningPoint);
+      if (!selected.objects[selected.element]) selected.objects[selected.element] = [];
       if (selected.radius > 0 && beginningPoint.x != undefined && beginningPoint.y != undefined && (selected.element == "staub" || selected.element == "schmuck" || selected.element == "spielzeug")) selected.objects[selected.element].push({x: beginningPoint.x, y:  beginningPoint.y, radius: selected.radius, collected: false});
       else if (!(isNaN(mausx - beginningPoint.x)) && !(isNaN(mausy - beginningPoint.y)) && mausx - beginningPoint.x != 0 && mausy - beginningPoint.y != 0) selected.objects[selected.element].push({x: beginningPoint.x, y: beginningPoint.y, width: mausx - beginningPoint.x, height: mausy - beginningPoint.y});
-      if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory]) creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
+      if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory - 1][selected.element].length) creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
       console.log("new point of history created");
       beginningPoint = {};
-      if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory])pointOfCreationHistory++;
+      if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory]) pointOfCreationHistory++;
+      console.log(creationHistory[pointOfCreationHistory - 1]);
     }
     else if (selected.element == "multiSelector" && !selected.waitMouseUp) {
       for (var i = 0; i < Object.keys(selected.objects).length; i++) {
@@ -413,8 +417,8 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   var mausx;
   var mausy;
   function readMouseMove(e) {
-    mausx = e.clientX + scrollX;
-    mausy = e.clientY + scrollY;
+    if (!e.scrollIncluded) mausx = e.clientX + scrollX;
+    if (!e.scrollIncluded) mausy = e.clientY + scrollY;
     if (Object.keys(beginningPoint).length > 0 && !beginningPoint.mouseUp) {
       selected.ablage = JSON.parse(JSON.stringify(beginningPoint));
       if (selected.positionNow && (selected.positionNow.x > mausx || selected.positionNow.y > mausy)) {
@@ -1476,22 +1480,49 @@ localStorage.setItem("storedName", name);
   document.addEventListener('touchstart', touch);
   document.addEventListener('touchend', touch);
 // }
+var firstTouch = {};
+var swipeUp;
 function touch(ev) {
   // if (!ev.touches[0]) {
   //   console.log(":((()))");
   // }
-    if (joyStickPlay.checked && ev.touches[0] != undefined) {
+  if (ev.type == "touchstart") firstTouch = {x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"]};
+    if (/*joyStickPlay.checked && */ev.touches[0] != undefined) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
       mausy = ev.touches[0]["pageY"]// + scrollY;
-    }
-  if (joyStickPlay.checked && ev.type == "touchend") {
+      // swipe direction detection:
+      var xDiff = firstTouch.x - mausx;
+      var yDiff = firstTouch.y - mausy;
+          if (!(Math.abs(xDiff) > Math.abs(yDiff)) && yDiff > 0) {
+              /* up swipe */
+          swipeUp = true;
+          if (mode = "creator") textur.style.touchAction = '';
+          console.log("scrolling allowed, because direction down");
+          beginningPoint = {};
+          }
+          else {
+            textur.style.touchAction = 'none';
+          }
+          if (mode == "creator") readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"], scrollIncluded: true});
+      }
+  if (joyStickPlay.checked && mode != "creator" && ev.type == "touchend") {
     //textur.style.touchAction = '';
     mausx = joyStick.coordinates.x;
     mausy = joyStick.coordinates.y;
   }
-    if (joyStickPlay.checked && ev.type == "touchstart") {
+  if (ev.type == "touchend" && mausy < textur.height/* && !swipeUp*/) {
+    mouseUpOnCanvas();
+  }
+  if (ev.type == "touchstart" && mausy < textur.height/* && !swipeUp*/) {
+    mousedownOnCanvas();
+  }
+  // if (ev.type == "touchend" && mausy < textur.height && swipeUp) {
+  //   beginningPoint = {};
+  //   console.log("removeElement");
+  // }
+  if (ev.type == "touchend") swipeUp = undefined;
+    if (joyStickPlay.checked && mode != "creator" && ev.type == "touchstart" && selected.objects) {
       joyStick = {coordinates : {x: mausx, y: mausy}};
-      textur.style.touchAction = 'none';
     }
     // if (ev.type == "touchmove") {
     //   mousemoveFolgen();
