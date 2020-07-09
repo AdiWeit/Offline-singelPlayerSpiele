@@ -650,6 +650,7 @@ localStorage.setItem("storedName", name);
     }
   })
   function highscoresToList(result) {
+    if (result == undefined) result = {};
     var fromFormat = JSON.parse(JSON.stringify(result));
     var format = {};
     if(mode == "normal") format["create own pixel rate"] = [];
