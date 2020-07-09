@@ -15,6 +15,7 @@
 </table>
 <div id="trash">
 <h1 onmousedown="style.color = 'red'" onmouseout="style.color = 'black';" onmouseup="style.color = 'black'; document.onkeydown({key: 'Delete'});" style="backgroundColor: 'none'; font-size='50px'; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">🚮</h1>
+<h1 onmouseup="dbClickCanvas();" style="backgroundColor: 'none'; font-size='50px'; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;">✅</h1>
 <br>
 </div>
 <canvas onclick="canvasClicked();" onmousedown="mousedownOnCanvas();" onmouseup="mouseUpOnCanvas();" id="textur" width="1900" height="700"></canvas>
@@ -342,6 +343,9 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     highscoresToList(highscores[mode]);
   }
   var beginningPoint = {};
+  function dbClickCanvas() {
+    if ((beginningPoint.x != undefined && selected.element == "multiSelector" && gerät == "Handy")) mousedownOnCanvas();
+  }
   function mousedownOnCanvas() {// window.addEventListener('mousedown', function() {
     if (mode == "creator"/* || (mode == "testLevel" && joyStick != "place")*/) {
       /*if (beginningPoint.mouseUp) */beginningPoint = {};
@@ -360,6 +364,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     if (selected.waitMouseUp) {
       beginningPoint = {};
       trash.style.display = "none";
+      anythingSelected = false;
     }
   }// });
   function resetAfterTrying(uploadHighscore) {
@@ -397,7 +402,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       console.log(creationHistory[pointOfCreationHistory - 1]);
     }
     else if (selected.element == "multiSelector" && !selected.waitMouseUp) {
-      var anythingSelected = false;
+      anythingSelected = false;
       for (var i = 0; i < Object.keys(selected.objects).length; i++) {
         for (var i1 = 0; i1 < selected.objects[Object.keys(selected.objects)[i]].length; i1++) {
           if (!selected.objects[Object.keys(selected.objects)[i]][i1].width && selected.objects[Object.keys(selected.objects)[i]][i1].radius) {
@@ -427,7 +432,8 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     }
     if (selected.waitMouseUp) selected.waitMouseUp = false;
   }// });
-  document.onmousemove = readMouseMove
+  var anythingSelected = false;
+  if (gerät == "PC") document.onmousemove = readMouseMove
   var mausx;
   var mausy;
   function readMouseMove(e) {
@@ -471,6 +477,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       pointOfCreationHistory++;
       beginningPoint = {};
       trash.style.display = 'none';
+      anythingSelected = false;
       trash.style.color = 'black';
     }
     if (event.key == "p" && !pause) pause = true;
@@ -1530,12 +1537,12 @@ function touch(ev) {
           swipeUp = true;
           if (mode = "creator") textur.style.touchAction = '';
           console.log("scrolling allowed, because direction down");
-          beginningPoint = {};
+          if (!anythingSelected) beginningPoint = {};
           }
           else {
             textur.style.touchAction = 'none';
           }
-          if (mode == "creator") readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"], scrollIncluded: true});
+          if (mode == "creator" && (trash.style.display == "none" || mausy > 125)) readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"], scrollIncluded: true});
       }
   if (joyStickPlay.checked && mode != "creator" && ev.type == "touchend") {
     //textur.style.touchAction = '';
@@ -1546,7 +1553,7 @@ function touch(ev) {
     mouseUpOnCanvas();
   }
   if (ev.type == "touchstart" && mausy < textur.height/* && !swipeUp*/) {
-    mousedownOnCanvas();
+    if (!(anythingSelected && selected.element == "multiSelector" && gerät == "Handy")) mousedownOnCanvas();
   }
   // if (ev.type == "touchend" && mausy < textur.height && swipeUp) {
   //   beginningPoint = {};
