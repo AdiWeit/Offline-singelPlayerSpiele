@@ -303,7 +303,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   var mode = "normal"
   var highscores = {normal: {}};
   var useSameRate = false;
-  var realHeight = window.innerHeight;
+  var realHeight = screen.availHeight;
   textur.style.display = "none";
   staubDiv.style.display = "none";
   verlangsamungSpielzeugP.style.display = "none";
@@ -347,8 +347,8 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       spezifischeSettings.style.display = "none";
       useSameRate = false;
       resetPixelRate(["width", "height"]);
-      // pixelRateWidth.value = window.innerWidth;
-      // pixelRateHeight.value = window.innerHeight;
+      // pixelRateWidth.value = screen.availWidth;
+      // pixelRateHeight.value = screen.availHeight;
     }
     else {
       creationDiv.style.display = "none";
@@ -396,7 +396,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     energyBar.style.width = 0;
     trashBar.style.width = 0;
     mode = "creator";
-    pause = false;
+    pause.boolean = false;
     settings.style.display = "inline"
     document.getElementById('tryLevel').innerHTML = 'try out your level (clear it to be able to upload it)';
     if (uploadHighscore) dbSetWarteschlange.push({tag: "highscores", data: highscores});
@@ -481,12 +481,13 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   }
   var pointOfCreationHistory = 0;
   var ablageTextBoxen = {list: ["zeitLangsamerEdit", "slowestSpeedEdit", "pixelBisLadenTEdit", "staubAlsLadeBasisTEdit", "pixelBisLeerenTEdit", "StaubAlsLeerBasisTEdit"]};
+  var rateAblage;
   // TODO: anpassen bei vor und zurrück
   document.onkeydown = function(event) {
-  var rateAblage = {width: pixelRateWidth.value, height: pixelRateHeight.value, };
-  // for (var i = 0; i < ; i++) {
-  //   []
-  // }
+  rateAblage = {width: pixelRateWidth.value, height: pixelRateHeight.value};
+  for (var i = 0; i < ablageTextBoxen.list.length; i++) {
+    ablageTextBoxen[ablageTextBoxen.list[i]] = document.getElementById(ablageTextBoxen.list[i]).value;
+  }
     if (event.key == "Delete" && mode == "creator" && beginningPoint.mouseUp) {
       for (var i = 0; i < Object.keys(selected.objects).length; i++) {
         for (var i1 = 0; i1 < selected.objects[Object.keys(selected.objects)[i]].length; i1++) {
@@ -503,26 +504,28 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       anythingSelected = false;
       trash.style.color = 'black';
     }
-    if (event.key == "p" && !pause) pause = true;
-    else if (event.key == "p") pause = false;
+    if (event.key == "p" && !pause.boolean) pause = {boolean: true, time: time};
+    else if (event.key == "p") {pause.boolean = false; time = JSON.parse(pause.time);}
     if (event.key == "z" && event.ctrlKey && (pointOfCreationHistory > 0)) {
       pointOfCreationHistory--;
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
-      setTimeout(function () {
-        if (pixelRateWidth.value != rateAblage.width || pixelRateHeight.value != rateAblage.height) pixelRateChanged(rateAblage);
-        // pixelRateWidth.value = rateAblage.width;
-        // pixelRateHeight.value = rateAblage.height;
-      }, 1);
+      textBoxenGleichBehalten();
     }
     if ((event.key == "y" || event.key == "Z") && event.ctrlKey && (pointOfCreationHistory < creationHistory.length - 1)) {
       pointOfCreationHistory++;
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
-      setTimeout(function () {
-        // pixelRateWidth.value = JSON.parse(JSON.stringify(rateAblage.width));
-        // pixelRateHeight.value = JSON.parse(JSON.stringify(rateAblage.height));
-        if (pixelRateWidth.value != rateAblage.width || pixelRateHeight.value != rateAblage.height) pixelRateChanged(rateAblage);
-      }, 1);
+      textBoxenGleichBehalten();
     }
+  }
+  function textBoxenGleichBehalten() {
+    setTimeout(function () {
+      if (pixelRateWidth.value != rateAblage.width || pixelRateHeight.value != rateAblage.height) pixelRateChanged(rateAblage);
+      for (var i = 0; i < Object.keys(ablageTextBoxen).length; i++) {
+        if (Object.keys(ablageTextBoxen)[i] != "list" && ablageTextBoxen[Object.keys(ablageTextBoxen)[i]] != document.getElementById(Object.keys(ablageTextBoxen)[i]).value) document.getElementById(Object.keys(ablageTextBoxen)[i]).value = Object.keys(ablageTextBoxen)[i] != "list" && ablageTextBoxen[Object.keys(ablageTextBoxen)[i]];
+      }
+      // pixelRateWidth.value = rateAblage.width;
+      // pixelRateHeight.value = rateAblage.height;
+    }, 1);
   }
   function preview() {
     beginningPoint = selected.ablage;
@@ -567,15 +570,15 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   }
   function resetPixelRate(rates) {
     /*
-    if (useSameRate == false) {pixelRateWidth.value = (window.innerWidth - 9); pixelRateHeight.value = (window.innerHeight - 9);}//selected.pixelRate = (window.innerWidth - 9) + " x " + (window.innerHeight - 9);
+    if (useSameRate == false) {pixelRateWidth.value = (screen.availWidth - 9); pixelRateHeight.value = (screen.availHeight - 9);}//selected.pixelRate = (screen.availWidth - 9) + " x " + (screen.availHeight - 9);
     else selected.pixelRate = useSameRate;
     */
     if (rates.includes("width")) {
-      if (useSameRate == false) pixelRateWidth.value = (window.innerWidth - 9);
+      if (useSameRate == false) pixelRateWidth.value = (screen.availWidth - 9);
       else pixelRateWidth.value = useSameRate.toString().split(" x ")[0];
     }
     if (rates.includes("height")) {
-      if (useSameRate == false) pixelRateHeight.value = (window.innerHeight - 9);
+      if (useSameRate == false) pixelRateHeight.value = (screen.availHeight - 9);
       else pixelRateHeight.value = useSameRate.toString().split(" x ")[1];
     }
   }
@@ -590,17 +593,17 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       resetPixelRate(["width", "height"]);
   }
   function settingsAnpassen() {
-    var pWindow = {innerWidth: window.innerWidth, innerHeight: window.innerHeight};
-    if (useSameRate != false) {pWindow.innerWidth = JSON.parse(useSameRate.toString().split(" x ")[0]); pWindow.innerHeight = JSON.parse(useSameRate.toString().split(" x ")[1]);}
-    anzahlStaub.value = Math.round(pWindow.innerWidth/25);
-    maxTeppichWidth.max = pWindow.innerWidth;
-    maxTeppichHeight.max = pWindow.innerHeight;
-    minTeppichWidth.max = pWindow.innerWidth - 1;
-    minTeppichHeight.max = pWindow.innerHeight - 1;
-    maxLochWidth.max = pWindow.innerWidth;
-    maxLochHeight.max = pWindow.innerHeight;
-    minLochWidth.max = pWindow.innerWidth - 1;
-    minLochHeight.max = pWindow.innerHeight - 1;
+    var pWindow = {innerWidth: screen.availWidth, innerHeight: screen.availHeight};
+    if (useSameRate != false) {pscreen.availWidth = JSON.parse(useSameRate.toString().split(" x ")[0]); pscreen.availHeight = JSON.parse(useSameRate.toString().split(" x ")[1]);}
+    anzahlStaub.value = Math.round(pscreen.availWidth/25);
+    maxTeppichWidth.max = pscreen.availWidth;
+    maxTeppichHeight.max = pscreen.availHeight;
+    minTeppichWidth.max = pscreen.availWidth - 1;
+    minTeppichHeight.max = pscreen.availHeight - 1;
+    maxLochWidth.max = pscreen.availWidth;
+    maxLochHeight.max = pscreen.availHeight;
+    minLochWidth.max = pscreen.availWidth - 1;
+    minLochHeight.max = pscreen.availHeight - 1;
   }
   // spielzeugDiv.style.display = "none";
   // sphere1.style.top = "175";
@@ -619,7 +622,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   getDatabase(undefined, true);
-  console.log(window.innerWidth + " - " + window.innerHeight);
+  console.log(screen.availWidth + " - " + screen.availHeight);
   function getVorgefertigteLevel() {
     // my level:
     highscores.vorgefertigt = /*JSON.parse(*/'{"1465 x 692":{"loecher: 1, Moebel: 5, Teppich: 2, Ladestationen: 1, Entleerer: 1, Spielzeug: 2, schmuck: 1, Staub: 36":{"pixelRate":"1465 x 692","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"staub":[{"x":670,"y":354,"radius":22,"collected":false},{"x":1199,"y":332,"radius":22,"collected":false},{"x":1208,"y":438,"radius":24,"collected":false},{"x":1200,"y":261,"radius":20,"collected":false},{"x":168,"y":86,"radius":24,"collected":false},{"x":192,"y":374,"radius":24,"collected":true},{"x":192,"y":598,"radius":24,"collected":false},{"x":895,"y":98,"radius":24,"collected":false},{"x":920,"y":235,"radius":24,"collected":false},{"x":936,"y":444,"radius":24,"collected":false},{"x":940,"y":613,"radius":24,"collected":false},{"x":1300,"y":593,"radius":24,"collected":false},{"x":1329,"y":72,"radius":24,"collected":false},{"x":1333,"y":373,"radius":24,"collected":false},{"x":914,"y":144,"radius":5,"collected":false},{"x":934,"y":293,"radius":5,"collected":false},{"x":934,"y":362,"radius":5,"collected":false},{"x":917,"y":191,"radius":5,"collected":false},{"x":944,"y":481,"radius":5,"collected":false},{"x":944,"y":551,"radius":5,"collected":false},{"x":1301,"y":546,"radius":5,"collected":false},{"x":1349,"y":415,"radius":5,"collected":false},{"x":1330,"y":500,"radius":5,"collected":false},{"x":1340,"y":256,"radius":5,"collected":false},{"x":1340,"y":189,"radius":5,"collected":false},{"x":1340,"y":151,"radius":5,"collected":false},{"x":1275,"y":92,"radius":5,"collected":false},{"x":1189,"y":92,"radius":5,"collected":false},{"x":1104,"y":98,"radius":5,"collected":false},{"x":1036,"y":103,"radius":5,"collected":false},{"x":989,"y":103,"radius":5,"collected":false},{"x":1009,"y":609,"radius":5,"collected":false},{"x":1063,"y":617,"radius":5,"collected":false},{"x":1112,"y":616,"radius":5,"collected":false},{"x":1196,"y":620,"radius":5,"collected":false},{"x":1244,"y":620,"radius":5,"collected":false}],"schmuck":[{"x":578,"y":352,"radius":19,"collected":false}],"spielzeug":[{"x":488,"y":596,"radius":23,"collected":false},{"x":499,"y":113,"radius":22,"collected":false}],"teppich":[{"x":500,"y":179,"width":212,"height":379},{"x":1154,"y":216,"width":102,"height":290}],"moebel":[{"x":638,"y":423,"width":63,"height":124},{"x":650,"y":198,"width":51,"height":101},{"x":384,"y":656,"width":97,"height":45},{"x":436,"y":9,"width":60,"height":63},{"x":1176,"y":374,"width":66,"height":38}],"vertiefung":[{"x":1159,"y":127,"width":91,"height":85}],"ladestation":[{"x":746,"y":666,"width":97,"height":30}],"leererStation":[{"x":1159,"y":9,"width":92,"height":30}]},"maxVerfallsdaten":{"ladung":3372.6,"füllungLeft":219}, "name": "Hin und her"}}'//);
@@ -729,9 +732,9 @@ localStorage.setItem("storedName", name);
     var list = [];
     try {
     for (var i = 0; i < Object.keys(fromFormat).length; i++) {
-      if ((Object.keys(fromFormat)[i] != "create own pixel rate") && (JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= window.innerHeight)) format[Object.keys(fromFormat)[i]] = Object.keys(fromFormat[Object.keys(fromFormat)[i]]);
+      if ((Object.keys(fromFormat)[i] != "create own pixel rate") && ((JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= screen.availWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= screen.availHeight) || (gerät == "Handy" && JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= screen.availHeight && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= screen.availWidth))) format[Object.keys(fromFormat)[i]] = Object.keys(fromFormat[Object.keys(fromFormat)[i]]);
       var highscore = {};
-      for (var i1 = 0; Object.keys(fromFormat)[i] != "create own pixel rate" && (JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= window.innerWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= window.innerHeight && Object.keys(result)[i]) && i1 < Object.keys(result[Object.keys(result)[i]]).length; i1++) {
+      for (var i1 = 0; Object.keys(fromFormat)[i] != "create own pixel rate" && ((JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= screen.availWidth && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= screen.availHeight) || (gerät == "Handy" && JSON.parse(Object.keys(result)[i].toString().split(' x ')[0]) <= screen.availHeight && JSON.parse(Object.keys(result)[i].toString().split(' x ')[1]) <= screen.availWidth)) && Object.keys(result)[i] && i1 < Object.keys(result[Object.keys(result)[i]]).length; i1++) {
         if (offline) list.push(Object.keys(result)[i] + "-->" + Object.keys(result[Object.keys(result)[i]])[i1]);
         else {
           //var anzahlSpieler = Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores).length;
@@ -748,6 +751,7 @@ localStorage.setItem("storedName", name);
             }
         }
         if (!highscore.general) highscore.general = {};
+        if (!highscore.mine) highscore.mine = "/";
         if (highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores) var info = " (" + Object.keys(highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].highscores).length + " player finished, " + highscore.general.number + " is the highscore time by " + highscore.general.name + ", your highscore: " + highscore.mine + ")";
         else var info = "";
         if (format[Object.keys(fromFormat)[i]][i1] && highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].name) format[Object.keys(fromFormat)[i]][i1] += " (" +  highscores[mode][Object.keys(result)[i]][Object.keys(result[Object.keys(result)[i]])[i1]].name + ")";
@@ -796,9 +800,9 @@ localStorage.setItem("storedName", name);
     else energyBar.style.display = "none";
     if (JSON.parse(anzahlEntleerer.value) || (mode == "creator" && Object.keys(selected.objects.leererStation).length > 0)) trashBar.style.display = "inline";
     else trashBar.style.display = "none";
-    textur.width = JSON.parse(pixelRateWidth.value); // window.innerWidth - 9;
-    textur.height = JSON.parse(pixelRateHeight.value); // window.innerHeight - 9;
-    console.log(window.innerWidth + " - " + textur.width);
+    textur.width = JSON.parse(pixelRateWidth.value); // screen.availWidth - 9;
+    textur.height = JSON.parse(pixelRateHeight.value); // screen.availHeight - 9;
+    console.log(screen.availWidth + " - " + textur.width);
     selected.pixelRate = pixelRateWidth.value + " x " + pixelRateHeight.value;
     if (mode == "normal") selected.gegenstaende = "loecher: " + anzahlLoecher.value + ", Moebel: " + anzahlMoebel.value + ", Teppich: " + anzahlTeppich.value + ", Ladestationen: " + anzahlLadestationen.value + ", Entleerer: " + anzahlEntleerer.value + ", Spielzeug: " + anzahlSpielzeug.value + ", schmuck: " + anzahlSchmuck.value + ", Staub: " + anzahlStaub.value;
     if (mode == "creator") selected.gegenstaende = "loecher: " + Object.keys(selected.objects.vertiefung).length + ", Moebel: " + Object.keys(selected.objects.moebel).length + ", Teppich: " + Object.keys(selected.objects.teppich).length + ", Ladestationen: " + Object.keys(selected.objects.ladestation).length + ", Entleerer: " + Object.keys(selected.objects.leererStation).length + ", Spielzeug: " + Object.keys(selected.objects.spielzeug).length + ", schmuck: " + Object.keys(selected.objects.schmuck).length + ", Staub: " + Object.keys(selected.objects.staub).length;
@@ -824,42 +828,42 @@ localStorage.setItem("storedName", name);
     }
     if (mode == "normal") {
     for (var i = 0; i < JSON.parse(anzahlLoecher.value) /*2*/; i++) { // Vertiefung
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.vertiefung.push({x: Math.round(Math.random() *(screen.availWidth)), y: Math.round(Math.random() *(screen.availHeight)), width: Math.round(Math.random() *(JSON.parse(maxLochWidth.value) - JSON.parse(minLochWidth.value))) + JSON.parse(minLochWidth.value)/*51*/, height: Math.round(Math.random() *(/*133*/JSON.parse(maxLochHeight.value) - JSON.parse(minLochHeight.value))) + JSON.parse(minLochHeight.value)});
     }
     for (var i = 0; i < JSON.parse(anzahlMoebel.value)/*4*/; i++) { // Möbel
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.moebel.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.moebel.push({x: Math.round(Math.random() *(screen.availWidth)), y: Math.round(Math.random() *(screen.availHeight)), width: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelWidth.value) - JSON.parse(minMoebelWidth.value))) + /*23*/JSON.parse(minMoebelWidth.value), height: Math.round(Math.random() *(/*155*/JSON.parse(maxMoebelHeight.value) - JSON.parse(minMoebelHeight.value))) + /*23*/JSON.parse(minMoebelHeight.value)});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlTeppich.value); i++) { // teppich
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.teppich.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.teppich.push({x: Math.round(Math.random() *(screen.availWidth)), y: Math.round(Math.random() *(screen.availHeight)), width: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichWidth.value) - JSON.parse(minTeppichWidth.value))) + JSON.parse(minTeppichWidth.value)/*33*/, height: Math.round(Math.random() *(/*444*/JSON.parse(maxTeppichHeight.value) - JSON.parse(minTeppichHeight.value))) + JSON.parse(minTeppichHeight.value)/*33*/});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlLadestationen.value); i++) { // ladestation
       var side = Math.round(Math.random() *(3));
-      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
-      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(screen.availWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: Math.round(Math.random() *(screen.availWidth - cssToNumber(sphere1.style.width))), y: screen.availHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: 0, y: Math.round(Math.random() *(screen.availHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
+      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.ladestation.push({x: screen.availWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(screen.availHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLaderWidth.value) - JSON.parse(minLaderWidth.value))) + JSON.parse(minLaderWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLaderHeight.value) - JSON.parse(minLaderHeight.value))) + JSON.parse(minLaderHeight.value)/*33*/});
     }
     for (var i = 0; i < /*1*/JSON.parse(anzahlEntleerer.value); i++) { // leererStation
       var side = Math.round(Math.random() *(3));
-      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(window.innerWidth - cssToNumber(sphere1.style.width))), y: window.innerHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
-      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: window.innerWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(window.innerHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      if (side == 0) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(screen.availWidth - cssToNumber(sphere1.style.width))), y: 0, width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 1) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: Math.round(Math.random() *(screen.availWidth - cssToNumber(sphere1.style.width))), y: screen.availHeight - cssToNumber(sphere1.style.width), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 2) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: 0, y: Math.round(Math.random() *(screen.availHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
+      else if (side == 3) highscores[mode][selected.pixelRate][selected.gegenstaende].objects.leererStation.push({x: screen.availWidth - cssToNumber(sphere1.style.width), y: Math.round(Math.random() *(screen.availHeight - cssToNumber(sphere1.style.width))), width: Math.round(Math.random() *(/*50**/JSON.parse(minLeererWidth.value) - JSON.parse(minLeererWidth.value))) + JSON.parse(minLeererWidth.value)/*50*/, height: Math.round(Math.random() *(/*50**/JSON.parse(minLeererHeight.value) - JSON.parse(minLeererHeight.value))) + JSON.parse(minLeererHeight.value)/*33*/});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSpielzeug.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.spielzeug.push({x: Math.round(Math.random() *(screen.availWidth)), y: Math.round(Math.random() *(screen.availHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minSpielzeugSize.value))) + JSON.parse(minSpielzeugSize.value)/*3*/, collected: false});
     }
     for (var i = 0; i < /*7*/JSON.parse(anzahlSchmuck.value); i++) { // hindernisseAufsaugen ("spielzeug")
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(window.innerWidth)), y: Math.round(Math.random() *(window.innerHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.schmuck.push({x: Math.round(Math.random() *(screen.availWidth)), y: Math.round(Math.random() *(screen.availHeight)), radius: Math.round(Math.random() *(/*22*/JSON.parse(maxSchmuckSize.value) - JSON.parse(minSchmuckSize.value))) + JSON.parse(minSchmuckSize.value)/*3*/, collected: false});
     }
     //setTimeout(function () {
     verfallsdaten = {ladung: 0, füllungLeft: 0};
     for (var i = 0; i < /*27*/JSON.parse(anzahlStaub.value); i++) { // Staub
       var radius = Math.round(Math.random() *(/*22*/JSON.parse(maxSpielzeugSize.value) - JSON.parse(minStaubSize.value))) + JSON.parse(minStaubSize.value)/*3*/;
       if (verfallsdaten.füllungLeft != undefined) verfallsdaten.füllungLeft += radius*2;
-      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.push({x: Math.round(Math.random() *(window.innerWidth)) + radius, y: Math.round(Math.random() *(window.innerHeight)) + radius, radius: radius, collected: false});
+      highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.push({x: Math.round(Math.random() *(screen.availWidth)) + radius, y: Math.round(Math.random() *(screen.availHeight)) + radius, radius: radius, collected: false});
       i2 = "defined";
-      if (highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].x > window.innerWidth - radius || highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].y > window.innerHeight - radius) {
+      if (highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].x > screen.availWidth - radius || highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub[highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.length - 1].y > screen.availHeight - radius) {
         i--;
         i2 = "skip";
         highscores[mode][selected.pixelRate][selected.gegenstaende].objects.staub.pop();}
@@ -910,7 +914,7 @@ localStorage.setItem("storedName", name);
       resetLevel("noLeerer");
     }, 100);
     if (!offline && save) dbSetWarteschlange.push({tag: "highscores", data: highscores});
-    else if (save && confirm("Wollen sie die pixel rate auf ihrem Gerät  speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben"))/*TODO*/ {
+    else if (save && confirm("Wollen sie die pixel rate auf ihrem Gerät  speichern, sodass sie wenn sie das nächste Mal Internet haben und dieses Dokument öffnen atomatisch hochgeladen wird? Mehr als 1 Mal wird die selbe pixel rate nicht zugelassen! Falls dies trotzdem geschieht, werden die Daten wahrscheinlich überschrieben")) {
       var newPixelRates = [];
       if (localStorage.getItem("newPixelRate")) newPixelRates = JSON.parse(localStorage.getItem("newPixelRate"));
       newPixelRates.push({pixelRate: selected.pixelRate, gegenstaende: selected.gegenstaende, data: highscores[mode][selected.pixelRate][selected.gegenstaende]});
@@ -930,6 +934,7 @@ localStorage.setItem("storedName", name);
     for (var i = 0; i < Object.keys(highscores[mode]).length; i++) {
       if (highscores[mode][Object.keys(highscores[mode])[i]][name] != undefined && Object.keys(highscores[mode])[i] == highscores[mode][Object.keys(highscores[mode])[i]][name].pixelRate) {
         console.log("level " + name + " with pixel rate " + Object.keys(highscores[mode])[i] + " selected!");
+        if ((Object.keys(highscores[mode])[i].toString().split(" x ")[0] > screen.availWidth || Object.keys(highscores[mode])[i].toString().split(" x ")[1] > screen.availHeight) && gerät == "Handy") alert("please turn the mobile device by 90°!");
         selected = {gegenstaende: name, maxVerfallsdaten: highscores[mode][Object.keys(highscores[mode])[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores[mode])[i], objects: highscores[mode][Object.keys(highscores[mode])[i]][name].objects, settings: highscores[mode][Object.keys(highscores[mode])[i]][name].settings, settingsConverted: highscores[mode][Object.keys(highscores[mode])[i]][name].settingsConverted};
         for (var i = 0; i < Object.keys(selected.settingsConverted).length; i++) {
           for (var i1 = 0; i1 < Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]]).length; i1++) {
@@ -946,7 +951,7 @@ localStorage.setItem("storedName", name);
         }
         */
         alert("Regeln: " + replaceAll(replaceAll(selected.settings, "false", "⛔"), "true", "✅"));
-        if (gerät == "Handy" && confirm("Wollen sie mit Jo-Stick spielen?")) joyStickPlay.checked = true;
+        if (gerät == "Handy" && confirm("Wollen sie mit Joy-Stick spielen?")) joyStickPlay.checked = true;
         resetLevel();
         i = Object.keys(highscores[mode]).length;
       }
@@ -978,13 +983,13 @@ localStorage.setItem("storedName", name);
   //   }, 1000);
   // }
   // ball
-  var pause = false;
+  var pause = {boolean: false, time: 0};
   sphere1.style.width = "50px";
   sphere1.style.height = "50px";
   var inOrAgainstDirection = 1;
-  var selected = {pixelRate: window.innerWidth + " x " + window.innerHeight};
+  var selected = {pixelRate: screen.availWidth + " x " + screen.availHeight};
   var x1 = 300,
-    y1 = 177; //window.innerHeight - 150 + 3,
+    y1 = 177; //screen.availHeight - 150 + 3,
   vx1 = 0, vy1 = 0,
     ax1 = 0, ay1 = 0;
   if (window.DeviceMotionEvent != undefined) {
@@ -998,9 +1003,10 @@ localStorage.setItem("storedName", name);
     joyStickPlay.checked = true;
   }
   setInterval(function() {
-    if ((mode != "creator" || Object.keys(beginningPoint).length < 1 || beginningPoint.mouseUp) && !pause) {
+    if ((mode != "creator" || Object.keys(beginningPoint).length < 1 || beginningPoint.mouseUp) && !pause.boolean) {
     if (oppsositeDirection.checked) inOrAgainstDirection = -1;
     else inOrAgainstDirection = 1;
+    if (screen.availWidth < screen.availHeight) inOrAgainstDirection *= (-1);
     if (audio && audio.currentTime >= 2*60 + 31) {
       playCleanerSound(true);
     }
@@ -1020,14 +1026,14 @@ localStorage.setItem("storedName", name);
     }
     else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
     // scrollingInterac.PC = true;
-    // if (!scrollingInterac.user && sphere1.style.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
-    // if (!scrollingInterac.user && sphere1.style.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
+    // if (!scrollingInterac.user && sphere1.style.y > screen.availWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
+    // if (!scrollingInterac.user && sphere1.style.y > screen.availHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
     // if (!scrollingInterac.user && sphere1.style.y - scrollX < (17*2 + sphere1.style.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
     // if (!scrollingInterac.user && sphere1.style.y - scrollY < (17*2 + sphere1.style.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
     // setTimeout(function () {
     //   scrollingInterac.PC = false;
     // }, 1);
-    var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
+    var landscapeOrientation = screen.availWidth / screen.availHeight > 1;
     if (landscapeOrientation) {
       vx1 = vx1 + ay1;
       vy1 = vy1 + ax1;
@@ -1047,6 +1053,7 @@ localStorage.setItem("storedName", name);
     if (stopSpielzeug.boolean) {
       noMoebelInFront = false;
       stopSpielzeug.time -= 20;
+      if (pause.boolean) pause.time += 0.1;
       if (stopSpielzeug.time < 1) {
         stopSpielzeug.boolean = false;
         if (stopSpielzeug.clearing) slowDownSpielzeug = {boolean: false, time: "endless"};
@@ -1181,7 +1188,7 @@ localStorage.setItem("storedName", name);
       canvas.fillStyle = "green";//"#2EFE2E";
       canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
       checkMark(selected.objects.ladestation[i], "rectangle");
-      if (showWayLadestation.checked || (verfallsdaten.ladung < window.innerWidth + window.innerHeight/5 && showWayLaderWhenLow.checked)) {
+      if (showWayLadestation.checked || (verfallsdaten.ladung < screen.availWidth + screen.availHeight/5 && showWayLaderWhenLow.checked)) {
         canvas.strokeStyle = "green";
         canvas.beginPath();
         canvas.moveTo(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y);
@@ -1263,9 +1270,13 @@ localStorage.setItem("storedName", name);
           alert("So schnell haben sie noch nie gesaugt!!!");
         }
         if (confirm("Wollen sie sich die Leistungen der anderen Spieler ansehen?")) {
+          resetLevel(undefined, true);
+          pause.boolean = true;
+          x1 = 1000;
           var highscoresShow = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].highscores));
           for (var i = 0; i < Object.keys(highscoresShow).length; i++) {
             if (!highscoresShow[Object.keys(highscoresShow)[i]].Handy) highscoresShow[Object.keys(highscoresShow)[i]].Handy = {};
+            if (!highscoresShow[Object.keys(highscoresShow)[i]].PC) highscoresShow[Object.keys(highscoresShow)[i]].PC = {};
             highscoresShow[Object.keys(highscoresShow)[i]] = {"PC with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].PC["joy-stick"], "Handy with joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["joy-stick"], "Handy without joy-stick": highscoresShow[Object.keys(highscoresShow)[i]].Handy["no joy-stick"]};
           }
           showScores(highscoresShow);
@@ -1431,13 +1442,13 @@ localStorage.setItem("storedName", name);
       if (cleanerAudio.checked) cleanerAudioVar.play();
     } catch (e) {console.log("audio not playable!")}
   }
-  function resetLevel(type) {
+  function resetLevel(type, texturNotVisible) {
     setTimeout(function () {
       window.scroll(9, 9);
     }, 500);
     textur.style.touchAction = 'none';
     time = 0;
-    textur.style.display = "inline";
+    if (!texturNotVisible) textur.style.display = "inline";
     if ((gerät == "PC" && (!joyStick || !joyStick.coordinates)) && type != "noLeerer"/* || joyStickPlay.checked*/) {joyStickPlay.checked = true; alert("please click to set a joy-stick!"); joyStick = "place";}
     if (type) console.log(type);
     inRound = true;
@@ -1511,7 +1522,7 @@ localStorage.setItem("storedName", name);
     }
     if (x1 > selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
       if (speed.highest.number > 5 && brokenCheck.checked && mode != "creator") {resetLevel("broken");}
-      x1 = /*window.innerWidth*/selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2 - 1;
+      x1 = /*screen.availWidth*/selected.pixelRate.toString().split(" x ")[0] - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2 - 1;
       if (bounceWalls.checked) vx1 = -vx1;
     }
     if (y1 > selected.pixelRate.toString().split(" x ")[1] - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
@@ -1528,6 +1539,8 @@ localStorage.setItem("storedName", name);
     if (joyStick == "place" && gerät == "PC") {
       joyStick = {coordinates : {x: mausx, y: mausy}};
     }
+    if (gerät == "Handy" && mode != "creator" && !pause.boolean) pause = {boolean: true, time: time};
+    else if (gerät == "Handy" && mode != "creator") {pause.boolean = false; time = JSON.parse(pause.time);}
   }
   document.addEventListener('touchmove', touch);
   document.addEventListener('touchstart', touch);
@@ -1658,10 +1671,10 @@ function showScores(highscores, mode) {
           // }
           if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] != undefined) cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]];
           else cell[cell.length - 2].innerHTML = "/";
-          if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] >  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1/* - 1*/]]) cell[cell.length - 2].style.color = "red";
-          else if (highscores[Object.keys(highscores)[i]][Object.keys(highscores[Object.keys(highscores)[i]])[i1 - 1]] <  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1/* - 1*/]]) cell[cell.length - 2].style.color = "green";
-          else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
+          if (highscores[name][Object.keys(highscores[name])[i1 - 1]] >  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1 - 1]]) cell[cell.length - 2].style.color = "red";
+          else if (highscores[name][Object.keys(highscores[name])[i1 - 1]] <  highscores[Object.keys(highscores)[i]][Object.keys( highscores[Object.keys(highscores)[i]])[i1 - 1]]) cell[cell.length - 2].style.color = "green";
           else cell[cell.length - 2].style.color = "black";
+          /*else */if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
 
         } else {
           cell[cell.length - 2] = row.insertCell(i1);
@@ -1684,7 +1697,7 @@ function showScores(highscores, mode) {
   for (var i1 = 0; i1 < highestLives.lives + 1; i1++) {
     cell.push(row.insertCell(i1));
     if (i1 == 0) cell[cell.length - 1].innerHTML = "name";
-    else cell[cell.length - 1].innerHTML = Object.keys(highscoresShow[name])[i1 - 1];
+    else cell[cell.length - 1].innerHTML = Object.keys(highscores/*Show*/[name])[i1 - 1];
   }
 }
 </script>
