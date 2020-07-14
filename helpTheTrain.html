@@ -1,0 +1,185 @@
+<canvas id="textur" width="1800" height="700"></canvas>
+
+<script>
+  var canvas = textur.getContext('2d');
+  var fields = [
+      { // gerade
+        wallStructure: [
+          {
+            type: "wall",
+            number: 3
+          },
+          {
+            type: "way",
+            number: 3,
+          },
+          {
+            type: "wall",
+            number: 3
+          }
+        ],
+        number: 12
+      },
+      {
+        wallStructure: [
+          { // Kurve
+            type: "wall",
+            number: 4
+          },
+          {
+            type: "way",
+            number: 2,
+          },
+          {
+            type: "wall",
+            number: 1
+          },
+          {
+            type: "way",
+            number: 1,
+          },
+          {
+            type: "wall",
+            number: 1
+          }
+        ],
+        number: 28
+      },
+      {
+        wallStructure: [
+          { // Weiche
+            type: "wall",
+            number: 1
+          },
+          {
+            type: "way",
+            number: 1,
+          },
+          {
+            type: "wall",
+            number: 1
+          },
+          {
+            type: "way",
+            number: 3
+          },
+          {
+            type: "wall",
+            number: 3
+          }
+        ],
+        number: 9
+      }
+
+  ]
+  var field = [];
+  for (var i = 0; i < 7; i++) {
+  field[i] = [];
+  for (var i1 = 0; i1 < 7; i1++) {
+    field[i][i1] = newField();
+  }
+}
+Layout();
+function newField() {
+  var newField = [];
+  var possibleStructure = [];
+  for (var i = 0; i < fields.length; i++) {
+    if (fields[i].number > 0) possibleStructure.push(i);
+  }
+  var selectedStructure = possibleStructure[Math.round(Math.random() *(possibleStructure.length - 1))];
+  var i2 = 0;
+  var i3 = 0;
+  // try {
+  //   console.log(fields[selectedStructure].wallStructure.length);
+  // } catch (e) {
+  //   console.log("please debug ;) ");
+  // }
+  for (var i = 0; i < fields[selectedStructure].wallStructure.length; i++) {
+    for (var i1 = 0; i1 < fields[selectedStructure].wallStructure[i].number; i1++) {
+      if (!newField[i2]) newField[i2] = [];
+      newField[i2][i3] = {type: fields[selectedStructure].wallStructure[i].type};
+      i2++;
+      if (i2 == 3) {i2 = 0; i3++;}
+    }
+  }
+
+  fields[selectedStructure].number--;
+  for (var i = 0; (i < Math.round(Math.random() * 11)); i++) {
+    if ((Math.round(Math.random() *1) == 0)) newField = turn("right", newField);
+    else newField = turn("left", newField);
+  }
+  return newField
+}
+function turn(direction, officialCard) {
+var newField = [[], [], []];
+newField[1][1] = officialCard[1][1];
+if (direction == "right") {
+  for (var i = 0; i < 3; i++) { // rechts --> unten works!
+    newField[i][2] = officialCard[2][i];
+  }
+  for (var i = 0; i < 3; i++) { // unten --> links  works!
+    newField[0][i] = officialCard[1 - 1 + i][1 + 1];
+  }
+  for (var i = 0; i < 3; i++) { // oben --> rechts works!
+    newField[2][i] = officialCard[i][0];
+  }
+  var i1 = 0;
+  for (var i = 2; i > -1; i--) { // links --> oben works!
+    newField[i1][0] = officialCard[0][i];
+    i1++;
+  }
+}
+else {
+  for (var i = 2; i > -1; i--) { // rechts --> oben
+    newField[i][0] = officialCard[2][i];
+  }
+  var i1 = 0;
+  for (var i = 3; i > 0; i--) { // unten --> rechts
+    newField[2][i - 1] = officialCard[i1][2];
+    i1++;
+  }
+  var i1 = 0;
+  for (var i = 3; i > 0; i--) { // oben --> links
+    newField[0][i1] = officialCard[i - 1][0];
+    i1++;
+  }
+  for (var i = 0; i < 3; i++) { // links --> unten
+    newField[i][2] = officialCard[0][i];
+  }
+}
+
+return newField;
+}
+function Layout(times) {
+  textur.height = 7*3*50 + 10;
+  if (!times) times = 0;
+  for (var i = 0; i < 7; i++) {
+    for (var i1 = 0; i1 < 7; i1++) {
+      displayCard(field, i, i1, 10 + 50*3*i, 10 + 50*3*i1, times);
+    }
+  }
+  if (times < 5) {
+    setTimeout(function () {
+      Layout(times + 1);
+    }, 70);
+  }
+}
+
+function displayCard(field, i, i1, startx, starty, times) {
+  canvas.globalAlpha = 1;//0.5
+  if (isNaN(times)) canvas.globalAlpha = 0.5;
+  for (var i2 = 0; i2 < 3; i2++) {
+    for (var i3 = 0; i3 < 3; i3++) {
+      if (field[i][i1][i2][i3].type == "wall") canvas.fillStyle = "brown";
+      else canvas.fillStyle = "gray";
+      if ((i2 == 2 && i3 == 2)) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 45);
+      else if (i2 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 50);
+      else if (i3 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 45);
+      else/* (i2 != 2 && i3 != 2)*/ canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 50);
+      itemsVerbleibend = [0, 0, 0, 0];
+    }
+  }
+  if (field[i][i1][0][0].movable/* && field[1] != undefined*/) canvas.fillStyle = "#40FF00";
+  else /*if (field[1] != undefined) */canvas.fillStyle = "red";
+}
+</script>
