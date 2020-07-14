@@ -1,4 +1,4 @@
-<canvas id="textur" width="1800" height="700"></canvas>
+<canvas id="textur" onclick="canvasClicked();" width="1800" height="700"></canvas>
 
 <script>
   var canvas = textur.getContext('2d');
@@ -18,7 +18,37 @@
             number: 3
           }
         ],
-        number: 12
+        number: 16
+      },
+      /*{ // Bahnhof
+        wallStructure: [
+          {
+            type: "way",
+            number: 3
+          },
+          {
+            type: "wall",
+            number: 6,
+          }
+        ],
+        number: 2
+      },*/
+      { // Puffer
+        wallStructure: [
+          {
+            type: "wall",
+            number: 3
+          },
+          {
+            type: "way",
+            number: 2,
+          },
+          {
+            type: "wall",
+            number: 4
+          }
+        ],
+        number: 2
       },
       {
         wallStructure: [
@@ -43,7 +73,7 @@
             number: 1
           }
         ],
-        number: 28
+        number: 24
       },
       {
         wallStructure: [
@@ -54,6 +84,7 @@
           {
             type: "way",
             number: 1,
+            active: true
           },
           {
             type: "wall",
@@ -61,14 +92,20 @@
           },
           {
             type: "way",
-            number: 3
+            number: 2,
+            active: true
+          },
+          {
+            type: "way",
+            number: 1,
+            active: false
           },
           {
             type: "wall",
             number: 3
           }
         ],
-        number: 9
+        number: 7
       }
 
   ]
@@ -79,9 +116,10 @@
     field[i][i1] = newField();
   }
 }
+var train = {spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"};
 Layout();
 function newField() {
-  var newField = [];
+  var newField = {};
   var possibleStructure = [];
   for (var i = 0; i < fields.length; i++) {
     if (fields[i].number > 0) possibleStructure.push(i);
@@ -98,6 +136,7 @@ function newField() {
     for (var i1 = 0; i1 < fields[selectedStructure].wallStructure[i].number; i1++) {
       if (!newField[i2]) newField[i2] = [];
       newField[i2][i3] = {type: fields[selectedStructure].wallStructure[i].type};
+      if (fields[selectedStructure].wallStructure[i].active != undefined) newField[i2][i3].active = fields[selectedStructure].wallStructure[i].active;
       i2++;
       if (i2 == 3) {i2 = 0; i3++;}
     }
@@ -111,7 +150,7 @@ function newField() {
   return newField
 }
 function turn(direction, officialCard) {
-var newField = [[], [], []];
+var newField = {0: [], 1: [], 2: []};
 newField[1][1] = officialCard[1][1];
 if (direction == "right") {
   for (var i = 0; i < 3; i++) { // rechts --> unten works!
@@ -151,18 +190,22 @@ else {
 return newField;
 }
 function Layout(times) {
-  textur.height = 7*3*50 + 10;
+  textur.height = 7*3*50 + 10 + 50;
+  textur.width = 7*3*50 + 10 + 50;
   if (!times) times = 0;
   for (var i = 0; i < 7; i++) {
     for (var i1 = 0; i1 < 7; i1++) {
       displayCard(field, i, i1, 10 + 50*3*i, 10 + 50*3*i1, times);
     }
   }
-  if (times < 5) {
+  /*if (times < 5) {
     setTimeout(function () {
       Layout(times + 1);
     }, 70);
-  }
+  }*/
+  canvas.fillStyle = "red";
+  canvas.fillRect((7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40);
+  canvas.fillRect(10 + train.position.x*50*3 + train.position.i2*50 + 5, 10 + 50*3*train.position.y + train.position.i3*50 + 5, 40, 40);
 }
 
 function displayCard(field, i, i1, startx, starty, times) {
@@ -172,14 +215,111 @@ function displayCard(field, i, i1, startx, starty, times) {
     for (var i3 = 0; i3 < 3; i3++) {
       if (field[i][i1][i2][i3].type == "wall") canvas.fillStyle = "brown";
       else canvas.fillStyle = "gray";
-      if ((i2 == 2 && i3 == 2)) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 45);
-      else if (i2 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 50);
-      else if (i3 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 45);
-      else/* (i2 != 2 && i3 != 2)*/ canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 50);
-      itemsVerbleibend = [0, 0, 0, 0];
+      fillField(i2, i3, startx, starty);
+      if (field[i][i1][i2][i3].active) {
+         canvas.globalAlpha = 0.4;
+        canvas.fillStyle = "green";
+        fillField(i2, i3, startx, starty);
+         canvas.globalAlpha = 1;
+      }
     }
   }
-  if (field[i][i1][0][0].movable/* && field[1] != undefined*/) canvas.fillStyle = "#40FF00";
-  else /*if (field[1] != undefined) */canvas.fillStyle = "red";
+}
+function fillField(i2, i3, startx, starty) {
+  if ((i2 == 2 && i3 == 2)) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 45);
+  else if (i2 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 45, 50);
+  else if (i3 == 2) canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 45);
+  else/* (i2 != 2 && i3 != 2)*/ canvas.fillRect(startx + 50*i2, starty + 50*i3, 50, 50);
+}
+var xMaus;
+var yMaus;
+document.onmousemove = readMouseMove
+function readMouseMove(e) {
+  xMaus = e.clientX + scrollX //- 10;
+  yMaus = e.clientY + scrollY //+ 23//- 33;
+  //    console.log(xMaus + " - " + yMaus);
+  Layout(5);
+  canvas.fillStyle = "red";
+  if (selected.type == "train") canvas.fillRect(xMaus, yMaus, 40, 40);
+}
+function canvasClicked() {
+  for (var i = 0; i < 7; i++) {
+  for (var i1 = 0; i1 < 7; i1++) {
+    // 10 + 50*3*i, 10 + 50*3*i1
+    for (var i2 = 0; i2 < 3; i2++) {
+      for (var i3 = 0; i3 < 3; i3++) {
+        // if (xMaus > 10 + 50*i2*i && xMaus < 10 + 50*i2*i  + 130 && yMaus > 10 + 50*i3*i1  && yMaus < 10 + 50*i3*i1  + 130 && player.movement == "movingPlayer" && checkMovementPossibe(player.movingPlayer.x, player.movingPlayer.y, player.movingPlayer.i2, player.movingPlayer.i3)) {
+        //       field[i][i1][i2][i3].player = player.myNumber
+        //       field[player.movingPlayer.x][player.movingPlayer.y][i2][i3].player = false;
+        //     }
+        if ((/*gerät == "PC" && */xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus > 10 + 50*3*i1 + 50*i3 && yMaus < 10 + 50*3*i1 + 50*i3 + 50) /*|| (gerät == "Handy" && xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus - scrollY > 10 + 50*3*i1 + 50*i3 && yMaus - scrollY < 10 + 50*3*i1 + 50*i3 + 50)*/) {
+          console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
+          if (selected.type != "train") {
+          if (field[i][i1][i2][i3].active) { // weiche stellen
+            // weiche noch nicht gestellt (Ausgangszustand)
+            if (!field[i][i1].straight) {
+            if ((!field[i][i1][0][1].active && field[i][i1][0][1].type == "way")/*Weiche nach unten -*/) {field[i][i1][0][1].active = true; field[i][i1][1][2].active = false;}
+            else if ((!field[i][i1][2][1].active && field[i][i1][2][1].type == "way")/*Weiche nach oben -*/) {field[i][i1][2][1].active = true; field[i][i1][1][0].active = false;}
+            else if ((!field[i][i1][1][2].active && field[i][i1][1][2].type == "way")/*Weiche nach rechts -*/) {field[i][i1][1][2].active = true; field[i][i1][2][1].active = false;}
+            else if ((!field[i][i1][1][0].active && field[i][i1][1][1].type == "way")/*Weiche nach links*/) {field[i][i1][1][0].active = true; field[i][i1][0][1].active = false;}
+            field[i][i1].straight = true;
+          }
+          else {
+            if ((!field[i][i1][1][2].active && field[i][i1][1][2].type == "way")/*Weiche nach unten -*/) {field[i][i1][0][1].active = false; field[i][i1][1][2].active = true;}
+            else if ((!field[i][i1][1][0].active && field[i][i1][1][0].type == "way")/*Weiche nach oben -*/) {field[i][i1][2][1].active = false; field[i][i1][1][0].active = true;}
+            else if ((!field[i][i1][2][1].active && field[i][i1][2][1].type == "way")/*Weiche nach rechts -*/) {field[i][i1][1][2].active = false; field[i][i1][2][1].active = true;}
+            else if ((!field[i][i1][0][1].active && field[i][i1][0][1].type == "way")/*Weiche nach links*/) {field[i][i1][1][0].active = false; field[i][i1][0][1].active = true;}
+            field[i][i1].straight = false;
+          }
+        }
+          else field[i][i1] = turn("right", field[i][i1]);
+          Layout();
+        }
+        else if (field[i][i1][i2][i3].type == "way" && i == 0) {
+          train.spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
+          train.position = JSON.parse(JSON.stringify(train.spawnPoint));
+          selected.type = "";
+        }
+      }
+      }
+    }
+  }
+}
+// (7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40
+if (xMaus > (7*3*50)/ 2 + 10 && xMaus < (7*3*50)/ 2 + 10 + 40 && yMaus > 7*3*50 + 10 && yMaus < 7*3*50 + 10 + 40) selected.type = "train";
+}
+var selected = {type: ""};
+function moveTrain() {
+  var possibleDirections = [];
+  var downIncluded = false;
+  if (train.direction != "left" && isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).position, direction: "right"});}
+  if (train.direction != "right" && isTrack(train.position.x, train.position.y, train.position.i2 - 1, train.position.i3).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2 - 1, train.position.i3).position, direction: "left"});}
+  if (train.direction != "up" && isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).position, direction: "down"}); downIncluded = true;}
+  if (train.direction != "down" && isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 - 1).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 - 1).position, direction: "up"});}
+  if (downIncluded) {train.direction = "down"; train.position = JSON.parse(JSON.stringify(isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).position));}
+  else if (possibleDirections.length == 0) {console.log("Puffer or wall reached!"); changeDirection();}
+  else {train.position = JSON.parse(JSON.stringify(possibleDirections[0].track)); train.direction = possibleDirections[0].direction}
+  Layout();
+  setTimeout(function () {
+    moveTrain();
+  }, 90);
+}
+function isTrack(i, i1, i2, i3) {
+  var transform = false;
+  if (i2 == 3) {i2 = 0; i++; transform = true;}
+  if (i3 == 3) {i3 = 0; i1++; transform = true;}
+  if (i2 == -1) {i2 = 2; i--; transform = true;}
+  if (i3 == -1) {i3 = 2; i1--; transform = true;}
+  try {
+    return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
+  } catch (e) {
+    console.log("turning, because edge reached (later on right side goal)");
+    return {boolean: false};
+    changeDirection();
+  }
+}
+function changeDirection() {
+  var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
+  train.direction = oppositeDirection[train.direction];
 }
 </script>
