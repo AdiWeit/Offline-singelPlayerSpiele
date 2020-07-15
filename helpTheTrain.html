@@ -21,12 +21,20 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
 <button type="button" onclick="createField();" name="button">create field</button>
 </div>
+<div id="highscores">
+  <h1 id="highscoresBetterThanYours"></h1>
+  <h1 id="highscoresAsGoodAsYours"></h1>
+  <h1 id="highscoresWorseThanYours"></h1>
+</div>
 <canvas id="textur" onclick="canvasClicked();" width="1800" height="700"></canvas>
 <br>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase(undefined, true);'></h1>
 <br>
 <button type="button" id="test" onclick="inRound = true; if (innerHTML == 'test') {innerHTML = 'beende test'; moveTrain();} else {resetTrain();} " name="button">test</button>
 <script>
+  document.getElementById('highscoresBetterThanYours').style.color = "red"
+  document.getElementById('highscoresWorseThanYours').style.color = "green";
+  document.getElementById('highscores').style.display = "none"
   var canvas = textur.getContext('2d');
   var fields = [
       { // gerade
@@ -156,6 +164,7 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
     });
   }
   function changeSetings(innerHTML) {
+    document.getElementById('highscores').style.display = "inline";
     rotateInRound.checked = JSON.parse(innerHTML.toString().split("bei Test rotieren: ")[1]);
     createField(true, innerHTML);
   }
@@ -419,7 +428,25 @@ function saveHighscore() {
     highscores[selectedSettings].highscores[name] = zuege;
     dbSetWarteschlange.push({tag: "highscores", data: highscores});
   }
-  resetTrain();
+  highscoresBetterThanYours.innerHTML = "";
+  highscoresAsGoodAsYours.innerHTML = "";
+  highscoresWorseThanYours.innerHTML = "";
+  for (var i = 0; i < Object.keys(highscores[selectedSettings].highscores).length; i++) {
+    if (Object.keys(highscores[selectedSettings].highscores)[i] != name && highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] < highscores[selectedSettings].highscores[name]) highscoresBetterThanYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
+    if (Object.keys(highscores[selectedSettings].highscores)[i] != name && highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] > highscores[selectedSettings].highscores[name]) highscoresWorseThanYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
+    else if (Object.keys(highscores[selectedSettings].highscores)[i] != name) highscoresAsGoodAsYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
+  }
+  document.getElementById('highscores').style.display = "inline";
+  resetTrain(true);
+  // if ((Ablage[0][zähler[0]][0] > dataMode[document.getElementById('Auswahl').value])) {
+  //   document.getElementById('highscoresBetterThanYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+  // }
+  // else if ((Ablage[0][zähler[0]][0] < dataMode[document.getElementById('Auswahl').value])) {
+  //   document.getElementById('highscoresWorseThanYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+  // }
+  // else {
+  //   document.getElementById('highscoresAsGoodAsYours').innerHTML += Ablage[0][zähler[0]][0] + "  " + Ablage[0][zähler[0]][1] + '<br>';
+  // }
 }
 var selectedField = [];
 var dbSetWarteschlange = [];
@@ -433,10 +460,10 @@ function changeDirection() {
   var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
   train.direction = oppositeDirection[train.direction];
 }
-function resetTrain() {
+function resetTrain(map) {
   inRound = false;
   train.position = JSON.parse(JSON.stringify(train.spawnPoint));
-  zuege = 0;
+  if (map) zuege = 0;
   bahnhoefe = {verbleibend: bahnhoefe.collected, collected: 0, all: bahnhoefe.collected};
   test.innerHTML = 'test';
   for (var i = 0; i < field.length; i++) {
@@ -448,7 +475,7 @@ function resetTrain() {
       }
     }
   }
-  field = JSON.parse(JSON.stringify(selectedField))
+  if (map) field = JSON.parse(JSON.stringify(selectedField));
   Layout();
 }
 </script>
