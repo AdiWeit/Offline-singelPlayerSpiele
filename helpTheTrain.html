@@ -1,5 +1,31 @@
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<div id="settings">
+<ul id="settingsL" font-size:30px></ul>
+Breite<input type="text" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="breite" value="7">
+<br>
+Höhe<input type="text" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="hoehe" value="7">
+<br>
+anzahl Geraden<input id="anzahlGeraden" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="16">
+<br>
+anzahl Puffer<input id="anzahlPuffer" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="2">
+<br>
+anzahl Bahnhöfe<input id="anzahlBahnhoefe" type="text" value="1">
+<br>
+anzahl Kurven<input id="anzahlKurven" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="24">
+<br>
+anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="7">
+<h2 id="verteilung"></h2>
+<br>
+auch beim Test rotieren<input id="rotateInRound" type="checkbox">
+<br>
+<button type="button" onclick="createField();" name="button">create field</button>
+</div>
 <canvas id="textur" onclick="canvasClicked();" width="1800" height="700"></canvas>
-
+<br>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase(undefined, true);'></h1>
+<br>
+<button type="button" id="test" onclick="inRound = true; if (innerHTML == 'test') {innerHTML = 'beende test'; moveTrain();} else {resetTrain();} " name="button">test</button>
 <script>
   var canvas = textur.getContext('2d');
   var fields = [
@@ -110,16 +136,59 @@
       }
 
   ]
+  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  else var name = localStorage.getItem("storedName");
+  localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
+  getDatabase();
+  function getDatabase(pReturn) {
+    dbGet("helpTheTrain", "highscores").then(result => {
+      highscores = result;
+      for (var i = 0; i < Object.keys(highscores).length; i++) {
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
+         li.setAttribute("onclick", "changeSetings(innerHTML)");
+        document.getElementById("settingsL").appendChild(li);
+      }
+      if (pReturn) saveHighscore();
+    }).catch(function(e) {
+      if (pReturn) saveHighscore();
+    });
+  }
+  function changeSetings(innerHTML) {
+    rotateInRound.checked = JSON.parse(innerHTML.toString().split("bei Test rotieren: ")[1]);
+    createField(true, innerHTML);
+  }
   var field = [];
   var bahnhoefe = {verbleibend: 1, collected: 0, all: 1};
-  for (var i = 0; i < 7; i++) {
-  field[i] = [];
-  for (var i1 = 0; i1 < 7; i1++) {
-    field[i][i1] = newField(i);
+  var highscores = {};
+  function createField(restore, selected) {
+    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked;
+    if (restore) field = highscores[selected].data.field
+    if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
+      for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
+        selectedSettings += "|";
+      }
+    }
+    else if (!restore && Object.keys(highscores).includes(selectedSettings)) {
+      return "cancel";
+    }
+    fields[0].number = JSON.parse(anzahlGeraden.value);
+    fields[1].number = JSON.parse(anzahlPuffer.value);
+    fields[2].number = JSON.parse(anzahlKurven.value);
+    fields[3].number = JSON.parse(anzahlWeichen.value);
+    for (var i = 0; !restore && i < JSON.parse(breite.value); i++) {
+    field[i] = [];
+    for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
+      field[i][i1] = newField(i);
+    }
   }
-}
+  selectedField = JSON.parse(JSON.stringify(field));
+  settings.style.display = "none";
+  Layout();
+  zuege = 0;
+  }
 var train = {spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"};
-Layout();
 function newField(pI) {
   var newField = {};
   var possibleStructure = [];
@@ -130,7 +199,7 @@ function newField(pI) {
   var i2 = 0;
   var i3 = 0;
   // try {
-  //   console.log(fields[selectedStructure].wallStructure.length);
+  //   console.log(fields[selectedStructure].wallStructure);
   // } catch (e) {
   //   console.log("please debug ;) ");
   // }
@@ -159,6 +228,7 @@ function newField(pI) {
   return newField
 }
 function turn(direction, officialCard) {
+zuege++;
 var newField = {0: [], 1: [], 2: []};
 newField[1][1] = officialCard[1][1];
 if (direction == "right") {
@@ -199,11 +269,11 @@ else {
 return newField;
 }
 function Layout(times) {
-  textur.height = 7*3*50 + 10 + 50;
-  textur.width = 7*3*50 + 10 + 50;
+  textur.height = JSON.parse(hoehe.value)*3*50 + 10 + 50;
+  textur.width = JSON.parse(breite.value)*3*50 + 10 + 50;
   if (!times) times = 0;
-  for (var i = 0; i < 7; i++) {
-    for (var i1 = 0; i1 < 7; i1++) {
+  for (var i = 0; i < JSON.parse(breite.value); i++) {
+    for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
       displayCard(field, i, i1, 10 + 50*3*i, 10 + 50*3*i1, times);
     }
   }
@@ -213,7 +283,7 @@ function Layout(times) {
     }, 70);
   }*/
   canvas.fillStyle = "red";
-  canvas.fillRect((7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40);
+  canvas.fillRect((JSON.parse(breite.value)*3*50)/ 2 + 10, JSON.parse(hoehe.value)*3*50 + 10, 40, 40);
   canvas.fillRect(10 + train.position.x*50*3 + train.position.i2*50 + 5, 10 + 50*3*train.position.y + train.position.i3*50 + 5, 40, 40);
 }
 
@@ -249,13 +319,12 @@ function readMouseMove(e) {
   xMaus = e.clientX + scrollX //- 10;
   yMaus = e.clientY + scrollY //+ 23//- 33;
   //    console.log(xMaus + " - " + yMaus);
-  Layout(5);
   canvas.fillStyle = "red";
-  if (selected.type == "train") canvas.fillRect(xMaus, yMaus, 40, 40);
+  if (selected.type == "train") {Layout(5); canvas.fillRect(xMaus, yMaus, 40, 40);}
 }
 function canvasClicked() {
-  for (var i = 0; i < 7; i++) {
-  for (var i1 = 0; i1 < 7; i1++) {
+  for (var i = 0; i < JSON.parse(breite.value); i++) {
+  for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
     // 10 + 50*3*i, 10 + 50*3*i1
     for (var i2 = 0; i2 < 3; i2++) {
       for (var i3 = 0; i3 < 3; i3++) {
@@ -284,7 +353,7 @@ function canvasClicked() {
             field[i][i1].straight = false;
           }
         }
-          else field[i][i1] = turn("right", field[i][i1]);
+          else if (!inRound || rotateInRound.checked) field[i][i1] = turn("right", field[i][i1]);
           Layout();
         }
         else if (field[i][i1][i2][i3].type == "way" && i == 0) {
@@ -298,9 +367,10 @@ function canvasClicked() {
   }
 }
 // (7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40
-if (xMaus > (7*3*50)/ 2 + 10 && xMaus < (7*3*50)/ 2 + 10 + 40 && yMaus > 7*3*50 + 10 && yMaus < 7*3*50 + 10 + 40) selected.type = "train";
+if (xMaus > (JSON.parse(breite.value)*3*50)/ 2 + 10 && xMaus < (JSON.parse(breite.value)*3*50)/ 2 + 10 + 40 && yMaus > JSON.parse(hoehe.value)*3*50 + 10 && yMaus < JSON.parse(hoehe.value)*3*50 + 10 + 40) selected.type = "train";
 }
 var selected = {type: ""};
+var inRound = false;
 function moveTrain() {
   var possibleDirections = [];
   var downIncluded = false;
@@ -313,9 +383,10 @@ function moveTrain() {
   else {train.position = JSON.parse(JSON.stringify(possibleDirections[0].track)); train.direction = possibleDirections[0].direction}
   Layout();
   setTimeout(function () {
-    moveTrain();
+    if (inRound) moveTrain();
   }, 90);
 }
+var zuege = 0;
 function isTrack(i, i1, i2, i3) {
   var transform = false;
   if (i2 == 3) {i2 = 0; i++; transform = true;}
@@ -325,18 +396,59 @@ function isTrack(i, i1, i2, i3) {
   try {
   if (field[i][i1][i2][i3].collected === false) {
     field[i][i1][i2][i3].collected = true;
+
     bahnhoefe.collected++;
   }
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
-    console.log("turning, because edge reached (later on right side goal)");
-    if (bahnhoefe.collected == bahnhoefe.all && i == 7) console.log("finished!");
+    console.log("turning, because edge reached");
+    if (bahnhoefe.collected == bahnhoefe.all && i == JSON.parse(breite.value)) {
+      console.log("finished!");
+      alert("Sie haben es in " + zuege + " Zügen geschafft!");
+      getDatabase(true);
+    }
     return {boolean: false};
     changeDirection();
   }
 }
+var selectedSettings;
+function saveHighscore() {
+  if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField}, highscores: {}};
+  if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings][name] > zuege) {
+    if (highscores[selectedSettings].highscores[name] > zuege) alert("So wenig Züge haben sie noch nie gebraucht!");
+    highscores[selectedSettings].highscores[name] = zuege;
+    dbSetWarteschlange.push({tag: "highscores", data: highscores});
+  }
+  resetTrain();
+}
+var selectedField = [];
+var dbSetWarteschlange = [];
+setInterval(function () {
+  if (dbSetWarteschlange.length > 0) {
+    dbSet("helpTheTrain", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+    dbSetWarteschlange.shift();
+  }
+}, 2222);
 function changeDirection() {
   var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
   train.direction = oppositeDirection[train.direction];
+}
+function resetTrain() {
+  inRound = false;
+  train.position = JSON.parse(JSON.stringify(train.spawnPoint));
+  zuege = 0;
+  bahnhoefe = {verbleibend: bahnhoefe.collected, collected: 0, all: bahnhoefe.collected};
+  test.innerHTML = 'test';
+  for (var i = 0; i < field.length; i++) {
+    for (var i1 = 0; i1 < field[0].length; i1++) {
+      for (var i2 = 0; i2 < 3; i2++) {
+        for (var i3 = 0; i3 < 3; i3++) {
+          if (field[i][i1][i2][i3].collected === true) field[i][i1][i2][i3].collected = false;
+        }
+      }
+    }
+  }
+  field = JSON.parse(JSON.stringify(selectedField))
+  Layout();
 }
 </script>
