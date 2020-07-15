@@ -23,8 +23,9 @@
       /*{ // Bahnhof
         wallStructure: [
           {
-            type: "way",
-            number: 3
+            type: "bahnsteig",
+            number: 3,
+            done: false
           },
           {
             type: "wall",
@@ -110,15 +111,16 @@
 
   ]
   var field = [];
+  var bahnhoefe = {verbleibend: 1, collected: 0, all: 1};
   for (var i = 0; i < 7; i++) {
   field[i] = [];
   for (var i1 = 0; i1 < 7; i1++) {
-    field[i][i1] = newField();
+    field[i][i1] = newField(i);
   }
 }
 var train = {spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"};
 Layout();
-function newField() {
+function newField(pI) {
   var newField = {};
   var possibleStructure = [];
   for (var i = 0; i < fields.length; i++) {
@@ -141,7 +143,14 @@ function newField() {
       if (i2 == 3) {i2 = 0; i3++;}
     }
   }
-
+  for (var i2 = 0; i2 < 3; i2++) {
+    for (var i3 = 0; i3 < 3; i3++) {
+      if (pI > 0 && newField[i2][i3].type == "wall" && bahnhoefe.verbleibend > 0 && Math.round(Math.random() *(100)) < 10 && ((newField[i2 - 1] && newField[i2 - 1][i3].type == "way") || (newField[i2 + 1] && newField[i2 + 1][i3].type == "way") || (newField[i2][i3 - 1] && newField[i2][i3 - 1].type == "way") || (newField[i2][i3 + 1] && newField[i2][i3 + 1].type == "way"))) {
+        newField[i2][i3].collected = false;
+        bahnhoefe.verbleibend--;
+      }
+    }
+  }
   fields[selectedStructure].number--;
   for (var i = 0; (i < Math.round(Math.random() * 11)); i++) {
     if ((Math.round(Math.random() *1) == 0)) newField = turn("right", newField);
@@ -214,7 +223,9 @@ function displayCard(field, i, i1, startx, starty, times) {
   for (var i2 = 0; i2 < 3; i2++) {
     for (var i3 = 0; i3 < 3; i3++) {
       if (field[i][i1][i2][i3].type == "wall") canvas.fillStyle = "brown";
-      else canvas.fillStyle = "gray";
+      else if (field[i][i1][i2][i3].type == "way") canvas.fillStyle = "gray";
+      if (field[i][i1][i2][i3].type == "wall" && field[i][i1][i2][i3].collected === false) canvas.fillStyle = "red";
+      if (field[i][i1][i2][i3].type == "wall" && field[i][i1][i2][i3].collected === true) canvas.fillStyle = "#40FF00";
       fillField(i2, i3, startx, starty);
       if (field[i][i1][i2][i3].active) {
          canvas.globalAlpha = 0.4;
@@ -254,7 +265,8 @@ function canvasClicked() {
         //     }
         if ((/*gerät == "PC" && */xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus > 10 + 50*3*i1 + 50*i3 && yMaus < 10 + 50*3*i1 + 50*i3 + 50) /*|| (gerät == "Handy" && xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus - scrollY > 10 + 50*3*i1 + 50*i3 && yMaus - scrollY < 10 + 50*3*i1 + 50*i3 + 50)*/) {
           console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
-          if (selected.type != "train") {
+          if (i == train.spawnPoint.x && i1 == train.spawnPoint.y && i2 == train.spawnPoint.i2 && i3 == train.spawnPoint.i3) selected.type = "train";
+          else if (selected.type != "train") {
           if (field[i][i1][i2][i3].active) { // weiche stellen
             // weiche noch nicht gestellt (Ausgangszustand)
             if (!field[i][i1].straight) {
@@ -311,9 +323,14 @@ function isTrack(i, i1, i2, i3) {
   if (i2 == -1) {i2 = 2; i--; transform = true;}
   if (i3 == -1) {i3 = 2; i1--; transform = true;}
   try {
+  if (field[i][i1][i2][i3].collected === false) {
+    field[i][i1][i2][i3].collected = true;
+    bahnhoefe.collected++;
+  }
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
     console.log("turning, because edge reached (later on right side goal)");
+    if (bahnhoefe.collected == bahnhoefe.all && i == 7) console.log("finished!");
     return {boolean: false};
     changeDirection();
   }
