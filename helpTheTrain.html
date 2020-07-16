@@ -1,6 +1,7 @@
 <meta charset="utf-8">
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <div id="settings">
+auch welche, bei denen ich am besten bin zeigen<input id="showFinished" onchange="getDatabase();" checked="true" type="checkbox">
 <ul id="settingsL" font-size:30px></ul>
 Breite<input type="text" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="breite" value="7">
 <br>
@@ -30,11 +31,11 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase(undefined, true);'></h1>
 <br>
-<button type="button" id="test" onclick="inRound = true; if (innerHTML == 'test') {innerHTML = 'beende test'; moveTrain();} else {resetTrain();} " name="button">test</button>
+<button type="button" id="test" onclick="inRound = true; if (innerHTML == 'test') {innerHTML = 'beende test'; window.scroll(0, 0); moveTrain();} else {resetTrain();} " name="button">test</button>
 <script>
   document.getElementById('highscoresBetterThanYours').style.color = "red"
   document.getElementById('highscoresWorseThanYours').style.color = "green";
-  document.getElementById('highscores').style.display = "none"
+  document.getElementById('highscores').style.display = "none";
   var canvas = textur.getContext('2d');
   var fields = [
       { // gerade
@@ -152,11 +153,28 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
   function getDatabase(pReturn) {
     dbGet("helpTheTrain", "highscores").then(result => {
       highscores = result;
+      for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
+        try {
+          document.getElementById("listEl " + i1).remove();
+        } catch (e) {
+          console.log("please debug");
+        }
+      }
       for (var i = 0; i < Object.keys(highscores).length; i++) {
-        var li = document.createElement("li");
-        li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
-         li.setAttribute("onclick", "changeSetings(innerHTML)");
-        document.getElementById("settingsL").appendChild(li);
+        var bestHighscore = {i: -1, number: 1111};
+        for (var i1 = 0; i1 < Object.keys(highscores[Object.keys(highscores)[i]].highscores).length; i1++) {
+          if (highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]] < bestHighscore.number) bestHighscore.number = highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]];
+        }
+        if (((highscores[Object.keys(highscores)[i]].highscores[name] < bestHighscore.number && !showFinished.checked) || (showFinished.checked))) {
+          var li = document.createElement("li");
+          li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
+          if (highscores[Object.keys(highscores)[i]].highscores[name] > bestHighscore.number) li.setAttribute("style",'color:red');
+          else if (highscores[Object.keys(highscores)[i]].highscores[name] != undefined) li.setAttribute("style",/*'color:#40FF00'*/'color:green');
+          else li.setAttribute("style",'color:blue');
+          li.setAttribute("onclick", "changeSetings(innerHTML)");
+          li.setAttribute("id", "listEl " + i);
+          document.getElementById("settingsL").appendChild(li);
+        }
       }
       if (pReturn) saveHighscore();
     }).catch(function(e) {
@@ -237,6 +255,7 @@ function newField(pI) {
   return newField
 }
 function turn(direction, officialCard) {
+document.getElementById('highscores').style.display = 'none';
 zuege++;
 var newField = {0: [], 1: [], 2: []};
 newField[1][1] = officialCard[1][1];
@@ -365,7 +384,7 @@ function canvasClicked() {
           else if (!inRound || rotateInRound.checked) field[i][i1] = turn("right", field[i][i1]);
           Layout();
         }
-        else if (field[i][i1][i2][i3].type == "way" && i == 0) {
+        else if (field[i][i1][i2][i3].type == "way" && i == 0 && !inRound) {
           train.spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
           train.position = JSON.parse(JSON.stringify(train.spawnPoint));
           selected.type = "";
@@ -381,6 +400,15 @@ if (xMaus > (JSON.parse(breite.value)*3*50)/ 2 + 10 && xMaus < (JSON.parse(breit
 var selected = {type: ""};
 var inRound = false;
 function moveTrain() {
+  var scrollPosition = {x: train.position.x, y: train.position.y};
+  if (train.position.x == 0) scrollPosition.x++;
+  if (train.position.y == 0) scrollPosition.y++;
+  if (/*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*3 + train.position.i3) window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*3 + train.position.i3 - window.innerHeight + scrollY));
+  if (/*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 2)*50*3 + train.position.i2) window.scroll(scrollX + (10 + (scrollPosition.x + 2)*50*3 + train.position.i2 - window.innerWidth - scrollX), scrollY);
+  if (10 + (scrollPosition.y - 1)*50*3 + train.position.i3 < scrollY) window.scroll(scrollX, scrollY - (scrollY - 10 + (scrollPosition.y - 1)*50*3 + train.position.i3));
+  if (10 + (scrollPosition.x - 1)*50*3 + train.position.i2 < scrollX) window.scroll(scrollX - (scrollX - 10 + (scrollPosition.x - 1)*50*3 + train.position.i2), scrollY);
+ //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*3 + train.position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*3 + train.position.i3 - window.innerHeight + scrollY));
+ //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*3 + train.position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*3 + train.position.i2 - window.innerWidth - scrollX), scrollY);
   var possibleDirections = [];
   var downIncluded = false;
   if (train.direction != "left" && isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).position, direction: "right"});}
@@ -423,7 +451,7 @@ function isTrack(i, i1, i2, i3) {
 var selectedSettings;
 function saveHighscore() {
   if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField}, highscores: {}};
-  if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings][name] > zuege) {
+  if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings].highscores[name] > zuege) {
     if (highscores[selectedSettings].highscores[name] > zuege) alert("So wenig Züge haben sie noch nie gebraucht!");
     highscores[selectedSettings].highscores[name] = zuege;
     dbSetWarteschlange.push({tag: "highscores", data: highscores});
@@ -433,7 +461,7 @@ function saveHighscore() {
   highscoresWorseThanYours.innerHTML = "";
   for (var i = 0; i < Object.keys(highscores[selectedSettings].highscores).length; i++) {
     if (Object.keys(highscores[selectedSettings].highscores)[i] != name && highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] < highscores[selectedSettings].highscores[name]) highscoresBetterThanYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
-    if (Object.keys(highscores[selectedSettings].highscores)[i] != name && highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] > highscores[selectedSettings].highscores[name]) highscoresWorseThanYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
+    else if (Object.keys(highscores[selectedSettings].highscores)[i] != name && highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] > highscores[selectedSettings].highscores[name]) highscoresWorseThanYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
     else if (Object.keys(highscores[selectedSettings].highscores)[i] != name) highscoresAsGoodAsYours.innerHTML += Object.keys(highscores[selectedSettings].highscores)[i] + ": " + highscores[selectedSettings].highscores[Object.keys(highscores[selectedSettings].highscores)[i]] + '<br>';
   }
   document.getElementById('highscores').style.display = "inline";
