@@ -20,6 +20,20 @@ anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie m�
 <br>
 auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
+Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="text">
+<p id="everybodyBahnhofAccessP">
+  <br>
+  mili sek (1000 = 1 sek.) zwischen Zügen<input id="timeBetweenTrains" value="1000" type="text">
+  <br>
+  alle Züge können Personen mitnehmen/Bahnhöfe grün machen<input type="checkbox" id="everybodyBahnhofAccess">
+  <br>
+  alle Züge müssen das Ziel erreichen<input type="checkbox" id="everybodyMustFinish">
+  <br>
+  alle Züge können das Ziel erreichen<input type="checkbox" id="everybodyCanFinish">
+  <br>
+  Zug ist bei Erreichen des Ziels weg <input type="checkbox" checked="true" id="disapearWhenFinished">
+</p>
+<br>
 <button type="button" onclick="createField();" name="button">create field</button>
 </div>
 <div id="highscores">
@@ -29,14 +43,31 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 </div>
 <canvas id="textur" onclick="canvasClicked();" width="1800" height="700"></canvas>
 <br>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase(undefined, true);'></h1>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <br>
-<button type="button" id="test" onclick="inRound = true; if (innerHTML == 'test') {innerHTML = 'beende test'; window.scroll(0, 0); moveTrain();} else {resetTrain();} " name="button">test</button>
+<button type="button" style="font-size: 77px" id="test" onclick="testTrain(innerHTML);" name="button">test</button>
 <script>
   document.getElementById('highscoresBetterThanYours').style.color = "red"
   document.getElementById('highscoresWorseThanYours').style.color = "green";
   document.getElementById('highscores').style.display = "none";
+  everybodyBahnhofAccessP.style.display = 'none';
   var canvas = textur.getContext('2d');
+  function testTrain(innerHTML) {
+    inRound = true;
+    if (innerHTML == 'test') {
+      test.innerHTML = 'beende test';
+      window.scroll(0, 0);
+      moveTrain();
+      //var anzahlZuege = {value: 2};
+      var i = 0;
+      var Test = setInterval(function () {
+        train[i].moving = true;
+        i++;
+        if (!(i < JSON.parse(anzahlZuege.value))) clearInterval(Test);
+      }, timeBetweenTrains.value);
+    }
+    else {resetTrain();}
+  }
   var fields = [
       { // gerade
         wallStructure: [
@@ -151,6 +182,7 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   getDatabase();
   function getDatabase(pReturn) {
+    if (pReturn) alert("Sie haben es in " + zuege + " Zügen geschafft!");
     dbGet("helpTheTrain", "highscores").then(result => {
       highscores = result;
       for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
@@ -183,14 +215,20 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
   }
   function changeSetings(innerHTML) {
     document.getElementById('highscores').style.display = "inline";
-    rotateInRound.checked = JSON.parse(innerHTML.toString().split("bei Test rotieren: ")[1]);
+    rotateInRound.checked = JSON.parse(innerHTML.toString().split("bei Test rotieren: ")[1].toString().split(", ")[0]);
+    everybodyBahnhofAccess.checked = JSON.parse(innerHTML.toString().split("grün machen: ")[1].toString().split(", ")[0]);
+    everybodyMustFinish.checked = JSON.parse(innerHTML.toString().split("müssen das Ziel erreichen: ")[1].toString().split(", ")[0]);
+    everybodyCanFinish.checked = JSON.parse(innerHTML.toString().split("können das Ziel erreichen: ")[1].toString().split(", ")[0]);
+    disapearWhenFinished.checked = JSON.parse(innerHTML.toString().split("weg: ")[1].toString().split(", ")[0]);
+    timeBetweenTrains.value = JSON.parse(innerHTML.toString().split("zwischen Zügen: ")[1].toString().split(", ")[0]);
+    anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split("|")[0]);
     createField(true, innerHTML);
   }
   var field = [];
   var bahnhoefe = {verbleibend: 1, collected: 0, all: 1};
   var highscores = {};
   function createField(restore, selected) {
-    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked;
+    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value;
     if (restore) field = highscores[selected].data.field
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
       for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
@@ -214,8 +252,11 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
   settings.style.display = "none";
   Layout();
   zuege = 0;
+  for (var i = 1; i < JSON.parse(anzahlZuege.value); i++) {
+    train.push({spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"});
   }
-var train = {spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"};
+  }
+var train = [{spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"}];
 function newField(pI) {
   var newField = {};
   var possibleStructure = [];
@@ -297,11 +338,11 @@ else {
 return newField;
 }
 function Layout(times) {
-  textur.height = JSON.parse(hoehe.value)*3*50 + 10 + 50;
-  textur.width = JSON.parse(breite.value)*3*50 + 10 + 50;
+  textur.height = field[0].length*3*50 + 10 + 50;
+  textur.width = field.length*3*50 + 10 + 50;
   if (!times) times = 0;
-  for (var i = 0; i < JSON.parse(breite.value); i++) {
-    for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
+  for (var i = 0; i < field.length; i++) {
+    for (var i1 = 0; i1 < field[0].length; i1++) {
       displayCard(field, i, i1, 10 + 50*3*i, 10 + 50*3*i1, times);
     }
   }
@@ -311,8 +352,12 @@ function Layout(times) {
     }, 70);
   }*/
   canvas.fillStyle = "red";
-  canvas.fillRect((JSON.parse(breite.value)*3*50)/ 2 + 10, JSON.parse(hoehe.value)*3*50 + 10, 40, 40);
-  canvas.fillRect(10 + train.position.x*50*3 + train.position.i2*50 + 5, 10 + 50*3*train.position.y + train.position.i3*50 + 5, 40, 40);
+  canvas.fillRect((field.length*3*50)/ 2 + 10, field[0].length*3*50 + 10, 40, 40);
+  //var trainColors = ["red", "brown"];
+  for (var i = 0; i < train.length; i++) {
+    if (i != 0) canvas.fillStyle = "brown"//trainColors[i];
+    canvas.fillRect(10 + train[i].position.x*50*3 + train[i].position.i2*50 + 5, 10 + 50*3*train[i].position.y + train[i].position.i3*50 + 5, 40, 40);
+  }
 }
 
 function displayCard(field, i, i1, startx, starty, times) {
@@ -348,11 +393,11 @@ function readMouseMove(e) {
   yMaus = e.clientY + scrollY //+ 23//- 33;
   //    console.log(xMaus + " - " + yMaus);
   canvas.fillStyle = "red";
-  if (selected.type == "train") {Layout(5); canvas.fillRect(xMaus, yMaus, 40, 40);}
+  if (selected.type.includes("train")) {Layout(5); canvas.fillRect(xMaus, yMaus, 40, 40);}
 }
 function canvasClicked() {
-  for (var i = 0; i < JSON.parse(breite.value); i++) {
-  for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
+  for (var i = 0; i < field.length; i++) {
+  for (var i1 = 0; i1 < field[0].length; i1++) {
     // 10 + 50*3*i, 10 + 50*3*i1
     for (var i2 = 0; i2 < 3; i2++) {
       for (var i3 = 0; i3 < 3; i3++) {
@@ -362,8 +407,11 @@ function canvasClicked() {
         //     }
         if ((/*gerät == "PC" && */xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus > 10 + 50*3*i1 + 50*i3 && yMaus < 10 + 50*3*i1 + 50*i3 + 50) /*|| (gerät == "Handy" && xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus - scrollY > 10 + 50*3*i1 + 50*i3 && yMaus - scrollY < 10 + 50*3*i1 + 50*i3 + 50)*/) {
           console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
-          if (i == train.spawnPoint.x && i1 == train.spawnPoint.y && i2 == train.spawnPoint.i2 && i3 == train.spawnPoint.i3) selected.type = "train";
-          else if (selected.type != "train") {
+          var moveTrain = false;
+          for (var i4 = 0; i4 < train.length; i4++) {
+            if (inRound && i == train[i4].spawnPoint.x && i1 == train[i4].spawnPoint.y && i2 == train[i4].spawnPoint.i2 && i3 == train[i4].spawnPoint.i3)  {moveTrain = true; selected.type = "train" + i4;}
+          }
+          if (!moveTrain) {
           if (field[i][i1][i2][i3].active) { // weiche stellen
             // weiche noch nicht gestellt (Ausgangszustand)
             if (!field[i][i1].straight) {
@@ -385,8 +433,8 @@ function canvasClicked() {
           Layout();
         }
         else if (field[i][i1][i2][i3].type == "way" && i == 0 && !inRound) {
-          train.spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
-          train.position = JSON.parse(JSON.stringify(train.spawnPoint));
+          train[selected.type.toString().split("train")[1]].spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
+          train[selected.type.toString().split("train")[1]].position = JSON.parse(JSON.stringify(train[selected.type.toString().split("train")[1]].spawnPoint));
           selected.type = "";
         }
       }
@@ -395,60 +443,88 @@ function canvasClicked() {
   }
 }
 // (7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40
-if (xMaus > (JSON.parse(breite.value)*3*50)/ 2 + 10 && xMaus < (JSON.parse(breite.value)*3*50)/ 2 + 10 + 40 && yMaus > JSON.parse(hoehe.value)*3*50 + 10 && yMaus < JSON.parse(hoehe.value)*3*50 + 10 + 40) selected.type = "train";
+if (xMaus > (field.length*3*50)/ 2 + 10 && xMaus < (field.length*3*50)/ 2 + 10 + 40 && yMaus > field[0].length*3*50 + 10 && yMaus < field[0].length*3*50 + 10 + 40) selected.type = "train0";
 }
 var selected = {type: ""};
 var inRound = false;
 function moveTrain() {
-  var scrollPosition = {x: train.position.x, y: train.position.y};
-  if (train.position.x == 0) scrollPosition.x++;
-  if (train.position.y == 0) scrollPosition.y++;
-  if (/*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*3 + train.position.i3) window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*3 + train.position.i3 - window.innerHeight + scrollY));
-  if (/*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 2)*50*3 + train.position.i2) window.scroll(scrollX + (10 + (scrollPosition.x + 2)*50*3 + train.position.i2 - window.innerWidth - scrollX), scrollY);
-  if (10 + (scrollPosition.y - 1)*50*3 + train.position.i3 < scrollY) window.scroll(scrollX, scrollY - (scrollY - 10 + (scrollPosition.y - 1)*50*3 + train.position.i3));
-  if (10 + (scrollPosition.x - 1)*50*3 + train.position.i2 < scrollX) window.scroll(scrollX - (scrollX - 10 + (scrollPosition.x - 1)*50*3 + train.position.i2), scrollY);
- //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*3 + train.position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*3 + train.position.i3 - window.innerHeight + scrollY));
- //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*3 + train.position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*3 + train.position.i2 - window.innerWidth - scrollX), scrollY);
-  var possibleDirections = [];
-  var downIncluded = false;
-  if (train.direction != "left" && isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2 + 1, train.position.i3).position, direction: "right"});}
-  if (train.direction != "right" && isTrack(train.position.x, train.position.y, train.position.i2 - 1, train.position.i3).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2 - 1, train.position.i3).position, direction: "left"});}
-  if (train.direction != "up" && isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).position, direction: "down"}); downIncluded = true;}
-  if (train.direction != "down" && isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 - 1).boolean) {possibleDirections.push({track: isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 - 1).position, direction: "up"});}
-  if (downIncluded) {train.direction = "down"; train.position = JSON.parse(JSON.stringify(isTrack(train.position.x, train.position.y, train.position.i2, train.position.i3 + 1).position));}
-  else if (possibleDirections.length == 0) {console.log("Puffer or wall reached!"); changeDirection();}
-  else {train.position = JSON.parse(JSON.stringify(possibleDirections[0].track)); train.direction = possibleDirections[0].direction}
+  for (var i = 0; i < train.length; i++) {
+    if (train[i].moving) {
+      for (var i1 = 0; i1 < train.length; i1++) {
+        if (i1 != i && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
+          console.log("Kollision!");
+          resetTrain();
+        }
+      }
+    var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
+    if (train[i].position.x == 0) scrollPosition.x++;
+    if (train[i].position.y == 0) scrollPosition.y++;
+    if (/*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*3 + train[i].position.i3) window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*3 + train[i].position.i3 - window.innerHeight + scrollY));
+    if (/*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 2)*50*3 + train[i].position.i2) window.scroll(scrollX + (10 + (scrollPosition.x + 2)*50*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
+    if (10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3 < scrollY) window.scroll(scrollX, scrollY - (scrollY - 10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3));
+    if (10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2 < scrollX) window.scroll(scrollX - (scrollX - 10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2), scrollY);
+   //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3 - window.innerHeight + scrollY));
+   //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
+    var possibleDirections = [];
+    var downIncluded = false;
+    if (train[i].direction != "left" && isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 + 1, train[i].position.i3).boolean) {possibleDirections.push({track: isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 + 1, train[i].position.i3).position, direction: "right"});}
+    if (train[i].direction != "right" && isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 - 1, train[i].position.i3).boolean) {possibleDirections.push({track: isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 - 1, train[i].position.i3).position, direction: "left"});}
+    if (train[i].direction != "up" && isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 + 1).boolean) {possibleDirections.push({track: isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 + 1).position, direction: "down"}); downIncluded = true;}
+    if (train[i].direction != "down" && isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 - 1).boolean) {possibleDirections.push({track: isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 - 1).position, direction: "up"});}
+    if (downIncluded) {train[i].direction = "down"; train[i].position = JSON.parse(JSON.stringify(isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 + 1).position));}
+    else if (possibleDirections.length == 0) {console.log("Puffer or wall reached!"); changeDirection(i);}
+    else {train[i].position = JSON.parse(JSON.stringify(possibleDirections[0].track)); train[i].direction = possibleDirections[0].direction}
+  }
+  }
   Layout();
   setTimeout(function () {
     if (inRound) moveTrain();
   }, 90);
 }
 var zuege = 0;
-function isTrack(i, i1, i2, i3) {
+function isTrack(trainNumber, i, i1, i2, i3) {
   var transform = false;
   if (i2 == 3) {i2 = 0; i++; transform = true;}
   if (i3 == 3) {i3 = 0; i1++; transform = true;}
   if (i2 == -1) {i2 = 2; i--; transform = true;}
   if (i3 == -1) {i3 = 2; i1--; transform = true;}
   try {
-  if (field[i][i1][i2][i3].collected === false) {
+  if (field[i][i1][i2][i3].collected === false && (trainNumber == 0 || everybodyBahnhofAccess.checked)) {
     field[i][i1][i2][i3].collected = true;
-
     bahnhoefe.collected++;
   }
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
     console.log("turning, because edge reached");
-    if (bahnhoefe.collected == bahnhoefe.all && i == JSON.parse(breite.value)) {
-      console.log("finished!");
-      alert("Sie haben es in " + zuege + " Zügen geschafft!");
+    if (bahnhoefe.collected == bahnhoefe.all && i == field.length && (everybodyCanFinish.checked || trainNumber == 0)) {
+      if (!everybodyMustFinish.checked || everyTrainFinished) {
       getDatabase(true);
     }
+    else {
+      train[trainNumber].finished = true;
+      if (disapearWhenFinished.checked) {
+        train[trainNumber].moving = false;
+        train[trainNumber].position.x = field.length + 1;
+      }
+      var everyTrainFinished = true;
+      for (var i4 = 0; i4 < train.length; i4++) {
+        if (!train[i4].finished) everyTrainFinished = false;
+      }
+      if (everyTrainFinished) getDatabase(true);
+    }
+    }
     return {boolean: false};
-    changeDirection();
+    changeDirection(i);
   }
 }
 var selectedSettings;
+function equals(a, b) {
+  var equalsVar = true;
+  for (var i = 0; i < Object.keys(a).length; i++) {
+    if (a[Object.keys(a)[i]] != b[Object.keys(a)[i]]) equalsVar = false;
+  }
+  return equalsVar;
+}
 function saveHighscore() {
   if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField}, highscores: {}};
   if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings].highscores[name] > zuege) {
@@ -484,15 +560,19 @@ setInterval(function () {
     dbSetWarteschlange.shift();
   }
 }, 2222);
-function changeDirection() {
+function changeDirection(i) {
   var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
-  train.direction = oppositeDirection[train.direction];
+  train[i].direction = oppositeDirection[train[i].direction];
 }
 function resetTrain(map) {
   inRound = false;
-  train.position = JSON.parse(JSON.stringify(train.spawnPoint));
+  for (var i = 0; i < train.length; i++) {
+    train[i].position = JSON.parse(JSON.stringify(train[i].spawnPoint));
+    train[i].moving = false;
+    train[i].finished = false;
+  }
   if (map) zuege = 0;
-  bahnhoefe = {verbleibend: bahnhoefe.collected, collected: 0, all: bahnhoefe.collected};
+  bahnhoefe = {verbleibend: JSON.parse(JSON.stringify(bahnhoefe.collected)), collected: 0, all: JSON.parse(anzahlBahnhoefe.value)};
   test.innerHTML = 'test';
   for (var i = 0; i < field.length; i++) {
     for (var i1 = 0; i1 < field[0].length; i1++) {
