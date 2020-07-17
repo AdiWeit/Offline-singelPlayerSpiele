@@ -57,6 +57,9 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
     if (innerHTML == 'test') {
       test.innerHTML = 'beende test';
       window.scroll(0, 0);
+      setTimeout(function () {
+        scrollingInterac.user = false;
+      }, 100);
       moveTrain();
       //var anzahlZuege = {value: 2};
       var i = 0;
@@ -250,11 +253,11 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   }
   selectedField = JSON.parse(JSON.stringify(field));
   settings.style.display = "none";
-  Layout();
   zuege = 0;
   for (var i = 1; i < JSON.parse(anzahlZuege.value); i++) {
     train.push({spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"});
   }
+  Layout();
   }
 var train = [{spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"}];
 function newField(pI) {
@@ -393,25 +396,33 @@ function readMouseMove(e) {
   yMaus = e.clientY + scrollY //+ 23//- 33;
   //    console.log(xMaus + " - " + yMaus);
   canvas.fillStyle = "red";
-  if (selected.type.includes("train")) {Layout(5); canvas.fillRect(xMaus, yMaus, 40, 40);}
+  if (selected.type == "train") {Layout(5); canvas.fillRect(xMaus, yMaus, 40, 40);}
+}
+var scrollingInterac = {};
+window.onscroll = function (e) {
+  console.log("scroll event");
+  if (!scrollingInterac.PC) {
+    scrollingInterac.user = true;
+  }
+  //if (scrollY < 10 && scrollX < 10) scrollingInterac.user = false;
 }
 function canvasClicked() {
   for (var i = 0; i < field.length; i++) {
   for (var i1 = 0; i1 < field[0].length; i1++) {
-    // 10 + 50*3*i, 10 + 50*3*i1
+    // 10 + 50*document.body.style.zoom*3*i, 10 + 50*document.body.style.zoom*3*i1
     for (var i2 = 0; i2 < 3; i2++) {
       for (var i3 = 0; i3 < 3; i3++) {
-        // if (xMaus > 10 + 50*i2*i && xMaus < 10 + 50*i2*i  + 130 && yMaus > 10 + 50*i3*i1  && yMaus < 10 + 50*i3*i1  + 130 && player.movement == "movingPlayer" && checkMovementPossibe(player.movingPlayer.x, player.movingPlayer.y, player.movingPlayer.i2, player.movingPlayer.i3)) {
+        // if (xMaus > 10 + 50*document.body.style.zoom*i2*i && xMaus < 10 + 50*document.body.style.zoom*i2*i  + 130 && yMaus > 10 + 50*document.body.style.zoom*i3*i1  && yMaus < 10 + 50*document.body.style.zoom*i3*i1  + 130 && player.movement == "movingPlayer" && checkMovementPossibe(player.movingPlayer.x, player.movingPlayer.y, player.movingPlayer.i2, player.movingPlayer.i3)) {
         //       field[i][i1][i2][i3].player = player.myNumber
         //       field[player.movingPlayer.x][player.movingPlayer.y][i2][i3].player = false;
         //     }
-        if ((/*gerät == "PC" && */xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus > 10 + 50*3*i1 + 50*i3 && yMaus < 10 + 50*3*i1 + 50*i3 + 50) /*|| (gerät == "Handy" && xMaus > 10 + 50*3*i + 50*i2 && xMaus < 10 + 50*3*i + 50*i2 + 50 && yMaus - scrollY > 10 + 50*3*i1 + 50*i3 && yMaus - scrollY < 10 + 50*3*i1 + 50*i3 + 50)*/) {
+        if ((/*gerät == "PC" && */xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom) /*|| (gerät == "Handy" && xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus - scrollY > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus - scrollY < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom)*/) {
           console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
-          var moveTrain = false;
-          for (var i4 = 0; i4 < train.length; i4++) {
-            if (inRound && i == train[i4].spawnPoint.x && i1 == train[i4].spawnPoint.y && i2 == train[i4].spawnPoint.i2 && i3 == train[i4].spawnPoint.i3)  {moveTrain = true; selected.type = "train" + i4;}
+          if (!inRound && i == train[0].spawnPoint.x && i1 == train[0].spawnPoint.y && i2 == train[0].spawnPoint.i2 && i3 == train[0].spawnPoint.i3)  {
+            var moveTrain = true;
+            selected.type = "train";
           }
-          if (!moveTrain) {
+          if (selected.type != "train") {
           if (field[i][i1][i2][i3].active) { // weiche stellen
             // weiche noch nicht gestellt (Ausgangszustand)
             if (!field[i][i1].straight) {
@@ -432,21 +443,25 @@ function canvasClicked() {
           else if (!inRound || rotateInRound.checked) field[i][i1] = turn("right", field[i][i1]);
           Layout();
         }
-        else if (field[i][i1][i2][i3].type == "way" && i == 0 && !inRound) {
-          train[selected.type.toString().split("train")[1]].spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
-          train[selected.type.toString().split("train")[1]].position = JSON.parse(JSON.stringify(train[selected.type.toString().split("train")[1]].spawnPoint));
+        else if (field[i][i1][i2][i3].type == "way" && i == 0 && !moveTrain) {
+          for (var i4 = 0; i4 < train.length; i4++) {
+            train[i4].spawnPoint = {x: 0, y: i1, i2: i2, i3: i3};
+            train[i4].position = JSON.parse(JSON.stringify(train[0].spawnPoint));
+          }
           selected.type = "";
+          Layout();
         }
       }
       }
     }
   }
 }
-// (7*3*50)/ 2 + 10, 7*3*50 + 10, 40, 40
-if (xMaus > (field.length*3*50)/ 2 + 10 && xMaus < (field.length*3*50)/ 2 + 10 + 40 && yMaus > field[0].length*3*50 + 10 && yMaus < field[0].length*3*50 + 10 + 40) selected.type = "train0";
+// (7*3*50*document.body.style.zoom)/ 2 + 10, 7*3*50*document.body.style.zoom + 10, 40, 40
+if (xMaus > (field.length*3*50*document.body.style.zoom)/ 2 + 10 && xMaus < (field.length*3*50*document.body.style.zoom)/ 2 + 10 + 40 && yMaus > field[0].length*3*50*document.body.style.zoom + 10 && yMaus < field[0].length*3*50*document.body.style.zoom + 10 + 40) selected.type = "train";
 }
 var selected = {type: ""};
 var inRound = false;
+document.body.style.zoom = 1.0;
 function moveTrain() {
   for (var i = 0; i < train.length; i++) {
     if (train[i].moving) {
@@ -456,15 +471,45 @@ function moveTrain() {
           resetTrain();
         }
       }
-    var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
-    if (train[i].position.x == 0) scrollPosition.x++;
-    if (train[i].position.y == 0) scrollPosition.y++;
-    if (/*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*3 + train[i].position.i3) window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*3 + train[i].position.i3 - window.innerHeight + scrollY));
-    if (/*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 2)*50*3 + train[i].position.i2) window.scroll(scrollX + (10 + (scrollPosition.x + 2)*50*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
-    if (10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3 < scrollY) window.scroll(scrollX, scrollY - (scrollY - 10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3));
-    if (10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2 < scrollX) window.scroll(scrollX - (scrollX - 10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2), scrollY);
-   //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*3 + train[i].position.i3 - window.innerHeight + scrollY));
-   //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
+      document.body.style.zoom = 1.0;
+      var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
+      var cameraMovements = 2;
+      for (var i2 = 0; cameraMovements > 1 && i2 < 100; i2++) {
+        cameraMovements = 0;
+        for (var i1 = 0; i1 < train.length; i1++) {
+          var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
+          if (train[i1].position.x == 0 || train.length > 1) scrollPosition.x++;
+          if (train[i1].position.y == 0 || train.length > 1) scrollPosition.y++;
+          if (!scrollingInterac.user && /*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*document.body.style.zoom*3 + train[i1].position.i3 || !scrollingInterac.user && /*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 1)*50*document.body.style.zoom*3 + train[i1].position.i2 || !scrollingInterac.user && 10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i1].position.i3 < scrollY || !scrollingInterac.user && 10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i1].position.i2 < scrollX) cameraMovements++;
+        }
+        if (cameraMovements > 1) {
+          scrollingInterac.PC = true;
+          document.body.style.zoom -= 0.1;
+        }
+      }
+      var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
+    if (train[i].position.x == 0 || train.length > 1) scrollPosition.x++;
+    if (train[i].position.y == 0 || train.length > 1) scrollPosition.y++;
+    scrollingInterac.PC = true;
+    console.log("PC scrolling");
+    if (!scrollingInterac.user && /*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*document.body.style.zoom*3 + train[i].position.i3) {
+      window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*document.body.style.zoom*3 + train[i].position.i3 - window.innerHeight + scrollY));
+    }
+    if (!scrollingInterac.user && /*screen.availWidth*/window.innerWidth + scrollX < 10 + (scrollPosition.x + 1)*50*document.body.style.zoom*3 + train[i].position.i2) {
+      window.scroll(scrollX + (10 + (scrollPosition.x + 1)*50*document.body.style.zoom*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
+    }
+    if (!scrollingInterac.user && 10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3 < scrollY) {
+      window.scroll(scrollX, scrollY - (scrollY - 10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3));
+    }
+    if (!scrollingInterac.user && 10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2 < scrollX) {
+      window.scroll(scrollX - (scrollX - 10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2), scrollY);
+    }
+    setTimeout(function () {
+      scrollingInterac.PC = false;
+      console.log("PC not scrolling");
+    }, 1);
+   //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3 - window.innerHeight + scrollY));
+   //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
     var possibleDirections = [];
     var downIncluded = false;
     if (train[i].direction != "left" && isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 + 1, train[i].position.i3).boolean) {possibleDirections.push({track: isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2 + 1, train[i].position.i3).position, direction: "right"});}
@@ -565,6 +610,8 @@ function changeDirection(i) {
   train[i].direction = oppositeDirection[train[i].direction];
 }
 function resetTrain(map) {
+  document.body.style.zoom = 1;
+  scrollingInterac.user = false;
   inRound = false;
   for (var i = 0; i < train.length; i++) {
     train[i].position = JSON.parse(JSON.stringify(train[i].spawnPoint));
