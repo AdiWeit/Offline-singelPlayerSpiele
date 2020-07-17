@@ -20,6 +20,10 @@ anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie m�
 <br>
 auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
+beenden, wenn alle Bahnhöfe grün/alle Personen mitgenommen <input type="checkbox" id="justBahnhoefe">
+<br>
+auch zweiträngige Züge (braun) können kollidierenden <input type="checkbox" id="brownCollide" checked="true">
+<br>
 Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="text">
 <p id="everybodyBahnhofAccessP">
   <br>
@@ -218,20 +222,24 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   }
   function changeSetings(innerHTML) {
     document.getElementById('highscores').style.display = "inline";
+    anzahlBahnhoefe.value = JSON.parse(innerHTML.toString().split("Anzahl Bahnhoefe: ")[1].toString().split(", ")[0]);
     rotateInRound.checked = JSON.parse(innerHTML.toString().split("bei Test rotieren: ")[1].toString().split(", ")[0]);
     everybodyBahnhofAccess.checked = JSON.parse(innerHTML.toString().split("grün machen: ")[1].toString().split(", ")[0]);
     everybodyMustFinish.checked = JSON.parse(innerHTML.toString().split("müssen das Ziel erreichen: ")[1].toString().split(", ")[0]);
     everybodyCanFinish.checked = JSON.parse(innerHTML.toString().split("können das Ziel erreichen: ")[1].toString().split(", ")[0]);
     disapearWhenFinished.checked = JSON.parse(innerHTML.toString().split("weg: ")[1].toString().split(", ")[0]);
     timeBetweenTrains.value = JSON.parse(innerHTML.toString().split("zwischen Zügen: ")[1].toString().split(", ")[0]);
-    anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split("|")[0]);
+    anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split(", ")[0]);
+    justBahnhoefe.checked = JSON.parse(innerHTML.toString().split("beenden, wenn alle Bahnhöfe grün: ")[1].toString().split(", ")[0]);
+    brownCollide.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split("|")[0]);
     createField(true, innerHTML);
   }
   var field = [];
   var bahnhoefe = {verbleibend: 1, collected: 0, all: 1};
   var highscores = {};
   function createField(restore, selected) {
-    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value;
+    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
+    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked;
     if (restore) field = highscores[selected].data.field
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
       for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
@@ -245,6 +253,9 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
     fields[1].number = JSON.parse(anzahlPuffer.value);
     fields[2].number = JSON.parse(anzahlKurven.value);
     fields[3].number = JSON.parse(anzahlWeichen.value);
+    bahnhoefe.all = JSON.parse(JSON.stringify(JSON.parse(anzahlBahnhoefe.value)));
+    bahnhoefe.verbleibend = JSON.parse(JSON.stringify(JSON.parse(anzahlBahnhoefe.value)));
+
     for (var i = 0; !restore && i < JSON.parse(breite.value); i++) {
     field[i] = [];
     for (var i1 = 0; i1 < JSON.parse(hoehe.value); i1++) {
@@ -257,6 +268,7 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   for (var i = 1; i < JSON.parse(anzahlZuege.value); i++) {
     train.push({spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"});
   }
+  bahnhoefe.verbleibend = JSON.parse(JSON.stringify(JSON.parse(anzahlBahnhoefe.value)));
   Layout();
   }
 var train = [{spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"}];
@@ -400,7 +412,7 @@ function readMouseMove(e) {
 }
 var scrollingInterac = {};
 window.onscroll = function (e) {
-  console.log("scroll event");
+  //console.log("scroll event");
   if (!scrollingInterac.PC) {
     scrollingInterac.user = true;
   }
@@ -463,15 +475,10 @@ var selected = {type: ""};
 var inRound = false;
 document.body.style.zoom = 1.0;
 function moveTrain() {
+  document.body.style.zoom = 1.0;
   for (var i = 0; i < train.length; i++) {
     if (train[i].moving) {
-      for (var i1 = 0; i1 < train.length; i1++) {
-        if (i1 != i && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
-          console.log("Kollision!");
-          resetTrain();
-        }
-      }
-      document.body.style.zoom = 1.0;
+      collisionCheck(i);
       var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
       var cameraMovements = 2;
       for (var i2 = 0; cameraMovements > 1 && i2 < 100; i2++) {
@@ -491,7 +498,7 @@ function moveTrain() {
     if (train[i].position.x == 0 || train.length > 1) scrollPosition.x++;
     if (train[i].position.y == 0 || train.length > 1) scrollPosition.y++;
     scrollingInterac.PC = true;
-    console.log("PC scrolling");
+    //console.log("PC scrolling");
     if (!scrollingInterac.user && /*screen.availHeight*/window.innerHeight + scrollY < 10 + (scrollPosition.y + 1)*50*document.body.style.zoom*3 + train[i].position.i3) {
       window.scroll(scrollX, scrollY + (10 + (scrollPosition.y + 1)*50*document.body.style.zoom*3 + train[i].position.i3 - window.innerHeight + scrollY));
     }
@@ -506,7 +513,7 @@ function moveTrain() {
     }
     setTimeout(function () {
       scrollingInterac.PC = false;
-      console.log("PC not scrolling");
+      //console.log("PC not scrolling");
     }, 1);
    //if (/*screen.availHeight*/window.innerHeight + scrollY > 10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3) window.scroll(scrollX, scrollY - (10 + (scrollPosition.y - 1)*50*document.body.style.zoom*3 + train[i].position.i3 - window.innerHeight + scrollY));
    //if (/*screen.availWidth*/window.innerWidth + scrollY > 10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2) window.scroll(scrollX - (10 + (scrollPosition.x - 1)*50*document.body.style.zoom*3 + train[i].position.i2 - window.innerWidth - scrollX), scrollY);
@@ -519,6 +526,7 @@ function moveTrain() {
     if (downIncluded) {train[i].direction = "down"; train[i].position = JSON.parse(JSON.stringify(isTrack(i, train[i].position.x, train[i].position.y, train[i].position.i2, train[i].position.i3 + 1).position));}
     else if (possibleDirections.length == 0) {console.log("Puffer or wall reached!"); changeDirection(i);}
     else {train[i].position = JSON.parse(JSON.stringify(possibleDirections[0].track)); train[i].direction = possibleDirections[0].direction}
+    collisionCheck(i);
   }
   }
   Layout();
@@ -527,6 +535,17 @@ function moveTrain() {
   }, 90);
 }
 var zuege = 0;
+function collisionCheck(i) {
+  for (var i1 = 0; i1 < train.length; i1++) {
+    if (i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
+      console.log("Kollision!");
+      resetTrain();
+      setTimeout(function () {
+        resetTrain();
+      }, 100);
+    }
+  }
+}
 function isTrack(trainNumber, i, i1, i2, i3) {
   var transform = false;
   if (i2 == 3) {i2 = 0; i++; transform = true;}
@@ -538,10 +557,11 @@ function isTrack(trainNumber, i, i1, i2, i3) {
     field[i][i1][i2][i3].collected = true;
     bahnhoefe.collected++;
   }
+  if (justBahnhoefe.checked && bahnhoefe.collected == bahnhoefe.all) {bahnhoefe.collected = 0; getDatabase(true);}
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
     console.log("turning, because edge reached");
-    if (bahnhoefe.collected == bahnhoefe.all && i == field.length && (everybodyCanFinish.checked || trainNumber == 0)) {
+    if (bahnhoefe.collected == bahnhoefe.all && (i == field.length || justBahnhoefe.checked) && (everybodyCanFinish.checked || trainNumber == 0)) {
       if (!everybodyMustFinish.checked || everyTrainFinished) {
       getDatabase(true);
     }
@@ -610,7 +630,7 @@ function changeDirection(i) {
   train[i].direction = oppositeDirection[train[i].direction];
 }
 function resetTrain(map) {
-  document.body.style.zoom = 1;
+  document.body.style.zoom = 1.0;
   scrollingInterac.user = false;
   inRound = false;
   for (var i = 0; i < train.length; i++) {
@@ -619,7 +639,7 @@ function resetTrain(map) {
     train[i].finished = false;
   }
   if (map) zuege = 0;
-  bahnhoefe = {verbleibend: JSON.parse(JSON.stringify(bahnhoefe.collected)), collected: 0, all: JSON.parse(anzahlBahnhoefe.value)};
+  bahnhoefe = {verbleibend: JSON.parse(JSON.stringify(anzahlBahnhoefe.value)), collected: 0, all: JSON.parse(anzahlBahnhoefe.value)};
   test.innerHTML = 'test';
   for (var i = 0; i < field.length; i++) {
     for (var i1 = 0; i1 < field[0].length; i1++) {
