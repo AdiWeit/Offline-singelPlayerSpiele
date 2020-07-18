@@ -31,6 +31,8 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   <br>
   alle Züge können Personen mitnehmen/Bahnhöfe grün machen<input type="checkbox" id="everybodyBahnhofAccess">
   <br>
+  keine zweiträngige Züge (braun) dürfen einen Banhof anfahren <input type="checkbox" id="justTrainBahnhof">
+  <br>
   alle Züge müssen das Ziel erreichen<input type="checkbox" id="everybodyMustFinish">
   <br>
   alle Züge können das Ziel erreichen<input type="checkbox" id="everybodyCanFinish">
@@ -231,7 +233,8 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
     timeBetweenTrains.value = JSON.parse(innerHTML.toString().split("zwischen Zügen: ")[1].toString().split(", ")[0]);
     anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split(", ")[0]);
     justBahnhoefe.checked = JSON.parse(innerHTML.toString().split("beenden, wenn alle Bahnhöfe grün: ")[1].toString().split(", ")[0]);
-    brownCollide.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split("|")[0]);
+    brownCollide.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split(", ")[0]);
+    justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split("|")[0]);
     createField(true, innerHTML);
   }
   var field = [];
@@ -239,7 +242,7 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   var highscores = {};
   function createField(restore, selected) {
     selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
-    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked;
+    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
     if (restore) field = highscores[selected].data.field
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
       for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
@@ -537,12 +540,9 @@ function moveTrain() {
 var zuege = 0;
 function collisionCheck(i) {
   for (var i1 = 0; i1 < train.length; i1++) {
-    if (i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
+    if (train[i].position.x != field.length && i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
       console.log("Kollision!");
       resetTrain();
-      setTimeout(function () {
-        resetTrain();
-      }, 100);
     }
   }
 }
@@ -557,11 +557,12 @@ function isTrack(trainNumber, i, i1, i2, i3) {
     field[i][i1][i2][i3].collected = true;
     bahnhoefe.collected++;
   }
+  if (justTrainBahnhof.checked && field[i][i1][i2][i3].collected != undefined && trainNumber != 0) {resetTrain();}
   if (justBahnhoefe.checked && bahnhoefe.collected == bahnhoefe.all) {bahnhoefe.collected = 0; getDatabase(true);}
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
     console.log("turning, because edge reached");
-    if (bahnhoefe.collected == bahnhoefe.all && (i == field.length || justBahnhoefe.checked) && (everybodyCanFinish.checked || trainNumber == 0)) {
+    if (bahnhoefe.collected == bahnhoefe.all && (i == field.length || justBahnhoefe.checked) && (everybodyCanFinish.checked || everybodyMustFinish.checked || trainNumber == 0)) {
       if (!everybodyMustFinish.checked || everyTrainFinished) {
       getDatabase(true);
     }
@@ -629,7 +630,8 @@ function changeDirection(i) {
   var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
   train[i].direction = oppositeDirection[train[i].direction];
 }
-function resetTrain(map) {
+function resetTrain(map, time) {
+  if (!time) time = 0;
   document.body.style.zoom = 1.0;
   scrollingInterac.user = false;
   inRound = false;
@@ -651,6 +653,11 @@ function resetTrain(map) {
     }
   }
   if (map) field = JSON.parse(JSON.stringify(selectedField));
+  if (time < 1) {
+    setTimeout(function () {
+      resetTrain(map, time + 1);
+    }, 700);
+  }
   Layout();
 }
 </script>
