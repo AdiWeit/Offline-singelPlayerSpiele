@@ -52,7 +52,12 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <br>
 <button type="button" style="font-size: 77px" id="test" onclick="testTrain(innerHTML);" name="button">test</button>
+<br>
+play train audio<input checked="true" id="trainAudio" type="checkbox">
+<br>
+use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
 <script>
+  textur.style.display = "none";
   document.getElementById('highscoresBetterThanYours').style.color = "red"
   document.getElementById('highscoresWorseThanYours').style.color = "green";
   document.getElementById('highscores').style.display = "none";
@@ -60,6 +65,7 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   var canvas = textur.getContext('2d');
   function testTrain(innerHTML) {
     inRound = true;
+    playTrainAudio();
     if (innerHTML == 'test') {
       test.innerHTML = 'beende test';
       window.scroll(0, 0);
@@ -70,7 +76,7 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
       //var anzahlZuege = {value: 2};
       var i = 0;
       var Test = setInterval(function () {
-        train[i].moving = true;
+        if (inRound) train[i].moving = true;
         i++;
         if (!(i < JSON.parse(anzahlZuege.value))) clearInterval(Test);
       }, timeBetweenTrains.value);
@@ -233,14 +239,15 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
     timeBetweenTrains.value = JSON.parse(innerHTML.toString().split("zwischen Zügen: ")[1].toString().split(", ")[0]);
     anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split(", ")[0]);
     justBahnhoefe.checked = JSON.parse(innerHTML.toString().split("beenden, wenn alle Bahnhöfe grün: ")[1].toString().split(", ")[0]);
-    brownCollide.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split(", ")[0]);
-    justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split("|")[0]);
+    brownCollide.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split("|")[0]);
+    justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split(", ")[0]);
     createField(true, innerHTML);
   }
   var field = [];
   var bahnhoefe = {verbleibend: 1, collected: 0, all: 1};
   var highscores = {};
   function createField(restore, selected) {
+    textur.style.display = "inline";
     selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
     justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
     if (restore) field = highscores[selected].data.field
@@ -439,6 +446,7 @@ function canvasClicked() {
           }
           if (selected.type != "train") {
           if (field[i][i1][i2][i3].active) { // weiche stellen
+            var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3").play();
             // weiche noch nicht gestellt (Ausgangszustand)
             if (!field[i][i1].straight) {
             if ((!field[i][i1][0][1].active && field[i][i1][0][1].type == "way")/*Weiche nach unten -*/) {field[i][i1][0][1].active = true; field[i][i1][1][2].active = false;}
@@ -455,7 +463,10 @@ function canvasClicked() {
             field[i][i1].straight = false;
           }
         }
-          else if (!inRound || rotateInRound.checked) field[i][i1] = turn("right", field[i][i1]);
+          else if (!inRound || rotateInRound.checked) {
+            field[i][i1] = turn("right", field[i][i1]);
+            var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/turn.mp3").play();
+          }
           Layout();
         }
         else if (field[i][i1][i2][i3].type == "way" && i == 0 && !moveTrain) {
@@ -540,8 +551,9 @@ function moveTrain() {
 var zuege = 0;
 function collisionCheck(i) {
   for (var i1 = 0; i1 < train.length; i1++) {
-    if (train[i].position.x != field.length && i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && !equals(train[i1].position, train[i1].spawnPoint)) {
+    if (train[i].position.x != field.length && i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && /*!equals(train[i1].position, train[i1].spawnPoint)*/train[i1].moving) {
       console.log("Kollision!");
+      var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/dampflockKollision.mp3").play();
       resetTrain();
     }
   }
@@ -556,8 +568,12 @@ function isTrack(trainNumber, i, i1, i2, i3) {
   if (field[i][i1][i2][i3].collected === false && (trainNumber == 0 || everybodyBahnhofAccess.checked)) {
     field[i][i1][i2][i3].collected = true;
     bahnhoefe.collected++;
+    var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/bahnhof.mp3").play();
   }
-  if (justTrainBahnhof.checked && field[i][i1][i2][i3].collected != undefined && trainNumber != 0) {resetTrain();}
+  if (justTrainBahnhof.checked && field[i][i1][i2][i3].collected != undefined && trainNumber != 0) {
+    resetTrain();
+    var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/gueterzugBeiBahnhof.mp3").play();
+  }
   if (justBahnhoefe.checked && bahnhoefe.collected == bahnhoefe.all) {bahnhoefe.collected = 0; getDatabase(true);}
     return {boolean: (field[i][i1][i2][i3].type == "way" && (field[i][i1][i2][i3].active == undefined || field[i][i1][i2][i3].active == true || transform)), position: {x: i, y: i1, i2: i2, i3: i3}};
   } catch (e) {
@@ -659,5 +675,26 @@ function resetTrain(map, time) {
     }, 700);
   }
   Layout();
+}
+var audio;
+function playTrainAudio() {
+  if (inRound && trainAudio.checked) {
+    if (fastTrainAudio.checked) {
+      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/dampflockFast.mp3");
+      audio.volume = 0.7;
+      audio.play();
+      setTimeout(function () {
+        playTrainAudio(inRound);
+      }, 360);
+    }
+    else {
+      audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/dampflock.mp3");
+      audio.volume = 0.7;
+      audio.play();
+      setTimeout(function () {
+        playTrainAudio(inRound);
+      }, 850);
+    }
+  }
 }
 </script>
