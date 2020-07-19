@@ -22,12 +22,20 @@ auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
 beenden, wenn alle Bahnhöfe grün/alle Personen mitgenommen <input type="checkbox" id="justBahnhoefe">
 <br>
-auch zweiträngige Züge (braun) können kollidierenden <input type="checkbox" id="brownCollide" checked="true">
-<br>
 Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="text">
-<p id="everybodyBahnhofAccessP">
+<div id="everybodyBahnhofAccessP">
+  <br>
+  auch zweiträngige Züge (braun) können kollidierenden <input type="checkbox" id="brownCollide" checked="true">
   <br>
   mili sek (1000 = 1 sek.) zwischen Zügen<input id="timeBetweenTrains" value="1000" type="text">
+  <br>
+  <input id="anzahlRandomTrains" value="1" onchange="if (JSON.parse(value) <= JSON.parse(anzahlBahnhoefe.value)) randomTrainsAtBahnhof.value = value;" type="text">der Züge sollen nur zur Behinderung zufällig spawnen
+  <br>
+  <p><input value="1" id="randomTrainsAtBahnhof" type="text">der zufälligen Züge sollen an einem Bahnhof spawnen</p>
+  <br>
+  mili sek (1000 = 1 sek.) bis Züge losfahren<input id="timeBetweenRandomTrains" value="1000" type="text">
+  <br>
+  Kollision auch mit Zügen möglich, die noch nicht losgefahren sind, aber auch nicht beim Spawnpoint des 1. Zuges warten <input type="checkbox" id="stayingTrainCollision">
   <br>
   alle Züge können Personen mitnehmen/Bahnhöfe grün machen<input type="checkbox" id="everybodyBahnhofAccess">
   <br>
@@ -38,7 +46,7 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
   alle Züge können das Ziel erreichen<input type="checkbox" id="everybodyCanFinish">
   <br>
   Zug ist bei Erreichen des Ziels weg <input type="checkbox" checked="true" id="disapearWhenFinished">
-</p>
+</div>
 <br>
 <button type="button" onclick="createField();" name="button">create field</button>
 </div>
@@ -53,9 +61,9 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
 <br>
 <button type="button" style="font-size: 77px" id="test" onclick="testTrain(innerHTML);" name="button">test</button>
 <br>
-play train audio<input checked="true" id="trainAudio" type="checkbox">
+play train audio<input onchange="playTrainAudio(true);" checked="true" id="trainAudio" type="checkbox">
 <br>
-use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
+use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="fastTrainAudio" type="checkbox">
 <script>
   textur.style.display = "none";
   document.getElementById('highscoresBetterThanYours').style.color = "red"
@@ -63,6 +71,17 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
   document.getElementById('highscores').style.display = "none";
   everybodyBahnhofAccessP.style.display = 'none';
   var canvas = textur.getContext('2d');
+  function releaseTrain(i) {
+    if (inRound && i > -1) train[i].moving = true;
+    i++;
+    var timeInterval = timeBetweenRandomTrains.value;
+    if (i > JSON.parse(anzahlRandomTrains.value)) timeInterval = timeBetweenTrains.value;
+    if ((i < JSON.parse(anzahlZuege.value)) && inRound) {
+      setTimeout(function () {
+        if (inRound) releaseTrain(i);
+      }, timeInterval);
+    }
+  }
   function testTrain(innerHTML) {
     inRound = true;
     playTrainAudio();
@@ -73,13 +92,17 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
         scrollingInterac.user = false;
       }, 100);
       moveTrain();
-      //var anzahlZuege = {value: 2};
-      var i = 0;
-      var Test = setInterval(function () {
-        if (inRound) train[i].moving = true;
-        i++;
-        if (!(i < JSON.parse(anzahlZuege.value))) clearInterval(Test);
-      }, timeBetweenTrains.value);
+      //var anzahlZuege = {value: 2};;
+      releaseTrain(-1);
+      // var timeInterval = timeBetweenRandomTrains.value;
+      // if (i > JSON.parse(anzahlRandomTrains.value)) timeInterval = timeBetweenTrains.value;
+      // var Test = setInterval(function () {
+      //   if (inRound) train[i].moving = true;
+      //   i++;
+      //   var timeInterval = timeBetweenRandomTrains.value;
+      //   if (i > JSON.parse(anzahlRandomTrains.value)) timeInterval = timeBetweenTrains.value;
+      //   if (!(i < JSON.parse(anzahlZuege.value))) clearInterval(Test);
+      // }, timeInterval);
     }
     else {resetTrain();}
   }
@@ -204,7 +227,7 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
         try {
           document.getElementById("listEl " + i1).remove();
         } catch (e) {
-          console.log("please debug");
+          //console.log("please debug");
         }
       }
       for (var i = 0; i < Object.keys(highscores).length; i++) {
@@ -237,10 +260,14 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
     everybodyCanFinish.checked = JSON.parse(innerHTML.toString().split("können das Ziel erreichen: ")[1].toString().split(", ")[0]);
     disapearWhenFinished.checked = JSON.parse(innerHTML.toString().split("weg: ")[1].toString().split(", ")[0]);
     timeBetweenTrains.value = JSON.parse(innerHTML.toString().split("zwischen Zügen: ")[1].toString().split(", ")[0]);
+    timeBetweenRandomTrains.value = JSON.parse(innerHTML.toString().split("bis zufällige Züge losfahren: ")[1].toString().split(", ")[0]);
     anzahlZuege.value = JSON.parse(innerHTML.toString().split("Anzahl Züge: ")[1].toString().split(", ")[0]);
+    //anzahlRandomTrains.value = JSON.parse(innerHTML.toString().split("Zeit bis Züge losfahren: ")[1].toString().split(", ")[0]);
+    //randomTrainsAtBahnhof.value = JSON.parse(innerHTML.toString().split("Züge an Bahnhof: ")[1].toString().split(", ")[0]);
     justBahnhoefe.checked = JSON.parse(innerHTML.toString().split("beenden, wenn alle Bahnhöfe grün: ")[1].toString().split(", ")[0]);
-    brownCollide.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split("|")[0]);
-    justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split(", ")[0]);
+    brownCollide.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split(", ")[0]);
+    stayingTrainCollision.checked = JSON.parse(innerHTML.toString().split("Kollision auch mit stehenden Zügen: ")[1].toString().split(", ")[0]);
+    justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split("|")[0]);
     createField(true, innerHTML);
   }
   var field = [];
@@ -248,9 +275,9 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
   var highscores = {};
   function createField(restore, selected) {
     textur.style.display = "inline";
-    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
-    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
-    if (restore) field = highscores[selected].data.field
+    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value /*+ ", Zeit bis Züge losfahren: " + anzahlRandomTrains.value  + ", anzahl Züge zur Behinderung: " + anzahlRandomTrains.value + ", anzahl Züge an Bahnhof: " + randomTrainsAtBahnhof.value*/ + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Zeit bis zufällige Züge losfahren: " + timeBetweenRandomTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
+    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", Kollision auch mit stehenden Zügen: " + stayingTrainCollision.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
+    if (restore) {field = highscores[selected].data.field; train = highscores[selected].data.trains}
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
       for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
         selectedSettings += "|";
@@ -275,10 +302,37 @@ use fast train audio<input checked="true" id="fastTrainAudio" type="checkbox">
   selectedField = JSON.parse(JSON.stringify(field));
   settings.style.display = "none";
   zuege = 0;
-  for (var i = 1; i < JSON.parse(anzahlZuege.value); i++) {
+  for (var i = 1; i < JSON.parse(anzahlZuege.value) && !restore; i++) {
     train.push({spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"});
+    if (i <= (JSON.parse(anzahlRandomTrains.value) - JSON.parse(randomTrainsAtBahnhof.value))) {
+      train[train.length - 1].spawnPoint = {x: Math.round(Math.random() *(field.length - 1)), y: Math.round(Math.random() *(field[0].length - 1)), i2: Math.round(Math.random() *(2)), i3: Math.round(Math.random() *(2))};
+      if (field[train[train.length - 1].spawnPoint.x][train[train.length - 1].spawnPoint.y][train[train.length - 1].spawnPoint.i2][train[train.length - 1].spawnPoint.i3].type != "way") {
+        train.pop();
+        i--;
+      }
+    }
+    else if (i <= JSON.parse(anzahlRandomTrains.value)) {
+      for (var i2 = 0; i2 < field.length; i2++) {
+        for (var i3 = 0; i3 < field[0].length; i3++) {
+          for (var i4 = 0; i4 < 3; i4++) {
+            for (var i5 = 0; i5 < 3; i5++) {
+              try {
+                if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 - 1] && field[i2][i3][i4 - 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 - 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 + 1] && field[i2][i3][i4 + 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 + 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 - 1] && field[i2][i3][i4][i5 - 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 - 1}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 + 1] && field[i2][i3][i4][i5 + 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 + 1}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+
+              } catch (e) {
+                console.log("etwas zu tun XD");
+              }
+            }
+          }
+        }
+      }
+    }
   }
   bahnhoefe.verbleibend = JSON.parse(JSON.stringify(JSON.parse(anzahlBahnhoefe.value)));
+  resetTrain();
   Layout();
   }
 var train = [{spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"}];
@@ -551,7 +605,7 @@ function moveTrain() {
 var zuege = 0;
 function collisionCheck(i) {
   for (var i1 = 0; i1 < train.length; i1++) {
-    if (train[i].position.x != field.length && i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && /*!equals(train[i1].position, train[i1].spawnPoint)*/train[i1].moving) {
+    if (train[i].position.x != field.length && i1 != i && ((brownCollide.checked) || (!brownCollide.checked && i < 1)) && equals(train[i].position, train[i1].position) && /*!equals(train[i1].position, train[i1].spawnPoint)*/(train[i1].moving || (stayingTrainCollision.checked && !equals(train[i1].spawnPoint, train[0].spawnPoint)))) {
       console.log("Kollision!");
       var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/dampflockKollision.mp3").play();
       resetTrain();
@@ -608,7 +662,7 @@ function equals(a, b) {
   return equalsVar;
 }
 function saveHighscore() {
-  if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField}, highscores: {}};
+  if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField, trains: train}, highscores: {}};
   if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings].highscores[name] > zuege) {
     if (highscores[selectedSettings].highscores[name] > zuege) alert("So wenig Züge haben sie noch nie gebraucht!");
     highscores[selectedSettings].highscores[name] = zuege;
@@ -655,6 +709,7 @@ function resetTrain(map, time) {
     train[i].position = JSON.parse(JSON.stringify(train[i].spawnPoint));
     train[i].moving = false;
     train[i].finished = false;
+    train[i].direction = "right";
   }
   if (map) zuege = 0;
   bahnhoefe = {verbleibend: JSON.parse(JSON.stringify(anzahlBahnhoefe.value)), collected: 0, all: JSON.parse(anzahlBahnhoefe.value)};
@@ -677,14 +732,14 @@ function resetTrain(map, time) {
   Layout();
 }
 var audio;
-function playTrainAudio() {
-  if (inRound && trainAudio.checked) {
+function playTrainAudio(demo) {
+  if ((inRound || demo) && trainAudio.checked) {
     if (fastTrainAudio.checked) {
       audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/dampflockFast.mp3");
       audio.volume = 0.7;
       audio.play();
       setTimeout(function () {
-        playTrainAudio(inRound);
+        playTrainAudio();
       }, 360);
     }
     else {
@@ -692,7 +747,7 @@ function playTrainAudio() {
       audio.volume = 0.7;
       audio.play();
       setTimeout(function () {
-        playTrainAudio(inRound);
+        playTrainAudio();
       }, 850);
     }
   }
