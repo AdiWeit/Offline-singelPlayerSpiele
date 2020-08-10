@@ -614,10 +614,17 @@ localStorage.setItem("storedName", name);
           i = data.data.length;
           resetLevel();
         }
-        if (data.data[0 + i] == 255 && data.data[1 + i] == 242 && data.data[2 + i] == 0 && Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") {
+        if (data.data[0 + i] == 255 && data.data[1 + i] == 242 && data.data[2 + i] == 0/* && Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"*/) {
+          if (level.aktuell >= Object.keys(level[level.mode]).length) {
           Bild = new Image();
           Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
           canvas.drawImage(Bild, 0 , 0, textur.width, textur.height);
+        }
+        else {
+          level.aktuell++;
+          configLevel("normal", level.aktuell);
+          i = data.data.length;
+        }
         }
         // red == 168 && green == 230 && blue == 29
         //if (red ==  255 && blue == 0 && alpha == 255 && green == 242) console.log("goalReached!");
