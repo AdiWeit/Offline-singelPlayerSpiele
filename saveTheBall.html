@@ -1,0 +1,866 @@
+<canvas id="textur" width="1847" height="748"></canvas>
+<select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
+<div id="ball">
+  <style>
+    .shape {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      -webkit-radius: 50px;
+      margin: 0;
+      width padding: 0;
+    }
+
+    #sphere1 {
+      border-radius: 50px;
+      background-color: blue;
+    }
+  </style>
+</div>
+<div id="content">
+  <div class="shape" id="sphere1"></div>
+</div>
+<button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
+<script>
+  function levelSelected(value) {
+    configLevel(level.mode, value.toString().split('. level')[0]);
+  }
+  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
+  getDatabase();
+  function getDatabase() {
+    dbGet("saveTheBall", "checkpoint " + name).then(result => {
+      checkpoint = result;
+      while (document.getElementById('levelSelector').options.length > 0) {
+        document.getElementById('levelSelector').options[0] = undefined;
+      }
+      for (var i = 0; i < Object.keys(checkpoint.normal).length; i++) {
+        opt = document.createElement("option");
+        document.getElementById("levelSelector").options.add(opt);
+        // opt.setAttribute("id", i);
+        opt.text = (i + 1) + ". level";
+      }
+      configLevel("normal", i);
+      resetLevel();
+    }).catch(function(e) {
+      checkpoint = {normal: {1: [{x: 450, y: 150, direction: "right"}]}}//[{x: 450, y: 150, direction: "right"}]
+      configLevel("normal", 1);
+      levelSelector.style.display = "none";
+    });
+  }
+  // linksRechtsPrototyp
+  var level = {
+    aktuell: 1,
+    mode: "normal",
+    normal: {
+      1: {
+        platforms: [{
+        shape: "rectangle",
+        position: {
+          x: 66,
+          y: 333
+        },
+        angle: 0,
+        inDirection: false,
+        maxAngles: {
+          left: 90,
+          right: 111
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 155,
+          y: 588
+        },
+        angle: 0,
+        inDirection: true,
+        maxAngles: {
+          left: 90,
+          right: 90
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 1200,
+          y: 188
+        },
+        angle: 0,
+        inDirection: false,
+        maxAngles: {
+          left: 33,
+          right: 88
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 1200,
+          y: 588
+        },
+        angle: 0,
+        inDirection: true,
+        maxAngles: {
+          left: 90,
+          right: 88
+        }
+      },
+      {
+        shape: "thing",
+        points: [
+          {x: 0 + 55, y: 0 - 33},
+          {x: 0 + 55, y: -50},
+          {x: 50 + 55, y: -50},
+          {x: 50 + 55, y: 0},
+          {x: 100, y: 0},
+          {x: 100, y: 50},
+          {x: 50 + 55, y: 50},
+          {x: 50 + 55, y: 100},
+          {x: 0 + 55, y: 100},
+          {x: 0 + 55, y: 50 - 33},
+          {x: -50, y: 50 - 33},
+          {x: -50, y: 0 - 33},
+          {x: 0, y: 0 - 33}
+        ],
+        position: {
+          x: 655,
+          y: 590
+        },
+        angle: 0,
+        beginningAngle: 0,
+        scale: 1.3,
+        inDirection: true,
+        maxAngles: {
+          left: 90,
+          right: 90
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 700,
+          y: 77
+        },
+        angle: 0,
+        beginningAngle: 90,
+        inDirection: true,
+        maxAngles: {
+          left: 90,
+          right: 88
+        }
+      },
+      {
+        shape: "thing",
+        points: [
+          {x: 0 + 55, y: 0 - 33},
+          {x: 0 + 55, y: -50},
+          {x: 50 + 55, y: -50},
+          {x: 50 + 55, y: 0},
+          {x: 100, y: 0},
+          {x: 100, y: 50},
+          {x: 50 + 55, y: 50},
+          {x: 50 + 55, y: 100},
+          {x: 0 + 55, y: 100},
+          {x: 0 + 55, y: 50 - 33},
+          {x: -50, y: 50 - 33},
+          {x: -50, y: 0 - 33},
+          {x: 0, y: 0 - 33}
+        ],
+        position: {
+          x: 300,
+          y: 193
+        },
+        angle: 0,
+        beginningAngle: 0,
+        scale: 1.3,
+        inDirection: true,
+        maxAngles: {
+          left: 90,
+          right: 90
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 933,
+          y: 444
+        },
+        angle: 0,
+        size: 2,
+        beginningAngle: 90,
+        inDirection: true,
+        maxAngles: {
+          left: 133,
+          right: 90
+        }
+      }
+    ]
+  },
+  2: {
+    checkpoint: {
+      x: 250,
+      y: 150,
+      direction: "right"
+    },
+    platforms: [
+      {
+        shape: "rectangle",
+        speed: 0.1,
+        position: {
+          x: 433,
+          y: 107
+        },
+        angle: 0,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: true,
+        maxAngles: {
+          left: 133,
+          right: 6
+        }
+      },
+      {
+        shape: "rectangle",
+        speed: 1.7,
+        position: {
+          x: 677,
+          y: 107
+        },
+        angle: 0,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: true,
+        maxAngles: {
+          left: 0,
+          right: 133
+        }
+      },
+      {
+        shape: "rectangle",
+        speed: 1.5,
+        position: {
+          x: 1133,
+          y: 88
+        },
+        angle: 0,
+        size: 1.7,
+        beginningAngle: 90,
+        inDirection: true,
+        maxAngles: {
+          left: 10,
+          right: 133
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 1233,
+          y: 444
+        },
+        angle: 0,
+        speed: 1.9,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 155
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 1050,
+          y: 655
+        },
+        angle: 0,
+        speed: 1.9,
+        size: 0.7,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 155
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 855,
+          y: 633
+        },
+        angle: 0,
+        speed: 0.5,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 155
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 666,
+          y: 633
+        },
+        angle: 0,
+        speed: 1.7,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 90
+        }
+      },
+      {
+        shape: "thing",
+        speed: 0.1,
+        points: [
+          {x: 0 + 55, y: 0 - 33},
+          {x: 0 + 55, y: -50},
+          {x: 50 + 55, y: -50},
+          {x: 50 + 55, y: 0},
+          {x: 100, y: 0},
+          {x: 100, y: 50},
+          {x: 50 + 55, y: 50},
+          {x: 50 + 55, y: 100},
+          {x: 0 + 55, y: 100},
+          {x: 0 + 55, y: 50 - 33},
+          {x: -50, y: 50 - 33},
+          {x: -50, y: 0 - 33},
+          {x: 0, y: 0 - 33}
+        ],
+        position: {
+          x: 211,
+          y: 633
+        },
+        angle: 0,
+        beginningAngle: 0,
+        scale: 1.3,
+        inDirection: true,
+        maxAngles: {
+          left: 180,
+          right: 55
+        }
+      },
+      {
+        shape: "thing",
+        speed: 1.3,//1.5,
+        points: [
+          {x: 0 + 55, y: 0 - 33},
+          {x: 0 + 55, y: -50},
+          {x: 50 + 55, y: -50},
+          {x: 50 + 55, y: 0},
+          {x: 100, y: 0},
+          {x: 100, y: 50},
+          {x: 50 + 55, y: 50},
+          {x: 50 + 55, y: 100},
+          {x: 0 + 55, y: 100},
+          {x: 0 + 55, y: 50 - 33},
+          {x: -50, y: 50 - 33},
+          {x: -50, y: 0 - 33},
+          {x: 0, y: 0 - 33}
+        ],
+        position: {
+          x: 177,
+          y: 422,
+        },
+        angle: 0,
+        beginningAngle: 0,
+        scale: 1.3,
+        inDirection: true,
+        maxAngles: {
+          left: 180,
+          right: 55
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 279,
+          y: 300
+        },
+        angle: 0,
+        speed: 0.1,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 0
+        }
+      },
+      {
+        shape: "thing",
+        speed: 0.7,//1.5,
+        points: [
+          {x: 0 + 55, y: 0 - 33},
+          {x: 0 + 55, y: -50},
+          {x: 50 + 55, y: -50},
+          {x: 50 + 55, y: 0},
+          {x: 100, y: 0},
+          {x: 100, y: 50},
+          {x: 50 + 55, y: 50},
+          {x: 50 + 55, y: 100},
+          {x: 0 + 55, y: 100},
+          {x: 0 + 55, y: 50 - 33},
+          {x: -50, y: 50 - 33},
+          {x: -50, y: 0 - 33},
+          {x: 0, y: 0 - 33}
+        ],
+        position: {
+          x: 909,
+          y: 433,
+        },
+        angle: 0,
+        beginningAngle: 0,
+        scale: 1.3,
+        inDirection: true,
+        maxAngles: {
+          left: 180,
+          right: 55
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 511,
+          y: 300
+        },
+        angle: 0,
+        speed: 2,
+        size: 1,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 133,
+          right: 133
+        }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 511,
+          y: 555
+        },
+        angle: 0,
+        speed: 2.5,
+        size: 1.7,
+        beginningAngle: 90,
+        inDirection: false,
+        maxAngles: {
+          left: 111,
+          right: 222
+        }
+      }
+    ]
+  }
+}
+};
+  var point = (x, y) => ({
+    x,
+    y
+  });
+  var rectangle = createPath(point(0, -25), point(-50, -25), point(-50, -200), point(0, -100));
+  // convert points to Path
+  var pointShapes = [];
+  var ball = {
+    x: 450,
+    y: 150
+  };
+  var checkpoint =
+  {normal: {1: [{
+    x: 450,
+    y: 150,
+    direction: "right"
+  }]}}
+  checkThing();
+  //configLevel("normal", 2);
+  function checkThing() {
+  pointShapes = [];
+  for (var i = 0; i < level[level.mode][level.aktuell].platforms.length; i++) {
+    if (!level[level.mode][level.aktuell].checkpoint) level[level.mode][level.aktuell].checkpoint = [{x: 450, y: 150, direction: "right"}];
+    if (!checkpoint[level.mode][level.aktuell]) checkpoint[level.mode][level.aktuell] = /*{0: */[level[level.mode][level.aktuell].checkpoint]//}
+    for (var i1 = 0; level[level.mode][level.aktuell].platforms[i].points && i1 < level[level.mode][level.aktuell].platforms[i].points.length; i1++) {
+      if (level[level.mode][level.aktuell].platforms[i].shape == "thing") {
+      var points = [];
+      for (var i2 = 0; i2 < level[level.mode][level.aktuell].platforms[i].points.length; i2++) {
+        points.push(point(level[level.mode][level.aktuell].platforms[i].points[i2].x, level[level.mode][level.aktuell].platforms[i].points[i2].y));
+      }
+      // if (points[1] && !points[2]) pointShapes.push({path: createPath(points[0], points[1]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[2] && !points[3]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[3] && !points[4]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+
+      // if (points[4] f&& !points[5]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[5] && !points[6]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[6] && !points[7]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[7] && !points[8]) pointShapes.push({path: createPath(points[0], points[1]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[8] && !points[9]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[9] && !points[10]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[10] && !points[11]) pointShapes.push({path: createPath(points[0], points[1]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+      // if (points[11] && !points[12]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].platforms[i].points[i1].position, angle: level[level.mode][level.aktuell].platforms[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].platforms[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].platforms[i].points[i1].heart.onceInMiliSec, size: level[level.mode][level.aktuell].platforms[i].points[i1].size});
+    }
+    }
+    if (level[level.mode][level.aktuell].platforms[i].points && points[12] && !points[13]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7], points[8], points[9], points[10], points[11], points[12]), position: level[level.mode][level.aktuell].platforms[i].position, angle: level[level.mode][level.aktuell].platforms[i].angle, scale: level[level.mode][level.aktuell].platforms[i].scale, maxAngles: level[level.mode][level.aktuell].platforms[i].maxAngles, speed: level[level.mode][level.aktuell].platforms[i].speed});
+  }
+}
+  function configLevel(mode, levelAktuell) {
+    levelSelector.value = levelAktuell + ". level";
+    if (level != undefined) level.aktuell = levelAktuell;
+    if (mode != undefined) level.mode = mode;
+    checkThing();
+    resetLevel();
+  }
+  function removeCheckpoint() {
+    if (checkpoint[level.mode][level.aktuell].length > 1) {checkpoint[level.mode][level.aktuell].pop(); dbSetWarteschlange.push({tag: "checkpoint " + name, data: checkpoint});}
+  }
+  var canvas = textur.getContext('2d');
+  var inOrAgainstDirection = 1;
+  var scrollingInterac = {user: false, PC: false}
+  window.onscroll = function (e) {
+    if (!scrollingInterac.PC) {
+      scrollingInterac.user = true;
+      //console.log("please debug");
+    }
+    if (scrollY == 0 && scrollX == 0) scrollingInterac.user = false;
+  }
+  // ball
+  sphere1.style.width = "50px";
+  sphere1.style.height = "50px";
+  var x1 = 10,
+    y1 = 177; //window.innerHeight - 150 + 3,
+  // x2 = 0, y2 = 0,
+  vx1 = 0, vy1 = 0,
+    // vx2 = 0, vy2 = 0,
+    ax1 = 0, ay1 = 0;
+  if (window.DeviceMotionEvent != undefined) {
+    window.ondevicemotion = function(e) {
+      ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
+      ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
+    }
+    setInterval(function() {
+      scrollingInterac.PC = true;
+      if (!scrollingInterac.user && ball.y > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
+      if (!scrollingInterac.user && ball.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
+      if (!scrollingInterac.user && ball.y - scrollX < (17*2 + ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      if (!scrollingInterac.user && ball.y - scrollY < (17*2 + ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      setTimeout(function () {
+        scrollingInterac.PC = false;
+      }, 1);
+      var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
+      if (landscapeOrientation) {
+        vx1 = vx1 + ay1;
+        vy1 = vy1 + ax1;
+        // vx2 = vx2 + ay1;
+        // vy2 = vy2 + ax1;
+      } else {
+        vy1 = vy1 - ay1;
+        vx1 = vx1 + ax1;
+        // vy2 = vy2 - ay1;
+        // vx2 = vx2 + ax1;
+      }
+      vx1 = vx1 * 0.98;
+      vy1 = vy1 * 0.98;
+      y1 = 1; //parseInt(y1 + vy1 / 50);
+      x1 = parseInt(x1 + vx1 / 50);
+
+      // vx2 = vx2 * 0.98;
+      // vy2 = vy2 * 0.98;
+      // y2 = parseInt(y2 + vy2 / 30);
+      // x2 = parseInt(x2 + vx2 / 30);
+      //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
+      boundingBoxCheck();
+      sphere1.style.top = y1 + "px";
+      sphere1.style.left = x1 + "px";
+      // set new angle
+      //if (x1 < 0 || x1 == -0) x1 = 0;
+      for (var i = 0; i < level[level.mode][level.aktuell].platforms.length; i++) {
+        var speed = 1;
+        if (level[level.mode][level.aktuell].platforms[i].speed) speed = level[level.mode][level.aktuell].platforms[i].speed;
+        var beginningAngle = 90;
+        if (level[level.mode][level.aktuell].platforms[i].beginningAngle != undefined) beginningAngle = level[level.mode][level.aktuell].platforms[i].beginningAngle;
+        if ((level[level.mode][level.aktuell].platforms[i].maxAngles.right + level[level.mode][level.aktuell].platforms[i].maxAngles.left)*1/speed > highestAngle) {
+          highestAngle = (level[level.mode][level.aktuell].platforms[i].maxAngles.right + level[level.mode][level.aktuell].platforms[i].maxAngles.left)*1/speed;
+          console.log("highest: " + i);
+        }
+        if (x1*speed < level[level.mode][level.aktuell].platforms[i].maxAngles.left && level[level.mode][level.aktuell].platforms[i].shape != "thing") level[level.mode][level.aktuell].platforms[i].angle = beginningAngle + (x1*speed - level[level.mode][level.aktuell].platforms[i].maxAngles.left) /* - highestAngle*/ //- level[level.mode][level.aktuell].platforms[i].maxAngles.left;
+        else if (x1*speed < level[level.mode][level.aktuell].platforms[i].maxAngles.right + level[level.mode][level.aktuell].platforms[i].maxAngles.left && level[level.mode][level.aktuell].platforms[i].shape != "thing") level[level.mode][level.aktuell].platforms[i].angle = beginningAngle + x1*speed - level[level.mode][level.aktuell].platforms[i].maxAngles.left;
+        if (level[level.mode][level.aktuell].platforms[i].shape != "thing" && !level[level.mode][level.aktuell].platforms[i].inDirection && (x1*speed < level[level.mode][level.aktuell].platforms[i].maxAngles.left || x1*speed < level[level.mode][level.aktuell].platforms[i].maxAngles.right + level[level.mode][level.aktuell].platforms[i].maxAngles.left)) level[level.mode][level.aktuell].platforms[i].angle = -(level[level.mode][level.aktuell].platforms[i].angle);
+        if (level[level.mode][level.aktuell].platforms[i].angle == -0) level[level.mode][level.aktuell].platforms[i].angle = 0;
+      }
+      for (var i = 0; i < pointShapes.length; i++) {
+        var beginningAngle = 90;
+        var speed = 1;
+        if (pointShapes[i].speed) speed = pointShapes[i].speed;
+        if (x1*speed < pointShapes[i].maxAngles.left && pointShapes[i].shape != "thing") pointShapes[i].angle = beginningAngle + (x1*speed - pointShapes[i].maxAngles.left) /* - highestAngle*/ //- pointShapes[i].maxAngles.left;
+        else if (x1*speed < pointShapes[i].maxAngles.right + pointShapes[i].maxAngles.left && pointShapes[i].shape != "thing") pointShapes[i].angle = beginningAngle + x1*speed - pointShapes[i].maxAngles.left;
+        if (pointShapes[i].shape != "thing" && !pointShapes[i].inDirection && (x1*speed < pointShapes[i].maxAngles.left || x1*speed < pointShapes[i].maxAngles.right + pointShapes[i].maxAngles.left)) pointShapes[i].angle = -(pointShapes[i].angle);
+        if (pointShapes[i].angle == -0) pointShapes[i].angle = 0;
+      }
+      data = canvas.getImageData(ball.x - 17, ball.y - 17, 17*2, 17*2);
+      for (var i = 0; i < data.data.length; i += 4) {
+        // canvas.fillStyle = "red";
+        // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
+        if (/*red == 0 && blue == 0 && alpha == 255 && green == 0*/data.data[0 + i] == 0 && data.data[1 + i] == 0 && data.data[2 + i] == 0) {
+          console.log("Fail!");
+          i = data.data.length;
+          resetLevel();
+        }
+        if (data.data[0 + i] == 255 && data.data[1 + i] == 242 && data.data[2 + i] == 0 && Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") {
+          Bild = new Image();
+          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
+          canvas.drawImage(Bild, 0 , 0, textur.width, textur.height);
+        }
+        // red == 168 && green == 230 && blue == 29
+        //if (red ==  255 && blue == 0 && alpha == 255 && green == 242) console.log("goalReached!");
+      }
+      data = canvas.getImageData(ball.x - 17 - 1, ball.y - 17 - 1, 17*2 + 2, 17*2 + 2);
+      for (var i = 0; i < data.data.length; i += 4) {
+          if (data.data[0 + i] == 168 && data.data[1 + i] == 230 && data.data[2 + i] == 29 && ((ball.x - checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].x > 100 || checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].x - ball.x > 100) || (checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].y - ball.y > 100 || ball.y - checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].y > 100))) {
+          console.log("checkpoint erreicht!!!");
+          checkpoint[level.mode][level.aktuell].push({x: ball.x, y: ball.y, direction: direction});
+          dbSetWarteschlange.push({tag: "checkpoint " + name, data: checkpoint});
+        }
+      }
+    }, 25);
+  }
+  var highestAngle = 0;
+  function resetLevel() {
+    x1 = 0;
+    ball.x = checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].x;
+    ball.y = checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].y
+    direction = checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].direction;
+    if (!scrollingInterac.user && ball.x > window.innerWidth + scrollX - 17*2*5) window.scroll(scrollX + 3, scrollY);
+    if (!scrollingInterac.user && ball.y > window.innerHeight + scrollY - 17*2*5) window.scroll(scrollX, scrollY + 3);
+    if (!scrollingInterac.user && ball.x - scrollX < (17*2 + ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+    if (!scrollingInterac.user && ball.y - scrollY < (17*2 + ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+  }
+  function boundingBoxCheck() {
+    if (x1 < 0) {
+      x1 = 0;
+      vx1 = 0 //-vx1;
+    }
+    // if (y1 < 0) {
+    //   y1 = 1;
+    //   vy1 = 1//-vy1;
+    // }
+    if (x1 > highestAngle - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+      x1 = highestAngle - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
+      // vx1 = -vx1;
+    }
+    // if (y1 > window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+    //   y1 = window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2 - 1;
+    //   // vy1 = -vy1;
+    // }
+    // if (x2 < 0) {
+    //   x2 = 1;
+    //   // vx2 = -vx2;
+    // }
+    // if (y2 < 1) {
+    //   y2 = 1;
+    //   // vy2 = -vy2;
+    // }
+    // if (x2 > highestAngle - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+    //   x2 = highestAngle - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2 - 1;
+    //   // vx2 = -vx2;
+    // }
+    // if (y2 > window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+    //   y2 = window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2 - 1;
+    //   // vy2 = -vy2;
+    // }
+  }
+  // show rotation:
+
+  function drawPath(path, x, y, angle) {
+    canvas.setTransform(1, 0, 0, 1, x, y);
+    canvas.rotate(angle);
+    canvas.stroke(path);
+  }
+
+  function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
+    canvas.setTransform(scale, 0, 0, scale, x, y);
+    canvas.rotate(angle * Math.PI / 180);
+    fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
+    strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
+  }
+  var Bild = new Image();
+  function renderLoop(time) {
+    //canvas.clearRect(0, 0, textur.width, textur.height);
+    if (Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") Bild = new Image();
+    if (Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/saveTheBall/normal/map" + level.aktuell + ".png";
+    if (Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") canvas.drawImage(Bild, 0, 0)
+    canvas.fillStyle = "red";
+    canvas.beginPath();
+    canvas.arc(ball.x, ball.y, 17, 0, Math.PI * 2, false);
+    canvas.fill();
+    var angle = 0;
+    var size = 1.0;
+    try {
+      for (var i = 0; i < level[level.mode][level.aktuell].platforms.length; i++) {
+        if (level[level.mode][level.aktuell].platforms[i].angle != undefined) angle = level[level.mode][level.aktuell].platforms[i].angle;
+        if (level[level.mode][level.aktuell].platforms[i].size) size = level[level.mode][level.aktuell].platforms[i].size;
+        if (level[level.mode][level.aktuell].platforms[i].shape && level[level.mode][level.aktuell].platforms[i].shape == "triangle") drawPath_V2(triangle, level[level.mode][level.aktuell].platforms[i].position.x, level[level.mode][level.aktuell].platforms[i].position.y, size, angle, "", "black");
+        // scale path
+        if (level[level.mode][level.aktuell].platforms[i].shape && level[level.mode][level.aktuell].platforms[i].shape == "rectangle") drawPath_V2(rectangle, level[level.mode][level.aktuell].platforms[i].position.x, level[level.mode][level.aktuell].platforms[i].position.y, size, angle, "", "black");
+      }
+      for (var i = 0; i < pointShapes.length; i++) {
+        if (pointShapes[i].angle != undefined) angle = pointShapes[i].angle;
+        var scale = 1;
+        if (pointShapes[i].scale) scale = pointShapes[i].scale;
+        drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale, angle, "", "black");
+      }
+      //fill scale path
+      //drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
+
+      canvas.setTransform(1, 0, 0, 1, 0, 0);
+      if (Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") requestAnimationFrame(renderLoop);
+    } catch (e) {
+      console.log("please debug :( ");
+    }
+  }
+  requestAnimationFrame(renderLoop);
+
+  function createPath(...points) {
+    var cx = 0;
+    cy = 0;
+    for (const p of points) {
+      cx += p.x;
+      cy += p.y;
+    }
+    cx /= points.length;
+    cy /= points.length;
+
+    const path = new Path2D;
+    for (const p of points) {
+      path.lineTo(p.x - cx, p.y - cy);
+    }
+    path.closePath();
+    return path;
+  }
+  // followLinePrototype
+  var direction = "";
+  var goDirection = {
+    direction: "",
+    left: 0
+  };
+  canvas.fillStyle = "rgba(0, 0, 1, 255)";
+  canvas.fillRect(0, 0, textur.width, textur.height);
+  var randCheckInt = setInterval(function() {
+    if (Bild.src == "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg") clearInterval(randCheckInt);
+    Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/saveTheBall/normal/map" + level.aktuell + ".png";
+    canvas.drawImage(Bild, 0, 0)
+    canvas.fillStyle = "red";
+    canvas.beginPath();
+    canvas.arc(ball.x, ball.y, 17, 0, Math.PI * 2, false);
+    canvas.fill();
+    for (var i = 0; i == 0 || (direction != "left" && goDirection.direction != "left" && !( /*red*/ data.data[0] == 0 && /*blue*/ data.data[2] == 1 && /*green*/ data.data[1] == 0)); i++) {
+      data = canvas.getImageData(ball.x + 17 / 2 + i, ball.y + 17 / 2, 1, 1);
+      // red = data.data[0];
+      // green = data.data[1];
+      // blue = data.data[2];
+      // alpha = data.data[3];
+    }
+    var highest = {
+      number: i - 1,
+      i: 0
+    };
+    for (var i = 0; i == 0 || (direction != "up" && goDirection.direction != "up" && !( /*red*/ data.data[0] == 0 && /*blue*/ data.data[2] == 1 && /*green*/ data.data[1] == 0)); i++) {
+      data = canvas.getImageData(ball.x + 17 / 2, ball.y + i + 17 / 2, 1, 1);
+      // red = data.data[0];
+      // green = data.data[1];
+      // blue = data.data[2];
+      // alpha = data.data[3];
+    }
+    if (highest.number < i - 1) highest = {
+      number: i - 1,
+      i: 1
+    };
+    for (var i = 0; i == 0 || (direction != "right" && goDirection.direction != "right" && !( /*red*/ data.data[0] == 0 && /*blue*/ data.data[2] == 1 && /*green*/ data.data[1] == 0)); i++) {
+      data = canvas.getImageData(ball.x - i + 17 / 2, ball.y + 17 / 2, 1, 1);
+      // red = data.data[0];
+      // green = data.data[1];
+      // blue = data.data[2];
+      // alpha = data.data[3];
+    }
+    if (highest.number < i - 1) highest = {
+      number: i - 1,
+      i: 2
+    };
+    for (var i = 0; i == 0 || (direction != "down" && goDirection.direction != "down" && !( /*red*/ data.data[0] == 0 && /*blue*/ data.data[2] == 1 && /*green*/ data.data[1] == 0)); i++) {
+      data = canvas.getImageData(ball.x + 17 / 2, ball.y - i + 17 / 2, 1, 1);
+      // red = data.data[0];
+      // green = data.data[1];
+      // blue = data.data[2];
+      // alpha = data.data[3];
+    }
+    if (highest.number < i - 1) highest = {
+      number: i - 1,
+      i: 3
+    };
+    var directionObj = {
+      right: 0,
+      down: 1,
+      left: 2,
+      up: 3
+    };
+    if (goDirection.left > 0) {
+      highest.i = directionObj[goDirection.direction];
+      goDirection.left--;
+      if (goDirection.left <= 0) {
+        goDirection.left = "done";
+        setTimeout(function() {
+          goDirection.left = 0;
+          setTimeout(function() {
+            goDirection.direction = "done";
+          }, 500);
+        }, 500);
+      }
+    }
+    if (highest.i == 0) {
+      ball.x += 3;
+      if (direction != "right" && direction != "" && goDirection.left < 1) {
+        goDirection.direction = direction;
+        goDirection.left = 17 / 2
+      }
+      direction = "right"
+    } else if (highest.i == 1) {
+      ball.y += 3;
+      if (direction != "down" && direction != "" && goDirection.left < 1) {
+        goDirection.direction = direction;
+        goDirection.left = 17 / 2
+      }
+      direction = "down"
+    } else if (highest.i == 2) {
+      ball.x -= 3;
+      if (direction != "left" && direction != "" && goDirection.left < 1) {
+        goDirection.direction = direction;
+        goDirection.left = 17 / 2
+      }
+      direction = "left"
+    } else {
+      ball.y -= 3;
+      if (direction != "up" && direction != "" && goDirection.left < 1) {
+        goDirection.direction = direction;
+        goDirection.left = 17 / 2
+      }
+      direction = "up"
+    }
+  }, 90);
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("saveTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
+
+</script>
