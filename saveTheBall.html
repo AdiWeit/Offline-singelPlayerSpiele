@@ -1,5 +1,6 @@
 <canvas id="textur" width="1847" height="748"></canvas>
 <select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
+<select id="checkpointSelector" value="1. Checkpoint" onchange="beginFromCheckpoint(value);"></select>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <div id="ball">
@@ -24,8 +25,15 @@
 </div>
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
 <script>
+  checkpointSelector.style.display = " none";
   function levelSelected(value) {
     configLevel(level.mode, value.toString().split('. level')[0]);
+  }
+  function beginFromCheckpoint(value) {
+    if (checkpoint[level.mode][level.aktuell]/*[checkpoint[level.mode][level.aktuell].length - 1]*/.selected) checkpoint[level.mode][level.aktuell].pop();
+    checkpoint[level.mode][level.aktuell].push(checkpoint[level.mode][level.aktuell][JSON.parse(value.toString().split('. Checkpoint')[0]) - 1]);
+    checkpoint[level.mode][level.aktuell]/*[checkpoint[level.mode][level.aktuell].length - 1]*/.selected = true;
+    resetLevel();
   }
   if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
   else var name = localStorage.getItem("storedName");
@@ -512,15 +520,39 @@ localStorage.setItem("storedName", name);
     if (level[level.mode][level.aktuell].platforms[i].points && points[12] && !points[13]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3], points[4], points[5], points[6], points[7], points[8], points[9], points[10], points[11], points[12]), position: level[level.mode][level.aktuell].platforms[i].position, angle: level[level.mode][level.aktuell].platforms[i].angle, scale: level[level.mode][level.aktuell].platforms[i].scale, maxAngles: level[level.mode][level.aktuell].platforms[i].maxAngles, speed: level[level.mode][level.aktuell].platforms[i].speed});
   }
 }
-  function configLevel(mode, levelAktuell) {
+  function configLevel(mode, levelAktuell, levelFinished) {
     levelSelector.value = levelAktuell + ". level";
     if (level != undefined) level.aktuell = levelAktuell;
     if (mode != undefined) level.mode = mode;
     checkThing();
     resetLevel();
+    if (checkpoint[level.mode][level.aktuell][0].finished) {
+      checkpointSelector.style.display = "inline";
+      while (document.getElementById('checkpointSelector').options.length > 0) {
+        document.getElementById('checkpointSelector').options[0] = undefined;
+      }
+      for (var i = 0; i < checkpoint[level.mode][level.aktuell].length; i++) {
+        opt = document.createElement("option");
+        document.getElementById("checkpointSelector").options.add(opt);
+        // opt.setAttribute("id", i);
+        opt.text = (i + 1) + ". Checkpoint";
+        if (i == 0) opt.text += " (Start)";
+      }
+      checkpointSelector.value = (i) + ". Checkpoint";
+    }
+    else checkpointSelector.style.display = " none";
+    if (levelFinished) uploadCheckpoint();
+  }
+  function uploadCheckpoint() {
+    for (var i = 0; i < Object.keys(checkpoint).length; i++) {
+      for (var i1 = 0; i1 < Object.keys(checkpoint[Object.keys(checkpoint)[i]]).length; i1++) {
+        if (checkpoint[Object.keys(checkpoint)[i]][Object.keys(checkpoint[Object.keys(checkpoint)[i]])[i1]].selected) checkpoint[Object.keys(checkpoint)[i]][Object.keys(checkpoint[Object.keys(checkpoint)[i]])[i1]].pop();
+      }
+    }
+    dbSetWarteschlange.push({tag: "checkpoint " + name, data: checkpoint});
   }
   function removeCheckpoint() {
-    if (checkpoint[level.mode][level.aktuell].length > 1) {checkpoint[level.mode][level.aktuell].pop(); dbSetWarteschlange.push({tag: "checkpoint " + name, data: checkpoint});}
+    if (checkpoint[level.mode][level.aktuell].length > 1) {checkpoint[level.mode][level.aktuell].pop(); uploadCheckpoint();}
   }
   var canvas = textur.getContext('2d');
   var inOrAgainstDirection = 1;
@@ -615,6 +647,7 @@ localStorage.setItem("storedName", name);
           resetLevel();
         }
         if (data.data[0 + i] == 255 && data.data[1 + i] == 242 && data.data[2 + i] == 0/* && Bild.src != "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg"*/) {
+          checkpoint[level.mode][level.aktuell][0].finished = true;
           if (level.aktuell >= Object.keys(level[level.mode]).length) {
           Bild = new Image();
           Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
@@ -622,7 +655,7 @@ localStorage.setItem("storedName", name);
         }
         else {
           level.aktuell++;
-          configLevel("normal", level.aktuell);
+          configLevel("normal", level.aktuell, true);
           i = data.data.length;
         }
         }
@@ -634,7 +667,7 @@ localStorage.setItem("storedName", name);
           if (data.data[0 + i] == 168 && data.data[1 + i] == 230 && data.data[2 + i] == 29 && ((ball.x - checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].x > 100 || checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].x - ball.x > 100) || (checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].y - ball.y > 100 || ball.y - checkpoint[level.mode][level.aktuell][checkpoint[level.mode][level.aktuell].length - 1].y > 100))) {
           console.log("checkpoint erreicht!!!");
           checkpoint[level.mode][level.aktuell].push({x: ball.x, y: ball.y, direction: direction});
-          dbSetWarteschlange.push({tag: "checkpoint " + name, data: checkpoint});
+          uploadCheckpoint();
         }
       }
     }, 25);
