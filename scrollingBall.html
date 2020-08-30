@@ -3,6 +3,9 @@
 <meta charset="utf-8">
 <html>
 <head>
+  <div class="column" id="newRecord">
+    <img src="https://adi.nicolaiweitkemper.de/Bilder/New%20best.png" id="newHighscore" onclick="imageClicked()">
+  </div>
 <title>scrolling ball</title>
   <h2 id="data"></h2>
 <meta name="viewport" content="width=device-width,user-scalable=yes" />
@@ -82,7 +85,7 @@ navigator.userAgent.match(/Windows Phone/i)
 var gerät = "Handy"
 console.log("Handy");
 } else {
-var gerät = "PC"
+var gerät = "Handy"//"PC"
 console.log("PC");
 }
   // ballMovement:
@@ -156,14 +159,18 @@ console.log("PC");
       lives.now--;
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
-        highscores[name][modeSelection.value][lives.beginning - lives.now] = pixelMoved - 852;
-        dbSet("scrollingBall", "highscores", highscores);
+        highscores[name][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
+        dbSetWarteschlange.push({tag: "highScores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
+      //  document.getElementById('newHighscore').style.display = "inline";
+      Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+      canvas.drawImage(Bild, 400, 20, 437, 437);
       }
       shield = true;
       setTimeout(function () {
         if (countdown.length == 0) shield = false;
       }, 2000);
-      if (lives.now < 1 && scores.style.display == "none") beginnRound();
+      if (lives.now < 1 && scores.style.display == "none" && modeSelection.value != "training") beginnRound(true);
     }
   }
   }, 25);
@@ -190,7 +197,9 @@ localStorage.setItem("storedName", name);
   var lives = {now: 3, beginning: 3};
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
-  var figuresUnlocked = 10;
+  var figuresUnlocked = 3;
+  var totalFigures = 10;
+  var figureXP = {have: 0, needed: [3333, 4444, 4444, 5555, 7777, 8888, 9999]};
   var figuresUsed = [];
   var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
@@ -205,10 +214,16 @@ localStorage.setItem("storedName", name);
       angle: 0
     }]
   }*/];
-
+  dbGet("scrollingBall", "figuresUnlocked").then(result => {
+    figuresUnlocked = result;
+  });
+  dbGet("scrollingBall", "figureXP").then(result => {
+  figureXP = result;
+  });
   dbGet("scrollingBall", "highscores").then(result => {
     highscores = result;
     if (!highscores[name]) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}};
+    showScores(highscores, modeSelection.value);
   }).catch(function(e) {
     console.error(e);
     if (e.message.includes("nicht gefunden")) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}};
@@ -216,37 +231,90 @@ localStorage.setItem("storedName", name);
   var direction = {};
 //  beginnRound();
   var countdownInt;
-  function beginnRound() {
-    if (gerät == "Handy") {
-      textur.style.transform = "rotate(" + 0 + "deg)";
-      var directions = [1, 1, -1];
-      var selectedDirection = directions[Math.round(Math.random()*1)];
-      if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)};}
-      else if (modeSelection.value == "scrollWaagerecht") {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)};}
-      else {direction = {direction: 1 /*beginning: pixelMoved,*/}; speed = 1;};
-    textur.style.display = "inline";
-    textur.width = 852;
-    scores.style.display = "none";
-    countdown = [3,2,1,"Go!", "reallyGo!"];
-    figuresUsed = [];
-    pixelMoved = 0;
-    screen = [];
-    lives.now = lives.beginning;
-    shield = true;
-    if (modeSelection.value == "againstThePC") screen.push(createNewFigure(0, 0));
-    for (var i = 1; i < 4; i++) {
-      screen.push(createNewFigure(i, 0));
+  function addXP(beginningXP, finishedXP) {
+    figureXP.have += 3;
+    try {
+      Bild = new Image();
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + (figuresUnlocked) + ".png";
+      console.log( figureXP.have/figureXP.needed[figuresUnlocked - 3] + " - " + figureXP.needed[figuresUnlocked - 3]*(figureXP.have/figureXP.needed[figuresUnlocked - 3]));
+      //textur.height =  figureXP.needed[figuresUnlocked - 3]*(figureXP.have/figureXP.needed[figuresUnlocked - 3]);
+      textur.height = Bild.height*(figureXP.have/figureXP.needed[figuresUnlocked - 3]);
+      canvas.drawImage(Bild, 0, 0);
+      showScores(highscores, modeSelection.value);
+      textur.style.display = "inline";
+      if (!(figureXP.have < finishedXP) || figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
+        dbSetWarteschlange.push({tag: "figuresUnlocked", data: figuresUnlocked});
+        dbSetWarteschlange.push({tag: "figureXP", data: figureXP});
+        setTimeout(function () {
+          beginnRoundP2();
+        }, 2222);
+      }
+      if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {figuresUnlocked++; figureXP.have = 0;}
+      else if (figureXP.have < finishedXP) {
+        setTimeout(function () {
+          addXP(beginningXP, finishedXP);
+        }, 1);
+      }
+    } catch (e) {
+      console.log("every figure unlocked!");
+      setTimeout(function () {
+        beginnRoundP2();
+      }, 1777);
     }
-    if (modeSelection.value != "againstThePC") screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
-    x1 = 222;
-    y1 = 600;
-    textur.style.display = "inline";
-    clearInterval(countdownInt);
-    countdownInt = setInterval(countdownFunction, 1000);
   }
-  else {
-    alert("Dieses Spiel ist auf Bewegungssteuerung basiet. Spielen sie es auf einem portablem Gerät (Handy oder Tablet), oder gucken sie sich hier, am PC die highscores an!");
+  document.getElementById('newHighscore').style.display = "none";
+  var Bild;
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
+  function beginnRoundP2(resetNoLive) {
+    if (gerät == "Handy") {
+    textur.height = 752;
+    document.getElementById('newHighscore').style.display = "none";
+    textur.style.transform = "rotate(" + 0 + "deg)";
+    var directions = [1, 1, -1];
+    var selectedDirection = directions[Math.round(Math.random()*1)];
+    if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5;}
+    else if (modeSelection.value == "scrollWaagerecht") {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5}
+    else {direction = {direction: 1 /*beginning: pixelMoved,*/}; speed = 1;};
+  textur.width = 852;
+  scores.style.display = "none";
+  countdown = [3,2,1,"Go!", "reallyGo!"];
+  figuresUsed = [];
+  pixelMoved = 0;
+  screen = [];
+  lives.now = lives.beginning;
+  shield = true;
+  if (modeSelection.value == "againstThePC") screen.push(createNewFigure(0, 0));
+  for (var i = 1; i < 4; i++) {
+    screen.push(createNewFigure(i, 0, resetNoLive));
   }
+  if (modeSelection.value != "againstThePC") screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
+  x1 = 222;
+  y1 = 600;
+  textur.style.display = "inline";
+  clearInterval(countdownInt);
+  countdownInt = setInterval(countdownFunction, 1000);
+}
+else {
+  alert("Dieses Spiel ist auf Bewegungssteuerung basiet. Spielen sie es auf einem portablem Gerät (Handy oder Tablet), oder gucken sie sich hier, am PC die highscores an!");
+}
+  }
+  function beginnRound(resetNoLive) {
+      canvas.clearRect(0, 0, textur.width, textur.height);
+      speed = "none";
+      if (figuresUnlocked != totalFigures) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
+      else {
+        showScores(highscores, modeSelection.value);
+        setTimeout(function () {
+          beginnRoundP2(resetNoLive);
+        }, 3000);
+      }
+      // figureXP.have += (Math.round(pixelMoved - 852));
   }
   function countdownFunction() {
     if (/*modeSelection.value != "training" || */beginnTraining.style.display == "none") {
@@ -268,9 +336,12 @@ localStorage.setItem("storedName", name);
     else lives.beginning = 1;
     beginnRound();
   }
-  function createNewFigure (i, x) {
+  function createNewFigure (i, x, resetNoLive) {
+    if (!resetNoLive || modeSelection.value != "training") {
     if (modeSelection.value != "scrollWaagerecht" || direction.stringDirection == "up" || direction.stringDirection == "left" || direction.stringDirection == undefined) return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: x, y: 376 - i*376};
+    else if (direction.stringDirection == "right" && modeSelection.value == "scrollWaagerecht") return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y:  376*2};
     else return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y: -(376)*2 + i*376};
+  }
   }
   var randomNumber = 0;
   function selectNewFigure(i) {
@@ -287,7 +358,7 @@ localStorage.setItem("storedName", name);
       else canvas.fillStyle = "red";
       canvas.fillRect(477*i, 0, 444 + 5, 400);
       var Bild = new Image();
-          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + i + ".png";
+      Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + i + ".png";
       canvas.drawImage(Bild, 10 + 477*i, 10);
     }
     if (times < 5) {
@@ -310,12 +381,13 @@ localStorage.setItem("storedName", name);
     clearInterval(moveUpInt);
     visible([["trainingHTMLElements", "none"], ["showHighscores", "inline"], ["checkbLives", "inline"], ["textCheckLives", "inline"]]);
     if (value != /*"scrollWithBall"*/"training") {moveUpInt = setInterval(moveUp, 10);  beginnRound();}
-    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["checkbLives", "none"], ["textCheckLives", "none"]]); if (figuresTraining.length == 0)visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
+    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["checkbLives", "none"], ["textCheckLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
     }
   modeSelected("autoScroll");
   var speed = 1;
   var pixelMoved = 0;
   function moveUp() {
+    if (speed != "none") {
     var directions = [-1, 1, 1]
     var selectedDirection = directions[Math.round(Math.random()*(directions.length - 1))];
     var i1 = 0;
@@ -344,6 +416,7 @@ localStorage.setItem("storedName", name);
       if ((direction.stringDirection == "up" && Math.round(Math.random()*1) == 0)/* || directionBefore == "left"*/) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
       else if (direction.stringDirection == "up"/* || directionBefore == "right"*/) {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
       else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      if (direction.stringDirection == "right") screen.pop();
       if (directionBefore == "right") direction.turned = 90;
       else if (directionBefore == "left") direction.turned = -90;
       rotateInt = setInterval(rotateCanvas, 50);
@@ -360,7 +433,9 @@ localStorage.setItem("storedName", name);
       }
       if ((screen[i].y > 852 && modeSelection.value != "againstThePC")) {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
       if (screen[i].y > 804 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
-      if (screen[i].y < /*-876 - 426*/-1229 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
+      // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
+      if (speed != 0 && screen[i].y <= /*-876 - 426*//*-1229*/-390 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {
+        screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
     if (countdown.length == 0) {
@@ -368,6 +443,7 @@ localStorage.setItem("storedName", name);
     Layout();
     }
   }
+}
   //var angle = 30;
   var rotateInt;
   var checkTurnedInt;
@@ -438,6 +514,7 @@ localStorage.setItem("storedName", name);
     console.log("scores: " + highscores);
     var cell = [ /*row.insertCell(0)*/ ];
     var highestLives = {lives: 0, number: 0};
+    if (highscores[name][modeSelection.value]) {
     for (var i = 0; i < Object.keys(highscores).length; i++) {
       // if (!(Object.keys(highscores)[i] == "allMaps")) {
         var table = document.getElementById("scores");
@@ -483,6 +560,7 @@ localStorage.setItem("storedName", name);
       else cell[cell.length - 1].innerHTML = (i1) + ". live";
     }
   }
+}
   var figuresSelected = 0;
   function canvasClicked() {
     for (var i = 0; i < figuresUnlocked; i++) {
