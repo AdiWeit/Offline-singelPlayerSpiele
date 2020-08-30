@@ -58,6 +58,8 @@
 <h2 id="textCheckLives">play with lives</h2>
 <input id="checkbLives" type="checkbox" checked="true" onchange="checkbLivesChanged(checked)" name="vehicle" value="">
 <br>
+<input type="checkbox" id="instatntRestart" checked="true">instant restart
+<br>
 <table id="scores">
   <!-- <tr>
   <td>Row1 cell1</td>
@@ -310,9 +312,11 @@ else {
       if (figuresUnlocked != totalFigures) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
       else {
         showScores(highscores, modeSelection.value);
+        var time = 3000;
+        if (instatntRestart.checked && resetNoLive) time = 0;
         setTimeout(function () {
           beginnRoundP2(resetNoLive);
-        }, 3000);
+        }, time);
       }
       // figureXP.have += (Math.round(pixelMoved - 852));
   }
