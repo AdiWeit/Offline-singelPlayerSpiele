@@ -614,6 +614,7 @@ localStorage.setItem("storedName", name);
       sphere1.style.left = x1 + "px";
       // set new angle
       //if (x1 < 0 || x1 == -0) x1 = 0;
+      highestAngle = 0;
       for (var i = 0; i < level[level.mode][level.aktuell].platforms.length; i++) {
         var speed = 1;
         if (level[level.mode][level.aktuell].platforms[i].speed) speed = level[level.mode][level.aktuell].platforms[i].speed;
