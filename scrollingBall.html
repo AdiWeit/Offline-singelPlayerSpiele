@@ -55,8 +55,8 @@
 <br>
 <button type="button" id="showHighscores" onclick="if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value); innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
 <br>
-<h2 id="textCheckLives">play with lives</h2>
-<input id="checkbLives" type="checkbox" checked="true" onchange="checkbLivesChanged(checked)" name="vehicle" value="">
+<h2 id="textTextBoxLives" onclick="alert('Hier können sie einstellen, wie viele Leben sie innerhalb einer Runde haben wollen. Da es für jedes Leben eigene highscores gibt, können sie hier bis zu 11 Leben einstellen. Wenn sie also z.B. den highscore der Punkte, bevor sie ihr erstes Leben verlieren verbessern wollen, geben sie hier 1 ein und drücken sie enter, damit sie es immer direkt nach einem Lebensverlust von neuem probieren können.');">amount of lives [i]</h2>
+<input id="textBoxLives" type="text" onchange="textBoxLivesChanged(value)" value="3" name="vehicle">
 <br>
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
@@ -157,8 +157,9 @@ console.log("PC");
     blue = data.data[2];
     alpha = data.data[3];
     if (!highscores[name][modeSelection.value]) highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
-    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
+    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed > 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
+      if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
         highscores[name][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
@@ -167,15 +168,20 @@ console.log("PC");
       Bild = new Image();
       Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
       canvas.drawImage(Bild, 400, 20, 437, 437);
+      newHighscore = true;
       }
       shield = true;
-      setTimeout(function () {
-        if (countdown.length == 0) shield = false;
-      }, 2000);
+      deactivateShield();
       if (lives.now < 1 && scores.style.display == "none" && modeSelection.value != "training") beginnRound(true);
     }
   }
   }, 25);
+  }
+  function deactivateShield() {
+    setTimeout(function () {
+      if (countdown.length == 0 && speed > 0) shield = false;
+      else if (countdown.length == 0) deactivateShield();
+    }, 2000);
   }
   if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
   else var name = localStorage.getItem("storedName");
@@ -196,6 +202,7 @@ localStorage.setItem("storedName", name);
 
   // textur.width = window.innerWidth;
   // textur.height = window.innerHeight;
+  var newHighscore = false;
   var lives = {now: 3, beginning: 3};
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
@@ -335,9 +342,11 @@ else {
     countdown.shift();
   }
   }
-  function checkbLivesChanged(checked) {
-    if (checked) lives.beginning = 3;
-    else lives.beginning = 1;
+  function textBoxLivesChanged(value) {
+    // if (checked) lives.beginning = 3;
+    // else lives.beginning = 1;
+    if (JSON.parse(value) > 11) {value = "11"; textBoxLives.value = "11"}
+    lives.beginning = JSON.parse(value);
     beginnRound();
   }
   function createNewFigure (i, x, resetNoLive) {
@@ -383,9 +392,9 @@ else {
   var moveUpInt;
   function modeSelected(value) {
     clearInterval(moveUpInt);
-    visible([["trainingHTMLElements", "none"], ["showHighscores", "inline"], ["checkbLives", "inline"], ["textCheckLives", "inline"]]);
+    visible([["trainingHTMLElements", "none"], ["showHighscores", "inline"], ["textBoxLives", "inline"], ["textTextBoxLives", "inline"]]);
     if (value != /*"scrollWithBall"*/"training") {moveUpInt = setInterval(moveUp, 10);  beginnRound();}
-    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["checkbLives", "none"], ["textCheckLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
+    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["textBoxLives", "none"], ["textTextBoxLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
     }
   modeSelected("autoScroll");
   var speed = 1;
