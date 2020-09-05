@@ -156,14 +156,14 @@ console.log("PC");
     green = data.data[1];
     blue = data.data[2];
     alpha = data.data[3];
-    if (!highscores[name][modeSelection.value]) highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
+    if (!highscores[name][modeSelection.value] && modeSelection.value != "training") highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
     else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed > 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
         highscores[name][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
-        dbSetWarteschlange.push({tag: "highScores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
+        dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
       //  document.getElementById('newHighscore').style.display = "inline";
       Bild = new Image();
       Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
@@ -231,11 +231,13 @@ localStorage.setItem("storedName", name);
   });
   dbGet("scrollingBall", "highscores").then(result => {
     highscores = result;
-    if (!highscores[name]) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}};
+    if (!highscores[name]) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
     showScores(highscores, modeSelection.value);
+    modeSelected("autoScroll");
   }).catch(function(e) {
     console.error(e);
-    if (e.message.includes("nicht gefunden")) highscores[name] = {autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}};
+    if (e.message.includes("nicht gefunden")) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
+    modeSelected("autoScroll");
   });
   var direction = {};
 //  beginnRound();
@@ -396,7 +398,6 @@ else {
     if (value != /*"scrollWithBall"*/"training") {moveUpInt = setInterval(moveUp, 10);  beginnRound();}
     else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["textBoxLives", "none"], ["textTextBoxLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
     }
-  modeSelected("autoScroll");
   var speed = 1;
   var pixelMoved = 0;
   function moveUp() {
