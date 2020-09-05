@@ -271,7 +271,7 @@ setTimeout(function () {
                    // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores = {};
                    // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = "not played yet!";
                    AblageListe[0] = JSON.stringify(pixelSpielfelder)
-                   dbSet("snakeGame", "pixelSpielfelder", AblageListe[0]);
+                   dbSetWarteschlange.push({tag: "pixelSpielfelder", data: AblageListe[0]});//dbSet("snakeGame", "pixelSpielfelder", AblageListe[0]);
                    localStorage.setItem("pixelSpielfelder", JSON.stringify([AblageListe[0], name]));
                  }
                  else if (!(this.innerHTML.includes("create own pixel rate"))) {
@@ -1174,7 +1174,7 @@ setTimeout(function () {
     }, 2000);
     // Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
     // canvas.getContext('2d').drawImage(Bild, 277, 20, 437, 437);
-    dbSet("snakeGame", "pixelSpielfelder", JSON.stringify(pixelSpielfelder));
+    dbSetWarteschlange.push({tag: "pixelSpielfelder", data: JSON.stringify(pixelSpielfelder)});//dbSet("snakeGame", "pixelSpielfelder", JSON.stringify(pixelSpielfelder));
     localStorage.setItem("pixelSpielfelder", JSON.stringify([pixelSpielfelder, name]));
     // TODO
   }
@@ -1225,7 +1225,14 @@ function showRewards() {
 }
 
 function deleteDataServer() {
-  dbSet("snakeGame", "pixelSpielfelder", "");
+  //dbSet("snakeGame", "pixelSpielfelder", "");
+  dbSetWarteschlange.push({tag: "snakeGame", data: ""});
 }
-
+var dbSetWarteschlange = [];
+setInterval(function () {
+  if (dbSetWarteschlange.length > 0) {
+    dbSet("snakeGame", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+    dbSetWarteschlange.shift();
+  }
+}, 2222);
 </script>
