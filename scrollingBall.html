@@ -87,7 +87,7 @@ navigator.userAgent.match(/Windows Phone/i)
 var gerät = "Handy"
 console.log("Handy");
 } else {
-var gerät = "Handy"//"PC"
+var gerät = "PC"//"PC"
 console.log("PC");
 }
   // ballMovement:
@@ -177,6 +177,10 @@ console.log("PC");
   }
   }, 25);
   }
+  else if (gerät == "Handy") {
+    alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
+    gerät = "unsaveHandyBrowser";
+  }
   function deactivateShield() {
     setTimeout(function () {
       if (countdown.length == 0 && speed > 0) shield = false;
@@ -223,8 +227,10 @@ localStorage.setItem("storedName", name);
       angle: 0
     }]
   }*/];
+  var figuresUnlockedGot = false;
   dbGet("scrollingBall", "figuresUnlocked").then(result => {
     figuresUnlocked = result;
+    figuresUnlockedGot = true;
   });
   dbGet("scrollingBall", "figureXP").then(result => {
   figureXP = result;
@@ -254,7 +260,7 @@ localStorage.setItem("storedName", name);
       showScores(highscores, modeSelection.value);
       textur.style.display = "inline";
       if (!(figureXP.have < finishedXP) || figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
-        dbSetWarteschlange.push({tag: "figuresUnlocked", data: figuresUnlocked});
+        if (figuresUnlockedGot) dbSetWarteschlange.push({tag: "figuresUnlocked", data: figuresUnlocked});
         dbSetWarteschlange.push({tag: "figureXP", data: figureXP});
         setTimeout(function () {
           beginnRoundP2();
@@ -311,7 +317,7 @@ localStorage.setItem("storedName", name);
   clearInterval(countdownInt);
   countdownInt = setInterval(countdownFunction, 1000);
 }
-else {
+else if (gerät == "PC") {
   alert("Dieses Spiel ist auf Bewegungssteuerung basiet. Spielen sie es auf einem portablem Gerät (Handy oder Tablet), oder gucken sie sich hier, am PC die highscores an!");
 }
   }
