@@ -354,6 +354,7 @@ var fieldGröße = 0;
 var item = {goal: false, normal: false};
 function rundeAuswerten() {
   var points = 0;
+  felderChecked = [];
   for (var i1 = 0; i1 < field.length; i1++) {
     for (var i = 0; i < field[0].length; i++) {
       if (fieldGröße > 2) points += fieldGröße;
@@ -386,8 +387,11 @@ function rundeAuswerten() {
   showScores(points);
 }
 function showScores(points) {
-  document.getElementById('highscores').style.display = "inline";
-  document.getElementById('textur').style.display = "none";
+  visible([['ownScore', 'inline'], ['highscores', 'inline'], ['ownHighscore', 'inline'], ['textur', 'none']]);
+  // document.getElementById('ownScore').style.display = "inline";
+  // document.getElementById('highscores').style.display = "inline";
+  // document.getElementById('ownHighscore').style.display = "inline";
+  // document.getElementById('textur').style.display = "none";
   document.getElementById('ownHighscore').innerHTML = "your highscore: " + highscores[document.getElementById('playStyleSelection').value.toString().split('(')[0]][name];
   if (points != undefined) document.getElementById('ownScore').innerHTML = "score: " + points;
   else document.getElementById('ownScore').style.display = "none";
