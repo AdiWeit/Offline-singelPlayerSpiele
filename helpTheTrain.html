@@ -59,6 +59,10 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
 <br>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <br>
+<button type="button" onclick="downloadHighscores(true);" name="button">download highscores and maps for offline play</button>
+<br>
+<p id="pSaveAutomaticly"><input type="checkbox" onchange="localStorage.setItem('saveAutomaticlyHelpTheTrain', checked);" id="saveAutomaticly">autosave</p>
+<br>
 <button type="button" style="font-size: 77px" id="test" onclick="testTrain(innerHTML);" name="button">test</button>
 <br>
 play train audio<input onchange="playTrainAudio(true);" checked="true" id="trainAudio" type="checkbox">
@@ -71,6 +75,16 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
   document.getElementById('highscores').style.display = "none";
   everybodyBahnhofAccessP.style.display = 'none';
   var canvas = textur.getContext('2d');
+  function downloadHighscores(warn) {
+    if ((!warn || confirm("WARNUNG: Dies muss die Datei sein, mit der sie nachher offline spielen wollen! Andernfalls werden die Highscores nicht auftauchen! Trotzdem fortfahren?"))) {
+      pSaveAutomaticly.style.display = "inline";
+      if (!localStorage.getItem("saveAutomaticlyHelpTheTrain")) {
+        saveAutomaticly.checked = confirm("Wollen sie, dass die Daten immer hochgeladen werden, wenn sie diese Datei öffnen?");
+        localStorage.setItem("saveAutomaticlyHelpTheTrain", saveAutomaticly.checked);
+      }
+      localStorage.setItem("downloadedHighscoresHelpTheTrain", JSON.stringify(highscores));
+    }
+  }
   function releaseTrain(i) {
     if (inRound && i > -1) train[i].moving = true;
     i++;
@@ -219,37 +233,93 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
   localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   getDatabase();
+  function uploadData() {
+    var doubleSettings = [];
+    if (localStorage.getItem("newFieldUploadHelpTheTrain")) {
+      var list = JSON.parse(localStorage.getItem("newFieldUploadHelpTheTrain"));
+      for (var i = 0; i < list.length; i++) {
+        if (!list[i].gapFiller) {
+        var newSettings = JSON.parse(JSON.stringify(list[i].selectedSettings));
+        doubleSettings.push(JSON.parse(JSON.stringify(list[i].selectedSettings)));
+        for (var i1 = 0; Object.keys(highscores).includes(newSettings); i1++) {
+          newSettings += "|";
+          doubleSettings[doubleSettings.length - 1] += "|";
+        }
+        highscores[newSettings] = list[i].data;
+        list.shift();
+        i--;
+      }
+      else doubleSettings.push("gapFiller");
+      }
+      localStorage.setItem("newFieldUploadHelpTheTrain", []);
+      dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    }
+    if (localStorage.getItem("highscoresUploadHelpTheTrain")) {
+      var list = JSON.parse(localStorage.getItem("highscoresUploadHelpTheTrain"));
+      for (var i = 0; i < list.length; i++) {
+        if (doubleSettings[i] != "gapFiller") list[i].selectedSettings = doubleSettings[i];
+        if (!highscores[list[i].selectedSettings].highscores[name] || highscores[list[i].selectedSettings].highscores[name] > list[i].data) highscores[list[i].selectedSettings].highscores[name] = list[i].data;
+        list.shift();
+        doubleSettings.shift();
+        i--;
+      }
+      localStorage.setItem("highscoresUploadHelpTheTrain", []);
+      dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    }
+  }
   function getDatabase(pReturn) {
     if (pReturn) alert("Sie haben es in " + zuege + " Zügen geschafft!");
     dbGet("helpTheTrain", "highscores").then(result => {
       highscores = result;
-      for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
-        try {
-          document.getElementById("listEl " + i1).remove();
-        } catch (e) {
-          //console.log("please debug");
+      uploadData();
+      setTimeout(function () {
+        if (localStorage.getItem("saveAutomaticlyHelpTheTrain") != undefined) {
+          downloadHighscores();
+          saveAutomaticly.checked = JSON.parse(localStorage.getItem("saveAutomaticlyHelpTheTrain"));
         }
-      }
-      for (var i = 0; i < Object.keys(highscores).length; i++) {
-        var bestHighscore = {i: -1, number: 1111};
-        for (var i1 = 0; i1 < Object.keys(highscores[Object.keys(highscores)[i]].highscores).length; i1++) {
-          if (highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]] < bestHighscore.number) bestHighscore.number = highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]];
-        }
-        if (((highscores[Object.keys(highscores)[i]].highscores[name] < bestHighscore.number && !showFinished.checked) || (showFinished.checked))) {
-          var li = document.createElement("li");
-          li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
-          if (highscores[Object.keys(highscores)[i]].highscores[name] > bestHighscore.number) li.setAttribute("style",'color:red');
-          else if (highscores[Object.keys(highscores)[i]].highscores[name] != undefined) li.setAttribute("style",/*'color:#40FF00'*/'color:green');
-          else li.setAttribute("style",'color:blue');
-          li.setAttribute("onclick", "changeSetings(innerHTML)");
-          li.setAttribute("id", "listEl " + i);
-          document.getElementById("settingsL").appendChild(li);
-        }
-      }
+        else pSaveAutomaticly.style.display = "none";
+        displaySettingsList();
+      }, 1000);
       if (pReturn) saveHighscore();
     }).catch(function(e) {
       if (pReturn) saveHighscore();
+      else if (e == "TypeError: Failed to fetch") {
+        alert("Der offline Modus ist aktiviert! Sie können neue zufällige Level erstellen (auch ohne dass sie gespeichert werden). Zudem können sie falls sie mit dieser Datei schon Mal die daten heruntergeladen haben die damaligen highscores angezeigen und neue, falls sie neue aufstellen, wenn sie mit dieser Datei später ins Internet gehen hochgeladen! Das Audio wird erst gespeichert, wenn sie es bereits auf der Seite abgespielt haben.");
+        offline = true;
+        if (JSON.parse(localStorage.getItem("downloadedHighscoresHelpTheTrain"))) highscores = JSON.parse(localStorage.getItem("downloadedHighscoresHelpTheTrain"));
+        else alert("keine Felder gespeichert!");
+      }
+      if (e != "TypeError: Failed to fetch") uploadData();
+      setTimeout(function () {
+        displaySettingsList();
+      }, 1000);
     });
+  }
+  var offline = false;
+  function displaySettingsList() {
+    for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
+      try {
+        document.getElementById("listEl " + i1).remove();
+      } catch (e) {
+        //console.log("please debug");
+      }
+    }
+    for (var i = 0; i < Object.keys(highscores).length; i++) {
+      var bestHighscore = {i: -1, number: 1111};
+      for (var i1 = 0; i1 < Object.keys(highscores[Object.keys(highscores)[i]].highscores).length; i1++) {
+        if (highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]] < bestHighscore.number) bestHighscore.number = highscores[Object.keys(highscores)[i]].highscores[Object.keys(highscores[Object.keys(highscores)[i]].highscores)[i1]];
+      }
+      if (((highscores[Object.keys(highscores)[i]].highscores[name] < bestHighscore.number && !showFinished.checked) || (showFinished.checked))) {
+        var li = document.createElement("li");
+        li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
+        if (highscores[Object.keys(highscores)[i]].highscores[name] > bestHighscore.number) li.setAttribute("style",'color:red');
+        else if (highscores[Object.keys(highscores)[i]].highscores[name] != undefined) li.setAttribute("style",/*'color:#40FF00'*/'color:green');
+        else li.setAttribute("style",'color:blue');
+        li.setAttribute("onclick", "changeSetings(innerHTML)");
+        li.setAttribute("id", "listEl " + i);
+        document.getElementById("settingsL").appendChild(li);
+      }
+    }
   }
   function changeSetings(innerHTML) {
     document.getElementById('highscores').style.display = "inline";
@@ -279,7 +349,7 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
     justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", Kollision auch mit stehenden Zügen: " + stayingTrainCollision.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
     if (restore) {field = highscores[selected].data.field; train = highscores[selected].data.trains}
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
-      for (var i = 0; i < Object.keys(highscores).includes(selectedSettings); i++) {
+      for (var i = 0; Object.keys(highscores).includes(selectedSettings); i++) {
         selectedSettings += "|";
       }
     }
@@ -305,7 +375,9 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
   for (var i = 1; i < JSON.parse(anzahlZuege.value) && !restore; i++) {
     train.push({spawnPoint: {x: 0, y: 0, i2: 1, i3: 1}, position: {x: 0, y: 0, i2: 1, i3: 1}, direction: "right"});
     if (i <= (JSON.parse(anzahlRandomTrains.value) - JSON.parse(randomTrainsAtBahnhof.value))) {
-      train[train.length - 1].spawnPoint = {x: Math.round(Math.random() *(field.length - 1)), y: Math.round(Math.random() *(field[0].length - 1)), i2: Math.round(Math.random() *(2)), i3: Math.round(Math.random() *(2))};
+      var randomPosition = {x: Math.round(Math.random() *(field.length - 1)), y: Math.round(Math.random() *(field[0].length - 1)), i2: Math.round(Math.random() *(2)), i3: Math.round(Math.random() *(2))};
+      train[train.length - 1].spawnPoint = {x: randomPosition.x, y: randomPosition.y, i2: randomPosition.i2, i3: randomPosition.i3};
+      field[randomPosition.x][randomPosition.y][randomPosition.i2][randomPosition.i3].spawnPoint = true;
       if (field[train[train.length - 1].spawnPoint.x][train[train.length - 1].spawnPoint.y][train[train.length - 1].spawnPoint.i2][train[train.length - 1].spawnPoint.i3].type != "way") {
         train.pop();
         i--;
@@ -317,10 +389,10 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
           for (var i4 = 0; i4 < 3; i4++) {
             for (var i5 = 0; i5 < 3; i5++) {
               try {
-                if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 - 1] && field[i2][i3][i4 - 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 - 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
-                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 + 1] && field[i2][i3][i4 + 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 + 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
-                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 - 1] && field[i2][i3][i4][i5 - 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 - 1}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
-                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 + 1] && field[i2][i3][i4][i5 + 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 + 1}; field[i2][i3][i4][i5].alreadyDone = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 - 1] && field[i2][i3][i4 - 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 - 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; field[i2][i3][i4 - 1][i5].spawnPoint = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4 + 1] && field[i2][i3][i4 + 1][i5].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4 + 1, i3: i5}; field[i2][i3][i4][i5].alreadyDone = true; field[i2][i3][i4 + 1][i5].spawnPoint = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 - 1] && field[i2][i3][i4][i5 - 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 - 1}; field[i2][i3][i4][i5].alreadyDone = true; field[i2][i3][i4][i5 - 1].spawnPoint = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
+                else if (field[i2][i3][i4][i5].collected != undefined && !field[i2][i3][i4][i5].alreadyDone && field[i2][i3][i4][i5 + 1] && field[i2][i3][i4][i5 + 1].type == "way") {train[i].spawnPoint = {x: i2, y: i3, i2: i4, i3: i5 + 1}; field[i2][i3][i4][i5].alreadyDone = true; field[i2][i3][i4][i5 + 1].spawnPoint = true; i2 = field.length; i3 = field[0].length; i4 = 3; i5 = 3;}
 
               } catch (e) {
                 console.log("etwas zu tun XD");
@@ -361,7 +433,7 @@ function newField(pI) {
   }
   for (var i2 = 0; i2 < 3; i2++) {
     for (var i3 = 0; i3 < 3; i3++) {
-      if (pI > 0 && newField[i2][i3].type == "wall" && bahnhoefe.verbleibend > 0 && Math.round(Math.random() *(100)) < 10 && ((newField[i2 - 1] && newField[i2 - 1][i3].type == "way") || (newField[i2 + 1] && newField[i2 + 1][i3].type == "way") || (newField[i2][i3 - 1] && newField[i2][i3 - 1].type == "way") || (newField[i2][i3 + 1] && newField[i2][i3 + 1].type == "way"))) {
+      if (pI > 0 && newField[i2][i3].type == "wall" && bahnhoefe.verbleibend > 0 && Math.round(Math.random() *(100)) > 97 && ((newField[i2 - 1] && newField[i2 - 1][i3].type == "way") || (newField[i2 + 1] && newField[i2 + 1][i3].type == "way") || (newField[i2][i3 - 1] && newField[i2][i3 - 1].type == "way") || (newField[i2][i3 + 1] && newField[i2][i3 + 1].type == "way"))) {
         newField[i2][i3].collected = false;
         bahnhoefe.verbleibend--;
       }
@@ -374,7 +446,7 @@ function newField(pI) {
   }
   return newField
 }
-function turn(direction, officialCard) {
+function turn(direction, officialCard, x, y) {
 document.getElementById('highscores').style.display = 'none';
 zuege++;
 var newField = {0: [], 1: [], 2: []};
@@ -382,39 +454,57 @@ newField[1][1] = officialCard[1][1];
 if (direction == "right") {
   for (var i = 0; i < 3; i++) { // rechts --> unten works!
     newField[i][2] = officialCard[2][i];
+    turnSpawnPoint(x, y, 2, i, i, 2);
   }
   for (var i = 0; i < 3; i++) { // unten --> links  works!
     newField[0][i] = officialCard[1 - 1 + i][1 + 1];
+    turnSpawnPoint(x, y, i, 2, 0, i);
   }
   for (var i = 0; i < 3; i++) { // oben --> rechts works!
     newField[2][i] = officialCard[i][0];
+    turnSpawnPoint(x, y, i, 0, 2, i);
   }
   var i1 = 0;
   for (var i = 2; i > -1; i--) { // links --> oben works!
     newField[i1][0] = officialCard[0][i];
+    turnSpawnPoint(x, y, 0, i, i1, 0);
     i1++;
   }
 }
 else {
   for (var i = 2; i > -1; i--) { // rechts --> oben
     newField[i][0] = officialCard[2][i];
+    turnSpawnPoint(x, y, 2, i, i, 0);
   }
   var i1 = 0;
   for (var i = 3; i > 0; i--) { // unten --> rechts
     newField[2][i - 1] = officialCard[i1][2];
+    turnSpawnPoint(x, y, i1, 2, 2, i - 1);
     i1++;
   }
   var i1 = 0;
   for (var i = 3; i > 0; i--) { // oben --> links
     newField[0][i1] = officialCard[i - 1][0];
+    turnSpawnPoint(x, y, i - 1, 0, 0, i1);
     i1++;
   }
   for (var i = 0; i < 3; i++) { // links --> unten
     newField[i][2] = officialCard[0][i];
+    turnSpawnPoint(x, y, 0, i, i, 2);
   }
 }
 
 return newField;
+}
+function turnSpawnPoint(x, y, i, i1, iBefore, i1Before) {
+  if (x != undefined && field[x][y][i][i1].spawnPoint) {
+    for (var i2 = 0; i2 < train.length; i2++) {
+      if (equals({x: train[i2].spawnPoint.x, y: train[i2].spawnPoint.y, i2: train[i2].spawnPoint.i2, i3: train[i2].spawnPoint.i3}, {x: x, y: y, i2: i, i3: i1})) {
+        train[i2].spawnPoint = {x: x, y: y, i2: iBefore, i3: i1Before};
+        train[i2].position = {x: x, y: y, i2: iBefore, i3: i1Before};
+      }
+    }
+  }
 }
 function Layout(times) {
   textur.height = field[0].length*3*50 + 10 + 50;
@@ -518,7 +608,7 @@ function canvasClicked() {
           }
         }
           else if (!inRound || rotateInRound.checked) {
-            field[i][i1] = turn("right", field[i][i1]);
+            field[i][i1] = turn("right", field[i][i1], i, i1);
             var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/turn.mp3").play();
           }
           Layout();
@@ -662,11 +752,33 @@ function equals(a, b) {
   return equalsVar;
 }
 function saveHighscore() {
-  if (!highscores[selectedSettings]) highscores[selectedSettings] = {data: {field: selectedField, trains: train}, highscores: {}};
+  var newField = !highscores[selectedSettings];
+  if (!highscores[selectedSettings]) {
+    highscores[selectedSettings] = {data: {field: selectedField, trains: train}, highscores: {}};
+    if (offline && confirm("Wollen sie dieses Feld ink. ihren Ergebnissen speichern? Sie können es hochladen, indem sie diese Datei erneut aufrufen, wenn sie Internet haben.")) {
+      if (!localStorage.getItem("newFieldUploadHelpTheTrain")) var newFieldUpload = [];
+      else var newFieldUpload = JSON.parse(localStorage.getItem("newFieldUploadHelpTheTrain"));
+      newFieldUpload.push({selectedSettings: selectedSettings, data: {data: {field: selectedField, trains: train}, highscores: {}}});
+      localStorage.setItem("newFieldUploadHelpTheTrain", JSON.stringify(newFieldUpload));
+    }
+  }
   if (!highscores[selectedSettings].highscores[name] || highscores[selectedSettings].highscores[name] > zuege) {
     if (highscores[selectedSettings].highscores[name] > zuege) alert("So wenig Züge haben sie noch nie gebraucht!");
     highscores[selectedSettings].highscores[name] = zuege;
-    dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    if (!offline) dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    else /*if (newFieldUpload != undefined || (highscores[selectedSettings] && confirm("Wollen sie diesen highscore wenn sie wieder Internet haben hochladen?")))*/ {
+      if (!localStorage.getItem("highscoresUploadHelpTheTrain")) var highscoresUpload = [];
+      else var highscoresUpload = JSON.parse(localStorage.getItem("highscoresUploadHelpTheTrain"));
+      highscoresUpload.push({selectedSettings: selectedSettings, data: zuege});
+      localStorage.setItem("highscoresUploadHelpTheTrain", JSON.stringify(highscoresUpload));
+      // für gleiche array Lenge falls mehrmals gleiche Settings
+      if (!localStorage.getItem("newFieldUploadHelpTheTrain")) var newFieldUpload = [];
+      else var newFieldUpload = JSON.parse(localStorage.getItem("newFieldUploadHelpTheTrain"));
+      if (newField) {
+      newFieldUpload.push({gapFiller: true});
+      localStorage.setItem("newFieldUploadHelpTheTrain", JSON.stringify(newFieldUpload));
+    }
+    }
   }
   highscoresBetterThanYours.innerHTML = "";
   highscoresAsGoodAsYours.innerHTML = "";
@@ -739,7 +851,7 @@ function playTrainAudio(demo) {
       audio.volume = 0.7;
       audio.play();
       setTimeout(function () {
-        playTrainAudio();
+          /*if (!offline) */playTrainAudio();
       }, 360);
     }
     else {
@@ -747,7 +859,7 @@ function playTrainAudio(demo) {
       audio.volume = 0.7;
       audio.play();
       setTimeout(function () {
-        playTrainAudio();
+        /*if (!offline)*/ playTrainAudio();
       }, 850);
     }
   }
