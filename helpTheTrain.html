@@ -311,11 +311,11 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
       }
       if (((highscores[Object.keys(highscores)[i]].highscores[name] < bestHighscore.number && !showFinished.checked) || (showFinished.checked))) {
         var li = document.createElement("li");
-        li.appendChild(document.createTextNode(Object.keys(highscores)[i]));
+        li.appendChild(document.createTextNode(Object.keys(highscores)[i].toString().split(', ').splice(4, Object.keys(highscores)[i].toString().split(', ').length - 4)));
         if (highscores[Object.keys(highscores)[i]].highscores[name] > bestHighscore.number) li.setAttribute("style",'color:red');
         else if (highscores[Object.keys(highscores)[i]].highscores[name] != undefined) li.setAttribute("style",/*'color:#40FF00'*/'color:green');
         else li.setAttribute("style",'color:blue');
-        li.setAttribute("onclick", "changeSetings(innerHTML)");
+        li.setAttribute("onclick", "changeSetings(Object.keys(highscores)[id.toString().split('listEl ')[1]])");
         li.setAttribute("id", "listEl " + i);
         document.getElementById("settingsL").appendChild(li);
       }
@@ -345,7 +345,7 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
   var highscores = {};
   function createField(restore, selected) {
     textur.style.display = "inline";
-    selectedSettings = "breite: " + breite.value + ", höhe: " + hoehe.value + ", Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value /*+ ", Zeit bis Züge losfahren: " + anzahlRandomTrains.value  + ", anzahl Züge zur Behinderung: " + anzahlRandomTrains.value + ", anzahl Züge an Bahnhof: " + randomTrainsAtBahnhof.value*/ + ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Zeit bis zufällige Züge losfahren: " + timeBetweenRandomTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
+    selectedSettings = "Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value /*+ ", Zeit bis Züge losfahren: " + anzahlRandomTrains.value  + ", anzahl Züge zur Behinderung: " + anzahlRandomTrains.value + ", anzahl Züge an Bahnhof: " + randomTrainsAtBahnhof.value*/ + ", breite: " + breite.value + ", höhe: " + hoehe.value +  ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Zeit bis zufällige Züge losfahren: " + timeBetweenRandomTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
     justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", Kollision auch mit stehenden Zügen: " + stayingTrainCollision.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
     if (restore) {field = highscores[selected].data.field; train = highscores[selected].data.trains}
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
@@ -569,6 +569,9 @@ window.onscroll = function (e) {
   //console.log("scroll event");
   if (!scrollingInterac.PC) {
     scrollingInterac.user = true;
+  }
+  if (scrollY == 0) {
+    scrollingInterac.user = false;
   }
   //if (scrollY < 10 && scrollX < 10) scrollingInterac.user = false;
 }
