@@ -6,10 +6,16 @@
 <br>
 <div id="app">
 <select name="course" id="spielmodi" onchange="modusSelected()" style="display: inline;">
-<option id="1-normal">normal</option><option id="2-play hunter">play hunter</option></select>
+<option id="1-normal">normal</option>
+<option id="2-play hunter">play hunter</option>
+<option id="3-insectEating">insect eating</option>
+<option id="4-insectSurviving">insect surviving</option>
+<option id="5-paintEverything">paint everything</option>
+</select>
 <li v-for="title in db" id="pixelSpielfelder">
 {{ title }}
 </li>
+<input type="checkbox" checked="true" id="speedrunnerMode"> speedrunner mode (restart a few sec. after finish)
 </div>
 <button type="button" name="button" onclick="rundeStarten()" id="rundeStarten">bereit für Rundenbeginn</button>
 </div>
@@ -24,7 +30,6 @@
 <head>
  <meta charset="utf-8">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
- <title>Team S.C.R.I.P.T.</title>
  <style> body {padding: 0; margin: 0;} </style>
  <script src="https://adi.nicolaiweitkemper.de/p5/p5.min.js"></script>
  <script src="https://adi.nicolaiweitkemper.de/p5/addons/p5.dom.min.js"></script>
@@ -174,9 +179,10 @@ function modusSelected() {
   }
   for (var i = 0; i < app._data.db.length - 1; i++) {
  //   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
-    AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+    if (pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value]) AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+    else AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (nobody played)";
   //  app._data.db[i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
-    console.log(app._data.db[i] + " to " + app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)");
+    if (pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value]) console.log(app._data.db[i] + " to " + app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)");
  //   }
   }
   app._data.db = AblageListe[0];
@@ -246,7 +252,8 @@ setTimeout(function () {
                      pixelSpielfelder[selected][document.getElementById('spielmodi').options[i].text].highscores = {};
                      pixelSpielfelder[selected][document.getElementById('spielmodi').options[i].text].highscores[name] = "not played yet!";
                    }
-                   pixelSpielfelder[selected].normal.coordinates = [];
+                   pixelSpielfelder[selected][spielmodi.value].coordinates = [];
+                   pixelSpielfelder[selected][spielmodi.value].spawnPoint = {x: Math.floor(Math.random() * (y - scl)), y: Math.floor(Math.random() * (y - scl)),}
                    for (var i = 0; i < Math.floor((selected.toString().split(' x ')[0]*selected.toString().split(' x ')[1])/17400); i++) {
                      AblageListe[0] = Math.floor(Math.random() * (x - scl))
                        while ((AblageListe[0]/20 + "").includes(".")) {
@@ -266,7 +273,7 @@ setTimeout(function () {
                            AblageListe[1]++;
                          }
                          }
-                     pixelSpielfelder[selected]["normal"].coordinates[i] = [AblageListe[0], AblageListe[1]];
+                     pixelSpielfelder[selected][spielmodi.value].coordinates[i] = [AblageListe[0], AblageListe[1]];
                    }
                    // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores = {};
                    // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = "not played yet!";
@@ -351,10 +358,15 @@ canvas.style.display = "none";
 }, 1000);
 
 function rundeStarten() {
+  s.tail.length = 1;
+  s.total = 1;
+  s.xspeed = 1;
+  s.yspeed = 0;
+  goneFields = [];
  if (gerät == "Handy") {
  viewPage();
 }
- AblageListe[0] = {"normal": 0, "play hunter": 1}
+ AblageListe[0] = {"normal": 0, "play hunter": 1, "insect eating": 2, "insect surviving": 3, "paint everything": 4}
  spielerIch = AblageListe[0][document.getElementById('spielmodi').value]
 if (spielerIch == 1) {
  AblageListe[3] = 0;
@@ -367,10 +379,27 @@ if (spielerIch == 1) {
 }
 canvas.style.display = "inline";
 document.getElementById('vorSpielBeginn').style.display = "none";
-if (spielerIch == 0) {
+if (spielerIch == 0 || spielerIch == 2) {
 pickLocation();
 }
 startPause();
+clearInterval(iDirectionInterval);
+if (spielerIch > 1 && spielerIch < 5) iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+nameEingeloggt.style.display = "none";
+if (spielerIch == 0 && pixelSpielfelder[selected].spawnPoint) {
+  s.x = pixelSpielfelder[selected].spawnPoint.x;
+  s.y = pixelSpielfelder[selected].spawnPoint.y;
+}
+if (spielerIch > 1) {
+  ins.x = x/2 - 40;
+  ins.y = y/2;
+  while ((ins.x/20 + "").includes(".")) {
+    ins.x--;
+  }
+  while ((ins.y/20 + "").includes(".")) {
+    ins.y--;
+  }
+}
 }
 
  var w = window,
@@ -430,6 +459,7 @@ function setup() {
  createCanvas(x,y);
  s=new Snake();
  h=new hunter();
+ ins=new insect();
  frameRate(10);
 //  pickLocation(true);
 }
@@ -475,7 +505,7 @@ function draw(inGame) {
         AblageListe[1] = "finished";
       }
     }
-    s.update();
+    if (spielerIch < 2) s.update();
     if(/*spielerIch == 0 && snake == true && */s.eat(food))
     {
     }
@@ -485,20 +515,23 @@ function draw(inGame) {
    // s.update();
  //  syncroS();
 //  }
- // if (spielerIch == 1) {
- //   i.collision();
- // }
- s.show();
+ if (spielerIch > 1 && spielerIch < 5) {
+   ins.collision();
+ }
+ if (spielerIch < 2) s.show();
 }
- for (var i = 0;!(food.x == undefined) && i < food.x.length; i++) {
+ for (var i = 0; food.x && i < food.x.length; i++) {
    fill(255,0,100);
    rect(food.x[i],food.y[i],scl,scl);
  }
- // if (!(character.includes("insect"))) {
- //   fill(110, 100, 110)
- //   rect(i.x, i.y,scl,scl);
- // //  syncroI();
- // }
+ for (var i = 0; spielerIch > 2 && spielerIch < 5 && i < goneFields.length; i++) {
+   fill(177, 0, 0);
+   rect(goneFields[i].toString().split(' - ')[0], goneFields[i].toString().split(' - ')[1], scl, scl);
+ }
+ if (spielerIch > 1 && spielerIch < 5) {
+   fill(110, 100, 110)
+   rect(ins.x, ins.y,scl,scl);
+ }
  // if (!(character.includes("draughts (Dame)"))) {
  //   fill("#B45F04");
  //   rect(d.x, d.y,scl,scl);
@@ -579,9 +612,9 @@ function folgenKeyPressed() {
    }, 58);
    hunterBullet = setInterval(moveHunterBullet, 59);
  }
- // if (spielerIch == 1 && (AblageListe[0]===DOWN_ARROW || AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW)) {
- //   i.direction = i.directionObj[AblageListe[0]];
- // }
+ if (spielerIch > 1 && spielerIch < 5 && (AblageListe[0]===DOWN_ARROW || AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW)) {
+   ins.direction = ins.directionObj[AblageListe[0]];
+ }
  // if (spielerIch == 2 && (AblageListe[0]===DOWN_ARROW || AblageListe[0]===UP_ARROW || AblageListe[0]===RIGHT_ARROW || AblageListe[0]===LEFT_ARROW)) {
  //   f.direction = i.directionObj[AblageListe[0]];
  // }
@@ -676,132 +709,43 @@ function folgenKeyPressed() {
 //   }
  }
 
-// function insect() {
-//   AblageListe[0] = 0;
-//   while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
-//     AblageListe[0]++;
-//   }
-//   this.x = ((floor(AblageListe[0]))*20) - 60;
-//   AblageListe[0] = 0;
-//   while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
-//     AblageListe[0]++;
-//   }
-//   this.y = ((floor(AblageListe[0]))*20)-60;
-//   this.direction = "RIGHT_ARROW";
-//   this.
-//
-//   this.collision= function() {
-//     if (this.x > x - scl) {
-//       this.isDead[1] = "LEFT_ARROW";
-//     }
-//     else if (this.y > y - 20) {
-//       this.isDead[1] = "UP_ARROW";
-//     }
-//     else if (this.y < 0) {
-//       this.isDead[1] = "DOWN_ARROW";
-//     }
-//     else if (this.x < 0) {
-//       this.isDead[1] = "RIGHT_ARROW";
-//     }
-//     zählerListe[0] = 0;
-//     while (zählerListe[0] < s.tail.length) {
-//       if (s.tail[zählerListe[0]].x == this.x && s.tail[zählerListe[0]].y == this.y) {
-//         console.log("collisionSnake");
-//         s.lives -= 37;
-//         checkGewinner();
-//         this.isDead[0] = true;
-//         this.isDead[1] = this.opositeDirection[this.direction];
-//         this.isDead[2] = "collision";
-//       clearInterval(iDirectionInterval);
-//       clearInterval(syncI)
-//       setTimeout(function () {
-//         iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
-//         syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2)
-//       }, 1537);
-//       }
-//       zählerListe[0]++;
-//     }
-//   /*  if (s.tail.some(x => x.includes(this.x) ) && s.tail.some(x => x.includes(this.y) )) {
-//       console.log("collisionSnake");
-//     } */
-//     if (dist(this.x, this.y, s.x, s.y) == 0 && this.direction == this.opositeDirection[s.direction]) {
-//       console.log("snakeEatsInsect");
-//       s.lives += 13;
-//       s.total++;
-//       checkGewinner();
-//       clearInterval(iDirectionInterval);
-//       clearInterval(syncI);
-//       AblageListe[0] = 0;
-//       while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
-//         AblageListe[0]++;
-//       }
-//       this.x = (floor(AblageListe[0]))*20;
-//       AblageListe[0] = 0;
-//       while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
-//         AblageListe[0]++;
-//       }
-//       this.y = (floor(AblageListe[0]))*20;
-//       zählerListe[0] = 0;
-//       while (zählerListe[0] < s.tail.length) {
-//         if (s.tail[zählerListe[0]].x == this.x && s.tail[zählerListe[0]].y == this.y) {
-//           this.y += 20;
-//           this.direction = "RIGHT_ARROW";
-//           if (this.y == y - 20) {
-//             this.x += 20;
-//           }
-//           zählerListe[0] = -1;
-//         }
-//         zählerListe[0]++;
-//       }
-//       setTimeout(function () {
-//         iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
-//         syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2)
-//       }, 2731);
-//     }
-//     if (this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) {
-//       console.log("deathInsect (Rand)");
-//       this.isDead[0] = true;
-//       this.isDead[2] = "Rand";
-//     }
-//     if (dist(this.x, this.y, food.x, food.y) == 0) {
-//       console.log("insectEatFood");
-//       pickLocation(false);
-//     }
-//     if (this.isDead[0] == true) {
-//       this.isDead[0] = false;
-//       if (this.isDead[1] == "LEFT_ARROW") {
-//         this.x -= 20;
-//       }
-//       else if (this.isDead[1] == "RIGHT_ARROW") {
-//         this.x += 20;
-//       }
-//       else if (this.isDead[1] == "UP_ARROW") {
-//         this.y -= 20;
-//       }
-//       else {
-//         this.y += 20;
-//       }
-//       if (this.isDead[1] == "RIGHT_ARROW" || this.isDead[1] == "LEFT_ARROW" || this.isDead[1] == "UP_ARROW" || this.isDead[1] == "DOWN_ARROW") {
-//         this.isDead[1] = "none";
-//         this.direction = this.opositeDirection[this.direction];
-//       }
-//       if (this.isDead[2] == "Rand") {
-//         clearInterval(iDirectionInterval);
-//         clearInterval(syncI)
-//         setTimeout(function () {
-//           iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
-//           syncI = setInterval(syncroI, (17 + ((1580 - x))/93)*2);
-//         }, 3700);
-//       }
-//     }
+var goneFields = [];
+function moveI() {
+if (spielerIch > 2 && spielerIch < 5 && !(goneFields.includes(ins.x + " - " + ins.y)) && ins.x >= 0 && ins.x <= x - 20 && ins.y >= 0 && ins.y <= y - 20) {
+  goneFields.push(ins.x + " - " + ins.y);
+  if (goneFields.length == x*y/(20*20)) soundsRoundFinished();
+}
+else if (spielerIch == 3) {
+  clearInterval(iDirectionInterval);
+  soundsRoundFinished();
+}
+// else if (spielerIch == 4) {
+//   for (var i = 0; i < goneFields.length; i++) {
+//     if (goneFields[i] == ins.x + " - " + ins.y) goneFields.splice(i, 1);
 //   }
 // }
-
-function moveI() {
-if (i.direction == "UP_ARROW") i.y -= scl;
-else if (i.direction == "DOWN_ARROW") i.y += scl;
-else if (i.direction == "RIGHT_ARROW") i.x += scl;
-else i.x -= scl;
+if (ins.direction == "UP_ARROW") ins.y -= scl;
+else if (ins.direction == "DOWN_ARROW") ins.y += scl;
+else if (ins.direction == "RIGHT_ARROW") ins.x += scl;
+else ins.x -= scl;
+for (var i = 0; food.x && i < food.x.length; i++) {
+  // if (dist(this.x, this.y, food.x[i], food.y[i]) == 0) {
+  if (ins.x == food.x[i] && ins.y == food.y[i]) {
+    console.log("insectEatFood");
+    var audio = new Audio('http://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
+      audio.play();
+      audio.currentTime = 0.5;
+      setTimeout(function () {
+        audio.pause();
+      }, 100);
+    food.x.splice([i], 1);
+    food.y.splice([i], 1);
+    console.log(food.x.length + " - " + food.y.length);
+  }
+  if (food.x.length < 1) {
+    soundsRoundFinished();
+  }
+}
 snake = true;
 draw(true);
 }
@@ -826,6 +770,90 @@ draw(true);
 //   this.directionFuture = "LEFT_ARROW + UP_ARROW";
 //   this.zählerWinkel = [3,3];
 // }
+function insect() {
+  AblageListe[0] = 0;
+  while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+    AblageListe[0]++;
+  }
+  this.x = ((floor(AblageListe[0]))*20) - 60;
+  AblageListe[0] = 0;
+  while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+    AblageListe[0]++;
+  }
+  this.y = ((floor(AblageListe[0]))*20)-60;
+  this.direction = "RIGHT_ARROW";
+  this.opositeDirection = {"UP_ARROW": "DOWN_ARROW", "RIGHT_ARROW": "LEFT_ARROW", "DOWN_ARROW": "UP_ARROW", "LEFT_ARROW": "RIGHT_ARROW"}
+  this.directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LEFT_ARROW"};
+  this.isDead = [false];
+
+  this.collision= function() {
+    if (this.x > x - scl) {
+      if (spielerIch != 4) this.isDead[1] = "LEFT_ARROW";
+      else this.x = -20;
+    }
+    else if (this.y > y - 20) {
+      if (spielerIch != 4) this.isDead[1] = "UP_ARROW";
+      else this.y = -20;
+    }
+    else if (this.y < 0) {
+      if (spielerIch != 4) this.isDead[1] = "DOWN_ARROW";
+      else this.y = y;
+    }
+    else if (this.x < 0) {
+      if (spielerIch != 4) this.isDead[1] = "RIGHT_ARROW";
+      else this.x = x;
+    }
+    zählerListe[0] = 0;
+  /*  if (s.tail.some(x => x.includes(this.x) ) && s.tail.some(x => x.includes(this.y) )) {
+      console.log("collisionSnake");
+    } */
+    if ((this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) && spielerIch != 4) {
+      console.log("deathInsect (Rand)");
+      if (spielerIch != 4) this.isDead[0] = true;
+      else this.direction = this.opositeDirection[this.direction];
+      this.isDead[2] = "Rand";
+      this.isDead[3] = false;
+      if (spielerIch == 3) {
+        clearInterval(iDirectionInterval);
+        soundsRoundFinished();
+        this.isDead = false;
+      }
+    }
+    if (this.isDead[0] == true) {
+      this.isDead[0] = false;
+      this.isDead[3] = true;
+      clearInterval(iDirectionInterval);
+      setTimeout(function () {
+        iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
+      }, 3700);
+      // if (this.isDead[1] == "LEFT_ARROW") {
+      //   this.x -= 20
+      // }
+      // else if (this.isDead[1] == "RIGHT_ARROW") {
+      //   this.x = 0;//+= 20
+      // }
+      // else if (this.isDead[1] == "UP_ARROW") {
+      //   this.y -= 20
+      // }
+      // else {
+      //   this.y = 0;//+= 20;
+      // }
+
+      // if (this.isDead[1] == "RIGHT_ARROW" || this.isDead[1] == "LEFT_ARROW" || this.isDead[1] == "UP_ARROW" || this.isDead[1] == "DOWN_ARROW") {
+      //   this.isDead[1] = "none";
+      //   this.direction = this.opositeDirection[this.direction];
+      // }
+      var ablage = JSON.parse(JSON.stringify(this.direction));
+      this.direction = this.isDead[1];
+      for (var i = 0; (this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) && i < 1000; i++) {
+        moveI();
+      }
+      this.direction = this.opositeDirection[ablage];
+      // moveI();
+    }
+  }
+}
+var iDirectionInterval;
 function hunter() {
 this.x = 20;
 this.bullet = {"x": this.x, "y": - 20}
@@ -1162,7 +1190,7 @@ function soundsRoundFinished() {
   audio.play();
 setTimeout(function () {
  audio.pause()
-  if (!(name == null) && (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == undefined || pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == "not played yet!" || (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] > mins[0] + ":" + secs[0] + ":0" + tenths[0] && spielerIch == 0 || pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] < mins[0] + ":" + secs[0] + ":0" + tenths[0] && spielerIch == 1))) {
+  if (!(name == null) && (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == undefined || pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] == "not played yet!" || ((pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] > mins[0] + ":" + secs[0] + ":0" + tenths[0] && (spielerIch == 0 || spielerIch == 2 || spielerIch == 4)) || (pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] < mins[0] + ":" + secs[0] + ":0" + tenths[0] && (spielerIch == 3 || spielerIch == 1))))) {
     pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = mins[0] + ":" + secs[0] + ":0" + tenths[0];
     console.log("newHighscore");
     document.getElementById('highscores').style.color = "green";
@@ -1176,7 +1204,6 @@ setTimeout(function () {
     // canvas.getContext('2d').drawImage(Bild, 277, 20, 437, 437);
     dbSetWarteschlange.push({tag: "pixelSpielfelder", data: JSON.stringify(pixelSpielfelder)});//dbSet("snakeGame", "pixelSpielfelder", JSON.stringify(pixelSpielfelder));
     localStorage.setItem("pixelSpielfelder", JSON.stringify([pixelSpielfelder, name]));
-    // TODO
   }
   else {
     document.getElementById('highscores').style.color = "black";
@@ -1184,7 +1211,7 @@ setTimeout(function () {
   showRewards();
 }, 2000);
 
-}, 500);
+}, 500);soundsRoundFinished
 }
 
 function showTime() {
@@ -1210,6 +1237,9 @@ function showRewards() {
     }
   }
   AblageListe[0].sort();
+  document.getElementById('highscoresBetterThanYours').innerHTML = "";
+  document.getElementById('highscoresAsGoodAsYours').innerHTML = "";
+  document.getElementById('highscoresWorseThanYours').innerHTML = "";
   while (zählerListe[0] < AblageListe[0].length) {
     if ((AblageListe[0][zählerListe[0]][0] < pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 0) || (AblageListe[0][zählerListe[0]][0] > pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] && spielerIch == 1)) {
       document.getElementById('highscoresBetterThanYours').innerHTML += AblageListe[0][zählerListe[0]][0] + "  " + AblageListe[0][zählerListe[0]][1] + '<br>';
@@ -1222,6 +1252,9 @@ function showRewards() {
     }
     zählerListe[0]++;
   }
+  setTimeout(function () {
+    if (speedrunnerMode.checked) rundeStarten();
+  }, 1777);
 }
 
 function deleteDataServer() {
