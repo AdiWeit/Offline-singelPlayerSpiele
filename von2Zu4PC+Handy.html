@@ -430,7 +430,7 @@ localStorage.setItem("storedName", name);
           canvas.arc(145 + 170*i, 790/* + 170*/, 70, 4.72, diff/10+4.72, false);
           canvas.stroke();
       diff = ((/*al*/(items[Object.keys(items)[i]].xp.got/items[Object.keys(items)[i]].xp.needs*100) / 100) * Math.PI*2*10).toFixed(2);
-      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) {canvas.strokeStyle = "blue"; alertSound = true;} // colour for progress bar
+      if (items[Object.keys(items)[i]].xp.got < items[Object.keys(items)[i]].xp.needs) {canvas.strokeStyle = "blue"; if (alertSound != "wait") alertSound = true;} // colour for progress bar
       else {
         canvas.strokeStyle = "#40FF00";
         if (Object.keys(items)[i] == selectedItem) changeSelection();
@@ -697,7 +697,10 @@ localStorage.setItem("storedName", name);
       }
       else if (alertSound == true) {
         new Audio("https://adi.nicolaiweitkemper.de/Sounds/ding-sound-effect-youtubemp3free.org.mp3").play();
-        alertSound = false;
+        alertSound = "wait";
+        setTimeout(function () {
+          alertSound = false;
+        }, 4000);
       }
     }, 1333);
   }
@@ -908,7 +911,7 @@ localStorage.setItem("storedName", name);
       zweitBesteScores[mode][1] = scores[1];
       newZweitbesteScores = true;
     }
-    if (newZweitbesteScores)  dbSetWarteschlange.push({tag: "zweitBesteScores" + name, data: JSON.stringify("zweitBesteScores")});//dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
+    if (newZweitbesteScores)  dbSetWarteschlange.push({tag: "zweitBesteScores" + name, data: JSON.stringify(zweitBesteScores)});//dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
     KoordinatenY = 700;
     AblageListe[3] = 0;
     /*    canvas.fillStyle = "blue";
