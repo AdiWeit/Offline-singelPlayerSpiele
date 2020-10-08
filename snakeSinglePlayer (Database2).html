@@ -25,6 +25,7 @@
   <h2 id="highscoresBetterThanYours"></h2>
   <h2 id="highscoresWorseThanYours"></h2>
   <h2 id="highscoresAsGoodAsYours"></h2>
+  <button type="button" onclick="rundeStarten();" name="button">restart (r)</button>
 </div>
 <html lang="">
 <head>
@@ -108,7 +109,7 @@ running[0] = 0;
 //timer = 0;
 }
 function increment() {
-if ((running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+if ((running[0] == 1/* || !running[0]*/)) {
   setTimeout(function () {
     time[0]++;
     mins[0] = Math.floor(time[0]/10/60);
@@ -127,7 +128,7 @@ if ((running[0] == 1 || document.getElementById('vorSpielBeginn').style.display 
 }
 }
 function increment1() {
-if ((running[1] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+if ((running[1] == 1/* || !running[0]*/)) {
   setTimeout(function () {
     time[1]--;
     mins[1] = Math.floor(time[1]/10/60);
@@ -460,7 +461,7 @@ function setup() {
  s=new Snake();
  h=new hunter();
  ins=new insect();
- frameRate(10);
+ frameRate(10, "Test");
 //  pickLocation(true);
 }
 
@@ -483,7 +484,7 @@ function pickLocation(setup)
 function draw(inGame) {
   background(51);
   fill(255, 0, 0);
- if (inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+ if (inGame == undefined && (running[0] == 1)) {
    coordinates[0] = 30;
    coordinates[1] = x - 133;
    coordinates[2] = 30;
@@ -497,7 +498,7 @@ function draw(inGame) {
    textSize(30);
    text(mins[1] + ":" + secs[1] + ":" + "0" + tenths[1], x - 133, 30 + 37);
  }
- if (inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+ if ((inGame || inGame == undefined) && (running[0] == 1 || (vorSpielBeginn.style.display == "inline" && spielerIch < 2))) {
    if (spielerIch == 0)  s.death();
     if (spielerIch == 1 && AblageListe[1].includes("total to")) {
       s.total++;
@@ -557,7 +558,7 @@ function draw(inGame) {
  //   // });
  // }
  // snake = true;
- if (spielerIch == 1 && inGame == undefined && (running[0] == 1 || document.getElementById('vorSpielBeginn').style.display == "inline")) {
+ if (spielerIch == 1 && inGame == undefined && (running[0] == 1)) {
    AblageListe[0] = canvas.getContext('2d');
    AblageListe[0].drawImage(h.image, h.x, y - scl, scl, scl)
    if (h.bullet.y < y - scl) {
@@ -588,6 +589,12 @@ window.addEventListener('mousedown', function() {
 function folgenKeyPressed() {
  if (gerät == "PC") {
    viewImage();
+ }
+ if ((AblageListe[0] == 82) && running[0]) {
+   rundeStarten();
+   setTimeout(function () {
+     rundeStarten();
+   }, 100);
  }
  if(AblageListe[0]=== UP_ARROW/* && spielerIch == 0 */)
  {
@@ -1072,7 +1079,7 @@ this.death=function(){
    var d=dist(this.x,this.y,pos.x,pos.y);
    if(d<1)
    {
-     if (document.getElementById('vorSpielBeginn').style.display == "none") {
+     if (running[0]) {
        s.lives -= 27
        if (this.total > 1) {
          this.total -= 1;
@@ -1211,7 +1218,8 @@ setTimeout(function () {
   showRewards();
 }, 2000);
 
-}, 500);soundsRoundFinished
+}, 500);
+vorSpielBeginn.style.display = "inline";
 }
 
 function showTime() {
