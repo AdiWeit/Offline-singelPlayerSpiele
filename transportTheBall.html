@@ -1,18 +1,21 @@
 <title>transport the ball</title>
 <meta charset="utf-8">
-<canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
+<canvas id="textur" width="1582" height="740"></canvas>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
   <option id="normalSelection" value="normal">normal</option>
   <option id="magnetSelection" value="magnet">magnet</option>
   <option id="allDirectionsSelection" value="allDirections">all directions</option>
   <option id="slideSelection" value="slide">slide</option>
+  <option id="oppositeSelection" value="opposite">opposite</option>
   <option value="showScores">show scores</option>
 </select>
 <br>
 <select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
+<br>
+<button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <div id="ball">
   <style>
     .shape {
@@ -95,19 +98,114 @@ localStorage.setItem("storedName", name);
       },
       3: {
         checkpointWhen_touches: "schieber"
+      },
+      4: {
+        heart: {
+          ball: {
+            min: 17,
+            max: 44,
+            pixelPerFunctionCall: 3,
+            waitBeforeDirectionSwitchInSec: {
+              min: 1,
+              max: 2
+            }
+          },
+          schieber: {
+            min: 37,
+            max: 47,
+            pixelPerFunctionCall: 3,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2,
+              max: 1
+            }
+          }
+        }
+      },
+      5: {
+        invisible: {
+          timeUntilInvisible: 3,
+          timeUntilVisivleAgain: 3,
+          anyOtherSide: true,
+          amStück: {
+            unvisible: true,
+            visible: true
+          }
+        }
+      },
+      6: {
+        sizes: {
+          ball: {
+            width: 200,
+            height: 55
+          },
+          schieber: {
+            width: 44,
+            height: 88
+          }
+        },
+        spawnPoint: {
+          schieber: {
+            x: 155,
+            y: 160
+          },
+          ball: {
+            x: 155,
+            y: 250
+          }
+        }
+        /*
+        schieber: {
+          x: 155,
+          y: 200
+        },
+        ball: {
+          x: 155,
+          y: 250
+        }
+        */
+      },
+      7: {
+        sizes: {
+          ball: {
+            width: 17,
+            height: 17
+          },
+          schieber: {
+            width: 17,
+            height: 17
+          }
+        },
+        spawnPoint: {
+          schieber: {
+            x: 83,
+            y: 143
+          },
+          ball: {
+            x: 97,
+            y: 237
+          }
+        }
       }
     },
     magnet: {
       // 1. normale Level übernommen
-      2: {
-
-      },
-      3: {
-
-      },
+      2: {},
+      3: {},
       4: {},
-      5: {
-
+      5: {},
+      6: {
+        rotating: [
+        {
+          shape: "rectangle",
+          position: {
+            x: 800,
+            y: 355
+          },
+          angle: 144,
+          miliSecsPerRotation: 2333,
+          sizeRelationToOriginal: 6.4
+        }
+        ]
       }
     },
     allDirections: {
@@ -137,6 +235,23 @@ localStorage.setItem("storedName", name);
             y: 150
           }
         }
+      },
+      4: {
+        rotating: [
+          {
+        shape: "rectangle",
+        position: {
+          x: 800,
+          y: 355
+        },
+        angle: 144,
+        miliSecsPerRotation: 11111,
+        sizeRelationToOriginal: 6.4,
+        heart: {
+          onceInMiliSec: 1111
+        }
+      }
+      ]
       }
     },
     slide: {
@@ -188,6 +303,91 @@ localStorage.setItem("storedName", name);
             height: 100
           }
         }]
+      },
+      7: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 44,
+            pixelPerFunctionCall: 1,
+            waitBeforeDirectionSwitchInSec: {
+              min: 1.5,
+              max: 0
+            }
+          },
+        }
+      },
+      8: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          },
+        }
+      },
+      9: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          },
+          schieber: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          }
+        },
+        sizes: {
+          ball: {
+            width: 15,
+            height: 15
+          },
+          schieber: {
+            width: 53,
+            height: 53
+          }
+        }
+      },
+      10: {
+        rotating: [
+          {
+        shape: "rectangle",
+        position: {
+          x: 800,
+          y: 577
+        },
+        angle: 144,
+        miliSecsPerRotation: 11111,
+        sizeRelationToOriginal: 1.9/*,
+        heart: {
+          onceInMiliSec: 1111
+        }*/
+      }
+    ],
+    sizes: {
+      ball: {
+        width: 15,
+        height: 15
+      },
+      schieber: {
+        width: 50,
+        height: 50
+      }
+    },
       }
     }
 
@@ -196,6 +396,94 @@ localStorage.setItem("storedName", name);
   level.slide[1] = level.normal[1];
   level.slide[3] = JSON.parse(JSON.stringify(level.slide[4]));
   level.slide[3].ballTeleporter[0].checkpoint = true;
+  level.opposite = level.normal;
+   // rotating examples:
+  var shapes = [
+    {
+      points: [
+        {
+          shape: "triangle",
+          position: {
+            x: 133,
+            y: 233
+          },
+          angle: 33,
+          miliSecsPerRotation: 7777,
+          heart: {
+            onceInMiliSec: 3333
+          }
+      },
+      {
+        shape: "rectangle",
+        position: {
+          x: 133,
+          y: 444
+        },
+        angle: 144,
+        miliSecsPerRotation: 9999,
+        heart: {
+          onceInMiliSec: 1111
+        }
+    },
+    {
+      shape: "thing",
+      points: [
+        {x: 0, y: 0},
+        {x: 0, y: 77},
+        {x: 100, y: 77},
+        {x: 100, y: 0}
+      ],
+      position: {
+        x: 222,
+        y: 222
+      },
+      angle: 90,
+      miliSecsPerRotation: 11111,
+      heart: {
+        onceInMiliSec: 500
+      }
+  },
+  {
+    shape: "thing",
+    points: [
+      {x: 0, y: 0},
+      {x: 177, y: 0},
+      {x: 133, y: 77}
+    ],
+    position: {
+      x: 333,
+      y: 444
+    },
+    angle: 180,
+    miliSecsPerRotation: 777,
+    heart: {
+      onceInMiliSec: 177
+    }
+}
+      ]
+    }
+  ]
+
+  // transform points to forms:
+  var point = (x, y) => ({x, y});
+  var triangle = createPath(point(0,-25), point(-50,-75), point(-100,-25));
+  var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
+  var pointShapes = [];
+  /*for (var i = 0; i < level[level.mode][level.aktuell].rotating.length; i++) {
+    for (var i1 = 0; i1 < level[level.mode][level.aktuell].rotating[i].points.length; i1++) {
+      if (level[level.mode][level.aktuell].rotating[i].points[i1].shape == "thing") {
+      var points = [];
+      for (var i2 = 0; i2 < level[level.mode][level.aktuell].rotating[i].points[i1].points.length; i2++) {
+        points.push(point(level[level.mode][level.aktuell].rotating[i].points[i1].points[i2].x, level[level.mode][level.aktuell].rotating[i].points[i1].points[i2].y));
+      }
+      if (points[1] && !points[2]) pointShapes.push({path: createPath(points[0], points[1]), position: level[level.mode][level.aktuell].rotating[i].points[i1].position, angle: level[level.mode][level.aktuell].rotating[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal});
+      if (points[2] && !points[3]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: level[level.mode][level.aktuell].rotating[i].points[i1].position, angle: level[level.mode][level.aktuell].rotating[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal});
+      if (points[3] && !points[4]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: level[level.mode][level.aktuell].rotating[i].points[i1].position, angle: level[level.mode][level.aktuell].rotating[i].points[i1].angle, miliSecsPerRotation: level[level.mode][level.aktuell].rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal});
+
+    }
+    }
+  }*/
+
   for (var i = 1; i < Object.keys(level.slide).length + 1; i++) {
     if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
     if (!level.slide[i].slideLength) level.slide[i].slideLength = 20;
@@ -221,7 +509,8 @@ localStorage.setItem("storedName", name);
     }
   }
   level.slide[1].slidestop = 16;
-
+  getDatabase();
+function getDatabase() {
   dbGet("transportTheBall", "highscores").then(result => {
     highscores = JSON.parse(result);
     for (var i = 0; i < Object.keys(level).length; i++) {
@@ -234,28 +523,31 @@ localStorage.setItem("storedName", name);
     }
     levelSelector.style.display = "none";
     modeSelected("normal");
-  });;
+  });
   dbGet("transportTheBall", "checkpoints " + name).then(result => {
     checkpoints = JSON.parse(result)
+  }).catch(function(e) {
+      console.log(e);
   });
-
+}
+  var direction = "long";
   var Bild = new Image();
-  function scrollWindow(direction, achse, scrollXBefore, scrollYBefore) {
-    scrolling = true;
-    if (achse == "right") window.scroll(scrollX + direction, scrollY);
-    else window.scroll(scrollX, scrollY + direction);
-    var scroll = {aktuell: {x: scrollX, y: scrollY}, max: {x: 0, y: 0}};
-    window.scroll(Bild.width, Bild.height);
-    scroll.max.x = scrollX;
-    scroll.max.y = scrollY;
-    window.scroll(scroll.aktuell.x, scroll.aktuell.y);
-    if (((achse == "right" && direction == 1 && scrollX != scroll.max.x) || (achse == "right" && direction == -1 && scrollX != 0) || (achse == "down" && direction == 1 && scrollY != scroll.max.y) || (achse == "down" && direction == -1 && scrollY != 0)) &&  ((Bild.width > window.innerWidth && achse == "right") || (Bild.height > window.screen.height && achse != "right") && ((achse == "right" && scrollX < window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width*2 + scrollXBefore) || (achse != "right" && scrollY < window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height*2 + scrollYBefore)))) {
-      setTimeout(function () {
-        scrollWindow(direction, achse, scrollXBefore, scrollYBefore);
-      }, 1);
-    }
-    else scrolling = false;
-  }
+  // function scrollWindow(direction, achse, scrollXBefore, scrollYBefore) {
+  //   scrolling = true;
+  //   if (achse == "right") window.scroll(scrollX + direction, scrollY);
+  //   else window.scroll(scrollX, scrollY + direction);
+  //   var scroll = {aktuell: {x: scrollX, y: scrollY}, max: {x: 0, y: 0}};
+  //   window.scroll(Bild.width, Bild.height);
+  //   scroll.max.x = scrollX;
+  //   scroll.max.y = scrollY;
+  //   window.scroll(scroll.aktuell.x, scroll.aktuell.y);
+  //   if (((achse == "right" && direction == 1 && scrollX != scroll.max.x) || (achse == "right" && direction == -1 && scrollX != 0) || (achse == "down" && direction == 1 && scrollY != scroll.max.y) || (achse == "down" && direction == -1 && scrollY != 0)) &&  ((Bild.width > window.innerWidth && achse == "right") || (Bild.height > window.screen.height && achse != "right") && ((achse == "right" && scrollX < window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width*2 + scrollXBefore) || (achse != "right" && scrollY < window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height*2 + scrollYBefore)))) {
+  //     setTimeout(function () {
+  //       scrollWindow(direction, achse, scrollXBefore, scrollYBefore);
+  //     }, 1);
+  //   }
+  //   else scrolling = false;
+  // }
   if (window.DeviceMotionEvent != undefined) {
     window.ondevicemotion = function(e) {
       ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
@@ -265,11 +557,15 @@ localStorage.setItem("storedName", name);
       // zoom: window.parent.document.body.style.zoom = 1.5;
       // scroll when at bootom
       if (level.aktuell == "winnerScreen") sphere.schieber.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
-      else {
-        if (x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
-        if (y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
-        if (x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-        if (y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      else/* if (!scrollingByUser)*/ {
+        scrollingInterac.PC = true;
+        if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
+        if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
+        if (!scrollingInterac.user && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+        if (!scrollingInterac.user && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+        setTimeout(function () {
+          scrollingInterac.PC = false;
+        }, 23);
       }
       // scroll all the way down when at bottom
       // if (scrollX != Bild.width - window.screen.width && !scrolling && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*2) scrollWindow(1, "right", scrollX, scrollY);
@@ -277,28 +573,36 @@ localStorage.setItem("storedName", name);
       // if (scrollX != 0 && !scrolling && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*2) && scrollX > 2) scrollWindow(-1, "right", scrollX, scrollY);
       // if (scrollY != 0 && !scrolling && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*2) && scrollY > 2) scrollWindow(-1, "down", scrollX, scrollY);
 
-      var landscapeOrientation = window.innerWidth / Bild.width > 1;
+      var landscapeOrientation = window.innerWidth - window.innerHeight > 1;
       if (landscapeOrientation) {
         vx1 = vx1 + ay1;
         vy1 = vy1 + ax1;
         vx2 = vx2 + ay1;
         vy2 = vy2 + ax1;
       } else {
-        vy1 = vy1 - ay1;
-        vx1 = vx1 + ax1;
-        vy2 = vy2 - ay1;
-        vx2 = vx2 + ax1;
+        vy1 = vy1 - ax1;
+        vx1 = vx1 + ay1;
+        vy2 = vy2 - ax1;
+        vx2 = vx2 + ay1;
+      }
+      if (landscapeOrientation && direction == "small") {
+        inOrAgainstDirection *= -1;
+        direction = "long";
+     } if (!landscapeOrientation && direction == "long") {
+       inOrAgainstDirection *= -1;
+       direction = "small";
       }
       vx1 = vx1 * 0.98;
       vy1 = vy1 * 0.98;
       ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
       ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
       coordinatesBefore = {x1: x1, y1: y1}
+      if (!level[level.mode][level.aktuell] || !level[level.mode][level.aktuell].invisible || invisible.boolean == false) {
       // allDirections
       if (level.mode == "allDirections") {
-      var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: 50, height: 50}, ball);
+      var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball);
       while (collision && !((parseInt(y1 + vy1 / 50) - y1) == 0 && (y1 - parseInt(y1 + vy1 / 50)) == 0 && (y1 - parseInt(y1 + vy1 / 50)) == 0 && (parseInt(y1 + vy1 / 50) - y1) == 0 && (parseInt(y1 + vy1 / 50) - y1) == 0 && (x1 - parseInt(x1 + vx1 / 50)) == 0 && (parseInt(x1 + vx1 / 50) - x1) == 0 && (parseInt(x1 + vx1 / 50) - x1) == 0 && (x1 - parseInt(x1 + vx1 / 50)) == 0)) {
-        collision = isCollide({x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball);
+        collision = isCollide({x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball);
         if (collision && parseInt(y1 + vy1 / 50) < ball.y) {
           // setTimeout(function () {
             if (parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)//3; // down
@@ -385,29 +689,47 @@ localStorage.setItem("storedName", name);
         timeDirection.over.right = 0;
       }
     }
-      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: 50, height: 50}, ball) && zaehler == 0) moveDirection(directionBefore);
-      y1 = parseInt(y1 + vy1 / 50);
-      x1 = parseInt(x1 + vx1 / 50);
-
-      vx2 = vx2 * 0.98;
-      vy2 = vy2 * 0.98;
-      y2 = parseInt(y2 + vy2 / 30);
-      x2 = parseInt(x2 + vx2 / 30);
-      //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
-      boundingBoxCheck();
-      sphere.schieber.style.top = y1 + "px";
-      sphere.schieber.style.left = x1 + "px";
+      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && zaehler == 0) moveDirection(directionBefore);
+      invisibleDirectionCheck();
       // normal mode
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere.schieber.style.width)//-= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere.schieber.style.height)//-= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: 50, height: 50}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
-
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere./*schieber*/ball.style.height)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+    }
+    else {
+      invisibleDirectionCheck();
+    }
+      if (level[level.mode][level.aktuell] && level[level.mode][level.aktuell].invisible) {
+        invisible.directions[invisible.direction] += 25;
+      if (!invisible.boolean && invisible.directions[invisible.direction]/1000 > level[level.mode][level.aktuell].invisible.timeUntilInvisible) {
+        invisible.mainDirection = invisible.direction;
+        for (var i = 0; i < 4; i++) {
+          /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+        }
+        invisible.boolean = true;
+      }
+      var totalTime = 0;
+      for (var i = 0; i < 4; i++) {
+        if (Object.keys(invisible.directions)[i] != invisible.mainDirection) totalTime += invisible.directions[Object.keys(invisible.directions)[i]];
+      }
+      if ((((level[level.mode][level.aktuell].invisible.anyOtherSide) && totalTime/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain) || ((!level[level.mode][level.aktuell].invisible.anyOtherSide && (invisible.directions.right/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.left/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.up/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.down/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain)))) && invisible.mainDirection != undefined) {
+        for (var i = 0; i < 4; i++) {
+          invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+        }
+        invisible.boolean = false;
+        invisible.mainDirection = undefined;
+      }
+      if (invisible.boolean) sphere.ball.style.display = "none";
+      else sphere.ball.style.display = "inline";
+    }
       sphere.ball.style.left = ball.x + "px";
       sphere.ball.style.top = ball.y + "px";
       checkColourCollisions();
     }, 25);
   }
+  var scrollingInterac = {user: false, PC: false}
+  var invisible = {directions: {left: 0, right: 0, up: 0, down: 0}, boolean: false};
   var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
   var timeDirection = {
     right: 0,
@@ -426,6 +748,46 @@ localStorage.setItem("storedName", name);
   var coordinatesBefore;
   var bounceCoordinates;
   var scrolling = false;
+  function invisibleDirectionCheck() {
+    var invisibleDirection = invisible.direction;
+    invisible.direction = {};
+    if (x1 > parseInt(x1 + vx1 / 50)) invisible.direction.left = x1 - parseInt(x1 + vx1 / 50);// = "left";
+    if (x1 < parseInt(x1 + vx1 / 50)) invisible.direction.right = parseInt(x1 + vx1 / 50) - x1;// = "right";
+    if (y1 > parseInt(y1 + vy1 / 50)) invisible.direction.up = y1 - parseInt(y1 + vy1 / 50);// = "up";
+    if (y1 < parseInt(y1 + vy1 / 50)) invisible.direction.down = parseInt(y1 + vy1 / 50) - y1;// = "down";
+    var highestDirection = {number: 0};
+    for (var i = 0; i < Object.keys(invisible.direction).length; i++) {
+      if (invisible.direction[Object.keys(invisible.direction)[i]] > highestDirection.number && Object.keys(invisible.direction)[i] != invisible.mainDirection) {highestDirection.number = invisible.direction[Object.keys(invisible.direction)[i]]; highestDirection.string = Object.keys(invisible.direction)[i];}
+    }
+    if (level[level.mode][level.aktuell] != undefined && invisibleDirection != undefined && highestDirection.string != undefined && level[level.mode][level.aktuell].invisible && level[level.mode][level.aktuell].invisible.amStück && invisibleDirection != highestDirection.string && ((invisible.boolean == true && level[level.mode][level.aktuell].invisible.amStück.invisible == true) || (invisible.boolean == false && level[level.mode][level.aktuell].invisible.amStück.visible == true))) {
+      for (var i = 0; i < 4; i++) {
+        /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+      }
+    }
+    invisible.direction = highestDirection.string;
+    y1 = parseInt(y1 + vy1 / 50);
+    x1 = parseInt(x1 + vx1 / 50);
+
+    vx2 = vx2 * 0.98;
+    vy2 = vy2 * 0.98;
+    y2 = parseInt(y2 + vy2 / 30);
+    x2 = parseInt(x2 + vx2 / 30);
+    boundingBoxCheck();
+    sphere.schieber.style.top = y1 + "px";
+    sphere.schieber.style.left = x1 + "px";
+  }
+  // window.onscroll = function (e) {
+  //   if (!scrollingInterac.PC) {
+  //     scrollingInterac.user = true;
+  //     // TODO: scroll function instead
+  //     console.log("please debug");
+  //   }
+  //   if (scrollY  < 5/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
+  // }
+  document.addEventListener('touchstart', touch);
+  function touch(ev){
+    scrollingInterac.user = true;
+  }
   function moveDirection(pDirectionBefore) {
     if (zaehler != "newLevel") {
     if (pDirectionBefore.includes( "right") && parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
@@ -496,13 +858,19 @@ localStorage.setItem("storedName", name);
       if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1] && level.aktuell != "winnerScreen") {
         console.log("goal reached (yellow)");
           i = 8;
-          restartLevel();
+          sphere.ball.style.top = "0px";
+          sphere.ball.style.left = "0px";
+          ball.x = 0;
+          ball.y = 0;
+          //restartLevel();
           setHighscores(true);
       }
-      else if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level.aktuell != "winnerScreen") {
+      else if (!(sphere.ball.style.top == "0px" && sphere.ball.style.left == "0px") && red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level.aktuell != "winnerScreen") {
         i = 8;
         sphere.ball.style.top = "0px";
         sphere.ball.style.left = "0px";
+        ball.x = 0;
+        ball.y = 0;
         alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
         setHighscores();
         zaehler = "newLevel";
@@ -516,7 +884,7 @@ localStorage.setItem("storedName", name);
         if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
         checkpoint.push({schieber: {x: x1, y: y1}, ball: {x: ball.x, y: ball.y}, timeNeededToReach: time})
         checkpoints[level.mode][level.aktuell] = checkpoint;
-        if (name != "allLevel") dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+        if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
       }
     }
      numbers = [
@@ -563,7 +931,7 @@ localStorage.setItem("storedName", name);
   if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != level[level.mode][level.aktuell].spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != level[level.mode][level.aktuell].spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != level[level.mode][level.aktuell].spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != level[level.mode][level.aktuell].spawnPoint.ball.y*/) {
     checkpoints[level.mode].splice(level.aktuell, 1);
     setTimeout(function () {
-      if (name != "allLevel") dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+      if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
     }, 1000);
   }
   }
@@ -577,18 +945,27 @@ localStorage.setItem("storedName", name);
     return onTeleporterObj;
   }
   function addToHighscore(pNextLevel) {
+    if (gameModeSelection.value == "opposite") level.mode = "opposite";
     if (!highscores[level.mode]) highscores[level.mode] = {};
     if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
     if (!highscores[level.mode][level.aktuell] || !highscores[level.mode][level.aktuell][name] || highscores[level.mode][level.aktuell][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][name] = mins + ":" + secs + ":" + "0" + tenths;
     setTimeout(function () {
-      if (name != "allLevel") dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
+      if (name != "allLevel") dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});//dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
       for (var i = 0; i < Object.keys(level).length; i++) {
         if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
       }
     }, 1000);
     if (pNextLevel) nextLevel();
     else winnerScreen();
+    if (level.mode == "opposite") level.mode = "normal";
   }
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
   function bounceBall(direction, time) {
     console.log("boundce " + direction);
     if (zaehler != "newLevel") {
@@ -695,12 +1072,16 @@ localStorage.setItem("storedName", name);
     ball.y = checkpoint[checkpoint.length - 1].ball.y;
     sphere.ball.style.top = ball.x + "px";
     sphere.ball.style.left = ball.y + "px";
+    scrollingInterac.PC = true;
     for (var i = 0; i < Bild.width; i++) {
-      if (x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
-      if (y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
-      if (x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-      if (y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
+      if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
+      if (!scrollingInterac.user && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      if (!scrollingInterac.user && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
     }
+    setTimeout(function () {
+      scrollingInterac.PC = false;
+    }, 1000);
   }
 
   function nextLevel() {
@@ -712,15 +1093,60 @@ localStorage.setItem("storedName", name);
     setupLevel();
     levelSelected(level.aktuell + ". level");
   }
+  var heartBeatInt
+  function heartBeatFunc() {
+    if (level[level.mode][level.aktuell].heart.ball && sphere.ball.heartBeatAction != false) {
+      /*sphere.*/sphere.ball.style.width = cssToNumber(sphere.ball.style.width) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
+      /*sphere.*/sphere.ball.style.height = cssToNumber(sphere.ball.style.height) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
+    }
+    if (level[level.mode][level.aktuell].heart.schieber && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.style.width = cssToNumber(sphere.schieber.style.width) + level[level.mode][level.aktuell].heart.schieber.pixelPerFunctionCall*sphere.schieber.direction + "px";
+      sphere.schieber.style.height = cssToNumber(sphere.schieber.style.height) + level[level.mode][level.aktuell].heart.schieber.pixelPerFunctionCall*sphere.schieber.direction + "px";
+    }
+    if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) > level[level.mode][level.aktuell].heart.ball.max && sphere.ball.heartBeatAction != false) {
+      ball.direction = -1;
+      heartBeatStop("ball", "max");
+    }
+    if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) < level[level.mode][level.aktuell].heart.ball.min && sphere.ball.heartBeatAction != false) {
+      ball.direction =  1;
+      heartBeatStop("ball", "min");
+    }
+    // if (ball.height > level[level.mode][level.aktuell].heart.ball.max) ball.direction = -1;
+    // if (ball.height < level[level.mode][level.aktuell].heart.ball.min) ball.direction =  1;
+    if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) > level[level.mode][level.aktuell].heart.schieber.max && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.direction = -1;
+      heartBeatStop("schieber", "max");
+    }
+    if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) < level[level.mode][level.aktuell].heart.schieber.min && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.direction =  1;
+      heartBeatStop("schieber", "min");
+    }
+    if (level[level.mode][level.aktuell].heart != undefined) {
+      setTimeout(function () {
+        heartBeatFunc();
+      }, 100);
+    }
+    ball.width = cssToNumber(sphere.ball.style.width);
+    ball.height = cssToNumber(sphere.ball.style.height);
+  }
+  function heartBeatStop(component, extrempunt) {
+    if (level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]) {
+      sphere[component].heartBeatAction = false;
+      setTimeout(function () {
+        sphere[component].heartBeatAction = true;
+      }, level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]*1000);
+    }
+  }
   function setupLevel() {
     checkpoint = [{schieber: {x: level[level.mode][level.aktuell].spawnPoint.schieber.x, y: level[level.mode][level.aktuell].spawnPoint.schieber.y}, ball: {x: level[level.mode][level.aktuell].spawnPoint.ball.x, y: level[level.mode][level.aktuell].spawnPoint.ball.y}}];
     restartLevel();
     ball.width = level[level.mode][level.aktuell].sizes.ball.width;
     ball.height = level[level.mode][level.aktuell].sizes.ball.height;
-    sphere.schieber.width = level[level.mode][level.aktuell].sizes.schieber.width;
-    sphere.schieber.height = level[level.mode][level.aktuell].sizes.schieber.height;
+    sphere.schieber.style.width = level[level.mode][level.aktuell].sizes.schieber.width + "px";
+    sphere.schieber.style.height = level[level.mode][level.aktuell].sizes.schieber.height + "px";
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
+    if (level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc();}
   }
   var directionBefore = [];
 
@@ -797,6 +1223,7 @@ localStorage.setItem("storedName", name);
     setupLevel();
     if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {checkpoint = checkpoints[level.mode][level.aktuell]; time = checkpoint[checkpoint.length - 1].timeNeededToReach;}
   }
+  if (level[level.mode][level.aktuell].rotating) requestAnimationFrame(renderLoop);
   }
   function modeSelected(mode) {
     if (mode != "showScores") {
@@ -805,9 +1232,6 @@ localStorage.setItem("storedName", name);
       sphere.schieber.style.display = "inline";
       sphere.ball.style.display = "inline";
     level.mode = mode;
-    if (mode == "normal") {
-      inOrAgainstDirection = 1;
-    }
     while (document.getElementById('levelSelector').options.length > 0) {
       document.getElementById('levelSelector').options[0] = undefined;
     }
@@ -835,6 +1259,8 @@ localStorage.setItem("storedName", name);
       levelSelected(/*"1. level"*/mapsFinished + ". level");
   }
     else levelSelected(/*"1. level"*/(mapsFinished + 1) + ". level");
+    if (mode == "opposite") {inOrAgainstDirection *= -1; level.mode = "normal";}
+    // else inOrAgainstDirection = 1;
 }
   else {
     showScores(highscores);
@@ -974,4 +1400,69 @@ setTimeout(function () {
 }
 }
 startPause();
+// rotating shapes:
+function drawPath(path, x, y, angle) {
+    canvas.setTransform(1, 0, 0, 1, x, y);
+    canvas.rotate(angle);
+    canvas.stroke(path);
+}
+
+function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
+    canvas.setTransform(scale, 0, 0, scale, x, y);
+    canvas.rotate(angle);
+    fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
+    strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
+}
+
+
+function renderLoop(time) {
+    //canvas.clearRect(0, 0, textur.width, textur.height);
+    checkColourCollisions();
+    var scale = Math.sin(time / 500) * 0.2 + 1.0;
+    var scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+    var miliSecsPerRotation = 2222;
+    var angle = 0;
+    var sizeRelationToOriginal = 1.0;
+    for (var i = 0; i < level[level.mode][level.aktuell].rotating.length; i++) {
+      if (level[level.mode][level.aktuell].rotating[i].angle) angle = level[level.mode][level.aktuell].rotating[i].angle;
+      if (level[level.mode][level.aktuell].rotating[i].miliSecsPerRotation) miliSecsPerRotation = level[level.mode][level.aktuell].rotating[i].miliSecsPerRotation;
+      if (level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal) sizeRelationToOriginal = level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal;
+      scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+      if (level[level.mode][level.aktuell].rotating[i].heart && level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec) scale2 = Math.cos(time / level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+      else scale2 = sizeRelationToOriginal;
+    if (level[level.mode][level.aktuell].rotating[i].shape && level[level.mode][level.aktuell].rotating[i].shape == "triangle") drawPath_V2(triangle, level[level.mode][level.aktuell].rotating[i].position.x, level[level.mode][level.aktuell].rotating[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
+    // scale path
+    if (level[level.mode][level.aktuell].rotating[i].shape && level[level.mode][level.aktuell].rotating[i].shape == "rectangle") drawPath_V2(rectangle, level[level.mode][level.aktuell].rotating[i].position.x, level[level.mode][level.aktuell].rotating[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 4 second
+    }
+    for (var i = 0; i < pointShapes.length; i++) {
+      if (pointShapes[i].angle) angle = pointShapes[i].angle;
+      if (pointShapes[i].miliSecsPerRotation) miliSecsPerRotation = pointShapes[i].miliSecsPerRotation;
+      if (pointShapes[i].sizeRelationToOriginal) sizeRelationToOriginal = pointShapes[i].sizeRelationToOriginal;
+      if (pointShapes[i].onceInMiliSec) scale2 = Math.cos(time / pointShapes[i].onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+      drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black");
+    }
+    // fill scale path
+    // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
+
+    canvas.setTransform(1, 0, 0, 1, 0, 0);
+    if (level[level.mode][level.aktuell].rotating) requestAnimationFrame(renderLoop);
+}
+
+
+function createPath(...points) {
+    var cx = 0; cy = 0;
+    for (const p of points) {
+        cx += p.x;
+        cy += p.y;
+    }
+    cx /= points.length;
+    cy /= points.length;
+
+    const path = new Path2D;
+    for (const p of points) {
+        path.lineTo(p.x - cx , p.y - cy);
+    }
+    path.closePath();
+    return path;
+}
 </script>
