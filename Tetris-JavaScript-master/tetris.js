@@ -262,7 +262,7 @@ Piece.prototype.lock = function(){
             }
             // increment the score
             score += 10;
-            points += 5;
+            points += 2;
         }
     }
 
@@ -420,9 +420,13 @@ function collisionFilling(x, y) {
 }
 function bodyClicked() {
   if (fillStone && !collisionFilling(fillStone.x, fillStone.y) && confirm('Wollen sie hier wirklich den Stein festsetzen? Wenn ja, drücken sie danach "p", um das Spiel fortzuführen!')) {
+    // CONTROL({key:"p"});
+    // pause = false;
     fillStone.lock();
-    // TODO: Ränder füllen
-    // TODO: Spielbrett auch bei pause neu zeichnen bzw. Pause beim locken aufheben
+    drawBoard();
+    for (var i = 0; i < board.length; i++) {
+      p[p.length - 1 - i].draw();
+    }
     fillStone = undefined;
   }
 }
@@ -444,7 +448,7 @@ function shopClicked() {
       }
       else alert("Sie haben zu wenig Punkte, um diesen Stein reservieren zu können!");
     }
-    if (x > SQ*i*5 && x < SQ*(i + 1)*5 && y > SQ*5 && y < SQ*7){
+    if (x > SQ*i*5 && x < SQ*(i + 1)*5 && y > SQ*4 && y < SQ*6){
       if (points >= requiredPoints.fillTiles[i]) {
       var board = prompt('In das wievielte Spielbrett wollen sie den Stein einsetzen?');
       if (confirm("Sind sie sich sicher, dass sie " + requiredPoints.fillTiles[i] + " Punkte für den ausgewählten Stein (" + addTiles[i][1] + ") zum Einsetzen bezahlen wollen?")) {
