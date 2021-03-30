@@ -5,6 +5,9 @@
         #score{
             display: inline-block;
         }
+        #points{
+            display: inline-block;
+        }
         div{
             font-size: 25px;
             font-weight: bold;
@@ -17,13 +20,18 @@
         } */
     </style>
 </head>
-<body>
+<body onclick="bodyClicked();">
     <canvas id="tetris 0" width="200" height="400"></canvas>
     <canvas id="tetris 1" width="200" height="400"></canvas>
     <div>
-        Score : <div id="score">0</div>
+      Score : <div id="score">0</div>
     </div>
+    <div>
+      Points : <div id="points">0</div>
+    </div>
+    <canvas id="shop" onclick="shopClicked()" width="1000" height="170"></canvas>
     <script src="tetrominoes.js"></script>
+    <script src="addTiles.js"></script>
     <script src="tetris.js"></script>
 </body>
 </html>
