@@ -318,6 +318,7 @@ for (var i = 0; i < addTiles.length; i++) {
 document.addEventListener("keydown",CONTROL);
 var pause = false;
 function CONTROL(event){
+  viewImage();
   for (var i = 0; i < board.length; i++) {
     if(event.keyCode == 37 && !pause){
         p[p.length - 1 - i].moveLeft();
@@ -368,7 +369,67 @@ function drop(){
 }
 
 drop();
+var startCoord = {x: -1, y: -1};
+// var move = "";
+document.addEventListener('touchstart', touch);
+document.addEventListener('touchmove', touch);
+document.addEventListener('touchend', touch);
+function touch(ev) {
+// mausx = ev.touches[0]["pageX"];
+// mausy = ev.touches[0]["pageY"];
+// if (ev.type == "touchstart" ) {
+//   move = "";
+// }
+if (ev.type == "touchmove") {
+  readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"]});
+  if (!fillStone) {
+    var newCoord = {x: JSON.parse((ev.touches[0]["pageX"]/SQ + "").split(".")[0]), y: JSON.parse((ev.touches[0]["pageY"]/SQ + "").split(".")[0])};
+    if (newCoord.x > startCoord.x && ((newCoord.y > startCoord.y && newCoord.y - startCoord.y < newCoord.x - startCoord.x) || newCoord.y <= startCoord.y)) CONTROL({keyCode: 39});
+    else if (newCoord.x < startCoord.x && ((newCoord.y > startCoord.y && newCoord.y - startCoord.y < startCoord.x - newCoord.x) || newCoord.y <= startCoord.y)) CONTROL({keyCode: 37});
+    else if (newCoord.y > startCoord.y/*newCoord.y - startCoord.y > 2 || newCoord.y - startCoord.y < -2*/) {
+      CONTROL({keyCode: 40});
+    }
+    startCoord = newCoord;
+  }
+}
+if (ev.type == "touchend" && fillStone) {
+  CONTROL({keyCode: 38});
+}
+}
 document.onmousemove = readMouseMove
+function viewPage () {
+  var el = document.body;
+  toggleFullscreen(el);
+};
+
+function viewImage () {
+  var el = body/*document.getElementById('myImage');*/
+  toggleFullscreen(el);
+};
+
+function toggleFullscreen (el) {
+/*		if(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement){
+    if(document.exitFullscreen){
+    //	document.exitFullscreen();
+    }else if(document.mozCancelFullScreen){
+  //		document.mozCancelFullScreen();
+    }else if(document.webkitExitFullscreen){
+  //		document.webkitExitFullscreen();
+    }else if(document.msExitFullscreen){
+  //		document.msExitFullscreen();
+    }
+  }else{*/
+    if(document.documentElement.requestFullscreen){
+      el.requestFullscreen();
+    }else if(document.documentElement.mozRequestFullScreen){
+      el.mozRequestFullScreen();
+    }else if(document.documentElement.webkitRequestFullscreen){
+      el.webkitRequestFullscreen();
+    }else if(document.documentElement.msRequestFullscreen){
+      el.msRequestFullscreen();
+    }
+//	}
+};
 var xMaus;
 var yMaus;
 var storedPosition = {};
@@ -429,6 +490,9 @@ function bodyClicked() {
     }
     fillStone = undefined;
   }
+  else if (!fillStone && (xMaus < document.getElementById("shop").getBoundingClientRect().x || xMaus > document.getElementById("shop").getBoundingClientRect().x) && (yMaus < document.getElementById("shop").getBoundingClientRect().y || yMaus > document.getElementById("shop").getBoundingClientRect().y)) {
+    CONTROL({keyCode: 38});
+  }
 }
 var fillStone;
 var requiredPoints = {forcedTiles: [3, 3, 4, 4, 3, 5, 3], fillTiles: [8, 7, 4]};
@@ -438,6 +502,7 @@ function shopClicked() {
   var y = yMaus - document.getElementById("shop").getBoundingClientRect().y;
   for (var i = 0; i < PIECES.length; i++) {
     if (x > SQ*i*5 && x < SQ*(i + 1)*5 && y > 0 && y < SQ*3){
+      fillStone = "in prep";
       if (points >= requiredPoints.forcedTiles[i]) {
       var board = prompt('Für das wievielte Spielbrett wollen sie den nächsten Stein (als ' + PIECES[i][1] + ') festlegen? Sie verlieren dabei ' + requiredPoints.forcedTiles[i] + ' Punkte! Wenn sie sich verklickt haben, klicken sie bitte auf "abbrechen"');
       if (board && !isNaN(board)) {
@@ -449,6 +514,7 @@ function shopClicked() {
       else alert("Sie haben zu wenig Punkte, um diesen Stein reservieren zu können!");
     }
     if (x > SQ*i*5 && x < SQ*(i + 1)*5 && y > SQ*4 && y < SQ*6){
+      fillStone = "in prep";
       if (points >= requiredPoints.fillTiles[i]) {
       var board = prompt('In das wievielte Spielbrett wollen sie den Stein einsetzen?');
       if (confirm("Sind sie sich sicher, dass sie " + requiredPoints.fillTiles[i] + " Punkte für den ausgewählten Stein (" + addTiles[i][1] + ") zum Einsetzen bezahlen wollen?")) {
@@ -460,5 +526,10 @@ function shopClicked() {
     }
     else alert("Sie brauchen " + requiredPoints.fillTiles[i] + " Punkte, um sich diesen Stein zum Einsetzen leisten zu können!");
   }
+  }
+  if (fillStone == "in prep") {
+    setTimeout(function () {
+      fillStone = undefined;
+    }, 10);
   }
 }
