@@ -1,3 +1,6 @@
+<meta charset="utf-8">
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <html>
 <head>
     <title>Tetris Game JS</title>
@@ -20,7 +23,18 @@
         } */
     </style>
 </head>
-<body id="body" onclick="bodyClicked();">
+<body style='color:red' id="body" onclick="bodyClicked();">
+  <div id="settings">
+  <input type="text" id="pointsPerRow" value="2" placeholder="Punkte pro komplettierte Reihe">
+  <br>
+  <button type="button" onclick='beginnRound();' name="button">beginnen!</button>
+</div>
+  <br>
+  <div id="app">
+  <li v-for="title in db" id="pixelSpielfelder">
+  {{ title }}
+  </li>
+  </div>
     <canvas id="tetris 0" width="200" height="400"></canvas>
     <canvas id="tetris 1" width="200" height="400"></canvas>
     <div>
@@ -30,8 +44,9 @@
       Points : <div id="points">0</div>
     </div>
     <canvas id="shop" onclick="shopClicked()" width="1000" height="170"></canvas>
-    <script src="tetrominoes.js"></script>
-    <script src="addTiles.js"></script>
-    <script src="tetris.js"></script>
 </body>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
+<script src="tetrominoes.js"></script>
+<script src="addTiles.js"></script>
+<script src="tetris.js"></script>
 </html>

@@ -2,7 +2,22 @@ const ROW = 20;
 const COL = COLUMN = 10;
 const SQ = squareSize = 20;
 const VACANT = "WHITE"; // color of an empty square
-
+if (!localStorage.getItem("storedName")) var name = prompt("Wie wollen sie sich nennen? (Eingabe bitte merken! Die Eingabe wird für die Speicherung der Highscores benötigt.");
+else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+var highscores = [];
+dbGet("tetrisBoards", "highscores").then(result => {
+  highscores = result;
+}).catch(function(e) {
+  console.log("no db data there (offline also possible)");
+});
+var app = new Vue({
+el: '#app',
+data: {
+db: []
+}
+})
 // draw a square
 function drawSquare(x,y,color, board){
   console.log("next scrare");
@@ -16,11 +31,17 @@ function drawSquare(x,y,color, board){
     console.log("abc");
   }
   }
-
+var board = [[], []];
+var shop = [];
+var ctx = [];
+const scoreElement = document.getElementById("score");
 // create the board
-
-let board = [[], []];
-let shop = [];
+function beginnRound() {
+  gameOver = false;
+  board = [[], []];
+  shop = [];
+  ctx = [];
+  settings.style.display = "none";
 for (var i = 0; i < board.length; i++) {
 for( r = 0; r <ROW; r++){
     board[i][r] = [];
@@ -29,13 +50,19 @@ for( r = 0; r <ROW; r++){
     }
   }
 }
-
-const ctx = [];
+for (var i = 0; i < 20; i++) {
+  shop[i] = [];
+  for (var i1 = 0; i1 < 3; i1++) {
+    shop[i][i1] = VACANT;
+  }
+}
 for (var i = 0; i < board.length; i++) {
   ctx[i] = document.getElementById("tetris " + i).getContext("2d");
 }
 ctx[i] = document.getElementById("shop").getContext("2d");
-const scoreElement = document.getElementById("score");
+drawBoard();
+CONTROL({key:"p"});
+}
 
 // draw the board
 function drawBoard(){
@@ -48,8 +75,6 @@ function drawBoard(){
     }
   }
 }
-
-drawBoard();
 
 // the pieces and their colors
 
@@ -67,12 +92,6 @@ const addTiles = [
   [two, "green"],
   [edge, "blue"]
 ]
-for (var i = 0; i < 20; i++) {
-  shop[i] = [];
-  for (var i1 = 0; i1 < 3; i1++) {
-    shop[i][i1] = VACANT;
-  }
-}
 var shopTiles = {forcedTiles: [], fillTiles: []};
 for (var i = 0; i < PIECES.length; i++) {
   shopTiles.forcedTiles.push(new Piece( PIECES[i][0],PIECES[i][1], board.length, i*5, 0));
@@ -220,7 +239,13 @@ Piece.prototype.rotate = function(){
 
 let score = 0;
 var points = 0;
-
+var dbSetWarteschlange = [];
+setInterval(function () {
+  if (dbSetWarteschlange.length > 0) {
+    dbSet("tetrisBoards", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+    dbSetWarteschlange.shift();
+  }
+}, 2222);
 Piece.prototype.lock = function(){
   console.log("lock");
   this.locked = true;
@@ -233,9 +258,23 @@ Piece.prototype.lock = function(){
             }
             // pieces to lock on top = game over
             if(this.y + r < 0){
-                alert("Game Over");
+                alert("Spiel vorbei!");
                 // stop request animation frame
                 gameOver = true;
+                pause = true;
+                if (!highscores[JSON.parse(pointsPerRow.value)]) highscores[(pointsPerRow.value)] = {};
+                if (!highscores[JSON.parse(pointsPerRow.value)][name] || score > highscores[JSON.parse(pointsPerRow.value)][name]) {
+                  highscores[(pointsPerRow.value)][name] = score;
+                  if (score > highscores[JSON.parse(pointsPerRow.value)][name]) alert("Glückwunsch! Sie haben einen neuen Beststand erreicht!");
+                }
+                settings.style.display = "inline";
+                dbSetWarteschlange.push({tag: "highscores", data: highscores});
+                while (app.db.length > 0) {
+                  app.db.pop();
+                }
+                for (name of Object.keys(highscores[JSON.parse(pointsPerRow.value)])) {
+                  app.db.push(name + ": " + highscores[JSON.parse(pointsPerRow.value)][name]);
+                }
                 break;
             }
             // we lock the piece
@@ -316,9 +355,9 @@ for (var i = 0; i < addTiles.length; i++) {
 // CONTROL the piece
 
 document.addEventListener("keydown",CONTROL);
-var pause = false;
+var pause = true;
 function CONTROL(event){
-  viewImage();
+  if (!pause && event.key != "p") viewImage();
   for (var i = 0; i < board.length; i++) {
     if(event.keyCode == 37 && !pause){
         p[p.length - 1 - i].moveLeft();
@@ -339,7 +378,7 @@ function CONTROL(event){
         p[p.length - 1 - i].moveDown();
     }
   }
-  if (event.key == "p") pause = !pause
+  if (event.key == "p" && !gameOver) pause = !pause
   if (!pause && !gameOver) drop();
 }
 
@@ -491,7 +530,9 @@ function bodyClicked() {
     fillStone = undefined;
   }
   else if (!fillStone && (xMaus < document.getElementById("shop").getBoundingClientRect().x || xMaus > document.getElementById("shop").getBoundingClientRect().x) && (yMaus < document.getElementById("shop").getBoundingClientRect().y || yMaus > document.getElementById("shop").getBoundingClientRect().y)) {
+    pause = true;
     CONTROL({keyCode: 38});
+    pause = false;
   }
 }
 var fillStone;
