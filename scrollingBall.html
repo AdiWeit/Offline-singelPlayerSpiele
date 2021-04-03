@@ -60,7 +60,7 @@
 <br>
 Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked) value = figuresUnlocked; beginnRound();" value="3" type="text">
 <br>
-<input type="range" min="10" oninput="sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
+<input type="range" min="10" onchange="beginnRound();" oninput="showScores(highscores, modeSelection.value); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
 <table id="scores">
@@ -139,8 +139,8 @@ console.log("PC");
 
     boundingBoxCheck();
     if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1 - 8; y1Converted = y1 - 20;}
-    else if (direction.stringDirection == "left") {x1Converted = textur.width - y1 - 20 - 37 - 10 - 15; y1Converted = x1 - 8 - 39;/*780 - x1 - 60 - 33*/}
-    else {x1Converted = y1 - 20 + 37; y1Converted = 779 - x1 - 8 + 5}
+    else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
+    else {x1Converted = y1 - 20 + 37 + 13; y1Converted = 779 - x1 - 8 + 5 + 23}
     for (var i = 0; i < 4; i++) {
     var numbers = [
       [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")), y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")) / 2], //rechts
@@ -161,13 +161,14 @@ console.log("PC");
     alpha = data.data[3];
     if (!highscores[name]) highscores[name] = {};
     if (!highscores[name][numberFigures.value]) highscores[name][numberFigures.value] = {};
-    if (!highscores[name][numberFigures.value][modeSelection.value] && modeSelection.value != "training") highscores[name][numberFigures.value][modeSelection.value] = {1: 0, 2: 0, 3: 0};
+    if (!highscores[name][numberFigures.value][sliderSize.value]) highscores[name][numberFigures.value][sliderSize.value] = {};
+    if (!highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] && modeSelection.value != "training") highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] = {1: 0, 2: 0, 3: 0};
     else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
-      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][modeSelection.value][lives.beginning - lives.now]) {
-        highscores[name][numberFigures.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
+      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now]) {
+        highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
         dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
       //  document.getElementById('newHighscore').style.display = "inline";
       Bild = new Image();
@@ -561,9 +562,9 @@ else if (gerät == "PC") {
     var cell = [ /*row.insertCell(0)*/ ];
     var highestLives = {lives: 0, number: 0};
     var missedProfiles = 0;
-    if (highscores[name][numberFigures.value][modeSelection.value]) {
+    if (highscores[name][numberFigures.value] && highscores[name][numberFigures.value][sliderSize.value] && highscores[name][numberFigures.value][sliderSize.value][modeSelection.value]) {
     for (var i = 0; i < Object.keys(highscores).length; i++) {
-      if (highscores[Object.keys(highscores)[i]][[numberFigures.value]] != undefined) {
+      if (highscores[Object.keys(highscores)[i]][numberFigures.value] && highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value]) {
         // if (!(Object.keys(highscores)[i] == "allMaps")) {
         var table = document.getElementById("scores");
         var row = table.insertRow(i - missedProfiles);
@@ -571,16 +572,16 @@ else if (gerät == "PC") {
         cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
       // }
       //  var cell = [/*row.insertCell(0)*/];
-      for (var i1 = 1; highscores[Object.keys(highscores)[i]][numberFigures.value][mode] && i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length + 1; i1++) {
+      for (var i1 = 1; highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode] && i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode]).length + 1; i1++) {
         // if (!(Object.keys(highscores)[i] == "allMaps")) {
-          if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length + 1) {
+          if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode]).length + 1) {
             cell[cell.length - 2] = row.insertCell(i1);
             // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
             //   i1--;
             // }
-            cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/];
-            if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/] > highscores[name][numberFigures.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "red";
-            else if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/] < highscores[name][numberFigures.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "green";
+            cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode][i1/* - 1*/];
+            if (highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode][i1/* - 1*/] > highscores[name][numberFigures.value][sliderSize.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "red";
+            else if (highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode][i1/* - 1*/] < highscores[name][numberFigures.value][sliderSize.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "green";
             else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
             else cell[cell.length - 2].style.color = "black";
 
@@ -594,7 +595,7 @@ else if (gerät == "PC") {
       var row = table.insertRow(i - missedProfiles);
       //  var row = table.insertRow(i+1);
       // var row = table.insertRow(i + 1);
-      if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode] && Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length}
+      if (highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode] && Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][sliderSize.value][mode]).length}
     }
     else missedProfiles++;
   }
