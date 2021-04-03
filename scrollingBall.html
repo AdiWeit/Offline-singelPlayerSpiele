@@ -340,7 +340,7 @@ else if (gerät == "PC") {
   function beginnRound(resetNoLive) {
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
-      if (figuresUnlocked != totalFigures && numberFigures == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
+      if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
       else {
         showScores(highscores, modeSelection.value);
         var time = 3000;
