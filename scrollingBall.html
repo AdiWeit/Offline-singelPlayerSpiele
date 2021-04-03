@@ -58,6 +58,7 @@
 <h2 id="textTextBoxLives" onclick="alert('Hier können sie einstellen, wie viele Leben sie innerhalb einer Runde haben wollen. Da es für jedes Leben eigene highscores gibt, können sie hier bis zu 11 Leben einstellen. Wenn sie also z.B. den highscore der Punkte, bevor sie ihr erstes Leben verlieren verbessern wollen, geben sie hier 1 ein und drücken sie enter, damit sie es immer direkt nach einem Lebensverlust von neuem probieren können.');">amount of lives [i]</h2>
 <input id="textBoxLives" type="text" onchange="textBoxLivesChanged(value)" value="3" name="vehicle">
 <br>
+Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked) value = figuresUnlocked; beginnRound();" value="3" type="text">
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
 <table id="scores">
@@ -157,13 +158,14 @@ console.log("PC");
     blue = data.data[2];
     alpha = data.data[3];
     if (!highscores[name]) highscores[name] = {};
-    if (!highscores[name][modeSelection.value] && modeSelection.value != "training") highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
+    if (!highscores[name][numberFigures.value]) highscores[name][numberFigures.value] = {};
+    if (!highscores[name][numberFigures.value][modeSelection.value] && modeSelection.value != "training") highscores[name][numberFigures.value][modeSelection.value] = {1: 0, 2: 0, 3: 0};
     else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
-      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][modeSelection.value][lives.beginning - lives.now]) {
-        highscores[name][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
+      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][modeSelection.value][lives.beginning - lives.now]) {
+        highscores[name][numberFigures.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
         dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
       //  document.getElementById('newHighscore').style.display = "inline";
       Bild = new Image();
@@ -235,6 +237,7 @@ localStorage.setItem("storedName", name);
     var figuresUnlockedGot = false;
     dbGet("scrollingBall", "figuresUnlocked " + name).then(result => {
       figuresUnlocked = result;
+      numberFigures.value = figuresUnlocked;
       figuresUnlockedGot = true;
     });
     dbGet("scrollingBall", "figureXP " + name).then(result => {
@@ -272,7 +275,11 @@ localStorage.setItem("storedName", name);
           beginnRoundP2();
         }, 2222);
       }
-      if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {figuresUnlocked++; figureXP.have = 0;}
+      if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
+        figuresUnlocked++;
+        numberFigures = figuresUnlocked;
+        figureXP.have = 0;
+      }
       else if (figureXP.have < finishedXP) {
         setTimeout(function () {
           addXP(beginningXP, finishedXP);
@@ -330,7 +337,7 @@ else if (gerät == "PC") {
   function beginnRound(resetNoLive) {
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
-      if (figuresUnlocked != totalFigures) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
+      if (figuresUnlocked != totalFigures && numberFigures == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
       else {
         showScores(highscores, modeSelection.value);
         var time = 3000;
@@ -372,6 +379,7 @@ else if (gerät == "PC") {
   }
   var randomNumber = 0;
   function selectNewFigure(i) {
+    var figuresUnlocked = JSON.parse(numberFigures.value);
     if (figuresUsed.length == figuresUnlocked || (modeSelection.value == "training" && figuresUsed.length == figuresSelected)) figuresUsed = [];
     randomNumber = Math.round(Math.random()*(figuresUnlocked - 1));
     if ((figuresUsed.includes(randomNumber)) || (modeSelection.value == "training" && figuresTraining[randomNumber] != true)) selectNewFigure();
@@ -550,25 +558,27 @@ else if (gerät == "PC") {
     console.log("scores: " + highscores);
     var cell = [ /*row.insertCell(0)*/ ];
     var highestLives = {lives: 0, number: 0};
-    if (highscores[name][modeSelection.value]) {
+    var missedProfiles = 0;
+    if (highscores[name][numberFigures.value][modeSelection.value]) {
     for (var i = 0; i < Object.keys(highscores).length; i++) {
-      // if (!(Object.keys(highscores)[i] == "allMaps")) {
+      if (highscores[Object.keys(highscores)[i]][[numberFigures.value]] != undefined) {
+        // if (!(Object.keys(highscores)[i] == "allMaps")) {
         var table = document.getElementById("scores");
-        var row = table.insertRow(i);
+        var row = table.insertRow(i - missedProfiles);
         cell.push(row.insertCell(0));
         cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
       // }
       //  var cell = [/*row.insertCell(0)*/];
-      for (var i1 = 1; highscores[Object.keys(highscores)[i]][mode] && i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1; i1++) {
+      for (var i1 = 1; highscores[Object.keys(highscores)[i]][numberFigures.value][mode] && i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length + 1; i1++) {
         // if (!(Object.keys(highscores)[i] == "allMaps")) {
-          if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1) {
+          if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length + 1) {
             cell[cell.length - 2] = row.insertCell(i1);
             // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
             //   i1--;
             // }
-            cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/];
-            if (highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/] > highscores[name][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "red";
-            else if (highscores[Object.keys(highscores)[i]][mode][i1/* - 1*/] < highscores[name][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "green";
+            cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/];
+            if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/] > highscores[name][numberFigures.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "red";
+            else if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode][i1/* - 1*/] < highscores[name][numberFigures.value][mode][i1/* - 1*/]) cell[cell.length - 2].style.color = "green";
             else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
             else cell[cell.length - 2].style.color = "black";
 
@@ -579,11 +589,13 @@ else if (gerät == "PC") {
           }
         // }
       }
-      var row = table.insertRow(i);
+      var row = table.insertRow(i - missedProfiles);
       //  var row = table.insertRow(i+1);
       // var row = table.insertRow(i + 1);
-      if (highscores[Object.keys(highscores)[i]][mode] && Object.keys(highscores[Object.keys(highscores)[i]][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][mode]).length}
+      if (highscores[Object.keys(highscores)[i]][numberFigures.value][mode] && Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][numberFigures.value][mode]).length}
     }
+    else missedProfiles++;
+  }
     //  var row = table.insertRow(0);
     //  var cell = [/*row.insertCell(0)*/];
     // cell.push(row.insertCell(0));
