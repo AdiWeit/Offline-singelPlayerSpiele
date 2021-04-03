@@ -74,7 +74,7 @@
   <td>Row3 cell2</td>
 </tr> -->
 </table>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
+<h1 id="nameEingeloggt" onclick='changeName();'></h1>
 <script>
 if (navigator.userAgent.match(/Android/i) ||
 navigator.userAgent.match(/webOS/i) ||
@@ -156,8 +156,9 @@ console.log("PC");
     green = data.data[1];
     blue = data.data[2];
     alpha = data.data[3];
+    if (!highscores[name]) highscores[name] = {};
     if (!highscores[name][modeSelection.value] && modeSelection.value != "training") highscores[name][modeSelection.value] = {1: 0, 2: 0, 3: 0};
-    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed > 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
+    else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
@@ -189,6 +190,7 @@ console.log("PC");
   }
   if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
   else var name = localStorage.getItem("storedName");
+  changeName(true);
 localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   var shield = false;
@@ -227,24 +229,28 @@ localStorage.setItem("storedName", name);
       angle: 0
     }]
   }*/];
-  var figuresUnlockedGot = false;
-  dbGet("scrollingBall", "figuresUnlocked").then(result => {
-    figuresUnlocked = result;
-    figuresUnlockedGot = true;
-  });
-  dbGet("scrollingBall", "figureXP").then(result => {
-  figureXP = result;
-  });
-  dbGet("scrollingBall", "highscores").then(result => {
-    highscores = result;
-    if (!highscores[name]) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
-    showScores(highscores, modeSelection.value);
-    modeSelected("autoScroll");
-  }).catch(function(e) {
-    console.error(e);
-    if (e.message.includes("nicht gefunden")) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
-    modeSelected("autoScroll");
-  });
+  function changeName(nameSelected) {
+    if (!nameSelected) name = prompt ("Mit welchem Namen wollen sie sich eingloggen?");
+    nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+    var figuresUnlockedGot = false;
+    dbGet("scrollingBall", "figuresUnlocked " + name).then(result => {
+      figuresUnlocked = result;
+      figuresUnlockedGot = true;
+    });
+    dbGet("scrollingBall", "figureXP " + name).then(result => {
+      figureXP = result;
+    });
+    dbGet("scrollingBall", "highscores").then(result => {
+      highscores = result;
+      if (!highscores[name]) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
+      showScores(highscores, modeSelection.value);
+      modeSelected("autoScroll");
+    }).catch(function(e) {
+      console.error(e);
+      if (e.message.includes("nicht gefunden")) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
+      modeSelected("autoScroll");
+    });
+  }
   var direction = {};
 //  beginnRound();
   var countdownInt;
@@ -260,8 +266,8 @@ localStorage.setItem("storedName", name);
       showScores(highscores, modeSelection.value);
       textur.style.display = "inline";
       if (!(figureXP.have < finishedXP) || figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
-        if (figuresUnlockedGot) dbSetWarteschlange.push({tag: "figuresUnlocked", data: figuresUnlocked});
-        dbSetWarteschlange.push({tag: "figureXP", data: figureXP});
+        if (figuresUnlockedGot) dbSetWarteschlange.push({tag: "figuresUnlocked " + name, data: figuresUnlocked});
+        dbSetWarteschlange.push({tag: "figureXP " + name, data: figureXP});
         setTimeout(function () {
           beginnRoundP2();
         }, 2222);
@@ -310,7 +316,7 @@ localStorage.setItem("storedName", name);
   for (var i = 1; i < 4; i++) {
     screen.push(createNewFigure(i, 0, resetNoLive));
   }
-  if (modeSelection.value != "againstThePC") screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376});
+  if (modeSelection.value != "againstThePC") screen.push({link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376, notRight: true});
   x1 = 222;
   y1 = 600;
   textur.style.display = "inline";
@@ -359,7 +365,7 @@ else if (gerät == "PC") {
   }
   function createNewFigure (i, x, resetNoLive) {
     if (!resetNoLive || modeSelection.value != "training") {
-    if (modeSelection.value != "scrollWaagerecht" || direction.stringDirection == "up" || direction.stringDirection == "left" || direction.stringDirection == undefined) return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: x, y: 376 - i*376};
+    if (modeSelection.value != "scrollWaagerecht" || direction.stringDirection == "up" || direction.stringDirection == "left" || direction.stringDirection == undefined) return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: x, y: 376 - i*376, notRight: true};
     else if (direction.stringDirection == "right" && modeSelection.value == "scrollWaagerecht") return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y:  376*2};
     else return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y: -(376)*2 + i*376};
   }
@@ -435,8 +441,8 @@ else if (gerät == "PC") {
       directionBefore = direction.stringDirection;
       if ((direction.stringDirection == "up" && Math.round(Math.random()*1) == 0)/* || directionBefore == "left"*/) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
       else if (direction.stringDirection == "up"/* || directionBefore == "right"*/) {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
-      else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
-      if (direction.stringDirection == "right") screen.pop();
+      else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 1777};}
+      // if (direction.stringDirection == "right") screen.pop();
       if (directionBefore == "right") direction.turned = 90;
       else if (directionBefore == "left") direction.turned = -90;
       rotateInt = setInterval(rotateCanvas, 50);
@@ -451,11 +457,21 @@ else if (gerät == "PC") {
       for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
         objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += direction.direction*speed;
       }
-      if ((screen[i].y > 852 && modeSelection.value != "againstThePC")) {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
-      if (screen[i].y > 804 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
-      // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
-      if (speed != 0 && screen[i].y <= /*-876 - 426*//*-1229*/-390 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {
+      // if (modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "right" && screen[i].y < -376 && screen[i].notRight) {
+      //   screen[i].y += 1504/2;
+      //   screen[i].notRight = undefined;
+      // }
+      // if (modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "up" && screen[i].y > 376 && !screen[i].notRight) {
+      //   screen[i].y -= 1504/2;
+      //   screen[i].notRight = true;
+      // }
+      if (screen[i].y > 752 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {
         screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+        if (speed != 0 && screen[i].y <= /*-876 - 426*//*-1229*/-752/*376*/ && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {
+          screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+        else if ((screen[i].y > 752 && modeSelection.value != "againstThePC") && !(modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "right")) {
+        screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
+      // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
     if (countdown.length == 0) {
@@ -543,7 +559,7 @@ else if (gerät == "PC") {
         cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
       // }
       //  var cell = [/*row.insertCell(0)*/];
-      for (var i1 = 1; i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1; i1++) {
+      for (var i1 = 1; highscores[Object.keys(highscores)[i]][mode] && i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1; i1++) {
         // if (!(Object.keys(highscores)[i] == "allMaps")) {
           if (i1 < Object.keys(highscores[Object.keys(highscores)[i]][mode]).length + 1) {
             cell[cell.length - 2] = row.insertCell(i1);
@@ -566,7 +582,7 @@ else if (gerät == "PC") {
       var row = table.insertRow(i);
       //  var row = table.insertRow(i+1);
       // var row = table.insertRow(i + 1);
-      if (Object.keys(highscores[Object.keys(highscores)[i]][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][mode]).length}
+      if (highscores[Object.keys(highscores)[i]][mode] && Object.keys(highscores[Object.keys(highscores)[i]][mode]).length > highestLives.lives) highestLives = {number: i, lives: Object.keys(highscores[Object.keys(highscores)[i]][mode]).length}
     }
     //  var row = table.insertRow(0);
     //  var cell = [/*row.insertCell(0)*/];
