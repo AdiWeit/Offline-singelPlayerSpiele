@@ -60,7 +60,7 @@
 <br>
 Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked) value = figuresUnlocked; beginnRound();" value="3" type="text">
 <br>
-<input type="range" min="10" onchange="beginnRound();" oninput="showScores(highscores, modeSelection.value); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
+<input type="range" min="10" onchange="canvasClicked(); beginnRound();" oninput="if (!pause.boolean) canvasClicked(); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
 <table id="scores">
@@ -219,7 +219,7 @@ localStorage.setItem("storedName", name);
   var screen = [];
   var figuresUnlocked = 3;
   var totalFigures = 10;
-  var figureXP = {have: 0, needed: [3333, 4444, 4444, 5555, 7777, 8888, 9999]};
+  var figureXP = {have: 0, needed: [3333*30, 4444*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30]};
   var figuresUsed = [];
   var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
@@ -234,15 +234,19 @@ localStorage.setItem("storedName", name);
       angle: 0
     }]
   }*/];
+  var figuresUnlockedGot = false;
   function changeName(nameSelected) {
     if (!nameSelected) name = prompt ("Mit welchem Namen wollen sie sich eingloggen?");
     nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
-    var figuresUnlockedGot = false;
+    figuresUnlockedGot = false;
     dbGet("scrollingBall", "figuresUnlocked " + name).then(result => {
       figuresUnlocked = result;
       numberFigures.value = figuresUnlocked;
       figuresUnlockedGot = true;
-    });
+    }).catch(function(e) {
+      console.error(e);
+      if (e.message.includes("nicht gefunden")) figuresUnlockedGot = true;
+    });;
     dbGet("scrollingBall", "figureXP " + name).then(result => {
       figureXP = result;
     });
@@ -261,7 +265,7 @@ localStorage.setItem("storedName", name);
 //  beginnRound();
   var countdownInt;
   function addXP(beginningXP, finishedXP) {
-    figureXP.have += 3;
+    figureXP.have += 30;
     try {
       Bild = new Image();
       Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + (figuresUnlocked) + ".png";
@@ -280,7 +284,7 @@ localStorage.setItem("storedName", name);
       }
       if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
         figuresUnlocked++;
-        numberFigures = figuresUnlocked;
+        numberFigures.value = figuresUnlocked;
         figureXP.have = 0;
       }
       else if (figureXP.have < finishedXP) {
@@ -340,7 +344,7 @@ else if (gerät == "PC") {
   function beginnRound(resetNoLive) {
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
-      if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved - 852)));
+      if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
       else {
         showScores(highscores, modeSelection.value);
         var time = 3000;
@@ -382,7 +386,7 @@ else if (gerät == "PC") {
   }
   var randomNumber = 0;
   function selectNewFigure(i) {
-    var figuresUnlocked = JSON.parse(numberFigures.value);
+    var figuresUnlocked = JSON.parse(document.getElementById('numberFigures').value);
     if (figuresUsed.length == figuresUnlocked || (modeSelection.value == "training" && figuresUsed.length == figuresSelected)) figuresUsed = [];
     randomNumber = Math.round(Math.random()*(figuresUnlocked - 1));
     if ((figuresUsed.includes(randomNumber)) || (modeSelection.value == "training" && figuresTraining[randomNumber] != true)) selectNewFigure();
@@ -459,9 +463,10 @@ else if (gerät == "PC") {
       rotateInt = setInterval(rotateCanvas, 50);
       i2 = 0;
     }
-    if (speed > 0) pixelMoved += speed;
-    else pixelMoved -= speed;
-    if (pixelMoved == 852*1) {shield = false;}
+    if (speed > 0 && !shield) pixelMoved += speed;
+    // else pixelMoved -= speed;
+    if (screen[3].link.includes("Start") && screen[3].y > 711) shield = false;
+    // if (pixelMoved == 852*1) {shield = false;}
     // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
     for (var i = 0; i < screen.length && countdown.length == 0; i++) {
       screen[i].y += direction.direction*speed;
@@ -625,12 +630,12 @@ else if (gerät == "PC") {
         else beginnTraining.style.display = "none";
       }
     }
-    if (/*modeSelection.value != "trining" */beginnTraining.style.display == "none" && !pause.boolean && pixelMoved > 400) {
+    if (/*modeSelection.value != "trining" */beginnTraining.style.display == "none" && !pause.boolean && countdown.length == 0) {
       pause.boolean = true;
       pause.speed = speed;
       speed = 0;
     }
-    else if (/*mode.Selection.value != "trining"*/ beginnTraining.style.display == "none" && pixelMoved > 400) {
+    else if (/*mode.Selection.value != "trining"*/ beginnTraining.style.display == "none" && countdown.length == 0) {
       pause.boolean = false;
       pause.onCountDown = true;
       clearInterval(countdownInt);
