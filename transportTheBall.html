@@ -13,7 +13,10 @@
 </select>
 <br>
 <select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
-<button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
+<select id="checkpointSelection" onchange="checkpointSelected(value);">
+
+</select>
+<button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before (checkpoint will be removed)</button>
 <br>
 <button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <div id="ball">
@@ -492,8 +495,8 @@ localStorage.setItem("storedName", name);
     if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
       for (var i1 = 1; i1 < Object.keys(level[Object.keys(level)[i]]).length + 1; i1++) {
         if (!level[Object.keys(level)[i]][i1].sizes) level[Object.keys(level)[i]][i1].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
-        if (!level[Object.keys(level)[i]][i1].bounceUpDown) level[Object.keys(level)[i]][i1].bounceUpDown = 5;
-        if (!level[Object.keys(level)[i]][i1].bounceleftRight) level[Object.keys(level)[i]][i1].bounceleftRight = 2;
+        if (!level[Object.keys(level)[i]][i1].bounceUpDown) level[Object.keys(level)[i]][i1].bounceUpDown = 3;
+        if (!level[Object.keys(level)[i]][i1].bounceleftRight) level[Object.keys(level)[i]][i1].bounceleftRight = 10;
         if (!level[Object.keys(level)[i]][i1].checkpointWhen_touches) level[Object.keys(level)[i]][i1].checkpointWhen_touches = "ball";
         if (!level[Object.keys(level)[i]][i1].spawnPoint) level[Object.keys(level)[i]][i1].spawnPoint =     {
                     schieber: {
@@ -511,6 +514,8 @@ localStorage.setItem("storedName", name);
   level.slide[1].slidestop = 16;
   getDatabase();
 function getDatabase() {
+  dbGet("transportTheBall", "checkpoints " + name).then(result => {
+    checkpoints = JSON.parse(result)
   dbGet("transportTheBall", "highscores").then(result => {
     highscores = JSON.parse(result);
     for (var i = 0; i < Object.keys(level).length; i++) {
@@ -524,11 +529,15 @@ function getDatabase() {
     levelSelector.style.display = "none";
     modeSelected("normal");
   });
-  dbGet("transportTheBall", "checkpoints " + name).then(result => {
-    checkpoints = JSON.parse(result)
-  }).catch(function(e) {
-      console.log(e);
-  });
+}).catch(function(e) {
+  console.log(e);
+});
+}
+function checkpointSelected(value) {
+  if (value.includes(".")) checkpoint.push(JSON.parse(JSON.stringify(checkpoint[value.split(".")[0]])));
+  else checkpoint.push(JSON.parse(JSON.stringify(checkpoint[0])));
+  // checkpoint[checkpoint.length - 1].notListed = true;
+  restartLevel();
 }
   var direction = "long";
   var Bild = new Image();
@@ -729,6 +738,21 @@ function getDatabase() {
     }, 25);
   }
   var scrollingInterac = {user: false, PC: false}
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+    scrollingInterac.user = true;
+  }
   var invisible = {directions: {left: 0, right: 0, up: 0, down: 0}, boolean: false};
   var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
   var timeDirection = {
@@ -928,12 +952,12 @@ function getDatabase() {
     }).catch(function(e) {
       addToHighscore(nextLevel);
     });
-  if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != level[level.mode][level.aktuell].spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != level[level.mode][level.aktuell].spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != level[level.mode][level.aktuell].spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != level[level.mode][level.aktuell].spawnPoint.ball.y*/) {
-    checkpoints[level.mode].splice(level.aktuell, 1);
-    setTimeout(function () {
-      if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
-    }, 1000);
-  }
+  // if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != level[level.mode][level.aktuell].spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != level[level.mode][level.aktuell].spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != level[level.mode][level.aktuell].spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != level[level.mode][level.aktuell].spawnPoint.ball.y*/) {
+  //   checkpoints[level.mode].splice(level.aktuell, 1);
+  //   setTimeout(function () {
+  //     if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+  //   }, 1000);
+  // }
   }
   function onTeleporter() {
     var onTeleporterObj = {schieber: false, ball: false, checkpoint: false}
@@ -980,12 +1004,12 @@ function getDatabase() {
 
   }
   else {
-    time = 32;
+    time = 13;
   }
     time++;
     sphere.ball.style.left = ball.x + "px";
     sphere.ball.style.top = ball.y + "px";
-    if (time < 33) {
+    if (time < 15) {
       setTimeout(function () {
         bounceBall(direction, time + 1);
       }, 27);
@@ -1065,7 +1089,22 @@ function getDatabase() {
     height: 50
   };
 
-  function restartLevel() {
+  function restartLevel(value) {
+    var valueBefore = checkpointSelection.value;
+    // if (valueBefore == "" && checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) valueBefore = (checkpoints[level.mode][level.aktuell].length - 1) + ". checkpoint";
+    if (valueBefore == "") valueBefore = "start";
+    while (document.getElementById('checkpointSelection').options.length > 0) {
+      document.getElementById('checkpointSelection').options[0] = undefined;
+    }
+    for (var i = 0; checkpoints[level.mode] && checkpoints[level.mode][level.aktuell] && i < checkpoints[level.mode][level.aktuell].length; i++) {
+      opt = document.createElement("option");
+      document.getElementById("checkpointSelection").options.add(opt);
+      if (i > 0) opt.text = i + ". checkpoint";
+      else opt.text = "start";
+    }
+    checkpointSelection.value = valueBefore;
+    if (document.getElementById('checkpointSelection').options.length > 0 && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length] && highscores[level.mode][Object.keys(level[level.mode]).length][name]) checkpointSelection.style.display = 'inline';
+    else checkpointSelection.style.display = 'none';
     x1 = checkpoint[checkpoint.length - 1].schieber.x;
     y1 = checkpoint[checkpoint.length - 1].schieber.y;
     ball.x = checkpoint[checkpoint.length - 1].ball.x;
@@ -1221,7 +1260,7 @@ function getDatabase() {
     if (running == 0) startPause();
     else time = 0;
     setupLevel();
-    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {checkpoint = checkpoints[level.mode][level.aktuell]; time = checkpoint[checkpoint.length - 1].timeNeededToReach;}
+    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {checkpoint = JSON.parse(JSON.stringify(checkpoints[level.mode][level.aktuell])); time = checkpoint[checkpoint.length - 1].timeNeededToReach;}
   }
   if (level[level.mode][level.aktuell].rotating) requestAnimationFrame(renderLoop);
   }
