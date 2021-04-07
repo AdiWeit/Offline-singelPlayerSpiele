@@ -255,7 +255,43 @@ localStorage.setItem("storedName", name);
         }
       }
       ]
+    },
+    5: {
+      spawnPoint: {
+        schieber: {
+          x: 300,
+          y: 600
+        },
+        ball: {
+          x: 440,
+          y: 500
+        }
       }
+    },
+    6: {
+      spawnPoint: {
+        schieber: {
+          x: 70,
+          y: 120
+        },
+        ball: {
+          x: 100,
+          y: 199
+        },
+        rotating: [{
+          shape: "rectangle",
+          position: {
+            x: 500,
+            y: 355
+          },
+          miliSecsPerRotation: 11111,
+          sizeRelationToOriginal: 1,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+      }
+    }
     },
     slide: {
       2: {
@@ -391,7 +427,7 @@ localStorage.setItem("storedName", name);
         height: 50
       }
     },
-      }
+  },
     }
 
   };
