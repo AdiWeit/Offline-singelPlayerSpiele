@@ -61,6 +61,12 @@ for (var i = 0; i < board.length; i++) {
 }
 ctx[i] = document.getElementById("shop").getContext("2d");
 drawBoard();
+for (var i = 0; i < PIECES.length; i++) {
+  shopTiles.forcedTiles[i].draw();
+}
+for (var i = 0; i < addTiles.length; i++) {
+  shopTiles.fillTiles[i].draw();
+}
 CONTROL({key:"p"});
 }
 
@@ -214,11 +220,11 @@ Piece.prototype.moveLeft = function(){
 }
 
 // rotate the piece
-Piece.prototype.rotate = function(){
+Piece.prototype.rotate = function(/*checkCollision*/){
     let nextPattern = this.tetromino[(this.tetrominoN + 1)%this.tetromino.length];
     let kick = 0;
 
-    if(this.collision(0,0,nextPattern)){
+    if(this.collision(0,0,nextPattern)/* && checkCollision*/){
         if(this.x > COL/2){
             // it's the right wall
             kick = -1; // we need to move the piece to the left
@@ -228,7 +234,7 @@ Piece.prototype.rotate = function(){
         }
     }
 
-    if(!this.collision(kick,0,nextPattern)){
+    if(!this.collision(kick,0,nextPattern)/* || !checkCollision*/){
         this.unDraw();
         this.x += kick;
         this.tetrominoN = (this.tetrominoN + 1)%this.tetromino.length; // (0+1)%4 => 1
@@ -345,26 +351,19 @@ Piece.prototype.collision = function(x,y,piece){
     return false;
 }
 
-for (var i = 0; i < PIECES.length; i++) {
-  shopTiles.forcedTiles[i].draw();
-}
-for (var i = 0; i < addTiles.length; i++) {
-  shopTiles.fillTiles[i].draw();
-}
-
 // CONTROL the piece
 
 document.addEventListener("keydown",CONTROL);
 var pause = true;
 function CONTROL(event){
-  if (!pause && event.key != "p") viewImage();
+  viewImage();
   for (var i = 0; i < board.length; i++) {
     if(event.keyCode == 37 && !pause){
         p[p.length - 1 - i].moveLeft();
         dropStart = Date.now();
     }else if(event.keyCode == 38){
       if (!fillStone) {
-        p[p.length - 1 - i].rotate();
+        p[p.length - 1 - i].rotate(/*true*/);
         dropStart = Date.now();
       }
       else if (i == board.length - 1) {
@@ -546,7 +545,7 @@ function shopClicked() {
       fillStone = "in prep";
       if (points >= requiredPoints.forcedTiles[i]) {
       var board = prompt('Für das wievielte Spielbrett wollen sie den nächsten Stein (als ' + PIECES[i][1] + ') festlegen? Sie verlieren dabei ' + requiredPoints.forcedTiles[i] + ' Punkte! Wenn sie sich verklickt haben, klicken sie bitte auf "abbrechen"');
-      if (board && !isNaN(board)) {
+      if (board && board > 0 && board < ctx.length/* && !isNaN(board)*/) {
           points -= requiredPoints.forcedTiles[i];
           document.getElementById("points").innerHTML = points;
           nextStone[board - 1] = i;
@@ -558,7 +557,7 @@ function shopClicked() {
       fillStone = "in prep";
       if (points >= requiredPoints.fillTiles[i]) {
       var board = prompt('In das wievielte Spielbrett wollen sie den Stein einsetzen?');
-      if (confirm("Sind sie sich sicher, dass sie " + requiredPoints.fillTiles[i] + " Punkte für den ausgewählten Stein (" + addTiles[i][1] + ") zum Einsetzen bezahlen wollen?")) {
+      if (ctx[board - 1] && board < ctx.length && confirm("Sind sie sich sicher, dass sie " + requiredPoints.fillTiles[i] + " Punkte für den ausgewählten Stein (" + addTiles[i][1] + ") zum Einsetzen bezahlen wollen?")) {
         pause = true;
         points -= requiredPoints.fillTiles[i];
         document.getElementById("points").innerHTML = points;
