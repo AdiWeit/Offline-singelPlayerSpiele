@@ -36,7 +36,8 @@
 </body>
 
 </html>
-<canvas id="textur" class="textur" width="852" onclick="canvasClicked();" height="752"></canvas>
+<canvas id="textur" class="textur" width="426" onclick="canvasClicked();" height="752"></canvas>
+<canvas id="statisticTextur" style="position:absolute; right:3px; top: 5px"></canvas>
 <br>
 <select name="course" id="modeSelection" value="autoScroll" onchange="modeSelected(value);">
   <option value="autoScroll">auto scrolling</option>
@@ -49,7 +50,7 @@
   <button type="button" id="beginnTraining" onclick="style.display = 'none'; setInterval(moveUp, 10); beginnRound();" name="button">beginn</button>
   <br>
   <h1>change speed: </h1>
-  <input type="range" min="1" onchange="speed=value/10;" max="10" value="10" class="slider" id="sliderSpeed">
+  <input type="range" min="1" oninput="speed=value/10;" max="10" value="10" class="slider" id="sliderSpeed">
   <button type="button" id="backToNormal" onclick="sliderSpeed.value = 10" name="button">back to normal</button>
 </div>
 <br>
@@ -79,6 +80,8 @@ Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked)
 </table>
 <h1 id="nameEingeloggt" onclick='changeName();'></h1>
 <script>
+statisticTextur.height = window.innerHeight;
+statisticTextur.width = window.innerWidth - textur.width - 37;
 if (navigator.userAgent.match(/Android/i) ||
 navigator.userAgent.match(/webOS/i) ||
 navigator.userAgent.match(/iPhone/i) ||
@@ -165,10 +168,13 @@ console.log("PC");
     if (!highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] && modeSelection.value != "training") highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] = {1: 0, 2: 0, 3: 0};
     else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
+      for (var screenNow of screen) {
+        if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) screenNow.damageless = false;
+      }
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now]) {
-        highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved - 852);
+        highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved);
         dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
       //  document.getElementById('newHighscore').style.display = "inline";
       Bild = new Image();
@@ -218,22 +224,135 @@ localStorage.setItem("storedName", name);
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
   var figuresUnlocked = 3;
-  var totalFigures = 10;
+  var totalFigures = 13;
   var figureXP = {have: 0, needed: [3333*30, 4444*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30]};
   var figuresUsed = [];
   var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
       scores.style.display = "none";
       beginnTraining.style.display = "none";
-  var objectives = [,,,,/*{
-    rotatingViereck: [{
-      x: 250,
-      y: 100,
-      width: 100,
-      height: 100,
-      angle: 0
-    }]
-  }*/];
+  var objectives = [,,,,,,,,,,{
+    shape: "rectangle",
+    position: {
+      x: 213,
+      y: 376/2
+    },
+    // angle: 33,
+    miliSecsPerRotation: 7777,
+    sizeRelationToOriginal: 1.5
+    // heart: {
+    //   onceInMiliSec: 3333
+    // }
+  },
+  {
+    shape: "triangle",
+    position: {
+      x: 213,
+      y: 376/2
+    },
+    // angle: 33,
+    miliSecsPerRotation: 7777,
+    sizeRelationToOriginal: 1.5
+    // heart: {
+    //   onceInMiliSec: 3333
+    // }
+  },
+  {
+    shape: "smallRectangle",
+    position: {
+      x: 213,
+      y: 376/2 - 17
+    },
+    // angle: 33,
+    miliSecsPerRotation: 7777,
+    sizeRelationToOriginal: 1.9
+    // heart: {
+    //   onceInMiliSec: 3333
+    // }
+  }
+];
+  // transform points to forms:
+  var point = (x, y) => ({x, y});
+  var doneShapes = {
+    triangle: createPath(point(0,-25), point(-50,-75), point(-100,-25)),
+    rectangle: createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125)),
+    smallRectangle: createPath(point(0,-13), point(-50,-13), point(-50,-20), point(0,-20)),
+  }
+  var pointShapes = [];
+  /*for (var i = 0; i < objectives.length; i++) {
+    for (var i1 = 0; i1 < objectives[i].points.length; i1++) {
+      if (objectives[i].points[i1].shape == "thing") {
+      var points = [];
+      for (var i2 = 0; i2 < objectives[i].points[i1].points.length; i2++) {
+        points.push(point(objectives[i].points[i1].points[i2].x, objectives[i].points[i1].points[i2].y));
+      }
+      if (points[1] && !points[2]) pointShapes.push({path: createPath(points[0], points[1]), position: objectives[i].points[i1].position, angle: objectives[i].points[i1].angle, miliSecsPerRotation: objectives[i].points[i1].miliSecsPerRotation, onceInMiliSec: objectives[i].heart.onceInMiliSec, sizeRelationToOriginal: objectives[i].sizeRelationToOriginal});
+      if (points[2] && !points[3]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: objectives[i].points[i1].position, angle: objectives[i].points[i1].angle, miliSecsPerRotation: objectives[i].points[i1].miliSecsPerRotation, onceInMiliSec: objectives[i].heart.onceInMiliSec, sizeRelationToOriginal: objectives[i].sizeRelationToOriginal});
+      if (points[3] && !points[4]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: objectives[i].points[i1].position, angle: objectives[i].points[i1].angle, miliSecsPerRotation: objectives[i].points[i1].miliSecsPerRotation, onceInMiliSec: objectives[i].heart.onceInMiliSec, sizeRelationToOriginal: objectives[i].sizeRelationToOriginal});
+
+    }
+    }
+  }*/
+  // rotating shapes:
+  function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
+      canvas.setTransform(scale, 0, 0, scale, x, y);
+      canvas.rotate(angle);
+      fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
+      strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
+  }
+  function renderLoop(time) {
+      //canvas.clearRect(0, 0, textur.width, textur.height);
+      var scale = Math.sin(time / 500) * 0.2 + 1.0;
+      var scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+      var miliSecsPerRotation = 2222;
+      var angle = 0;
+      var sizeRelationToOriginal = 1.0;
+      var screenIncludes = false;
+      for (var i = 0; i < screen.length; i++) {
+        if (!screen[i].link.includes("Start") && objectives[screen[i].link.split(".png")[0].split("/schema")[1]]) {
+          var objective = JSON.parse(JSON.stringify(objectives[screen[i].link.split(".png")[0].split("/schema")[1]]));
+          screenIncludes = true;
+        if (objective.angle) angle = objective.angle;
+        if (objective.miliSecsPerRotation) miliSecsPerRotation = objective.miliSecsPerRotation;
+        if (objective.sizeRelationToOriginal) sizeRelationToOriginal = objective.sizeRelationToOriginal;
+        scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+        if (objective.heart && objective.heart.onceInMiliSec) scale2 = Math.cos(time / objective.heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+        else scale2 = sizeRelationToOriginal;
+        // if (objective.shape && objective.shape == "triangle") drawPath_V2(triangle, screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
+        drawPath_V2(doneShapes[objective.shape], screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
+      }
+    }
+      for (var i = 0; i < pointShapes.length; i++) {
+        if (pointShapes[i].angle) angle = pointShapes[i].angle;
+        if (pointShapes[i].miliSecsPerRotation) miliSecsPerRotation = pointShapes[i].miliSecsPerRotation;
+        if (pointShapes[i].sizeRelationToOriginal) sizeRelationToOriginal = pointShapes[i].sizeRelationToOriginal;
+        if (pointShapes[i].onceInMiliSec) scale2 = Math.cos(time / pointShapes[i].onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+        drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black");
+      }
+      // fill scale path
+      // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
+
+      canvas.setTransform(1, 0, 0, 1, 0, 0);
+      if (screenIncludes) requestAnimationFrame(renderLoop);
+  }
+
+
+  function createPath(...points) {
+      var cx = 0; cy = 0;
+      for (const p of points) {
+          cx += p.x;
+          cy += p.y;
+      }
+      cx /= points.length;
+      cy /= points.length;
+
+      const path = new Path2D;
+      for (const p of points) {
+          path.lineTo(p.x - cx , p.y - cy);
+      }
+      path.closePath();
+      return path;
+  }
   var figuresUnlockedGot = false;
   function changeName(nameSelected) {
     if (!nameSelected) name = prompt ("Mit welchem Namen wollen sie sich eingloggen?");
@@ -318,7 +437,7 @@ localStorage.setItem("storedName", name);
     if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5;}
     else if (modeSelection.value == "scrollWaagerecht") {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5}
     else {direction = {direction: 1 /*beginning: pixelMoved,*/}; speed = 1;};
-  textur.width = 852;
+  // textur.width = 852;
   scores.style.display = "none";
   countdown = [3,2,1,"Go!", "reallyGo!"];
   figuresUsed = [];
@@ -342,6 +461,11 @@ else if (gerät == "PC") {
 }
   }
   function beginnRound(resetNoLive) {
+    if (modeSelection.value == "training") {
+      statistics["training"] = {};
+      statisticTextur.style.display = "inline";
+      textur.width = 426;
+    }
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
       if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
@@ -353,7 +477,7 @@ else if (gerät == "PC") {
           beginnRoundP2(resetNoLive);
         }, time);
       }
-      // figureXP.have += (Math.round(pixelMoved - 852));
+      // figureXP.have += (Math.round(pixelMoved));
   }
   function countdownFunction() {
     if (/*modeSelection.value != "training" || */beginnTraining.style.display == "none") {
@@ -366,7 +490,7 @@ else if (gerät == "PC") {
     }, 1000);
   }
     canvas.font = "70px Georgia";
-    canvas.fillText(countdown[0], 852/3, 752/2);
+    canvas.fillText(countdown[0], 426/2, 752/2);
     countdown.shift();
   }
   }
@@ -377,19 +501,24 @@ else if (gerät == "PC") {
     lives.beginning = JSON.parse(value);
     beginnRound();
   }
+  var statistics = {training: {}, autoScroll: {}, againstThePC: {}, scrollWaagerecht: {}};
   function createNewFigure (i, x, resetNoLive) {
+    setTimeout(function () {
+      /*if (speed != 0 && level[level.mode][level.aktuell].rotating) */requestAnimationFrame(renderLoop);
+    }, 1);
     if (!resetNoLive || modeSelection.value != "training") {
-    if (modeSelection.value != "scrollWaagerecht" || direction.stringDirection == "up" || direction.stringDirection == "left" || direction.stringDirection == undefined) return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: x, y: 376 - i*376, notRight: true};
+    if (modeSelection.value != "scrollWaagerecht" || direction.stringDirection == "up" || direction.stringDirection == "left" || direction.stringDirection == undefined) return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0, figuresUnlocked) + ".png", x: x, y: 376 - i*376, notRight: true, damageless: true};
     else if (direction.stringDirection == "right" && modeSelection.value == "scrollWaagerecht") return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y:  376*2};
     else return {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + selectNewFigure(0) + ".png", x: 0, y: -(376)*2 + i*376};
   }
   }
   var randomNumber = 0;
-  function selectNewFigure(i) {
+  function selectNewFigure(i, figUnlocked) {
     var figuresUnlocked = JSON.parse(document.getElementById('numberFigures').value);
+    if (modeSelection.value == "training") figuresUnlocked = figUnlocked;
     if (figuresUsed.length == figuresUnlocked || (modeSelection.value == "training" && figuresUsed.length == figuresSelected)) figuresUsed = [];
     randomNumber = Math.round(Math.random()*(figuresUnlocked - 1));
-    if ((figuresUsed.includes(randomNumber)) || (modeSelection.value == "training" && figuresTraining[randomNumber] != true)) selectNewFigure();
+    if ((figuresUsed.includes(randomNumber)) || (modeSelection.value == "training" && figuresTraining[randomNumber] != true)) selectNewFigure(null, figuresUnlocked);
     if (i == 0) figuresUsed.push(randomNumber);
     if (i == 0) return randomNumber
   }
@@ -420,10 +549,13 @@ else if (gerät == "PC") {
   }
   var moveUpInt;
   function modeSelected(value) {
+    // TODO:
+    if (value == "scrollWaagerecht") statisticTextur.style.display = "none";
+    else statisticTextur.style.display = "inline";
     clearInterval(moveUpInt);
     visible([["trainingHTMLElements", "none"], ["showHighscores", "inline"], ["textBoxLives", "inline"], ["textTextBoxLives", "inline"]]);
     if (value != /*"scrollWithBall"*/"training") {moveUpInt = setInterval(moveUp, 10);  beginnRound();}
-    else {showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["textBoxLives", "none"], ["textTextBoxLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
+    else {statisticTextur.style.display = "none"; showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["textBoxLives", "none"], ["textTextBoxLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
     }
   var speed = 1;
   var pixelMoved = 0;
@@ -465,14 +597,14 @@ else if (gerät == "PC") {
     }
     if (speed > 0 && !shield) pixelMoved += speed;
     // else pixelMoved -= speed;
-    if (screen[3].link.includes("Start") && screen[3].y > 711) shield = false;
+    if (screen[3].link.includes("Start") && screen[3].y > 711 && screen[3].y < 715) shield = false;
     // if (pixelMoved == 852*1) {shield = false;}
     // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
     for (var i = 0; i < screen.length && countdown.length == 0; i++) {
       screen[i].y += direction.direction*speed;
-      for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
-        objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += direction.direction*speed;
-      }
+      // for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
+      //   objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]][Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]])[i1]].y += direction.direction*speed;
+      // }
       // if (modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "right" && screen[i].y < -376 && screen[i].notRight) {
       //   screen[i].y += 1504/2;
       //   screen[i].notRight = undefined;
@@ -482,11 +614,11 @@ else if (gerät == "PC") {
       //   screen[i].notRight = true;
       // }
       if (screen[i].y > 752 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {
-        screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+        addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
         if (speed != 0 && screen[i].y <= /*-876 - 426*//*-1229*/-752/*376*/ && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {
-          screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+          addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
         else if ((screen[i].y > 752 && modeSelection.value != "againstThePC") && !(modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "right")) {
-        screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
+        addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
       // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
@@ -496,6 +628,42 @@ else if (gerät == "PC") {
     }
   }
 }
+  function addToStatistic(i) {
+    if (pixelMoved > 0 && !screen[i].link.includes("Start") && !statistics[modeSelection.value][screen[i].link]) statistics[modeSelection.value][screen[i].link] = {streak: 0, right: 0, wrong: 0};
+    if (pixelMoved > 0 && !screen[i].link.includes("Start") && screen[i].damageless) {
+      statistics[modeSelection.value][screen[i].link].right++;
+      statistics[modeSelection.value][screen[i].link].streak++;
+    }
+    else if (pixelMoved > 0 && !screen[i].link.includes("Start"))  {
+      statistics[modeSelection.value][screen[i].link].streak = 0;
+      statistics[modeSelection.value][screen[i].link].wrong++;
+    }
+    showStatistic();
+    setTimeout(function () {
+      showStatistic();
+    }, 100);
+  }
+  var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
+  function showStatistic() {
+    statisticCanvas.clearRect(0, 0, statisticTextur.width, statisticTextur.height);
+    var yPlus = 0;
+    var x = 0;
+    for (var i = 0; i < Object.keys(statistics[modeSelection.value]).length; i++) {
+      if (x*110 + 100 > statisticTextur.width) {
+        yPlus += 25*3 + 110;
+        x = 0;
+      }
+      var img = new Image();
+      img.src = Object.keys(statistics[modeSelection.value])[i];
+      statisticCanvas.drawImage(img, x*110, yPlus, 100, 100);
+      statisticCanvas.font = "25px Georgia";
+      for (var i1 = 0; i1 < Object.keys(statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]]).length; i1++) {
+        var text = Object.keys(statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]])[i1];
+        statisticCanvas.fillText(text + ":" + statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]][text], x*110, 123 + 27*i1 + yPlus);
+      }
+      x++;
+    }
+  }
   //var angle = 30;
   var rotateInt;
   var checkTurnedInt;
@@ -535,21 +703,7 @@ else if (gerät == "PC") {
       clearInterval(checkTurnedInt);
     }
   }
-  function rotatingViereck() {
-    for (var i = 0; i < screen.length; i++) {
-      if (objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined) {
-        for (var i1 = 0; i1 < objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck.length; i1++) {
-          canvas.fillStyle = "black";
-          canvas.fillRect(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].x, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].y, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].width, objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].height);
-          canvas.save();
-          canvas.translate(100, 100);
-          canvas.rotate(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].angle * Math.PI / 180)
-          canvas.restore();
-          objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]].rotatingViereck[i1].angle++;
-        }
-      }
-  }
-  }
+
   var highscoresDisplayedBefore = {};
   function showScores(highscores, mode) {
     scores.style.display = "inline";
@@ -622,7 +776,7 @@ else if (gerät == "PC") {
     for (var i = 0; i < figuresUnlocked; i++) {
       // canvas.drawImage(Bild, 10 + 477*i, 10);
       // canvas.fillRect(477*i, 0, 444 + 5, 400);
-      if (mausx > 10 + 477*i && mausx < 10 + 477*i + 444 && mausy < 400 && modeSelection.value == "training") {
+      if (mausx > 10 + 477*i && mausx < 10 + 477*i + 444 && mausy < 400 && modeSelection.value == "training" && textur.width > 477) {
         if (figuresTraining[i] != undefined && figuresTraining[i] != false) {figuresTraining[i] = false; figuresSelected--;}
         else {figuresTraining[i] = true; figuresSelected++;}
         showUnlockedElements(0);
