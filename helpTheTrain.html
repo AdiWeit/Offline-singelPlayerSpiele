@@ -69,6 +69,11 @@ play train audio<input onchange="playTrainAudio(true);" checked="true" id="train
 <br>
 use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="fastTrainAudio" type="checkbox">
 <script>
+  var alertWhenFinishedSaving = true;
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   textur.style.display = "none";
   document.getElementById('highscoresBetterThanYours').style.color = "red"
   document.getElementById('highscoresWorseThanYours').style.color = "green";
@@ -652,7 +657,7 @@ function moveTrain() {
         }
         if (cameraMovements > 1) {
           scrollingInterac.PC = true;
-          document.body.style.zoom -= 0.1;
+          document.body.style.zoom -= 0.01;
         }
       }
       var scrollPosition = {x: train[i].position.x, y: train[i].position.y};
@@ -810,6 +815,10 @@ setInterval(function () {
     dbSet("helpTheTrain", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
     dbSetWarteschlange.shift();
   }
+  else if (alertWhenFinishedSaving) {
+  alert("Saving finished! You can now leave the website!");
+  alertWhenFinishedSaving = false;
+}
 }, 2222);
 function changeDirection(i) {
   var oppositeDirection = {right: "left", left: "right", down: "up", up: "down"};
