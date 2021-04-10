@@ -548,6 +548,11 @@ localStorage.setItem("storedName", name);
     }
   }
   level.slide[1].slidestop = 16;
+  var alertWhenFinishedSaving = false;
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   getDatabase();
 function getDatabase() {
   dbGet("transportTheBall", "checkpoints " + name).then(result => {
@@ -772,6 +777,10 @@ function checkpointSelected(value) {
       sphere.ball.style.top = ball.y + "px";
       checkColourCollisions();
     }, 25);
+  }
+  else if (gerät == "Handy") {
+    alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
+    gerät = "unsaveHandyBrowser";
   }
   var scrollingInterac = {user: false, PC: false}
   if (navigator.userAgent.match(/Android/i) ||
@@ -1024,6 +1033,10 @@ function checkpointSelected(value) {
     if (dbSetWarteschlange.length > 0) {
       dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
     }
   }, 2222);
   function bounceBall(direction, time) {

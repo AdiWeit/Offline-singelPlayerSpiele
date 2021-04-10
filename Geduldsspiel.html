@@ -110,7 +110,10 @@
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
   <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
   <script type="text/javascript">
-
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   visible([
     // ['ballStyleSelection', "none"],
     ['colourPicker', "none"]
@@ -1000,6 +1003,10 @@ function ballColourChanged (value) {
         dbSet("Geduldspiel", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
         dbSetWarteschlange.shift();
       }
+      else if (alertWhenFinishedSaving) {
+        alert("Saving finished! You can now leave the website!");
+        alertWhenFinishedSaving = false;
+      }
     }, 2222);
     function folgenDbGetLevelBy(result, offline) {
 
@@ -1356,6 +1363,21 @@ function ballColourChanged (value) {
         document.getElementById('textur').style.display = "inline";
       }, 500);
     }
+    if (navigator.userAgent.match(/Android/i) ||
+      navigator.userAgent.match(/webOS/i) ||
+      navigator.userAgent.match(/iPhone/i) ||
+      navigator.userAgent.match(/iPad/i) ||
+      navigator.userAgent.match(/iPod/i) ||
+      navigator.userAgent.match(/BlackBerry/i) ||
+      navigator.userAgent.match(/Windows Phone/i)
+    ) {
+      var gerät = "Handy"
+      console.log("Handy");
+    } else {
+      var gerät = "PC"
+      console.log("PC");
+      scrollingInterac.user = true;
+    }
     if (window.DeviceMotionEvent != undefined) {
       window.ondevicemotion = function(e) {
         ax1 = inOrAgainstDirection*event.accelerationIncludingGravity.x * 5;
@@ -1438,7 +1460,10 @@ function ballColourChanged (value) {
         }
       }, 25);
     }
-
+    else if (gerät == "Handy") {
+      alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
+      gerät = "unsaveHandyBrowser";
+    }
     function testLevel() {
       if (document.getElementById('testLevel').innerHTML == "test Level") {
         level[level.mode].editLevel["Test"] = level[level.mode].editHistory[level[level.mode].stepOfHistory];

@@ -25,6 +25,11 @@
 </div>
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
 <script>
+  var alertWhenFinishedSaving = true;
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   checkpointSelector.style.display = " none";
   function levelSelected(value) {
     configLevel(level.mode, value.toString().split('. level')[0]);
@@ -564,6 +569,21 @@ localStorage.setItem("storedName", name);
     }
     if (scrollY == 0 && scrollX == 0) scrollingInterac.user = false;
   }
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+    scrollingInterac.user = true;
+  }
   // ball
   sphere1.style.width = "50px";
   sphere1.style.height = "50px";
@@ -672,6 +692,10 @@ localStorage.setItem("storedName", name);
         }
       }
     }, 25);
+  }
+  else if (gerät == "Handy") {
+  alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
+  gerät = "unsaveHandyBrowser";
   }
   var highestAngle = 0;
   function resetLevel() {
@@ -901,6 +925,10 @@ localStorage.setItem("storedName", name);
     if (dbSetWarteschlange.length > 0) {
       dbSet("saveTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
     }
   }, 2222);
 
