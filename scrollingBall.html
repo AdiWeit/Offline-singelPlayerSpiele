@@ -80,6 +80,11 @@ Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked)
 </table>
 <h1 id="nameEingeloggt" onclick='changeName();'></h1>
 <script>
+var alertWhenFinishedSaving = false;
+window.onbeforeunload = function(){
+console.log("Leave Website");
+  if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
 statisticTextur.height = window.innerHeight;
 statisticTextur.width = window.innerWidth - textur.width - 37;
 if (navigator.userAgent.match(/Android/i) ||
@@ -224,14 +229,14 @@ localStorage.setItem("storedName", name);
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
   var figuresUnlocked = 3;
-  var totalFigures = 13;
+  var totalFigures = 15;
   var figureXP = {have: 0, needed: [3333*30, 4444*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30]};
   var figuresUsed = [];
   var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
       scores.style.display = "none";
       beginnTraining.style.display = "none";
-  var objectives = [,,,,,,,,,,{
+  var objectives = [,,,,,,,,,,[{
     shape: "rectangle",
     position: {
       x: 213,
@@ -243,8 +248,8 @@ localStorage.setItem("storedName", name);
     // heart: {
     //   onceInMiliSec: 3333
     // }
-  },
-  {
+  }],
+  [{
     shape: "triangle",
     position: {
       x: 213,
@@ -256,8 +261,8 @@ localStorage.setItem("storedName", name);
     // heart: {
     //   onceInMiliSec: 3333
     // }
-  },
-  {
+  }],
+  [{
     shape: "smallRectangle",
     position: {
       x: 213,
@@ -269,7 +274,41 @@ localStorage.setItem("storedName", name);
     // heart: {
     //   onceInMiliSec: 3333
     // }
+  }],
+  [{
+    shape: "rectangle",
+    position: {
+      x: 213,
+      y: 376/2
+    },
+    // angle: 33,
+    miliSecsPerRotation: 7777,
+    sizeRelationToOriginal: 1.5,
+    heart: {
+      onceInMiliSec: 777
+    }
+  }],
+  [{
+    shape: "smallRectangle",
+    position: {
+      x: 225,
+      y: 44
+    },
+    // angle: 33,
+    miliSecsPerRotation: 7333,
+    sizeRelationToOriginal: 1.3,
+  },
+  {
+    shape: "smallRectangle",
+    position: {
+      x: 213,
+      y: 376/2
+    },
+    // angle: 33,
+    miliSecsPerRotation: 5000,
+    sizeRelationToOriginal: 4,
   }
+  ]
 ];
   // transform points to forms:
   var point = (x, y) => ({x, y});
@@ -310,7 +349,8 @@ localStorage.setItem("storedName", name);
       var screenIncludes = false;
       for (var i = 0; i < screen.length; i++) {
         if (!screen[i].link.includes("Start") && objectives[screen[i].link.split(".png")[0].split("/schema")[1]]) {
-          var objective = JSON.parse(JSON.stringify(objectives[screen[i].link.split(".png")[0].split("/schema")[1]]));
+          for (var objective of objectives[screen[i].link.split(".png")[0].split("/schema")[1]]) {
+          // var objective = JSON.parse(JSON.stringify(objectives[screen[i].link.split(".png")[0].split("/schema")[1]]));
           screenIncludes = true;
         if (objective.angle) angle = objective.angle;
         if (objective.miliSecsPerRotation) miliSecsPerRotation = objective.miliSecsPerRotation;
@@ -321,6 +361,7 @@ localStorage.setItem("storedName", name);
         // if (objective.shape && objective.shape == "triangle") drawPath_V2(triangle, screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
         drawPath_V2(doneShapes[objective.shape], screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
       }
+    }
     }
       for (var i = 0; i < pointShapes.length; i++) {
         if (pointShapes[i].angle) angle = pointShapes[i].angle;
@@ -425,6 +466,10 @@ localStorage.setItem("storedName", name);
     if (dbSetWarteschlange.length > 0) {
       dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
     }
   }, 2222);
   function beginnRoundP2(resetNoLive) {
@@ -629,39 +674,64 @@ else if (gerät == "PC") {
   }
 }
   function addToStatistic(i) {
-    if (pixelMoved > 0 && !screen[i].link.includes("Start") && !statistics[modeSelection.value][screen[i].link]) statistics[modeSelection.value][screen[i].link] = {streak: 0, right: 0, wrong: 0};
+    if (pixelMoved > 0 && !screen[i].link.includes("Start") && !statistics[modeSelection.value][screen[i].link]) statistics[modeSelection.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
     if (pixelMoved > 0 && !screen[i].link.includes("Start") && screen[i].damageless) {
       statistics[modeSelection.value][screen[i].link].right++;
       statistics[modeSelection.value][screen[i].link].streak++;
+      statistics[modeSelection.value].all.streak++;
+      if (statistics[modeSelection.value][screen[i].link].streak > statistics[modeSelection.value][screen[i].link].longest) statistics[modeSelection.value][screen[i].link].longest++;
+      if (statistics[modeSelection.value].all && statistics[modeSelection.value].all.streak > statistics[modeSelection.value].all.longest) statistics[modeSelection.value].all.longest++;
     }
     else if (pixelMoved > 0 && !screen[i].link.includes("Start"))  {
       statistics[modeSelection.value][screen[i].link].streak = 0;
       statistics[modeSelection.value][screen[i].link].wrong++;
+      statistics[modeSelection.value].all.streak = 0;
     }
     showStatistic();
     setTimeout(function () {
-      showStatistic();
+      showStatistic(true);
     }, 100);
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
-  function showStatistic() {
+  function showStatistic(secondRender) {
     statisticCanvas.clearRect(0, 0, statisticTextur.width, statisticTextur.height);
     var yPlus = 0;
     var x = 0;
+    if (!secondRender) {
+      if (!statistics[modeSelection.value].all) statistics[modeSelection.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
+      statistics[modeSelection.value].all.right = 0;
+      statistics[modeSelection.value].all.wrong = 0;
+    }
     for (var i = 0; i < Object.keys(statistics[modeSelection.value]).length; i++) {
-      if (x*110 + 100 > statisticTextur.width) {
-        yPlus += 25*3 + 110;
+      var srcNow = Object.keys(statistics[modeSelection.value])[i];
+      if (srcNow != "all" || secondRender) {
+      if (x*113 + 100 > statisticTextur.width) {
+        yPlus += 25*Object.keys(statistics[modeSelection.value][srcNow]).length + 113;
         x = 0;
       }
-      var img = new Image();
-      img.src = Object.keys(statistics[modeSelection.value])[i];
-      statisticCanvas.drawImage(img, x*110, yPlus, 100, 100);
+      if (srcNow == "all" && Object.keys(statistics[modeSelection.value]).length > 2) {
+        for (var i1 = 0; i1 < Object.keys(statistics[modeSelection.value]).length; i1++) {
+          if (Object.keys(statistics[modeSelection.value])[i1] != "all") {
+          var img = new Image();
+          img.src = Object.keys(statistics[modeSelection.value])[i1];
+          statisticCanvas.drawImage(img, x*113 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1), 100);
+        }
+        }
+      }
+      else {
+        var img = new Image();
+        img.src = srcNow;
+        statisticCanvas.drawImage(img, x*113, yPlus, 100, 100);
+      }
       statisticCanvas.font = "25px Georgia";
-      for (var i1 = 0; i1 < Object.keys(statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]]).length; i1++) {
-        var text = Object.keys(statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]])[i1];
-        statisticCanvas.fillText(text + ":" + statistics[modeSelection.value][Object.keys(statistics[modeSelection.value])[i]][text], x*110, 123 + 27*i1 + yPlus);
+      for (var i1 = 0; (srcNow != "all" || Object.keys(statistics[modeSelection.value]).length > 2) && i1 < Object.keys(statistics[modeSelection.value][srcNow]).length; i1++) {
+        var text = Object.keys(statistics[modeSelection.value][srcNow])[i1];
+        var data = statistics[modeSelection.value][srcNow][text];
+        statisticCanvas.fillText(text + ":" + data, x*113, 123 + 27*i1 + yPlus);
+        if (srcNow != "all" && (text == "right" || text == "wrong")) statistics[modeSelection.value].all[text] += data;
       }
       x++;
+    }
     }
   }
   //var angle = 30;
