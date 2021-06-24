@@ -377,54 +377,55 @@ function ballColourChanged (value) {
             y: 255
           },
           rotatingWall: [{
-            x: window.innerWidth / 2,
+            x: window.innerWidth / 2 - 50,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+            //
+            // height: 17,
+            scale: 20,
             angle: 0
-          }, {
+          }, /*{
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+
+            scale: 20,
             angle: 22
-          }, {
+          },*/ {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
-            angle: 44
-          }, {
+
+            scale: 20,
+            angle: 77
+          }, /*{
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+
+            scale: 20,
             angle: 88
-          }, {
+          },*/ {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
-            angle: 110
-          }, {
+
+            scale: 20,
+            angle: 120
+          }, /*{
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+
+            scale: 20,
             angle: 130
-          }, {
+          },*/ {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+
+            scale: 20,
             angle: 150
-          }, {
+          }/*, {
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
-            width: window.innerWidth - 120,
-            height: 17,
+
+            scale: 20,
             angle: 70
-          }]
+          }*/]
         },
         5: {
           sensibility: 5,
@@ -988,20 +989,20 @@ function ballColourChanged (value) {
             activateBlinkWall();
             sensibility(level[level.mode].worldWideLevel[level[level.mode].number].sensibility, false);
             if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
-            RotatingWall = setInterval(function() {
-              level[level.mode].rotating.rotatingWall = true;
-              level[level.mode].rotatingNow = "rotatingWall";
-              Layout();
-              rotatingWall(true);
-            }, 70);
+            // RotatingWall = setInterval(function() {
+            //   level[level.mode].rotating.rotatingWall = true;
+            //   level[level.mode].rotatingNow = "rotatingWall";
+            //   Layout();
+            //   rotatingWall(true);
+            // }, 70);
           }
             if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
-            RotatingDreieck = setInterval(function() {
-              level[level.mode].rotating.rotatingDreieck = true;
-              level[level.mode].rotatingNow = "rotatingDreieck";
-              Layout();
-              rotatingDreieck();
-            }, 70);
+            // RotatingDreieck = setInterval(function() {
+            //   level[level.mode].rotating.rotatingDreieck = true;
+            //   level[level.mode].rotatingNow = "rotatingDreieck";
+            //   Layout();
+            //   rotatingDreieck();
+            // }, 70);
           }
           };
         };
@@ -1326,20 +1327,20 @@ function ballColourChanged (value) {
       // }, 6000);
       activateBlinkWall();
       if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
-      RotatingWall = setInterval(function() {
-        level[level.mode].rotating.rotatingWall = true;
-        level[level.mode].rotatingNow = "rotatingWall";
-        Layout();
-        rotatingWall(true);
-      }, 70);
+      // RotatingWall = setInterval(function() {
+      //   level[level.mode].rotating.rotatingWall = true;
+      //   level[level.mode].rotatingNow = "rotatingWall";
+      //   Layout();
+      //   rotatingWall(true);
+      // }, 70);
     }
       if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
-      RotatingDreieck = setInterval(function() {
-        level[level.mode].rotating.rotatingDreieck = true;
-        level[level.mode].rotatingNow = "rotatingDreieck";
-        Layout();
-        rotatingDreieck();
-      }, 70);
+      // RotatingDreieck = setInterval(function() {
+      //   level[level.mode].rotating.rotatingDreieck = true;
+      //   level[level.mode].rotatingNow = "rotatingDreieck";
+      //   Layout();
+      //   rotatingDreieck();
+      // }, 70);
     }
       }
       if (level[level.mode].levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
@@ -1495,18 +1496,18 @@ function ballColourChanged (value) {
         level[level.mode].number = "Test";
         if (!(level[level.mode].editLevel["Test"].rotatingWall == undefined) && level[level.mode].editLevel["Test"].rotatingWall.length > 0) {
         AblageListe[8] = JSON.parse(JSON.stringify(level[level.mode].editLevel["Test"].rotatingWall));
-        RotatingWall = setInterval(function() {
-          level[level.mode].rotating.rotatingWall = true;
-          level[level.mode].rotatingNow = "rotatingWall";
-          Layout();
-        }, 40);
+        // RotatingWall = setInterval(function() {
+        //   level[level.mode].rotating.rotatingWall = true;
+        //   level[level.mode].rotatingNow = "rotatingWall";
+        //   Layout();
+        // }, 40);
       }
       if (!(level[level.mode].editLevel["Test"].rotatingDreieck == undefined) && level[level.mode].editLevel["Test"].rotatingDreieck.length > 0) {
-        RotatingDreieck = setInterval(function() {
-          level[level.mode].rotating.rotatingDreieck = true;
-          level[level.mode].rotatingNow = "rotatingDreieck";
-          Layout();
-        }, 40);
+        // RotatingDreieck = setInterval(function() {
+        //   level[level.mode].rotating.rotatingDreieck = true;
+        //   level[level.mode].rotatingNow = "rotatingDreieck";
+        //   Layout();
+        // }, 40);
       }
         activateBlinkWall();
         document.getElementById('testLevel').innerHTML = "stop Test";
@@ -1775,6 +1776,7 @@ function ballColourChanged (value) {
     });
     const triangle = createPath(point(0, -25), point(-50, -75), point(-100, -25));
     var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
+    var smallRectangle = createPath(point(0,-13), point(-50,-13), point(-50,-20), point(0,-20));
     // function drawPath(path, x, y, angle) {
     //     canvas.setTransform(1, 0, 0, 1, x, y);
     //     canvas.rotate(level[level.mode].vorgefertigt[level[level.mode].number].rotatingDreieck[i].angle);
@@ -1790,10 +1792,11 @@ function ballColourChanged (value) {
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
     }
 
-
-    function renderLoop(time) {
+    requestAnimationFrame(renderLoop);
+    function renderLoop(time, isRectangle) {
+      // Layout();
       //  canvas.clearRect(0, 0, textur.width, textur.height);
-      //  if (!(level[level.mode].levelType == "editHistory")) Layout();
+      if (!(level[level.mode].levelType == "editHistory")) Layout(null, true);
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       AblageListe[0] = time
@@ -1810,9 +1813,26 @@ function ballColourChanged (value) {
       }
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
-
+      if (isRectangle && offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
+//    if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
+      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
+          level[level.mode].number
+        ].rotatingWall.length; i++) {
+        // canvas.save();
+        // canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
+        // canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
+        // if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
+        // else canvas.fillStyle = "black";
+        // canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
+        //   .rotatingWall[i].height);
+        // canvas.restore();
+        // if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle++;
+        // if (level[level.mode].levelType != "vorgefertigt" && level[level.mode].rotating.rotatingWall == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
+        if (!level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].timeFor360GradRotation) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].timeFor360GradRotation = 10000;
+        drawPath_V2(smallRectangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].scale, (time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].timeFor360GradRotation) * Math.PI) + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle, "black", "black", i);
+      }
       canvas.setTransform(1, 0, 0, 1, 0, 0);
-      //  requestAnimationFrame(renderLoop);
+      requestAnimationFrame(renderLoop);
     }
 
     function createPath(...points) {
@@ -1861,23 +1881,24 @@ function ballColourChanged (value) {
     }
 
     function rotatingWall(rotate) {
+      if (level[level.mode][level[level.mode].levelType][level[level.mode].number]?.rotatingWall)   requestAnimationFrame(renderLoop); // start animation
       //if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
-      if (offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
-  //    if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
-      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
-          level[level.mode].number
-        ].rotatingWall.length; i++) {
-        canvas.save();
-        canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
-        canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
-        if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
-        else canvas.fillStyle = "black";
-        canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
-          .rotatingWall[i].height);
-        canvas.restore();
-        if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle++;
-        if (level[level.mode].levelType != "vorgefertigt" && level[level.mode].rotating.rotatingWall == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
-      }
+  //     if (offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
+  // //    if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
+  //     for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
+  //         level[level.mode].number
+  //       ].rotatingWall.length; i++) {
+  //       canvas.save();
+  //       canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
+  //       canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
+  //       if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
+  //       else canvas.fillStyle = "black";
+  //       canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
+  //         .rotatingWall[i].height);
+  //       canvas.restore();
+  //       if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle++;
+  //       if (level[level.mode].levelType != "vorgefertigt" && level[level.mode].rotating.rotatingWall == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
+  //     }
     }
 
     function boundingBoxCheck() {
@@ -1918,18 +1939,19 @@ function ballColourChanged (value) {
       }
     }
 
-    function Layout(changingSize) {
+    function Layout(changingSize, justBackground) {
       if (level[level.mode].levelType == "vorgefertigt" || level[level.mode].levelType == "winnerScreen") {
         canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5])
       } else canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
       //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
       //    größeAnpassen();
       //}
+      if (!justBackground) {
       for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
         if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x != undefined) drawBullet(level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i]);
       }
-      if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
-      if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
+      // if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
+      // if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
       if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
       // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
@@ -1953,6 +1975,7 @@ function ballColourChanged (value) {
         canvas.arc(level[level.mode].editHistory.spawnPoint.x + level[level.mode].editHistory.ballSize/2, level[level.mode].editHistory.spawnPoint.y + level[level.mode].editHistory.ballSize/2,level[level.mode].editHistory.ballSize/2,0,Math.PI*2, false);
         canvas.fill();
       }
+    }
     }
 
     function größeAnpassen() {
