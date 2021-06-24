@@ -90,15 +90,31 @@
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
   <br>
-  <select name="course" id="modeSelection" value="move" onchange="modeSelected(value);">
+  <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
     <option value="growing">growing</option>
     <option value="survive">survive</option>
   </select>
   <br>
+  <h1 id="nameEingeloggt" onclick='changeName();'></h1>
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
   <script type="text/javascript">
-
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+  };
+  var dbSetWarteschlange = [];
+  var alertWhenFinishedSaving = false;
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("Gelduldspiel", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
+    }
+  }, 2222);
   var sphere1 = document.getElementById("sphere1");
   var growing;
   function modeSelected(value) {
@@ -590,7 +606,10 @@
     var highscores = {}
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
-    var name = prompt("Wie heißen sie? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! Ihre Zeiten werden auf Anfrage, oder beim Beenden aller Level angezeigt)")
+    if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
+    else var name = localStorage.getItem("storedName");
+    changeName(true);
+    localStorage.setItem("storedName", name);
     for (var i = 0; i < Object.keys(level).length - 1; i++) {
       highscores[Object.keys(level)[i]] = {};
       highscores[Object.keys(level)[i]][name] = [];
@@ -600,29 +619,33 @@
       if (AblageListe[6] == true) {AblageListe[6] = false; document.getElementById('select').style.background = "";}
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
-    dbGet("Gelduldspiel", "highscores").then(result => {
-      folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
-      if (localStorage.getItem("uploadScore") == true && localStorage.getItem("profileName") == name) {
-        for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
-          level[level.mode].worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
+    function changeName(nameSelected) {
+      if (!nameSelected) name = prompt ("Mit welchem Namen wollen sie sich eingloggen?");
+      nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+      dbGet("Gelduldspiel", "highscores").then(result => {
+        folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
+        if (localStorage.getItem("uploadScore") == true && localStorage.getItem("profileName") == name) {
+          for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
+            level[level.mode].worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
+          }
+          localStorage.setItem("uploadScore", false);
         }
-        localStorage.setItem("uploadScore", false);
-      }
-      if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
-        highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
-      }
-    }).catch(function(e) {
-      console.error(e);
-      if (e == "TypeError: Failed to fetch") {
-        alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
-        offline = true;
-        if (localStorage.getItem("profileName") == name && localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
-        else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
-        document.getElementById('saveMaps').style.display = "none";
-        window.innerWidth += 832;
-        folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscores")), true);
-      }
-    });
+        if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
+          highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
+        }
+      }).catch(function(e) {
+        console.error(e);
+        if (e == "TypeError: Failed to fetch") {
+          alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
+          offline = true;
+          if (localStorage.getItem("profileName") == name && localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
+          else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
+          document.getElementById('saveMaps').style.display = "none";
+          window.innerWidth += 832;
+          folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscores")), true);
+        }
+      });
+    }
     function folgenDbgetHighscores(result, offline) {
         highscores = result
         // for (var i = 0; i < result.length; i++) {
@@ -635,9 +658,9 @@
         highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
       }
     }
-        if (highscores[level.mode][name] != undefined && highscores[level.mode][name].length > 0) {
+        if (highscores[level.mode][name] != undefined && Object.keys(highscores[level.mode][name]).length > 0) {
         for (var i = 0;
-          (i < highscores[level.mode][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
+          (i < Object.keys(highscores[level.mode][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
           opt = document.createElement("option");
           document.getElementById("courceSelection").options.add(opt);
           opt.setAttribute("id", i);
@@ -684,7 +707,7 @@
             level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
           }
           localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-          // dbset("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+          dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
           localStorage.setItem("uploadCources", []);
         }
       }).catch(function(e) {
@@ -1250,7 +1273,7 @@
         if (highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
           // localStorage.setItem("highscores", JSON.stringify(highscores));
-          // if (offline == false)  dbset("Gelduldspiel", "highscores", highscores);
+          if (!offline)  dbSetWarteschlange.push({tag: "highscores", data: highscores});
         }
         level[level.mode].number++;
         document.getElementById('courceSelection').value = level[level.mode].number + ". map";
@@ -1270,8 +1293,8 @@
         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
         // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-        if (offline == false) {
-        // dbset("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+        if (!offline) {
+        dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
         alert("uploading...");
         var checkLevelUploaded = setInterval(function() {
           dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
@@ -1365,8 +1388,8 @@
       }
       if (level[level.mode].levelType == "worldWideLevel") {
         // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel));
-        if (offline == false) {
-      // dbset("Gelduldspiel", "levelAroundTheWorld", level[level.mode].worldWideLevel);
+        if (!offline) {
+      dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
       alert("uploading (high)score...");
       var checkLevelUploadedHighscore = setInterval(function() {
         dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
@@ -1859,7 +1882,7 @@
         Layout();
         localStorage.setItem("levelBy " + name, JSON.stringify(AblageListe[0]));
         if (offline == false) {
-        // dbset("Gelduldspiel", "levelBy " + name, AblageListe[0]);
+        dbSetWarteschlange.push({tag: "levelBy " + name, data: AblageListe[0]});
         alert("saving...")
         var checkLevelSaved = setInterval(function() {
           dbGet("Gelduldspiel", "levelBy " + name).then(result => {
@@ -1869,7 +1892,7 @@
               AblageListe[3] = false;
             }
             // else {
-            //   // dbset("Gelduldspiel", "levelBy " + name, AblageListe[0]);
+            //   // dbSetWarteschlange.push("levelBy " + name, AblageListe[0]);
             // }
           }).catch(function(e) {
             console.error(e);
