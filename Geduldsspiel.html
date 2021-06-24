@@ -109,7 +109,8 @@
   <br>
   <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
   <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
-  <div class="voiceRecognition">
+  <h4 id="voiceRecognitionErrors"></h4>
+  <div class="voiceRecognition" style="display:none">
     <form id="search-form" onsubmit="return false;">
     <!-- (A) SEARCH FIELD AS USUAL -->
     <input type="text" id="search-input"/>
@@ -123,6 +124,7 @@
   </div>
   </div>
   <script type="text/javascript">
+  var alertWhenFinishedSaving  = false;
   window.onbeforeunload = function(){
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -2384,7 +2386,7 @@ function ballColourChanged (value) {
       }, 3000);
     }
 
-    var direciton = "none";
+    var direction = "none";
     var speed = 3;
       var speech = {
         // (A) PROPERTIES
@@ -2396,7 +2398,7 @@ function ballColourChanged (value) {
         // (B) INIT
         init : function () {
           // (B1) GET HTML ELEMENTS
-          speech.hwrap = document.getElementById("search-speech");
+          speech.hwrap = document.getElementById("voiceRecognitionErrors");
           speech.hon = document.getElementById("speech-on");
           speech.hoff = document.getElementById("speech-off");
 
@@ -2405,12 +2407,12 @@ function ballColourChanged (value) {
           if (window.hasOwnProperty('SpeechRecognition') || window.hasOwnProperty('webkitSpeechRecognition')) {
             navigator.mediaDevices.getUserMedia({ audio: true })
             .then(function(stream) {
-              speech.hon.onclick = speech.start;
-              speech.hoff.onclick = speech.stop;
-              speech.hoff.disabled = true;
+              /*speech.hon.onclick = */speech.start();
+              // speech.hoff.onclick = speech.stop;
+              // speech.hoff.disabled = true;
             })
             .catch(function(err) {
-              speech.hwrap.innerHTML = "Please enable access and attach a microphone.";
+              speech.hwrap.innerHTML = "Please enable microphone access and attach a microphone to be able to direct the ball with your voice!";
             });
           }
 
@@ -2440,8 +2442,6 @@ function ballColourChanged (value) {
           speech.recognition.onresult = function (evt) {
             // document.getElementById('search-input').value = evt.results[evt.results.length - 1][0].transcript;
             direction = evt.results[evt.results.length - 1][0].transcript.split(' ')[evt.results[evt.results.length - 1][0].transcript.split(' ').length - 1];
-            if (direction == "langsamer" && speed > 3) speed -= 3;
-            if (direction == "schneller") speed += 3;
             // if (evt.results[evt.results.length - 1][0].transcript.split(' ')[evt.results[evt.results.length - 1][0].transcript.split(' ').length - 1] == "rechts") sphere1.style.left = JSON.parse(sphere1.style.left.split("px")[0]) + 3 + "px";
             // if (evt.results[evt.results.length - 1][0].transcript.split(' ')[evt.results[evt.results.length - 1][0].transcript.split(' ').length - 1] == "links") sphere1.style.left = JSON.parse(sphere1.style.left.split("px")[0]) - 3 + "px";
             // if (evt.results[evt.results.length - 1][0].transcript.split(' ')[evt.results[evt.results.length - 1][0].transcript.split(' ').length - 1] == "unten") sphere1.style.top = JSON.parse(sphere1.style.top.split("px")[0]) + 3 + "px";
