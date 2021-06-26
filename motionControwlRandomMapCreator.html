@@ -11,7 +11,8 @@
       canvas.fillRect(0, 0, window.innerWidth, window.innerHeight);
       canvas.fillStyle = "black";
       currentProcess = {counter: Math.round(window.innerWidth/3), string: "straight"};
-      moveDrawingPointer({bottom: 10, top: 10}, {bottom: 33 + JSON.parse(distance.value), top: 33}, {x: 1, y: 0}, straight);
+      currentProcess.turning = false;
+      moveDrawingPointer({bottom: JSON.parse(distance.value) + 1, top: JSON.parse(distance.value) + 1}, {bottom: JSON.parse(distance.value) + 1 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 1}, {x: 1, y: 0}, straight);
     }
     function moveDrawingPointer(x, y, currentDirection, straight, randomDirectionBefore) {
       var possibleDirections = ["straight", "right", "left"]
@@ -23,8 +24,6 @@
       document.onkeydown = function(event) {
       if (manualControwl.checked && (event.key.replace("Arrow", "").toLowerCase() == "left" || event.key.replace("Arrow", "").toLowerCase() == "right")) currentProcess = {string: event.key.replace("Arrow", "").toLowerCase(), counter: 1};
       }
-      console.log(currentProcess);
-      console.log(currentDirection);
       if (currentProcess.string == "straight" || (currentProcess.string == "random" && possibleDirections[randomDirection] == "straight")) {
         if (!currentDirection.bottom) x.bottom += currentDirection.x;
         if (!currentDirection.bottom) y.bottom += currentDirection.y;
@@ -32,10 +31,10 @@
         if (!currentDirection.top) y.top += currentDirection.y;
         if (currentProcess.counter == 0) {
             if (!manualControwl.checked) currentProcess.counter = 11 + Math.round(Math.random()*((window.innerHeight - x.top)));
-            if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
-              console.log("debug");
-              if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
-            }
+            // if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
+            //   console.log("debug");
+            //   if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
+            // }
             currentProcess.string = "straight";
       }
     }
@@ -47,6 +46,7 @@
         getAheadIfObj["-1|0"] = x.bottom != x.top + JSON.parse(distance.value);
         getAheadIfObj["0|-1"] = y.bottom - JSON.parse(distance.value) != y.top;
         if (getAheadIfObj[currentDirection.x + '|' + currentDirection.y]) {
+          currentProcess.turning = true;
           x.top += currentDirection.x;
           y.top += currentDirection.y;
         }
@@ -54,6 +54,7 @@
           currentDirection = {x: JSON.parse(newDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1]), bottom: true};
           currentProcess.string = "straight";
           currentProcess.counter = JSON.parse(distance.value);
+          currentProcess.turning = true;
         }
         // if (y.bottom != y.top - JSON.parse(distance.value)) y.top += currentDirection.y;
         // else {
@@ -62,10 +63,11 @@
         // }
         if (currentProcess.counter == 0 && !manualControwl.checked) {
           currentProcess = {string: "right", counter: JSON.parse(distance.value) + Math.round(Math.random()*(window.innerHeight - x.top))};
-          if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
-            if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
-            console.log("debug");
-          }
+          currentProcess.turning = true;
+          // if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
+          //   if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
+          //   console.log("debug");
+          // }
       }
       }
       if (currentProcess.string == "left" || (currentProcess.string == "random" && possibleDirections[randomDirection] == "left")) {
@@ -76,6 +78,7 @@
         getAheadIfObj["-1|0"] = x.bottom + JSON.parse(distance.value) != x.top;
         getAheadIfObj["0|-1"] = y.bottom != y.top - JSON.parse(distance.value);
         if (getAheadIfObj[currentDirection.x + '|' + currentDirection.y]) {
+          currentProcess.turning = true;
           x.bottom += currentDirection.x;
           y.bottom += currentDirection.y;
         }
@@ -83,6 +86,7 @@
           currentDirection = {x: JSON.parse(newDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1]), top: true};
           currentProcess.string = "straight";
           currentProcess.counter = JSON.parse(distance.value);
+          currentProcess.turning = true;
         }
         // if (y.bottom != y.top - JSON.parse(distance.value)) y.top += currentDirection.y;
         // else {
@@ -91,10 +95,11 @@
         // }
         if (currentProcess.counter == 0 && !manualControwl.checked) {
           currentProcess = {string: "left", counter: JSON.parse(distance.value) + Math.round(Math.random()*(window.innerHeight - x.top))};
-          if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
-            if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
-            console.log("debug");
-          }
+          currentProcess.turning = true;
+          // if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
+          //   if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
+          //   console.log("debug");
+          // }
       }
       }
       // canvas.fillStyle = "black";
@@ -103,13 +108,25 @@
       // canvas.fillStyle = "#6E6E6E";
       // canvas.fillRect(x.top + currentDirection.y, y.top + currentDirection.x, 1, JSON.parse(distance.value) - 1);
       /*if (!manualControwl.checked) */currentProcess.counter--;
+      if (!currentProcess.turning && (x.top <= JSON.parse(distance.value) - 20 || y.top <= JSON.parse(distance.value) - 20 || x.top > window.innerWidth - JSON.parse(distance.value) - 20 || y.top > window.innerHeight - JSON.parse(distance.value) - 20)) {
+        var checkCoordinates = {x: x.top, y: y.top};
+        for (var i = 0; i < JSON.parse(distance.value) + 20; i++) {
+          checkCoordinates.x += currentDirection.x;
+          checkCoordinates.y += currentDirection.y;
+        }
+        if (!currentProcess.turning && (checkCoordinates.x <= 0 || checkCoordinates.y <= 0 || checkCoordinates.x > window.innerWidth || checkCoordinates.y > window.innerHeight)) {
+        currentProcess.counter = 0;
+        currentProcess.string = "random";
+      }
+      }
       if (currentProcess.counter == 0) {
         if (currentDirection.bottom || currentDirection.top) {
           if (!manualControwl.checked) currentProcess.counter = Math.round(Math.random()*(window.innerHeight - x.top));
-          if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
-            if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
-            console.log("debug");
-          }
+          // if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
+          //   if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
+          //   console.log("debug");
+          // }
+          currentProcess.turning = false;
           currentDirection.bottom = undefined;
           currentDirection.top = undefined;
         }
