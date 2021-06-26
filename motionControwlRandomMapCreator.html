@@ -12,10 +12,10 @@
       canvas.fillStyle = "black";
       currentProcess = {counter: Math.round(window.innerWidth/3), string: "straight"};
       currentProcess.turning = false;
-      moveDrawingPointer({bottom: JSON.parse(distance.value) + 1, top: JSON.parse(distance.value) + 1}, {bottom: JSON.parse(distance.value) + 1 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 1}, {x: 1, y: 0}, straight);
+      moveDrawingPointer({bottom: JSON.parse(distance.value) + 36, top: JSON.parse(distance.value) + 36}, {bottom: JSON.parse(distance.value) + 36 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 36}, {x: 1, y: 0}, straight);
     }
     function moveDrawingPointer(x, y, currentDirection, straight, randomDirectionBefore) {
-      var possibleDirections = ["straight", "right", "left"]
+      var possibleDirections = ["left", "right", "straight"]
       do {
         if (randomDirection) randomDirectionBefore = randomDirection;
         if (straight) var randomDirection = Math.round(Math.random()*2);
@@ -23,6 +23,26 @@
       } while (randomDirection == randomDirectionBefore && !manualControwl.checked);
       document.onkeydown = function(event) {
       if (manualControwl.checked && (event.key.replace("Arrow", "").toLowerCase() == "left" || event.key.replace("Arrow", "").toLowerCase() == "right")) currentProcess = {string: event.key.replace("Arrow", "").toLowerCase(), counter: 1};
+      }
+      if (!currentProcess.turning && (x.top <= JSON.parse(distance.value) + 35 || y.top <= JSON.parse(distance.value) + 35 || x.top > window.innerWidth - JSON.parse(distance.value) - 35 || y.top > window.innerHeight - JSON.parse(distance.value) - 35)) {
+        var checkCoordinates = {x: x.top, y: y.top};
+        var newRightDirectionObj = {"1|0": "0|1", "0|1": "-1|0", "-1|0": "0|-1", "0|-1": "1|0"};
+        var newLeftDirectionObj = {"1|0": "0|-1", "0|-1": "-1|0", "-1|0": "0|1", "0|1": "1|0"};
+        var possibleNewDirections = [{x: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}, {x: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}, currentDirection]
+        var currentProcessBefore = JSON.parse(JSON.stringify(currentProcess));
+        for (var i1 = 0; i1 < possibleNewDirections.length; i1++) {
+          var currentDirection = possibleNewDirections[i1];
+        for (var i = 0; i < JSON.parse(distance.value) + 35; i++) {
+          checkCoordinates.x += currentDirection.x;
+          checkCoordinates.y += currentDirection.y;
+        }
+        if (!currentProcess.turning && (checkCoordinates.x <= 0 || checkCoordinates.y <= 0 || checkCoordinates.x > window.innerWidth || checkCoordinates.y > window.innerHeight)) {
+          currentProcess.counter = 0;
+          currentProcess.string = "random";
+        }
+        else if (possibleDirections[randomDirection] == currentProcess.string) currentProcessBefore = currentProcess;
+        else randomDirection = i1;
+      }
       }
       if (currentProcess.string == "straight" || (currentProcess.string == "random" && possibleDirections[randomDirection] == "straight")) {
         if (!currentDirection.bottom) x.bottom += currentDirection.x;
@@ -108,17 +128,6 @@
       // canvas.fillStyle = "#6E6E6E";
       // canvas.fillRect(x.top + currentDirection.y, y.top + currentDirection.x, 1, JSON.parse(distance.value) - 1);
       /*if (!manualControwl.checked) */currentProcess.counter--;
-      if (!currentProcess.turning && (x.top <= JSON.parse(distance.value) - 20 || y.top <= JSON.parse(distance.value) - 20 || x.top > window.innerWidth - JSON.parse(distance.value) - 20 || y.top > window.innerHeight - JSON.parse(distance.value) - 20)) {
-        var checkCoordinates = {x: x.top, y: y.top};
-        for (var i = 0; i < JSON.parse(distance.value) + 20; i++) {
-          checkCoordinates.x += currentDirection.x;
-          checkCoordinates.y += currentDirection.y;
-        }
-        if (!currentProcess.turning && (checkCoordinates.x <= 0 || checkCoordinates.y <= 0 || checkCoordinates.x > window.innerWidth || checkCoordinates.y > window.innerHeight)) {
-        currentProcess.counter = 0;
-        currentProcess.string = "random";
-      }
-      }
       if (currentProcess.counter == 0) {
         if (currentDirection.bottom || currentDirection.top) {
           if (!manualControwl.checked) currentProcess.counter = Math.round(Math.random()*(window.innerHeight - x.top));
