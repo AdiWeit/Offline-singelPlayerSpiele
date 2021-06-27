@@ -15,33 +15,55 @@
       moveDrawingPointer({bottom: JSON.parse(distance.value) + 36, top: JSON.parse(distance.value) + 36}, {bottom: JSON.parse(distance.value) + 36 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 36}, {x: 1, y: 0}, straight);
     }
     function moveDrawingPointer(x, y, currentDirection, straight, randomDirectionBefore) {
-      var possibleDirections = ["left", "right", "straight"]
+      var possibleDirections = ["straight", "left", "right"]
+      if (!currentProcess.helping && currentProcess.counter == 0 && currentProcess.string == "random") {
       do {
         if (randomDirection) randomDirectionBefore = randomDirection;
         if (straight) var randomDirection = Math.round(Math.random()*2);
         else var randomDirection = Math.round(Math.random()*4);
       } while (randomDirection == randomDirectionBefore && !manualControwl.checked);
+    }
+      else randomDirection = randomDirectionBefore;
+      currentProcess.helping = false;
       document.onkeydown = function(event) {
       if (manualControwl.checked && (event.key.replace("Arrow", "").toLowerCase() == "left" || event.key.replace("Arrow", "").toLowerCase() == "right")) currentProcess = {string: event.key.replace("Arrow", "").toLowerCase(), counter: 1};
       }
-      if (!currentProcess.turning && (x.top <= JSON.parse(distance.value) + 35 || y.top <= JSON.parse(distance.value) + 35 || x.top > window.innerWidth - JSON.parse(distance.value) - 35 || y.top > window.innerHeight - JSON.parse(distance.value) - 35)) {
-        var checkCoordinates = {x: x.top, y: y.top};
+      if (!currentProcess.turning && (x.top <= JSON.parse(distance.value) + 35 || y.top <= JSON.parse(distance.value) + 35 || x.top > textur.width - JSON.parse(distance.value) - 35 || y.top > textur.height - JSON.parse(distance.value) - 35)) {
         var newRightDirectionObj = {"1|0": "0|1", "0|1": "-1|0", "-1|0": "0|-1", "0|-1": "1|0"};
         var newLeftDirectionObj = {"1|0": "0|-1", "0|-1": "-1|0", "-1|0": "0|1", "0|1": "1|0"};
-        var possibleNewDirections = [{x: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}, {x: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}, currentDirection]
+        var possibleNewDirections = [JSON.parse(JSON.stringify(currentDirection)), {x: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newLeftDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}, {x: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[0]), y: JSON.parse(newRightDirectionObj[currentDirection.x + '|' + currentDirection.y].split('|')[1])}]
         var currentProcessBefore = JSON.parse(JSON.stringify(currentProcess));
+        var possibleDirectionsArray = [];
         for (var i1 = 0; i1 < possibleNewDirections.length; i1++) {
-          var currentDirection = possibleNewDirections[i1];
-        for (var i = 0; i < JSON.parse(distance.value) + 35; i++) {
-          checkCoordinates.x += currentDirection.x;
-          checkCoordinates.y += currentDirection.y;
+          var checkCurrentDirection = possibleNewDirections[i1];
+          var checkCoordinates = {x: x.top, y: y.top};
+        for (var i = 0; i < JSON.parse(distance.value) + 20; i++) {
+          checkCoordinates.x += checkCurrentDirection.x;
+          checkCoordinates.y += checkCurrentDirection.y;
         }
-        if (!currentProcess.turning && (checkCoordinates.x <= 0 || checkCoordinates.y <= 0 || checkCoordinates.x > window.innerWidth || checkCoordinates.y > window.innerHeight)) {
-          currentProcess.counter = 0;
-          currentProcess.string = "random";
+        if ((currentProcess.turning || (currentProcess.helping || currentProcess.string == "helping")) && ((i1 == randomDirection && currentProcess.counter == 0) || (currentProcess.string == possibleDirections[i1])) && (checkCoordinates.x <= 3 || checkCoordinates.y <= 3 || checkCoordinates.x > textur.width - 3 || checkCoordinates.y > textur.height - 3)) console.log("not helping because in turn or string");
+        if (!currentProcess.turning && (!currentProcess.helping && currentProcess.string != "helping") && ((i1 == randomDirection && currentProcess.counter == 0) || (currentProcess.string == possibleDirections[i1])) && (checkCoordinates.x <= 3 || checkCoordinates.y <= 3 || checkCoordinates.x > textur.width - 3 || checkCoordinates.y > textur.height - 3)) {
+          console.log("helping");
+          currentProcess.counter = 1;
+          currentProcess.string = "helping";
+          // currentProcess.turning = true;
         }
-        else if (possibleDirections[randomDirection] == currentProcess.string) currentProcessBefore = currentProcess;
-        else randomDirection = i1;
+      //   else if (currentProcess.counter == 0 && possibleDirections[randomDirection] == currentProcess.string) currentProcessBefore = currentProcess;
+        else if (!(checkCoordinates.x <= 3 || checkCoordinates.y <= 3 || checkCoordinates.x > textur.width - 3 || checkCoordinates.y > textur.height - 3)) {
+          if (i1 == 0) {
+            // console.error("Achtung!!!");
+          }
+          possibleDirectionsArray.push(i1);
+          // randomDirection = i1;
+          // currentProcess.string = "random";
+          // currentProcess.counter = 0;
+      }
+      }
+      if (currentProcess.string == "helping" && possibleDirectionsArray.length > 0) {
+        console.log("choosing random possible direction");
+        var randomIndex = Math.round(Math.random()*(possibleDirectionsArray.length - 1));
+          randomDirection = possibleDirectionsArray[randomIndex];
+        if (possibleDirectionsArray.length > 1 && randomDirection == randomDirectionBefore && randomIndex == 0) randomDirection = possibleDirectionsArray[randomIndex + 1];
       }
       }
       if (currentProcess.string == "straight" || (currentProcess.string == "random" && possibleDirections[randomDirection] == "straight")) {
@@ -139,12 +161,15 @@
           currentDirection.bottom = undefined;
           currentDirection.top = undefined;
         }
-        else if (!manualControwl.checked) currentProcess.string = "random";
+        else if (!manualControwl.checked) {
+          if (currentProcess.string == "helping") currentProcess.helping = true;
+          currentProcess.string = "random";
+        }
       }
       // if (currentDirection.x > 0) canvas.fillRect(x, y + JSON.parse(distance.value), 1, 1);
       // else if (currentDirection.y > 0) canvas.fillRect(x + JSON.parse(distance.value), y, 1, 1);
       setTimeout(function () {
-        if (x.top > 0 && y.top > 0 && x.top < window.innerWidth && y.top < window.innerHeight) moveDrawingPointer(x,y, currentDirection, straight, currentProcess, randomDirection);
+        if (x.top > 0 && y.top > 0 && x.top < window.innerWidth && y.top < window.innerHeight) moveDrawingPointer(x,y, currentDirection, straight, randomDirection);
       }, 1);
     }
     document.addEventListener('touchstart', handleTouchStart, false);
