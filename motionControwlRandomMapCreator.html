@@ -1,21 +1,56 @@
-<input type="text" value="60" id="distance" placeholder="distance">
+<input type="text" value="100" id="distance" placeholder="distance">
 <button type="button" onclick="drawRandomMap(true);" name="button">create</button>
 <input id="manualControwl" type="checkbox"> controwl with arrows
-<!-- TODO:  -->
-<input type="checkbox"> stop before collision
+<input id="stopBeforeCollision" type="checkbox"> stop before collision
 <input checked="true" id="fill" type="checkbox"> fill
-<canvas id="textur" width="1582" height="740"></canvas>
+<canvas id="textur" onclick="pausePlay();" width="1582" height="740"></canvas>
+<style>
+.shape {
+ position: absolute;
+ width: 50px;
+ height: 50px;
+ -webkit-radius: 50px;
+ margin:0;
+ padding:0;
+}
+#sphere1{
+ border-radius: 50px;
+ background-color: blue;
+}
+</style>
+</head>
+<body>
+<div id="content">
+    <div class ="shape" id="sphere1"></div>
+  <div class ="shape" id="sphere2"></div>
+  <div>some text or other html</div>
+</div>
+<select name="course" id="modeSelection" onchange="inOrAgainstDirection *= -1;">
+  <option value="normal">normal</option>
+  <option value="opposite">opposite</option>
+</select>
+<br>
+<input type="checkbox" id="senkrecht"> senkrecht
 <script>
   textur.width = window.innerWidth - textur.getBoundingClientRect().left;
   textur.height = window.innerHeight - textur.getBoundingClientRect().top;
     var canvas = textur.getContext('2d'); //Dimension
+    var infoText = false;
     function drawRandomMap(straight) {
-      canvas.fillStyle = "green";
-      canvas.fillRect(0, 0, window.innerWidth, window.innerHeight);
-      canvas.fillStyle = "black";
-      currentProcess = {counter: Math.round(window.innerWidth/3), string: "straight"};
-      currentProcess.turning = false;
-      moveDrawingPointer({bottom: JSON.parse(distance.value) + 36, top: JSON.parse(distance.value) + 36}, {bottom: JSON.parse(distance.value) + 36 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 36}, {x: 1, y: 0}, straight);
+      if (!infoText) alert("click on the screen to pause or continue!");
+      else {
+        pausePlay();
+      }
+      setTimeout(function () {
+        canvas.fillStyle = "green";
+        canvas.fillRect(0, 0, window.innerWidth, window.innerHeight);
+        canvas.fillStyle = "black";
+        currentProcess = {counter: Math.round(window.innerWidth/3), string: "straight"};
+        currentProcess.turning = false;
+        moveDrawingPointer({bottom: JSON.parse(distance.value) + 36, top: JSON.parse(distance.value) + 36}, {bottom: JSON.parse(distance.value) + 36 + JSON.parse(distance.value), top: JSON.parse(distance.value) + 36}, {x: 1, y: 0}, straight);
+        if (infoText) pausePlay(true);
+        infoText = true;
+      }, 2);
     }
     function moveDrawingPointer(x, y, currentDirection, straight, randomDirectionBefore) {
       var possibleDirections = ["straight", "left", "right"]
@@ -156,8 +191,15 @@
       }
       }
       canvas.fillStyle = "black";
+      var data = canvas.getImageData(x.top, y.top, 1, 1);
+      red = data.data[0];
+      green = data.data[1];
+      blue = data.data[2];
+      alpha = data.data[3];
+      if (!(red == 110 && blue == 110 && green == 110)) {
       canvas.fillRect(x.top, y.top, 1, 1);
       canvas.fillRect(x.bottom, y.bottom, 1, 1);
+      }
       if (fill.checked && !currentProcess.turning) {
         canvas.fillStyle = "#6E6E6E";
         if (currentDirection.x == 1 && currentDirection.y == 0) canvas.fillRect(x.top + currentDirection.y, y.top + currentDirection.x, 1, JSON.parse(distance.value) - 1);
@@ -185,7 +227,13 @@
       // if (currentDirection.x > 0) canvas.fillRect(x, y + JSON.parse(distance.value), 1, 1);
       // else if (currentDirection.y > 0) canvas.fillRect(x + JSON.parse(distance.value), y, 1, 1);
       setTimeout(function () {
-        if (x.top > 0 && y.top > 0 && x.top < window.innerWidth && y.top < window.innerHeight) moveDrawingPointer(x,y, currentDirection, straight, randomDirection);
+        var data = canvas.getImageData(x.top + currentDirection.x, y.top + currentDirection.y, 1, 1);
+        red = data.data[0];
+        green = data.data[1];
+        blue = data.data[2];
+        alpha = data.data[3];
+        if (!pause.boolean && x.top > 0 && y.top > 0 && x.top < window.innerWidth && y.top < window.innerHeight && (!(red == 0 && blue == 0 && green == 0) || !stopBeforeCollision.checked)) moveDrawingPointer(x,y, currentDirection, straight, randomDirection);
+        if (pause.boolean) pause.params = {x, y, currentDirection, straight, randomDirection}
       }, 1);
     }
     document.addEventListener('touchstart', handleTouchStart, false);
@@ -224,5 +272,85 @@
     }
   };
 
-  </script>
+  var inOrAgainstDirection = 1;
+  var x1 = 0, y1 = 0,
+    x2 = 0, y2 = 0,
+    vx1 = 0, vy1 = 0,
+    vx2 = 0, vy2 = 0,
+    ax1 = 0, ay1 = 0;
+  var sphere1 = document.getElementById("sphere1");
+  var sphere2 = document.getElementById("sphere2");
+  sphere1.style.width = 50;
+  sphere1.style.height = 50;
+  var direction = "long";
+  if (window.DeviceMotionEvent != undefined) {
+   window.ondevicemotion = function(e) {
+    if (senkrecht.checked) ax1 = inOrAgainstDirection*((event.accelerationIncludingGravity.z - 6) * (-17));
+    else ax1 = inOrAgainstDirection*((event.accelerationIncludingGravity.x) * 17);
+    ay1 = inOrAgainstDirection*((event.accelerationIncludingGravity.y) * 17);
+   }
+   setInterval( function() {
+     var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
+     if ( landscapeOrientation) {
+      vx1 = vx1 + ay1;
+      vy1 = vy1 + ax1;
+     } else {
+      vy1 = vy1 - ay1;
+      vx1 = vx1 + ax1;
+     }
+    if (landscapeOrientation && direction == "small") {
+      inOrAgainstDirection *= -1;
+      direction = "long";
+   } if (!landscapeOrientation && direction == "long") {
+     inOrAgainstDirection *= -1;
+     direction = "small";
+    }
+    vx1 = vx1 * 0.98;
+    vy1 = vy1 * 0.98;
+    y1 = parseInt(y1 + vy1 / 50);
+    x1 = parseInt(x1 + vx1 / 50);
+
+
+    boundingBoxCheck();
+
+    sphere1.style.top = y1 + "px";
+    sphere1.style.left = x1 + "px";
+    // canvas.clearRect(0, 0, 10000, 10000)
+    var numbers = [
+      [x1 - textur.getBoundingClientRect().left + JSON.parse(sphere1.style.width.replace("px", "")), y1 - textur.getBoundingClientRect().top + (JSON.parse(sphere1.style.height.replace("px", "")) / 2)],
+      [x1 - textur.getBoundingClientRect().left + (JSON.parse(sphere1.style.width.replace("px", "")) / 2), y1 - textur.getBoundingClientRect().top],
+      [x1 - textur.getBoundingClientRect().left + (JSON.parse(sphere1.style.width.replace("px", "")) / 2), y1 - textur.getBoundingClientRect().top + JSON.parse(sphere1.style.height.replace("px", ""))],
+      [x1 - textur.getBoundingClientRect().left, y1 - textur.getBoundingClientRect().top + (JSON.parse(sphere1.style.height.replace("px", "")) / 2)]
+    ]
+    for (var i = 0; i < 4; i++) {
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(numbers[i][0], numbers[i][1], 10, 10);
+      data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+      red = data.data[0];
+      green = data.data[1];
+      blue = data.data[2];
+      alpha = data.data[3];
+      if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+        console.log("Fail!");
+        if (sphere1.style.backgroundColor != "red") {
+        sphere1.style.backgroundColor = "red";
+        setTimeout(function () {
+          sphere1.style.backgroundColor = "#40FF00";
+        }, 500);
+      }
+    }
+    }
+   }, 25);
+  }
+  function boundingBoxCheck(){
+   if (x1<0) { x1 = 0; vx1 = -vx1; }
+   if (y1<0) { y1 = 0; vy1 = -vy1; }
+   if (x1>window.innerWidth-50) { x1 = window.innerWidth-50; vx1 = -vx1; }
+   if (y1>window.innerHeight-50) { y1 = window.innerHeight-50; vy1 = -vy1; }
+  }
+  var pause = {params: {}, boolean: false};
+  function pausePlay(noFunctionCall) {
+    pause.boolean = !pause.boolean;
+    if (!pause.boolean && !noFunctionCall) moveDrawingPointer(pause.params.x, pause.params.y, pause.params.currentDirection, pause.params.straight, pause.params.randomDirection);
+  }
 </script>
