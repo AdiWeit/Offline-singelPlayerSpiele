@@ -1,10 +1,13 @@
 <input type="text" value="60" id="distance" placeholder="distance">
 <button type="button" onclick="drawRandomMap(true);" name="button">create</button>
 <input id="manualControwl" type="checkbox"> controwl with arrows
+<!-- TODO:  -->
+<input type="checkbox"> stop before collision
+<input checked="true" id="fill" type="checkbox"> fill
 <canvas id="textur" width="1582" height="740"></canvas>
 <script>
-    textur.width = window.innerWidth;
-    textur.height = window.innerHeight;
+  textur.width = window.innerWidth - textur.getBoundingClientRect().left;
+  textur.height = window.innerHeight - textur.getBoundingClientRect().top;
     var canvas = textur.getContext('2d'); //Dimension
     function drawRandomMap(straight) {
       canvas.fillStyle = "green";
@@ -16,12 +19,17 @@
     }
     function moveDrawingPointer(x, y, currentDirection, straight, randomDirectionBefore) {
       var possibleDirections = ["straight", "left", "right"]
-      if (!currentProcess.helping && currentProcess.counter == 0 && currentProcess.string == "random") {
+      if (currentProcess.turning && !currentProcess.helping && currentProcess.counter == 0 && currentProcess.string == "random") {
+        console.log("no random because of turn");
+      }
+      if (!currentProcess.turning && !currentProcess.helping && currentProcess.counter == 0 && currentProcess.string == "random") {
       do {
         if (randomDirection) randomDirectionBefore = randomDirection;
         if (straight) var randomDirection = Math.round(Math.random()*2);
         else var randomDirection = Math.round(Math.random()*4);
       } while (randomDirection == randomDirectionBefore && !manualControwl.checked);
+      if (currentProcess.helping && randomDirection == 0) randomDirection++;
+      console.log(randomDirection + " selected");
     }
       else randomDirection = randomDirectionBefore;
       currentProcess.helping = false;
@@ -60,11 +68,13 @@
       }
       }
       if (currentProcess.string == "helping" && possibleDirectionsArray.length > 0) {
-        console.log("choosing random possible direction");
+        console.log("choosing random possible direction at ytop == " + y.top);
         var randomIndex = Math.round(Math.random()*(possibleDirectionsArray.length - 1));
-          randomDirection = possibleDirectionsArray[randomIndex];
+        randomDirection = possibleDirectionsArray[randomIndex];
         if (possibleDirectionsArray.length > 1 && randomDirection == randomDirectionBefore && randomIndex == 0) randomDirection = possibleDirectionsArray[randomIndex + 1];
+        console.log(randomDirection + " selected");
       }
+      else if (currentProcess.string == "helping") console.log("no direction found, so it will be a random one");
       }
       if (currentProcess.string == "straight" || (currentProcess.string == "random" && possibleDirections[randomDirection] == "straight")) {
         if (!currentDirection.bottom) x.bottom += currentDirection.x;
@@ -73,6 +83,7 @@
         if (!currentDirection.top) y.top += currentDirection.y;
         if (currentProcess.counter == 0) {
             if (!manualControwl.checked) currentProcess.counter = 11 + Math.round(Math.random()*((window.innerHeight - x.top)));
+            if (currentProcess.counter > window.innerHeight/1.5 || currentProcess.counter < 1) currentProcess.counter = Math.round(Math.random()*((window.innerHeight/1.5)));
             // if (y.bottom + currentProcess.counter > window.innerHeight - JSON.parse(distance.value)) {
             //   console.log("debug");
             //   if (!manualControwl.checked) currentProcess.counter = window.innerHeight - JSON.parse(distance.value) - y.bottom;
@@ -144,11 +155,16 @@
           // }
       }
       }
-      // canvas.fillStyle = "black";
+      canvas.fillStyle = "black";
       canvas.fillRect(x.top, y.top, 1, 1);
       canvas.fillRect(x.bottom, y.bottom, 1, 1);
-      // canvas.fillStyle = "#6E6E6E";
-      // canvas.fillRect(x.top + currentDirection.y, y.top + currentDirection.x, 1, JSON.parse(distance.value) - 1);
+      if (fill.checked && !currentProcess.turning) {
+        canvas.fillStyle = "#6E6E6E";
+        if (currentDirection.x == 1 && currentDirection.y == 0) canvas.fillRect(x.top + currentDirection.y, y.top + currentDirection.x, 1, JSON.parse(distance.value) - 1);
+        if (currentDirection.x == -1 && currentDirection.y == 0) canvas.fillRect(x.top + currentDirection.y, y.top - JSON.parse(distance.value) + 1, 1, JSON.parse(distance.value) - 1);
+        if (currentDirection.x == 0 && currentDirection.y == 1) canvas.fillRect(x.bottom + 1, y.bottom, JSON.parse(distance.value) - 1, 1);
+        if (currentDirection.x == 0 && currentDirection.y == -1) canvas.fillRect(x.top + 1, y.top, JSON.parse(distance.value) - 1, 1);
+      }
       /*if (!manualControwl.checked) */currentProcess.counter--;
       if (currentProcess.counter == 0) {
         if (currentDirection.bottom || currentDirection.top) {
