@@ -8,9 +8,10 @@
   <option id="magnetSelection" value="magnet">magnet</option>
   <option id="allDirectionsSelection" value="allDirections">all directions</option>
   <option id="slideSelection" value="slide">slide</option>
-  <option id="oppositeSelection" value="opposite">opposite</option>
+  <!-- <option id="oppositeSelection" value="opposite">opposite</option> -->
   <option value="showScores">show scores</option>
 </select>
+<input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
 <br>
 <select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
 <select id="checkpointSelection" onchange="checkpointSelected(value);">
@@ -19,6 +20,16 @@
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before (checkpoint will be removed)</button>
 <br>
 <button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
+<br>
+<h3>sensibility</h3>
+<input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, the progress and the score will not be saved after leaving the website. If you do not want to continue, please press cancel!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
+<button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
+<br>
+<select id="tabletPositionModeSelection">
+  <option>flat (most natural)</option>
+  <option>almost on end (slopes away from you a bit, best? for your posture)</option>
+  <option>on end (better for your posture)</option>
+</select>
 <div id="ball">
   <style>
     .shape {
@@ -50,6 +61,13 @@
 <table id="scores"></table>
 
 <script>
+  function normalSensibility() {
+    if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
+    else if (!level[level.mode][level.aktuell].sensibility) sensibility = {x: 17, y: 17};
+    else sensibility = level[level.mode][level.aktuell].sensibility;
+    document.getElementById('sensibility').value = sensibility;
+    saveHighscores = true;
+  }
   var canvas = textur.getContext('2d'); //Dimension
   var highscores = {};
   var checkpoints = {};
@@ -557,6 +575,9 @@ localStorage.setItem("storedName", name);
 function getDatabase() {
   dbGet("transportTheBall", "checkpoints " + name).then(result => {
     checkpoints = JSON.parse(result)
+  }).catch(function(e) {
+    console.log(e);
+  });
   dbGet("transportTheBall", "highscores").then(result => {
     highscores = JSON.parse(result);
     for (var i = 0; i < Object.keys(level).length; i++) {
@@ -570,9 +591,6 @@ function getDatabase() {
     levelSelector.style.display = "none";
     modeSelected("normal");
   });
-}).catch(function(e) {
-  console.log(e);
-});
 }
 function checkpointSelected(value) {
   if (value.includes(".")) checkpoint.push(JSON.parse(JSON.stringify(checkpoint[value.split(".")[0]])));
@@ -598,10 +616,14 @@ function checkpointSelected(value) {
   //   }
   //   else scrolling = false;
   // }
+  var sensibility = {x: 17, y: 17};
   if (window.DeviceMotionEvent != undefined) {
     window.ondevicemotion = function(e) {
-      ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
-      ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
+      if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
+      else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
+      else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibility.x);
+      if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibility.y;
+      else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
     }
     setInterval(function() {
       // zoom: window.parent.document.body.style.zoom = 1.5;
@@ -931,6 +953,7 @@ function checkpointSelected(value) {
           sphere.ball.style.left = "0px";
           ball.x = 0;
           ball.y = 0;
+          // inOrAgainstDirection = 0;
           //restartLevel();
           setHighscores(true);
       }
@@ -1014,7 +1037,7 @@ function checkpointSelected(value) {
     return onTeleporterObj;
   }
   function addToHighscore(pNextLevel) {
-    if (gameModeSelection.value == "opposite") level.mode = "opposite";
+    if (oppositeCheck.checked) level.mode += ' opposite';
     if (!highscores[level.mode]) highscores[level.mode] = {};
     if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
     if (!highscores[level.mode][level.aktuell] || !highscores[level.mode][level.aktuell][name] || highscores[level.mode][level.aktuell][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][name] = mins + ":" + secs + ":" + "0" + tenths;
@@ -1026,12 +1049,12 @@ function checkpointSelected(value) {
     }, 1000);
     if (pNextLevel) nextLevel();
     else winnerScreen();
-    if (level.mode == "opposite") level.mode = "normal";
+    level.mode.replace(' opposite', '');
   }
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      // dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -1117,8 +1140,8 @@ function checkpointSelected(value) {
     textur.height = Bild.height;
     canvas.drawImage(Bild, 0, 0);
     for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
-      /*if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) canvas.fillStyle = "rgba(168, 230, 29, 1)";
-      else */canvas.fillStyle = "blue";
+      if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) canvas.fillStyle = "rgba(168, 230, 29, 1)";
+      else canvas.fillStyle = "blue";
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y, cssToNumber(ball.width), ball.height);
       canvas.fillStyle = "red";
@@ -1170,6 +1193,8 @@ function checkpointSelected(value) {
     setTimeout(function () {
       scrollingInterac.PC = false;
     }, 1000);
+    if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
+    else if (saveHighscores) sensibility = {x: 17, y: 17};
   }
 
   function nextLevel() {
@@ -1180,8 +1205,10 @@ function checkpointSelected(value) {
     }, 500);
     setupLevel();
     levelSelected(level.aktuell + ". level");
+    // inOrAgainstDirection = 1;
   }
   var heartBeatInt
+  var saveHighscores = true;
   function heartBeatFunc() {
     if (level[level.mode][level.aktuell].heart.ball && sphere.ball.heartBeatAction != false) {
       /*sphere.*/sphere.ball.style.width = cssToNumber(sphere.ball.style.width) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
@@ -1347,7 +1374,6 @@ function checkpointSelected(value) {
       levelSelected(/*"1. level"*/mapsFinished + ". level");
   }
     else levelSelected(/*"1. level"*/(mapsFinished + 1) + ". level");
-    if (mode == "opposite") {inOrAgainstDirection *= -1; level.mode = "normal";}
     // else inOrAgainstDirection = 1;
 }
   else {
