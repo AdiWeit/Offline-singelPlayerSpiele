@@ -237,6 +237,7 @@ localStorage.setItem("storedName", name);
           },
           angle: 144,
           miliSecsPerRotation: 2333,
+          miliSecsPerRotationEasy: 4666,
           sizeRelationToOriginal: 6.4
         }
         ]
@@ -280,12 +281,14 @@ localStorage.setItem("storedName", name);
         },
         angle: 144,
         miliSecsPerRotation: 11111,
+        miliSecsPerRotationEasy: 17777,
         sizeRelationToOriginal: 6.4,
         heart: {
-          onceInMiliSec: 1111
+          onceInMiliSec: 1111,
+          onceInMiliSecEasy: 2777
         }
       }
-      ]
+    ],
     },
     5: {
       spawnPoint: {
@@ -1557,9 +1560,11 @@ function renderLoop(time) {
     for (var i = 0; i < level[level.mode][level.aktuell].rotating.length; i++) {
       if (level[level.mode][level.aktuell].rotating[i].angle) angle = level[level.mode][level.aktuell].rotating[i].angle;
       if (level[level.mode][level.aktuell].rotating[i].miliSecsPerRotation) miliSecsPerRotation = level[level.mode][level.aktuell].rotating[i].miliSecsPerRotation;
+      if (easyMaps.checked && level[level.mode][level.aktuell].rotating[i].miliSecsPerRotationEasy) miliSecsPerRotation = level[level.mode][level.aktuell].rotating[i].miliSecsPerRotationEasy;
       if (level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal) sizeRelationToOriginal = level[level.mode][level.aktuell].rotating[i].sizeRelationToOriginal;
       scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       if (level[level.mode][level.aktuell].rotating[i].heart && level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec) scale2 = Math.cos(time / level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+      else if (easyMaps.checked && level[level.mode][level.aktuell].rotating[i].heart && level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSecEasy) scale2 = Math.cos(time / level[level.mode][level.aktuell].rotating[i].heart.onceInMiliSecEasy) * 0.4 + sizeRelationToOriginal;
       else scale2 = sizeRelationToOriginal;
     if (level[level.mode][level.aktuell].rotating[i].shape && level[level.mode][level.aktuell].rotating[i].shape == "triangle") drawPath_V2(triangle, level[level.mode][level.aktuell].rotating[i].position.x, level[level.mode][level.aktuell].rotating[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
     // scale path
