@@ -11,7 +11,9 @@
   <!-- <option id="oppositeSelection" value="opposite">opposite</option> -->
   <option value="showScores">show scores</option>
 </select>
-<input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
+<input id="easyMaps" type="checkbox"> easy map versiosn
+<br>
+<input type="checkbox" onchange="inOrAgainstDirection *= -1; setupLevel(true);" id="oppositeCheck"> opposite
 <br>
 <select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
 <select id="checkpointSelection" onchange="checkpointSelected(value);">
@@ -139,6 +141,16 @@ localStorage.setItem("storedName", name);
               min: 2,
               max: 1
             }
+          }
+        },
+        sizes: {
+          schieber: {
+            width: 47,
+            height: 47
+          },
+          ball: {
+            width: 44,
+            height: 44
           }
         }
       },
@@ -1038,6 +1050,7 @@ function checkpointSelected(value) {
   }
   function addToHighscore(pNextLevel) {
     if (oppositeCheck.checked) level.mode += ' opposite';
+    if (easyMaps.checked) level.mode += ' easy_maps';
     if (!highscores[level.mode]) highscores[level.mode] = {};
     if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
     if (!highscores[level.mode][level.aktuell] || !highscores[level.mode][level.aktuell][name] || highscores[level.mode][level.aktuell][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][name] = mins + ":" + secs + ":" + "0" + tenths;
@@ -1047,9 +1060,10 @@ function checkpointSelected(value) {
         if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
       }
     }, 1000);
+    level.mode = level.mode.replace(' opposite', '');
+    level.mode = level.mode.replace(' easy_maps', '');
     if (pNextLevel) nextLevel();
     else winnerScreen();
-    level.mode.replace(' opposite', '');
   }
   var dbSetWarteschlange = [];
   setInterval(function () {
@@ -1135,7 +1149,8 @@ function checkpointSelected(value) {
 
   function Layout() {
     if (level.aktuell != "winnerScreen") {
-    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
+    if (easyMaps.checked) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/easy_versions/" + level.mode + "/map" + level.aktuell + ".png";
+    else Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
     textur.width = Bild.width;
     textur.height = Bild.height;
     canvas.drawImage(Bild, 0, 0);
@@ -1193,8 +1208,6 @@ function checkpointSelected(value) {
     setTimeout(function () {
       scrollingInterac.PC = false;
     }, 1000);
-    if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
-    else if (saveHighscores) sensibility = {x: 17, y: 17};
   }
 
   function nextLevel() {
@@ -1236,11 +1249,9 @@ function checkpointSelected(value) {
       sphere.schieber.direction =  1;
       heartBeatStop("schieber", "min");
     }
-    if (level[level.mode][level.aktuell].heart != undefined) {
       setTimeout(function () {
-        heartBeatFunc();
+        if (level[level.mode][level.aktuell].heart != undefined) heartBeatFunc();
       }, 100);
-    }
     ball.width = cssToNumber(sphere.ball.style.width);
     ball.height = cssToNumber(sphere.ball.style.height);
   }
@@ -1252,8 +1263,11 @@ function checkpointSelected(value) {
       }, level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]*1000);
     }
   }
-  function setupLevel() {
-    checkpoint = [{schieber: {x: level[level.mode][level.aktuell].spawnPoint.schieber.x, y: level[level.mode][level.aktuell].spawnPoint.schieber.y}, ball: {x: level[level.mode][level.aktuell].spawnPoint.ball.x, y: level[level.mode][level.aktuell].spawnPoint.ball.y}}];
+  function setupLevel(direction) {
+    if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
+    else if (saveHighscores) sensibility = {x: 17, y: 17};
+    sensibility.value = sensibility.x;
+    if (!direction) checkpoint = [{schieber: {x: level[level.mode][level.aktuell].spawnPoint.schieber.x, y: level[level.mode][level.aktuell].spawnPoint.schieber.y}, ball: {x: level[level.mode][level.aktuell].spawnPoint.ball.x, y: level[level.mode][level.aktuell].spawnPoint.ball.y}}];
     restartLevel();
     ball.width = level[level.mode][level.aktuell].sizes.ball.width;
     ball.height = level[level.mode][level.aktuell].sizes.ball.height;
@@ -1261,7 +1275,7 @@ function checkpointSelected(value) {
     sphere.schieber.style.height = level[level.mode][level.aktuell].sizes.schieber.height + "px";
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
-    if (level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc();}
+    if (!direction && level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc();}
   }
   var directionBefore = [];
 
