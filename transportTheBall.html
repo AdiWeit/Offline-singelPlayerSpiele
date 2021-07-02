@@ -21,7 +21,7 @@
 </select>
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before (checkpoint will be removed)</button>
 <br>
-<button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
+<button type="button" onclick="scrollingInterac.user = false; window.scroll(cssToNumber(sphere.schieber.style.left), cssToNumber(sphere.schieber.style.top))" name="button">autoscroll again</button>
 <br>
 <h3>sensibility</h3>
 <input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, the progress and the score will not be saved after leaving the website. If you do not want to continue, please press cancel!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
@@ -1282,6 +1282,7 @@ function checkpointSelected(value) {
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
     if (!direction && level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc(true);}
+    scrollingInterac.user = false;
   }
   var directionBefore = [];
 
