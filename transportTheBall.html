@@ -130,7 +130,8 @@ localStorage.setItem("storedName", name);
             pixelPerFunctionCall: 3,
             waitBeforeDirectionSwitchInSec: {
               min: 1,
-              max: 2
+              max: 2,
+              levelBegin: 0
             }
           },
           schieber: {
@@ -1222,7 +1223,7 @@ function checkpointSelected(value) {
   }
   var heartBeatInt
   var saveHighscores = true;
-  function heartBeatFunc() {
+  function heartBeatFunc(firstCall) {
     if (level[level.mode][level.aktuell].heart.ball && sphere.ball.heartBeatAction != false) {
       /*sphere.*/sphere.ball.style.width = cssToNumber(sphere.ball.style.width) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
       /*sphere.*/sphere.ball.style.height = cssToNumber(sphere.ball.style.height) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
@@ -1233,21 +1234,21 @@ function checkpointSelected(value) {
     }
     if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) > level[level.mode][level.aktuell].heart.ball.max && sphere.ball.heartBeatAction != false) {
       ball.direction = -1;
-      heartBeatStop("ball", "max");
+      heartBeatStop("ball", "max", firstCall);
     }
     if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) < level[level.mode][level.aktuell].heart.ball.min && sphere.ball.heartBeatAction != false) {
       ball.direction =  1;
-      heartBeatStop("ball", "min");
+      heartBeatStop("ball", "min", firstCall);
     }
     // if (ball.height > level[level.mode][level.aktuell].heart.ball.max) ball.direction = -1;
     // if (ball.height < level[level.mode][level.aktuell].heart.ball.min) ball.direction =  1;
     if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) > level[level.mode][level.aktuell].heart.schieber.max && sphere.schieber.heartBeatAction != false) {
       sphere.schieber.direction = -1;
-      heartBeatStop("schieber", "max");
+      heartBeatStop("schieber", "max", firstCall);
     }
     if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) < level[level.mode][level.aktuell].heart.schieber.min && sphere.schieber.heartBeatAction != false) {
       sphere.schieber.direction =  1;
-      heartBeatStop("schieber", "min");
+      heartBeatStop("schieber", "min", firstCall);
     }
       setTimeout(function () {
         if (level[level.mode][level.aktuell].heart != undefined) heartBeatFunc();
@@ -1255,12 +1256,14 @@ function checkpointSelected(value) {
     ball.width = cssToNumber(sphere.ball.style.width);
     ball.height = cssToNumber(sphere.ball.style.height);
   }
-  function heartBeatStop(component, extrempunt) {
+  function heartBeatStop(component, extrempunt, firstCall) {
     if (level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]) {
       sphere[component].heartBeatAction = false;
+      var time = level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]*1000;
+      if (firstCall && level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec.levelBegin != undefined) time = level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec.levelBegin;
       setTimeout(function () {
         sphere[component].heartBeatAction = true;
-      }, level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]*1000);
+      }, time);
     }
   }
   function setupLevel(direction) {
@@ -1275,7 +1278,7 @@ function checkpointSelected(value) {
     sphere.schieber.style.height = level[level.mode][level.aktuell].sizes.schieber.height + "px";
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
-    if (!direction && level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc();}
+    if (!direction && level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc(true);}
   }
   var directionBefore = [];
 
