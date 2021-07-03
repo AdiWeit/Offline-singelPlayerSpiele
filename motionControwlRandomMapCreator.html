@@ -1,4 +1,4 @@
-size of track: 
+size of track:
 <input type="range" min="52" max="300" value="100" id="distance" placeholder="distance">
 <button type="button" onclick="drawRandomMap(true);" name="button">create</button>
 <input id="manualControwl" type="checkbox"> controwl with arrows
@@ -25,13 +25,17 @@ size of track:
     <div class ="shape" id="sphere1"></div>
   <div class ="shape" id="sphere2"></div>
 </div>
-<select name="course" id="modeSelection" onchange="inOrAgainstDirection *= -1;">
-  <option value="normal">normal</option>
-  <option value="opposite">opposite</option>
-</select>
+<h3>sensibility: </h3>
+<input type="range" onchange="sensibility = {x: value, y: value}" min="1" max="25" value="5">
+<input onchange="inOrAgainstDirection *= -1;" type="checkbox"> opposite
 <br>
-<input type="checkbox" id="senkrecht"> senkrecht
+<select id="tabletPositionModeSelection">
+  <option>flat (most natural)</option>
+  <option>almost on end (slopes away from you a bit, best? for your posture)</option>
+  <option>on end (better for your posture)</option>
+</select>
 <script>
+  var sensibility = {x: 5, y: 5};
   textur.width = window.innerWidth - textur.getBoundingClientRect().left;
   textur.height = window.innerHeight - textur.getBoundingClientRect().top;
     var canvas = textur.getContext('2d'); //Dimension
@@ -284,10 +288,12 @@ size of track:
   sphere1.style.height = 50;
   var direction = "long";
   if (window.DeviceMotionEvent != undefined) {
-   window.ondevicemotion = function(e) {
-    if (senkrecht.checked) ax1 = inOrAgainstDirection*((event.accelerationIncludingGravity.z - 6) * (-17));
-    else ax1 = inOrAgainstDirection*((event.accelerationIncludingGravity.x) * 17);
-    ay1 = inOrAgainstDirection*((event.accelerationIncludingGravity.y) * 17);
+    window.ondevicemotion = function(e) {
+      if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
+      else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
+      else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibility.x);
+      if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibility.y;
+      else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
    }
    setInterval( function() {
      var landscapeOrientation = window.innerWidth/window.innerHeight > 1;
