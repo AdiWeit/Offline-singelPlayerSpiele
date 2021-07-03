@@ -6,7 +6,7 @@
 <html>
 
 <head>
-  <title>Accelerometer</title>
+  <title>game of caution</title>
   <canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
   <p><img id="preview"></p>
   <meta name="viewport" content="width=device-width,user-scalable=yes" />
@@ -89,6 +89,7 @@
   </div>
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
+  <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
   <br>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
@@ -97,8 +98,15 @@
   </select>
   <br>
   <h1 id="nameEingeloggt" onclick='changeName();'></h1>
-  <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button>
+  <!-- <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button> -->
+  <br>
+  <select id="tabletPositionModeSelection">
+    <option>flat (most natural)</option>
+    <option>almost on end (slopes away from you a bit, best? for your posture)</option>
+    <option>on end (better for your posture)</option>
+  </select>
   <script type="text/javascript">
+  var inOrAgainstDirection = 1;
   window.onbeforeunload = function(){
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -136,16 +144,14 @@
       sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
     }
   }
+  var sensibilityAcc = {x: 5, y: 5};
   function sensibility(value, backToNormal) {
 //    if (value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {
-      if (backToNormal == true || level[level.mode].levelType == "editHistory" || level[level.mode].levelType || "editLevel" || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
+      if (backToNormal == true || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "editLevel" || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
       if ((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") && backToNormal == true) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
       if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility = document.getElementById('sensibility').value; value = document.getElementById('sensibility').value;}
       document.getElementById('sensibility').value = value;
-      window.ondevicemotion = function(e) {
-        ax1 = event.accelerationIncludingGravity.x * value;
-        ay1 = event.accelerationIncludingGravity.y * value;
-    }
+      sensibilityAcc = {x: value, y: value};
   //}
   }
     function changing(id) {
@@ -354,7 +360,7 @@
           }]
         },
         4: {
-          sensibility: 5,
+          sensibility: 15,
           spawnPoint: {
             x: 10,
             y: 255
@@ -451,7 +457,7 @@
             x: 10,
             y: 255
           }
-        },
+        }/*,
         12: {
           sensibility: 5,
           spawnPoint: {
@@ -473,7 +479,7 @@
               radius: 50
             }
           ]
-        },
+        },*/
       },
       editLevel: {
         selectedLevel: 1
@@ -675,14 +681,14 @@
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i + 1);
         opt.text = "show Scores";
-        opt = document.createElement("option");
-        document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", i + 2);
-        opt.text = "upload own level";
-        opt = document.createElement("option");
-        document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", i + 2);
-        opt.text = "play from world wide web";
+        // opt = document.createElement("option");
+        // document.getElementById("courceSelection").options.add(opt);
+        // opt.setAttribute("id", i + 2);
+        // opt.text = "upload own level";
+        // opt = document.createElement("option");
+        // document.getElementById("courceSelection").options.add(opt);
+        // opt.setAttribute("id", i + 2);
+        // opt.text = "play from world wide web";
       }
       else {
         visible([["modeSelection", "none"]]);
@@ -1073,6 +1079,8 @@
       if (offline == false)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
       else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
     }
+    document.getElementById('sensibility').value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
+    sensibilityAcc = {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility};
     }
 
     function imageLoaded(input) {
@@ -1091,8 +1099,11 @@
     sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
     if (window.DeviceMotionEvent != undefined) {
       window.ondevicemotion = function(e) {
-        ax1 = event.accelerationIncludingGravity.x * 5;
-        ay1 = event.accelerationIncludingGravity.y * 5;
+        if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
+        else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
+        else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibilityAcc.x);
+        if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibilityAcc.y;
+        else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
       }
       setInterval(function() {
         var landscapeOrientation = window.innerWidth / AblageListe[5] > 1;
@@ -1262,6 +1273,9 @@
     }
 
     function zielErreicht() {
+      if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
+        alert("every vorgefertigt level finished! That was the last one :(  )");
+      }
       if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || (level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility == undefined && level[level.mode].levelType == "editLevel")) {
       if (level[level.mode].levelType == "worldWideLevel") {
         level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name].finished = true;
@@ -1447,12 +1461,12 @@
     //  if (level[level.mode].levelType == "vorgefertigt") Layout();
       for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
         time = AblageListe[0];
-        time += level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle * 10000
+        // time += level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle * 10000
           if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number]
             .rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ , time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) *
-            Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "blue", "blue", i); //360 every 2 second
+            Math.PI + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "blue", "blue", i); //360 every 2 second
           else drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ ,
-            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
+            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
       }
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
