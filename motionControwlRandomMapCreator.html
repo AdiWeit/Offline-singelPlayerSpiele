@@ -1,4 +1,5 @@
-<input type="text" value="100" id="distance" placeholder="distance">
+size of track: 
+<input type="range" min="52" max="300" value="100" id="distance" placeholder="distance">
 <button type="button" onclick="drawRandomMap(true);" name="button">create</button>
 <input id="manualControwl" type="checkbox"> controwl with arrows
 <input id="stopBeforeCollision" type="checkbox"> stop before collision
@@ -23,7 +24,6 @@
 <div id="content">
     <div class ="shape" id="sphere1"></div>
   <div class ="shape" id="sphere2"></div>
-  <div>some text or other html</div>
 </div>
 <select name="course" id="modeSelection" onchange="inOrAgainstDirection *= -1;">
   <option value="normal">normal</option>
