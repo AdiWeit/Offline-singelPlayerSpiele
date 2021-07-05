@@ -612,7 +612,12 @@
     var highscores = {}
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
-    if (!localStorage.getItem("storedName")) var name = prompt("Wie heißen sie (Spitzname möglich)? (Diese Info ist nötig, um ihre Highscores (Bestzeit) zu speichern! ");
+    if (!localStorage.getItem("storedName")) {
+      var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+      while (Object.keys(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+        var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+      }
+    }
     else var name = localStorage.getItem("storedName");
     changeName(true);
     localStorage.setItem("storedName", name);
@@ -626,7 +631,8 @@
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
     function changeName(nameSelected) {
-      if (!nameSelected) name = prompt ("Mit welchem Namen wollen sie sich eingloggen?");
+      document.getElementById("courceSelection").options.length = 0;
+      if (!nameSelected) name = prompt ("Which user do you want to log in?");
       nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
       dbGet("Gelduldspiel", "highscores").then(result => {
         folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
@@ -693,6 +699,11 @@
       else {
         visible([["modeSelection", "none"]]);
         highscores.normal[name] = [];
+        opt = document.createElement("option");
+        document.getElementById("courceSelection").options.add(opt);
+        opt.setAttribute("id", 0);
+        opt.text = (1) + ". map"
+        courceSelection.value = "1. map";
       }
       if (highscores[level.mode][name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
@@ -1352,6 +1363,16 @@
     if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
   }
     function showScores(highscores) {
+      for (var i = 0; i < 11; i++) {
+        try {
+          document.getElementById("scores").deleteRow(0);
+        } catch (e) {
+          console.log("wanted to delete too many elements of table");
+          i = 11
+        }
+      }
+      var highscoresBefore = JSON.parse(JSON.stringify(highscores));
+      delete highscores.allMaps;
       document.getElementById('textur').style.display = "none";
       console.log("scores: " + highscores);
       var cell = [ /*row.insertCell(0)*/ ];
@@ -1367,9 +1388,9 @@
           if (!(Object.keys(highscores)[i] == "allMaps")) {
             if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
-              cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1 - 1];
-              if (highscores[Object.keys(highscores)[i]][i1 - 1] > highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "red";
-              else if (highscores[Object.keys(highscores)[i]][i1 - 1] < highscores[name][i1 - 1]) cell[cell.length - 2].style.color = "green";
+              if (highscores[Object.keys(highscores)[i]][i1]) cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1];
+              if (highscores[Object.keys(highscores)[i]][i1] > highscores[name][i1]) cell[cell.length - 2].style.color = "green";
+              else if (highscores[Object.keys(highscores)[i]][i1] < highscores[name][i1]) cell[cell.length - 2].style.color = "red";
               else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
               else cell[cell.length - 2].style.color = "black";
 
@@ -1380,7 +1401,7 @@
             }
           }
         }
-        var row = table.insertRow(i);
+        if (table) var row = table.insertRow(i);
         if (i == 0) {}
         //  var row = table.insertRow(i+1);
         // var row = table.insertRow(i + 1);
@@ -1427,6 +1448,7 @@
       localStorage.setItem("uploadScore", true);
     }
     }
+    highscores = highscoresBefore;
     }
     // Für rotatingDreieck:
     const point = (x, y) => ({
@@ -1720,7 +1742,7 @@
     }
 
     function activateBullets() {
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
+      for (var i = 0; level[level.mode].levelType != "showScores" && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
         level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done = 0;
         bulletInterval[i] = true;
         bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPointInSec, level[level.mode].levelType, level[level.mode].number);
