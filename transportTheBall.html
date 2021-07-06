@@ -1,7 +1,7 @@
 <title>transport the ball</title>
 <meta charset="utf-8">
 <canvas id="textur" width="1582" height="740"></canvas>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Which user(name) do you want to log in?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
   <option id="normalSelection" value="normal">normal</option>
@@ -11,7 +11,7 @@
   <!-- <option id="oppositeSelection" value="opposite">opposite</option> -->
   <option value="showScores">show scores</option>
 </select>
-<input id="easyMaps" type="checkbox"> easy map versiosn
+<input id="easyMaps" type="checkbox"> easy map versions
 <br>
 <input type="checkbox" onchange="inOrAgainstDirection *= -1; setupLevel(true);" id="oppositeCheck"> opposite
 <br>
@@ -73,7 +73,12 @@
   var canvas = textur.getContext('2d'); //Dimension
   var highscores = {};
   var checkpoints = {};
-  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  if (!localStorage.getItem("storedName")) {
+    var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+    while (Object.keys(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+      var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+    }
+  }
   else var name = localStorage.getItem("storedName");
 localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
@@ -817,7 +822,8 @@ function checkpointSelected(value) {
     }, 25);
   }
   else if (gerät == "Handy") {
-    alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
+    alert("Please call up this website as https (secure) to be able to use the required motion control (Chrome recommended)");
+    // alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
     gerät = "unsaveHandyBrowser";
   }
   var scrollingInterac = {user: false, PC: false}
@@ -979,7 +985,8 @@ function checkpointSelected(value) {
         sphere.ball.style.left = "0px";
         ball.x = 0;
         ball.y = 0;
-        alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
+        alert("This was the last level :( but you can check out the other modes if you haven't done that already!");
+        // alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
         setHighscores();
         zaehler = "newLevel";
         setTimeout(function () {
@@ -1072,7 +1079,7 @@ function checkpointSelected(value) {
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      // dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -1396,6 +1403,7 @@ function checkpointSelected(value) {
   }
     else levelSelected(/*"1. level"*/(mapsFinished + 1) + ". level");
     // else inOrAgainstDirection = 1;
+    gameModeSelection.value = mode;
 }
   else {
     showScores(highscores);
