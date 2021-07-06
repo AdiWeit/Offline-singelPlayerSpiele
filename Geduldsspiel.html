@@ -90,6 +90,7 @@
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
+  <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
   <br>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
@@ -106,6 +107,22 @@
     <option>on end (better for your posture)</option>
   </select>
   <script type="text/javascript">
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    joyStickPlayP.style.display = "none";
+    joyStickPlay.checked = true;
+    console.log("PC");
+  }
   var inOrAgainstDirection = 1;
   window.onbeforeunload = function(){
   console.log("Leave Website");
@@ -642,8 +659,8 @@
           }
           localStorage.setItem("uploadScore", false);
         }
-        if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
-          highscores[level.mode][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
+        if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][joyStickPlay.checked][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
+          highscores[level.mode][joyStickPlay.checked][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
         }
       }).catch(function(e) {
         console.error(e);
@@ -670,9 +687,9 @@
         highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
       }
     }
-        if (highscores[level.mode][name] != undefined && Object.keys(highscores[level.mode][name]).length > 0) {
+        if (highscores[level.mode][false] && highscores[level.mode][false][name] != undefined && Object.keys(highscores[level.mode][false][name]).length > 0 && (!highscores[level.mode][true] || !highscores[level.mode][true][name] || Object.keys(highscores[level.mode][false][name]).length >= Object.keys(highscores[level.mode][true][name]).length)) {
         for (var i = 0;
-          (i < Object.keys(highscores[level.mode][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][name].length*/; i++) {
+          (i < Object.keys(highscores[level.mode][false][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
           opt = document.createElement("option");
           document.getElementById("courceSelection").options.add(opt);
           opt.setAttribute("id", i);
@@ -687,15 +704,25 @@
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i + 1);
         opt.text = "show Scores";
-        // opt = document.createElement("option");
-        // document.getElementById("courceSelection").options.add(opt);
-        // opt.setAttribute("id", i + 2);
-        // opt.text = "upload own level";
-        // opt = document.createElement("option");
-        // document.getElementById("courceSelection").options.add(opt);
-        // opt.setAttribute("id", i + 2);
-        // opt.text = "play from world wide web";
       }
+      else if (highscores[level.mode][true] && highscores[level.mode][true][name] != undefined && Object.keys(highscores[level.mode][true][name]).length > 0 && (!highscores[level.mode][false] || !highscores[level.mode][false][name] || Object.keys(highscores[level.mode][true][name]).length >= Object.keys(highscores[level.mode][false][name]).length)) {
+      for (var i = 0;
+        (i < Object.keys(highscores[level.mode][true][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
+        opt = document.createElement("option");
+        document.getElementById("courceSelection").options.add(opt);
+        opt.setAttribute("id", i);
+        opt.text = (i + 1) + ". map"
+        opt1 = document.createElement("option");
+        document.getElementById("courceSelectionEdit").options.add(opt1);
+        opt1.setAttribute("id", i);
+        opt1.text = (i + 1) + ". map"
+        AblageListe[0] = i;
+      }
+      opt = document.createElement("option");
+      document.getElementById("courceSelection").options.add(opt);
+      opt.setAttribute("id", i + 1);
+      opt.text = "show Scores";
+    }
       else {
         visible([["modeSelection", "none"]]);
         highscores.normal[name] = [];
@@ -705,10 +732,10 @@
         opt.text = (1) + ". map"
         courceSelection.value = "1. map";
       }
-      if (highscores[level.mode][name].length == 0) courceSelected();
+      if (!highscores[level.mode][joyStickPlay.checked][name] || highscores[level.mode][joyStickPlay.checked][name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
       document.getElementById('courceSelection').value = "select map!";
-      if (highscores[level.mode][name].length > 0 && offline == false) {
+      if (highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0 && offline == false) {
       dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
         folgenDbGetLevelAroundTheWorld(result, false);
       }).catch(function(e) {
@@ -733,7 +760,7 @@
         app._data.db.push("create new level");
       });
     }
-    else if (localStorage.getItem("profileName") == name && highscores[level.mode][name].length > 0) {
+    else if (localStorage.getItem("profileName") == name && highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0) {
       folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
       folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
     }
@@ -912,7 +939,7 @@
       level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
       /*if (document.getElementById('modeSelection').value == "survive") */
-      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores[level.mode]);document.getElementById('levelEditTool').style.display = "none";level[level.mode].levelType = "showScores";        clearInterval(BlinkWall);
+      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores[level.mode][joyStickPlay.checked]);document.getElementById('levelEditTool').style.display = "none";level[level.mode].levelType = "showScores";        clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);}
       else if (document.getElementById('courceSelection').value == "upload own level") {
@@ -1035,7 +1062,7 @@
         clearInterval(BlinkWall);
         document.getElementById('levelEditTool').style.display = "none";
         level[level.mode].levelType = "vorgefertigt";
-      //  if (highscores[level.mode][name] != undefined && highscores[level.mode][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
+      //  if (highscores[level.mode][joyStickPlay.checked][name] != undefined && highscores[level.mode][joyStickPlay.checked][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
         if (document.getElementById('courceSelection').value != "") level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
           alert("every vorgefertigt level finished! That was the last one :(  )");
@@ -1108,7 +1135,7 @@
     }
     sphere1.style.width = (window.innerWidth / 40 + 66) / 2 + "px";
     sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
-    if (window.DeviceMotionEvent != undefined) {
+    if (window.DeviceMotionEvent != undefined || joyStick.coordinates) {
       window.ondevicemotion = function(e) {
         if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
         else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
@@ -1117,6 +1144,16 @@
         else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
       }
       setInterval(function() {
+        // joy-stick:
+        var nextCoordinates = {x: 0, y: 0};
+        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores") {
+          if (!level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) Layout();
+          if (joyStick && joyStick.coordinates) {
+            if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 + (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
+            else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 - (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
+          }
+        }
+        // else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
         var landscapeOrientation = window.innerWidth / AblageListe[5] > 1;
         if (landscapeOrientation) {
           vx1 = vx1 + ay1;
@@ -1140,6 +1177,14 @@
         x2 = parseInt(x2 + vx2 / 30);
         //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
         boundingBoxCheck();
+        if (joyStickPlay.checked) {
+          x1 = nextCoordinates.x;
+          y1 = nextCoordinates.y;
+          if (x1 < 0) x1 = 0;
+          if (x1 > textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""))) x1 = textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""));
+          if (y1 < 0) y1 = 0;
+          if (y1 > textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""));
+        }
         sphere1.style.top = y1 + "px";
         sphere1.style.left = x1 + "px";
         if ( /*y1 <= AblageListe[5]*/ scrollY == 0 && window.innerHeight == AblageListe[5]) sphere1.style.display = "inline";
@@ -1158,7 +1203,7 @@
           green = data.data[1];
           blue = data.data[2];
           alpha = data.data[3];
-          if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+          if ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177)) {
             console.log("Fail!");
             if (level.mode == "growing") {
               modeSelected("growing");
@@ -1171,6 +1216,18 @@
             time = 0;
           }
           if (red == 255 && blue == 0 && alpha == 255 && green == 242 && level[level.mode].levelType != "editHistory") zielErreicht();
+        }
+        if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
+          canvas.fillStyle = "blue";
+          canvas.beginPath();
+          canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
+          canvas.fill();
+          canvas.strokeStyle = "green";
+          canvas.beginPath();
+          canvas.moveTo(joyStick.coordinates.x, joyStick.coordinates.y);
+          canvas.lineTo(mausx, mausy);
+          canvas.stroke();
+          canvas.closePath();
         }
       }, 25);
     }
@@ -1295,8 +1352,10 @@
         showScores(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0]);
       }
       if (level[level.mode].levelType == "vorgefertigt") {
-        if (highscores[level.mode][name][level[level.mode].number] == undefined || highscores[level.mode][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
-          highscores[level.mode][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
+        if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
+        if (!highscores[level.mode][joyStickPlay.checked][name]) highscores[level.mode][joyStickPlay.checked][name] = [];
+        if (highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
+          highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
           // localStorage.setItem("highscores", JSON.stringify(highscores));
           if (!offline)  dbSetWarteschlange.push({tag: "highscores", data: highscores});
         }
@@ -1308,7 +1367,7 @@
           clearInterval(BlinkWall);
           clearInterval(RotatingWall);
           clearInterval(RotatingDreieck);
-          showScores(highscores[level.mode]);
+          showScores(highscores[level.mode][joyStickPlay.checked]);
         }
       }
       if (level[level.mode].levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
@@ -1340,7 +1399,7 @@
       }
       }
     }
-    else if (level[level.mode].number == highscores[level.mode][name].length) {
+    else if (highscores[level.mode][joyStickPlay.checked] && level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length) {
       alert("gg! Now, try it at normal speed to receve an highscore and maybe even unlock new level)");
     }
     else {
@@ -1353,14 +1412,14 @@
         clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        showScores(highscores[level.mode]);
+        showScores(highscores[level.mode][joyStickPlay.checked]);
       }
     }
     if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
     x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
     y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
   }
-    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
+    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
   }
     function showScores(highscores) {
       for (var i = 0; i < 11; i++) {
@@ -1779,7 +1838,11 @@
       canvas.arc(levelAktuell.position.x,levelAktuell.position.y,levelAktuell.radius,100,Math.PI*2, true);
       canvas.fill();
     }
+    if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
     function canvasClicked() {
+      if (joyStick == "place" && gerät == "PC") {
+        joyStick = {coordinates : {x: mausx, y: mausy}};
+      }
       if (level[level.mode].levelType == "editHistory") {
         AblageListe[0] = [];
         AblageListe[0][0] = [];
@@ -2044,6 +2107,30 @@
       console.log(AblageListe[7]);
       }, 3000);
     }
+
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+    document.addEventListener('touchend', touch);
+    var joyStick;
+  function touch(ev) {
+    if (joyStickPlay.checked && ev.type == "touchend" && joyStick.coordinates) {
+      //textur.style.touchAction = '';
+      mausx = joyStick.coordinates.x;
+      mausy = joyStick.coordinates.y;
+    }
+    if (ev.touches[0] != undefined) {
+        mausx = ev.touches[0]["pageX"]// + scrollX;
+        mausy = ev.touches[0]["pageY"]// + scrollY;
+      }
+    if (joyStickPlay.checked && ev.type == "touchstart" && mausy < textur.getBoundingClientRect().bottom) {
+      joyStick = {coordinates : {x: mausx, y: mausy}};
+      if (!ev.touches[1]) textur.style.touchAction = 'none';
+      else textur.style.touchAction = '';
+    }
+  }
+  function cssToNumber(string) {
+    return JSON.parse(string.toString().split("px")[0]);
+  }
   </script>
 </body>
 
