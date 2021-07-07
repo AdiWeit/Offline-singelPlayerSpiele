@@ -80,7 +80,6 @@ Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked)
 </table>
 <h1 id="nameEingeloggt" onclick='changeName();'></h1>
 <script>
-var alertWhenFinishedSaving = false;
 window.onbeforeunload = function(){
 console.log("Leave Website");
   if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -229,7 +228,7 @@ localStorage.setItem("storedName", name);
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
   var figuresUnlocked = 3;
-  var totalFigures = 15;
+  var totalFigures = 14;
   var figureXP = {have: 0, needed: [3333*30, 4444*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30]};
   var figuresUsed = [];
   var figuresTraining = [];
@@ -333,12 +332,17 @@ localStorage.setItem("storedName", name);
     }
   }*/
   // rotating shapes:
-  function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
+  function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, canvas, doNotRotate) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      canvas.rotate(angle);
+      if (!doNotRotate) canvas.rotate(angle);
+      else {
+        console.log("debug");
+      }
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
+      if (doNotRotate) canvas.setTransform(1, 0, 0, 1, 0, 0);
   }
+  var lowest = {number: 500};
   function renderLoop(time) {
       //canvas.clearRect(0, 0, textur.width, textur.height);
       var scale = Math.sin(time / 500) * 0.2 + 1.0;
@@ -359,7 +363,8 @@ localStorage.setItem("storedName", name);
         if (objective.heart && objective.heart.onceInMiliSec) scale2 = Math.cos(time / objective.heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
         else scale2 = sizeRelationToOriginal;
         // if (objective.shape && objective.shape == "triangle") drawPath_V2(triangle, screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
-        drawPath_V2(doneShapes[objective.shape], screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
+        if (scale2 < lowest.number) {lowest.number = scale2; lowest.time = time};
+        drawPath_V2(doneShapes[objective.shape], screen[i].x + objective.position.x, screen[i].y + objective.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black", canvas); //360 every 2 second
       }
     }
     }
@@ -368,7 +373,7 @@ localStorage.setItem("storedName", name);
         if (pointShapes[i].miliSecsPerRotation) miliSecsPerRotation = pointShapes[i].miliSecsPerRotation;
         if (pointShapes[i].sizeRelationToOriginal) sizeRelationToOriginal = pointShapes[i].sizeRelationToOriginal;
         if (pointShapes[i].onceInMiliSec) scale2 = Math.cos(time / pointShapes[i].onceInMiliSec) * 0.4 + sizeRelationToOriginal;
-        drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black");
+        drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black", canvas);
       }
       // fill scale path
       // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
@@ -576,6 +581,20 @@ else if (gerät == "PC") {
       var Bild = new Image();
       Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + i + ".png";
       canvas.drawImage(Bild, 10 + 477*i, 10);
+      if (objectives[i]) {
+      for (var objective of objectives[i]) {
+        var sizeRelationToOriginal = 1.0;
+        if (objective.sizeRelationToOriginal) sizeRelationToOriginal = objective.sizeRelationToOriginal;
+        scale2 = sizeRelationToOriginal;
+        if (objective.heart && objective.heart.onceInMiliSec) {
+          scale2 = ((-1) * 0.4 + sizeRelationToOriginal);
+          drawPath_V2(doneShapes[objective.shape], 10 + 477*i + objective.position.x, 10 + objective.position.y, scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", canvas, true); //360 every 2 second
+          scale2 = ((1) * 0.4 + sizeRelationToOriginal);
+          drawPath_V2(doneShapes[objective.shape], 10 + 477*i + objective.position.x, 10 + objective.position.y, scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", canvas, true); //360 every 2 second
+        }
+        else drawPath_V2(doneShapes[objective.shape], 10 + 477*i + objective.position.x, 10 + objective.position.y, scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", canvas, true); //360 every 2 second
+      }
+    }
     }
     if (times < 5) {
       setTimeout(function () {
@@ -715,6 +734,14 @@ else if (gerät == "PC") {
           var img = new Image();
           img.src = Object.keys(statistics[modeSelection.value])[i1];
           statisticCanvas.drawImage(img, x*113 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1), 100);
+        //   if (Object.keys(statistics[modeSelection.value])[i1].split('/schema') && objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema1')[1].split('.png')[0]]) {
+        //   for (var objective of objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema')[1].split('.png')[0]]) {
+        //     var sizeRelationToOriginal = 1.0;
+        //     if (objective.sizeRelationToOriginal) sizeRelationToOriginal = objective.sizeRelationToOriginal;
+        //     scale2 = sizeRelationToOriginal;
+        //     drawPath_V2(doneShapes[objective.shape], x*113 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1) + objective.position.x, yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1) + objective.position.y, scale2, (6666 / (7777/2) * Math.PI) + 0, "", "red", statisticCanvas, true); //360 every 2 second
+        //   }
+        // }
         }
         }
       }
@@ -722,7 +749,22 @@ else if (gerät == "PC") {
         var img = new Image();
         img.src = srcNow;
         statisticCanvas.drawImage(img, x*113, yPlus, 100, 100);
+        if (srcNow.split('/schema')[1] && objectives[srcNow.split('/schema')[1].split('.png')[0]]) {
+        for (var objective of objectives[srcNow.split('/schema')[1].split('.png')[0]]) {
+          var sizeRelationToOriginal = 1.0;
+          if (objective.sizeRelationToOriginal) sizeRelationToOriginal = objective.sizeRelationToOriginal;
+          scale2 = sizeRelationToOriginal*(100/426);
+          if (objective.heart && objective.heart.onceInMiliSec) {
+            scale2 = ((-1) * 0.4 + sizeRelationToOriginal)*(100/426);
+            drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
+            scale2 = ((1) * 0.4 + sizeRelationToOriginal)*(100/426);
+            drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
+          }
+          else drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", statisticCanvas, true); //360 every 2 second
+        }
       }
+      }
+      statisticCanvas.fillStyle = "black";
       statisticCanvas.font = "25px Georgia";
       for (var i1 = 0; (srcNow != "all" || Object.keys(statistics[modeSelection.value]).length > 2) && i1 < Object.keys(statistics[modeSelection.value][srcNow]).length; i1++) {
         var text = Object.keys(statistics[modeSelection.value][srcNow])[i1];
