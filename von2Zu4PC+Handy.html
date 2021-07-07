@@ -11,6 +11,11 @@
 <canvas id="textur" width="2570" height="888" style="touch-action: none"></canvas>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDataPlayer();"offline"'></h1>
 <script>
+  var alertWhenFinishedSaving = true;
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -113,7 +118,10 @@ localStorage.setItem("storedName", name);
   canvas.fill();
   */
     if (gerät == "Handy") {
-      $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
+      // $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
+      modeSelection.style.fontSize = "100";
+      BNeueRunde.style.fontSize = "50";
+      BAndereBenutzerAnzeigen.style.fontSize = "75";
     }
     else {
       var zoomRate = 1.0;
@@ -527,7 +535,7 @@ localStorage.setItem("storedName", name);
       mousemoveFolgen();
     }
   }
-
+  var offline = false;
 
    window.addEventListener('mousedown', function() {
     if (gerät == "PC") {
@@ -662,6 +670,10 @@ localStorage.setItem("storedName", name);
       dbSet("von2Zu4", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
+    else if (alertWhenFinishedSaving) {
+  alert("Saving finished! You can now leave the website!");
+  alertWhenFinishedSaving = false;
+}
   }, 2222);
   function doChanger(number) {
     if (number == 2 || number == 4 || number == 6)  {
@@ -874,6 +886,13 @@ localStorage.setItem("storedName", name);
       }
       zählerListe[0]++;
     }
+    zählerListe[0] = 0;
+    while (zählerListe[0] < AblageListe[2].length) {
+      if (AblageListe[2][zählerListe[0]].length == 3) {
+        AblageListe[2][zählerListe[0]] = "0" + AblageListe[2][zählerListe[0]]
+      }
+      zählerListe[0]++;
+    }
     AblageListe[2].sort();
     zählerListe[0] = 0;
     remove0();
@@ -895,7 +914,7 @@ localStorage.setItem("storedName", name);
     if (newHighscore) {
       if (offline) localStorage.setItem("uploadScore" + name, {true: true, myScores: highscores[mode], mode: mode});
       else {
-        dbSetWarteschlange.push({tag: "highscores" + name, data: JSON.stringify(highScores)});//dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
+        dbSetWarteschlange.push({tag: "highscores" + name, data: JSON.stringify(highscores)});//dbSet("von2Zu4", "highscores" + name, JSON.stringify(highscores));
       //  setTimeout(function () {
           dbSetWarteschlange.push({tag: "zweitBesteScores" + name, data: JSON.stringify(zweitBesteScores)});//dbSet("von2Zu4", "zweitBesteScores" + name, JSON.stringify(zweitBesteScores));
       //  }, 1000);
