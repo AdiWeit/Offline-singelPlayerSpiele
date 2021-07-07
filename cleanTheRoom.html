@@ -157,7 +157,7 @@
   </div>
 </div>
 <div id="creationDiv">
-  <button type="button" onclick='document.onkeydown({key: "z", ctrlKey: true})'' name="button"> <-- </button>
+  <button type="button" onclick='document.onkeydown({key: "z", ctrlKey: true})' name="button"> <-- </button>
   <button type="button" onclick="elementSelected(id);" id="staub" name="button">Staub</button>
   <button type="button" onclick="elementSelected(id);" id="schmuck" name="button">Schmuck</button>
   <button type="button" onclick="elementSelected(id);" id="spielzeug" name="button">Spielzeug</button>
@@ -289,6 +289,10 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   <div class="bars" id="trashBar"></div>
 </div>
 <script>
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
   function tryLevel() {
     if (mode == 'creator') {
       createNewPixelRate();
@@ -350,6 +354,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       resetPixelRate(["width", "height"]);
       // pixelRateWidth.value = screen.availWidth;
       // pixelRateHeight.value = screen.availHeight;
+      textur.style.touchAction = 'none';
     }
     else {
       creationDiv.style.display = "none";
@@ -397,7 +402,8 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     energyBar.style.width = 0;
     trashBar.style.width = 0;
     mode = "creator";
-    pause.boolean = false;
+    changePause(false);
+    textur.style.touchAction = 'none';
     settings.style.display = "inline"
     document.getElementById('tryLevel').innerHTML = 'try out your level (clear it to be able to upload it)';
     if (uploadHighscore) {
@@ -405,6 +411,11 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       //else
     }
     cleanerAudioVar.pause();
+  }
+  function changePause(boolean) {
+    pause.boolean = boolean;
+    if (boolean) textur.style.touchAction = '';
+    else textur.style.touchAction = 'none';
   }
   function mouseUpOnCanvas() {// window.addEventListener('mouseup', function() {
     if (mode == "creator" && selected.element != "multiSelector") {
@@ -509,7 +520,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       trash.style.color = 'black';
     }
     if (event.key == "p" && !pause.boolean) pause = {boolean: true, time: time};
-    else if (event.key == "p") {pause.boolean = false; time = JSON.parse(pause.time);}
+    else if (event.key == "p") {changePause(false); time = JSON.parse(pause.time);}
     if (event.key == "z" && event.ctrlKey && (pointOfCreationHistory > 0)) {
       pointOfCreationHistory--;
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
@@ -628,6 +639,15 @@ localStorage.setItem("storedName", name);
   getDatabase(undefined, true);
   console.log(screen.availWidth + " - " + screen.availHeight);
   function getVorgefertigteLevel() {
+    var highscoresAblage = {};
+    for (var i = 0; i < Object.keys(highscores.vorgefertigt).length; i++) {
+      for (var i1 = 0; i1 < Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]]).length; i1++) {
+        if (highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]].highscores) {
+          if (!highscoresAblage[Object.keys(highscores.vorgefertigt)[i]]) highscoresAblage[Object.keys(highscores.vorgefertigt)[i]] = {};
+          highscoresAblage[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]] = highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]].highscores;
+        }
+      }
+    }
     // my level:
     highscores.vorgefertigt = /*JSON.parse(*/'{"1465 x 692":{"loecher: 1, Moebel: 5, Teppich: 2, Ladestationen: 1, Entleerer: 1, Spielzeug: 2, schmuck: 1, Staub: 36":{"pixelRate":"1465 x 692","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"staub":[{"x":670,"y":354,"radius":22,"collected":false},{"x":1199,"y":332,"radius":22,"collected":false},{"x":1208,"y":438,"radius":24,"collected":false},{"x":1200,"y":261,"radius":20,"collected":false},{"x":168,"y":86,"radius":24,"collected":false},{"x":192,"y":374,"radius":24,"collected":true},{"x":192,"y":598,"radius":24,"collected":false},{"x":895,"y":98,"radius":24,"collected":false},{"x":920,"y":235,"radius":24,"collected":false},{"x":936,"y":444,"radius":24,"collected":false},{"x":940,"y":613,"radius":24,"collected":false},{"x":1300,"y":593,"radius":24,"collected":false},{"x":1329,"y":72,"radius":24,"collected":false},{"x":1333,"y":373,"radius":24,"collected":false},{"x":914,"y":144,"radius":5,"collected":false},{"x":934,"y":293,"radius":5,"collected":false},{"x":934,"y":362,"radius":5,"collected":false},{"x":917,"y":191,"radius":5,"collected":false},{"x":944,"y":481,"radius":5,"collected":false},{"x":944,"y":551,"radius":5,"collected":false},{"x":1301,"y":546,"radius":5,"collected":false},{"x":1349,"y":415,"radius":5,"collected":false},{"x":1330,"y":500,"radius":5,"collected":false},{"x":1340,"y":256,"radius":5,"collected":false},{"x":1340,"y":189,"radius":5,"collected":false},{"x":1340,"y":151,"radius":5,"collected":false},{"x":1275,"y":92,"radius":5,"collected":false},{"x":1189,"y":92,"radius":5,"collected":false},{"x":1104,"y":98,"radius":5,"collected":false},{"x":1036,"y":103,"radius":5,"collected":false},{"x":989,"y":103,"radius":5,"collected":false},{"x":1009,"y":609,"radius":5,"collected":false},{"x":1063,"y":617,"radius":5,"collected":false},{"x":1112,"y":616,"radius":5,"collected":false},{"x":1196,"y":620,"radius":5,"collected":false},{"x":1244,"y":620,"radius":5,"collected":false}],"schmuck":[{"x":578,"y":352,"radius":19,"collected":false}],"spielzeug":[{"x":488,"y":596,"radius":23,"collected":false},{"x":499,"y":113,"radius":22,"collected":false}],"teppich":[{"x":500,"y":179,"width":212,"height":379},{"x":1154,"y":216,"width":102,"height":290}],"moebel":[{"x":638,"y":423,"width":63,"height":124},{"x":650,"y":198,"width":51,"height":101},{"x":384,"y":656,"width":97,"height":45},{"x":436,"y":9,"width":60,"height":63},{"x":1176,"y":374,"width":66,"height":38}],"vertiefung":[{"x":1159,"y":127,"width":91,"height":85}],"ladestation":[{"x":746,"y":666,"width":97,"height":30}],"leererStation":[{"x":1159,"y":9,"width":92,"height":30}]},"maxVerfallsdaten":{"ladung":3372.6,"füllungLeft":219}, "name": "Hin und her"}}'//);
     highscores.vorgefertigt += ', "800 x 600":{"loecher: 1, Moebel: 1, Teppich: 1, Ladestationen: 1, Entleerer: 1, Spielzeug: 3, schmuck: 2, Staub: 13":{"pixelRate":"800 x 600","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless"},"checked":{"oppsositeDirection":false,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"staub":[{"radius":16,"collected":false},{"x":211,"y":452,"radius":21,"collected":false,"selected":false,"beginningPoint":{"x":339,"y":568}},{"x":51,"y":552,"radius":22,"collected":false,"selected":false,"beginningPoint":{"x":179,"y":668}},{"x":343,"y":405,"radius":22,"collected":false,"selected":false,"beginningPoint":{"x":471,"y":521}},{"x":416,"y":374,"radius":17,"collected":false,"selected":false,"beginningPoint":{"x":544,"y":490}},{"radius":8,"collected":false},{"x":496,"y":350,"radius":8,"collected":false,"selected":false,"beginningPoint":{"x":624,"y":466}},{"x":562,"y":308,"radius":12,"collected":false,"selected":false,"beginningPoint":{"x":690,"y":424}},{"radius":9,"collected":false},{"x":642,"y":277,"radius":6,"collected":false,"selected":false,"beginningPoint":{"x":770,"y":393}},{"x":674,"y":260,"radius":5,"collected":false,"selected":false,"beginningPoint":{"x":802,"y":376}},{"x":698,"y":242,"radius":3,"collected":false,"selected":false,"beginningPoint":{"x":826,"y":358}},{"x":721,"y":229,"radius":2,"collected":false,"selected":false,"beginningPoint":{"x":849,"y":345}}],"schmuck":[{"x":530,"y":332,"radius":12,"collected":false,"selected":false,"beginningPoint":{"x":658,"y":448}},{"x":781,"y":187,"radius":16,"collected":false,"selected":false,"beginningPoint":{"x":909,"y":303}}],"spielzeug":[{"x":378,"y":378,"radius":12,"collected":false,"selected":false,"beginningPoint":{"x":506,"y":494}},{"x":462,"y":370,"radius":12,"collected":false,"selected":false,"beginningPoint":{"x":590,"y":486}},{"x":613,"y":297,"radius":12,"collected":false,"selected":false,"beginningPoint":{"x":741,"y":413}}],"teppich":[{"x":471,"y":233,"width":149,"height":210,"selected":false,"beginningPoint":{"x":599,"y":349}}],"moebel":[{"x":89,"y":470,"width":88,"height":107,"selected":false,"beginningPoint":{"x":217,"y":586}}],"vertiefung":[{"x":237,"y":351,"width":83,"height":159,"selected":false,"beginningPoint":{"x":365,"y":467}}],"ladestation":[{"x":491,"y":253,"width":29,"height":42,"selected":false,"beginningPoint":{"x":619,"y":369}}],"leererStation":[{"x":587,"y":250,"width":21,"height":27,"selected":false,"beginningPoint":{"x":715,"y":366}}]},"maxVerfallsdaten":{"ladung":1510,"füllungLeft":151}, "name": "Akku laden nicht vergessen!"}}';
@@ -647,6 +667,11 @@ localStorage.setItem("storedName", name);
           if (highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]].objects.ladestation.length == 0) highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][[Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]] + "|"].maxVerfallsdaten.ladung = undefined;
           // if (highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]][i].objects.Entleerer.length == 0) highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]][Object.keys(highscores.vorgefertigt[Object.keys(highscores.vorgefertigt)[i]])[i1]][i].objects.maxVerfallsdaten.füllungLeft = undefined;
         }
+      }
+    }
+    for (var i = 0; i < Object.keys(highscoresAblage).length; i++) {
+      for (var i1 = 0; i1 < Object.keys(highscoresAblage[Object.keys(highscoresAblage)[i]]).length; i1++) {
+        highscores.vorgefertigt[Object.keys(highscoresAblage)[i]][Object.keys(highscoresAblage[Object.keys(highscoresAblage)[i]])[i1]].highscores = highscoresAblage[Object.keys(highscoresAblage)[i]][Object.keys(highscoresAblage[Object.keys(highscoresAblage)[i]])[i1]];
       }
     }
   }
@@ -937,6 +962,10 @@ localStorage.setItem("storedName", name);
     if (dbSetWarteschlange.length > 0) {
       dbSet("cleanTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
     }
   }, 2222);
   function levelSelected(name) {
@@ -1248,14 +1277,14 @@ localStorage.setItem("storedName", name);
       if (!(verfallsdaten.füllungLeft >= selected.objects.staub[i].radius*2) && verfallsdaten.füllungLeft != undefined) canvas.globalAlpha = 0.5;
       canvas.beginPath();
       canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
-      if (!selected.objects.staub[i].collected) {
+      if (!selected.objects.staub[i].collected && selected.objects.staub[i].x) {
         canvas.fill();
         allStaubCollected = false;
       }
       checkMark(selected.objects.staub[i], "cycle")
     }
     if (mode == "creator" && StaubAlsLeerBasisCheckEdit.checked) verfallsdaten.füllungLeft = JSON.parse(JSON.stringify(allStaubPixel/JSON.parse(StaubAlsLeerBasisTEdit.value)));//2;
-    if (allStaubCollected == true && (syncFinished == true || syncFinished == "beginning") && mode != "creator") {
+    if (allStaubCollected == true/* && (syncFinished == true || syncFinished == "beginning")*/ && mode != "creator") {
       console.log("finished!!!");
       if (syncFinished != true) {syncFinished = "inProgress";getDatabase(true);}
       // else {
@@ -1279,9 +1308,9 @@ localStorage.setItem("storedName", name);
           }
           alert("So schnell haben sie noch nie gesaugt!!!");
         }
+        resetLevel(undefined, true);
+        changePause(true);
         if (confirm("Wollen sie sich die Leistungen der anderen Spieler ansehen?")) {
-          resetLevel(undefined, true);
-          pause.boolean = true;
           x1 = 1000;
           var highscoresShow = JSON.parse(JSON.stringify(highscores[mode][selected.pixelRate][selected.gegenstaende].highscores));
           for (var i = 0; i < Object.keys(highscoresShow).length; i++) {
@@ -1293,7 +1322,7 @@ localStorage.setItem("storedName", name);
         }
         syncFinished = false;
       }
-      else if (mode == "testLevel" && confirm("Sie haben allen Staub aufgesammelt! Dies ist die Gelegenheit, das Level hoch zu laden, da sie es dafür abschließen müssen! Also, wollen sie es hochladen?")) {
+      else if (mode == "testLevel" && syncFinished == true && confirm("Sie haben allen Staub aufgesammelt! Dies ist die Gelegenheit, das Level hoch zu laden, da sie es dafür abschließen müssen! Also, wollen sie es hochladen?")) {
         if (confirm("Wollen sie ihr Level benennen?")) highscores.creator[selected.pixelRate][Object.keys(highscores.creator[selected.pixelRate])[0]].name = prompt("Wie wollen sie ihr level nennen?");
         if (!highscores.uploaded) highscores.uploaded = {};
         if (!highscores.uploaded[selected.pixelRate]) highscores.uploaded[selected.pixelRate] = {};
@@ -1556,8 +1585,8 @@ localStorage.setItem("storedName", name);
     if (joyStick == "place" && gerät == "PC") {
       joyStick = {coordinates : {x: mausx, y: mausy}};
     }
-    if (gerät == "Handy" && mode != "creator" && !pause.boolean) pause = {boolean: true, time: time};
-    else if (gerät == "Handy" && mode != "creator") {pause.boolean = false; time = JSON.parse(pause.time);}
+    if (gerät == "Handy" && mode != "creator" && !pause.boolean) {pause = {boolean: true, time: time}; changePause(true);}
+    else if (gerät == "Handy" && mode != "creator") {changePause(false); time = JSON.parse(pause.time);}
   }
   document.addEventListener('touchmove', touch);
   document.addEventListener('touchstart', touch);
@@ -1577,41 +1606,104 @@ function touch(ev) {
       // swipe direction detection:
       var xDiff = firstTouch.x - mausx;
       var yDiff = firstTouch.y - mausy;
-          if (!(Math.abs(xDiff) > Math.abs(yDiff)) && yDiff > 0/* && mode == "creator"*/) {
-              /* up swipe */
-          swipeUp = true;
-          /*if (mode = "creator") */textur.style.touchAction = '';
-          console.log("scrolling allowed, because direction down");
-          if (!anythingSelected) beginningPoint = {};
-          }
-          else {
-            textur.style.touchAction = 'none';
-          }
-          if (mode == "creator" && (trash.style.display == "none" || mausy > 125)) readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"], scrollIncluded: true});
+          // if (((!(Math.abs(xDiff) > Math.abs(yDiff)) && yDiff > 0) || (!(Math.abs( xDiff ) > Math.abs( yDiff )) && yDiff < 0)) && mode == "creator") {
+          //   coordinatesBefore.direction = "up";
+          // }
+      //         /* up/down swipe */
+      //     swipeUp = true;
+      //     console.log("multiple fingers: " + coordinatesBefore.multipleFingers);
+      //     if (ev.type == "touchmove" && coordinatesBefore.multipleFingers) /*if (mode = "creator") */textur.style.touchAction = '';
+      //     console.log("scrolling allowed, because direction down");
+      //     if (!anythingSelected) beginningPoint = {};
+      //     }
+      //     else if (window.scrollY == 0) {
+      //       textur.style.touchAction = 'none';
+      //     }
+
+      if (mode == "creator" && Math.abs( xDiff ) > Math.abs( yDiff ) && xDiff > 0 && coordinatesBefore.multipleFingers && !coordinatesBefore.stepDone) {
+        // left swipe
+        beginningPoint = {};
+        document.onkeydown({key: "z", ctrlKey: true});
+        console.log("one step back");
+        coordinatesBefore.stepDone = true;
       }
-  if (joyStickPlay.checked && mode != "creator" && ev.type == "touchend") {
+      if (mode == "creator" && Math.abs( xDiff ) > Math.abs( yDiff ) && xDiff < 0 && coordinatesBefore.multipleFingers && !coordinatesBefore.stepDone) {
+        // right swipe
+        beginningPoint = {};
+        document.onkeydown({key: "y", ctrlKey: true})
+        console.log("one line forward");
+        coordinatesBefore.stepDone = true;
+      }
+
+          if (mode == "creator" && !coordinatesBefore.multipleFingers && (trash.style.display == "none" || mausy > 125)) readMouseMove({clientX: ev.touches[0]["pageX"], clientY: ev.touches[0]["pageY"], scrollIncluded: true});
+      }
+  if (joyStickPlay.checked && mode != "creator" && ev.type == "touchend" && joyStick) {
     //textur.style.touchAction = '';
     mausx = joyStick.coordinates.x;
     mausy = joyStick.coordinates.y;
   }
-  if (ev.type == "touchend" && mausy < textur.height/* && !swipeUp*/ && mode == "creator" && !(anythingSelected && selected.element == "multiSelector" && gerät == "Handy")) {
+  if (ev.type == "touchend" && (mode != "creator" || (!coordinatesBefore.multipleFingers && !coordinatesBefore.stepDone && mausy < textur.height))/* && mausy < textur.height/* && !swipeUp*//* && mode == "creator" && !(anythingSelected && selected.element == "multiSelector" && gerät == "Handy")*/) {
     mouseUpOnCanvas();
   }
   if (ev.type == "touchstart" && mausy < textur.height/* && !swipeUp*/) {
     if (!(anythingSelected && selected.element == "multiSelector" && gerät == "Handy") && mode == "creator") mousedownOnCanvas();
+    if (!coordinatesBefore.multipleFingers) textur.style.touchAction = 'none';
+    else textur.style.touchAction = '';
   }
   // if (ev.type == "touchend" && mausy < textur.height && swipeUp) {
   //   beginningPoint = {};
   //   console.log("removeElement");
   // }
-  if (ev.type == "touchend") swipeUp = undefined;
+  if (ev.type == "touchend") {
+  //   swipeUp = undefined;
+    coordinatesBefore.y = undefined;
+      coordinatesBefore.stepDone = false;
+  }
     if (joyStickPlay.checked && mode != "creator" && ev.type == "touchstart" && selected.objects) {
       joyStick = {coordinates : {x: mausx, y: mausy}};
     }
-    // if (ev.type == "touchmove") {
-    //   mousemoveFolgen();
-    // }
+    if (ev.type == "touchmove") {
+    // //   mousemoveFolgen();
+    coordinatesBefore.x = JSON.parse(JSON.stringify(ev.touches[0].pageX));
+    if (!coordinatesBefore.y && ev.touches[1]) coordinatesBefore.multipleFingers = ev.touches[1] && ev.touches[1].pageX != coordinatesBefore.touchesEinsX;
+    else if (!coordinatesBefore.y) coordinatesBefore.multipleFingers = false;
+    if (!coordinatesBefore.y) {
+      coordinatesBefore.y = JSON.parse(JSON.stringify(ev.touches[0].pageY));
+      if (ev.touches[1]) coordinatesBefore.touchesEinsX = JSON.parse(JSON.stringify(ev.touches[1].pageX));
+    }
+    if (!coordinatesBefore.multipleFingers) textur.style.touchAction = 'none';
+    else textur.style.touchAction = '';
+    }
 }
+
+// function touch(ev) {
+//   if (ev.type == "touchmove") {
+//     if (/*coordinatesBefore.y && */ev.touches[0].pageY > coordinatesBefore.y && view.indexNow > 0) coordinatesBefore.direction = -1;
+//     if (/*coordinatesBefore.y && */ev.touches[0].pageY < coordinatesBefore.y && view.indexNow <= view.list.length - 1) coordinatesBefore.direction = 1;
+//     coordinatesBefore.x = JSON.parse(JSON.stringify(ev.touches[0].pageX));
+//     if (!coordinatesBefore.y && ev.touches[1]) coordinatesBefore.multipleFingers = ev.touches[1] && ev.touches[1].pageX != coordinatesBefore.touchesEinsX;
+//     else if (!coordinatesBefore.y) coordinatesBefore.multipleFingers = false;
+//     if (!coordinatesBefore.y) {
+//       coordinatesBefore.y = JSON.parse(JSON.stringify(ev.touches[0].pageY));
+//       if (ev.touches[1]) coordinatesBefore.touchesEinsX = JSON.parse(JSON.stringify(ev.touches[1].pageX));
+//     }
+//   }
+//   // console.log(ev.type + " - multiple fingers: " + coordinatesBefore.multipleFingers);
+//   if (ev.type == "touchend" && coordinatesBefore.multipleFingers) {
+//     // console.log("Test");
+//     // if (ev.touches[0].pageY > coordinatesBefore.y && view.indexNow > 0) view.indexNow--;
+//     // else if (view.indexNow != view.list.length - 1) view.indexNow++;
+//     if (coordinatesBefore.direction) {
+//       console.log("direction " + coordinatesBefore.direction);
+//       view.indexNow += coordinatesBefore.direction;
+//       if (document.querySelectorAll("[id='" + view.list[view.indexNow] + "']")[0]) document.querySelectorAll("[id='" + view.list[view.indexNow] + "']")[0].scrollIntoView();
+//        ev.touches.length = 0;
+//     }
+//   }
+//   if (ev.type == "touchend") {coordinatesBefore.y = undefined; coordinatesBefore.direction = undefined;}
+// }
+var coordinatesBefore = {};
+
 function replaceAll(str, find, replace) {
     return str.replace(new RegExp(find, 'g'), replace);
 }
