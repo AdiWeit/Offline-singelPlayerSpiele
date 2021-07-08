@@ -1000,6 +1000,7 @@ localStorage.setItem("storedName", name);
         i = Object.keys(highscores[mode]).length;
       }
     }
+    scores.style.display = "none";
   }
   // function clickListCheck() {
   //   setTimeout(function () {
@@ -1056,6 +1057,7 @@ localStorage.setItem("storedName", name);
     }
     if (selected.pixelRate) {
     textur.width = selected.pixelRate.toString().split(" x ")[0];
+    if (textur.width < window.innerWidth && joyStickPlay.checked) textur.width = window.innerWidth;
     textur.height = selected.pixelRate.toString().split(" x ")[1];
   }
     canvas.fillStyle = "#FF8000";
