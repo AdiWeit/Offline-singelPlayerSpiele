@@ -342,6 +342,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     selected.pixelRate = textur.width + " x " + textur.height;
   }
   function modeSelected(value) {
+    modeSelection.value = value;
     document.getElementById('app').style.display = "inline";
     if (value == "creator") {
       document.getElementById('app').style.display = "none";
@@ -638,6 +639,9 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
 localStorage.setItem("storedName", name);
   nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   getDatabase(undefined, true);
+  setTimeout(function () {
+    modeSelected("vorgefertigt");
+  }, 1000);
   console.log(screen.availWidth + " - " + screen.availHeight);
   function getVorgefertigteLevel() {
     var highscoresAblage = {};
@@ -961,7 +965,7 @@ localStorage.setItem("storedName", name);
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      dbSet("cleanTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      // dbSet("cleanTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -1253,6 +1257,84 @@ localStorage.setItem("storedName", name);
       }
       if (mode != "creator" && isCollide(ball, selected.objects.leererStation[i]) && verfallsdaten.füllungLeft < /*133*/selected.maxVerfallsdaten.füllungLeft) verfallsdaten.füllungLeft += 3;
     }
+    canvas.globalAlpha = 1;
+    for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
+      // collect spielzeug
+      if (mode != "creator" && !selected.objects.spielzeug[i].collected && ((!spielzeugWenigPlatz.checked && verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) || spielzeugWenigPlatz.checked) && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
+        selected.objects.spielzeug[i].collected = true;
+        if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked && verfallsdaten.füllungLeft != undefined) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+        if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
+        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [/*JSON.parse(*/zeitLangsamer.value/*)*/], speed: 1.9};
+        else if (langsamerBeiSpielzeug.checked && ((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {slowDownSpielzeug.speed -= 0.1; slowDownSpielzeug.time.push(/*JSON.parse(*/zeitLangsamer.value/*)*/);}
+        if (langsamerBeiSpielzeug.checked && !((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {
+          if (restartWhenSlow.checked) resetLevel();
+          if (clearWhenSlow.checked) stopSpielzeug = {boolean: true, time: 2000, clearing: true};
+        }
+        /*
+        if (slowDownSpielzeug.boolean && ) {slowDown(slowDownSpielzeug.speed - 0.1); slowDownSpielzeug.speed -= 1.1;}
+        else if (slowDownSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
+        */
+        try {
+          var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
+          localAudio.currentTime = 48;
+          localAudio.play();
+          setTimeout(function () {
+            localAudio.pause();
+          }, 500);
+        } catch (e) {console.log("audio not playable!")}
+        // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
+        // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
+      }
+      if (!selected.objects.spielzeug[i].collected) {
+        try {
+        if (!useImage.checked) var oneColor = ja;
+          var Bild = new Image();
+          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/spielzeug.png";
+          canvas.drawImage(Bild, selected.objects.spielzeug[i].x - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].radius*2, selected.objects.spielzeug[i].radius*2);
+
+        } catch (e) {
+          canvas.fillStyle = "red";
+          canvas.beginPath();
+          canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
+          canvas.fill();
+        }
+      }
+      checkMark(selected.objects.spielzeug[i], "cycle");
+    }
+    for (var i = 0; selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
+      // collect Schmuck
+      if (mode != "creator" && !selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
+        selected.objects.schmuck[i].collected = true;
+        try {
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
+          audio.currentTime = 60*1 + 29.5;
+          audio.play();
+          setTimeout(function () {
+            audio.pause();
+            audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
+            resetLevel(/*"Schmuck eingesammelt!"*/);
+          }, 500);
+        } catch (e) {
+          setTimeout(function () {
+          resetLevel();
+        }, 500);
+        }
+      }
+      if (!selected.objects.schmuck[i].collected) {
+        try {
+          if (!useImage.checked) var oneColor = ja;
+          var Bild = new Image();
+          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/schmuck.png";
+          canvas.drawImage(Bild, selected.objects.schmuck[i].x - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].radius*2, selected.objects.schmuck[i].radius*2);
+        } catch (e) {
+          canvas.fillStyle = "yellow";
+          canvas.beginPath();
+          canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
+          canvas.fill();
+        }
+        checkMark(selected.objects.schmuck[i], "cycle");
+      }
+    }
     var allStaubPixel = 0;
     for (var i = 0; selected.objects && selected.objects.staub && i < selected.objects.staub.length; i++) {
       // collect staub
@@ -1345,84 +1427,6 @@ localStorage.setItem("storedName", name);
           localStorage.setItem("uploadCourcesCleanTheRoom", JSON.stringify(uploadCources));
         }
         resetAfterTrying(true);
-      }
-    }
-    canvas.globalAlpha = 1;
-    for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
-      // collect spielzeug
-      if (mode != "creator" && !selected.objects.spielzeug[i].collected && ((!spielzeugWenigPlatz.checked && verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) || spielzeugWenigPlatz.checked) && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
-        selected.objects.spielzeug[i].collected = true;
-        if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked && verfallsdaten.füllungLeft != undefined) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
-        if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
-        if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [/*JSON.parse(*/zeitLangsamer.value/*)*/], speed: 1.9};
-        else if (langsamerBeiSpielzeug.checked && ((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {slowDownSpielzeug.speed -= 0.1; slowDownSpielzeug.time.push(/*JSON.parse(*/zeitLangsamer.value/*)*/);}
-        if (langsamerBeiSpielzeug.checked && !((mode != "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeed.value))/* || (mode == "creator" && slowDownSpielzeug.speed - 0.1 >= JSON.parse(slowestSpeedEdit.value))*/)) {
-          if (restartWhenSlow.checked) resetLevel();
-          if (clearWhenSlow.checked) stopSpielzeug = {boolean: true, time: 2000, clearing: true};
-        }
-        /*
-        if (slowDownSpielzeug.boolean && ) {slowDown(slowDownSpielzeug.speed - 0.1); slowDownSpielzeug.speed -= 1.1;}
-        else if (slowDownSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
-        */
-        try {
-          var localAudio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/seth-hoovers-up-his-lego-youtubemp3free.org.mp3");
-          localAudio.currentTime = 48;
-          localAudio.play();
-          setTimeout(function () {
-            localAudio.pause();
-          }, 500);
-        } catch (e) {console.log("audio not playable!")}
-        // verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
-        // if (verfallsdaten.füllungLeft < 1) console.log("Sauger voll! Keinen neuen spielzeug mehr aufnehmen!!!");
-      }
-      if (!selected.objects.spielzeug[i].collected) {
-        try {
-        if (!useImage.checked) var oneColor = ja;
-          var Bild = new Image();
-          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/spielzeug.png";
-          canvas.drawImage(Bild, selected.objects.spielzeug[i].x - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].radius*2, selected.objects.spielzeug[i].radius*2);
-
-        } catch (e) {
-          canvas.fillStyle = "red";
-          canvas.beginPath();
-          canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
-          canvas.fill();
-        }
-      }
-      checkMark(selected.objects.spielzeug[i], "cycle");
-    }
-    for (var i = 0; selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
-      // collect Schmuck
-      if (mode != "creator" && !selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
-        selected.objects.schmuck[i].collected = true;
-        try {
-          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
-          audio.currentTime = 60*1 + 29.5;
-          audio.play();
-          setTimeout(function () {
-            audio.pause();
-            audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
-            resetLevel(/*"Schmuck eingesammelt!"*/);
-          }, 500);
-        } catch (e) {
-          setTimeout(function () {
-          resetLevel();
-        }, 500);
-        }
-      }
-      if (!selected.objects.schmuck[i].collected) {
-        try {
-          if (!useImage.checked) var oneColor = ja;
-          var Bild = new Image();
-          Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/cleanTheRoom/schmuck.png";
-          canvas.drawImage(Bild, selected.objects.schmuck[i].x - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].radius*2, selected.objects.schmuck[i].radius*2);
-        } catch (e) {
-          canvas.fillStyle = "yellow";
-          canvas.beginPath();
-          canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
-          canvas.fill();
-        }
-        checkMark(selected.objects.schmuck[i], "cycle");
       }
     }
     // sphere1.style.top = "175";
