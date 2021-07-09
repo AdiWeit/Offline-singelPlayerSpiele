@@ -1517,8 +1517,44 @@ localStorage.setItem("storedName", name);
     x1 = coordinatesBefore.x;
     y1 = coordinatesBefore.y;
   }
-  canvas.stroke();
-  // check cable collision
+  if (wholeDistance >= cable.maxLength - 17) {
+    canvas.strokeStyle = "#FF2525";
+    canvas.stroke();
+    for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
+      data = canvas.getImageData(selected.objects.spielzeug[i].x - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].radius*2, selected.objects.spielzeug[i].radius*2);
+      for (var i1 = 0; i1 < data.data.length; i1 += 4) {
+      red = data.data[i1];
+      green = data.data[i1 + 1];
+      blue = data.data[i1 + 2];
+      alpha = data.data[i1 + 3];
+      if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+        if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.spielzeug[i].radius*2)/*selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
+          selected.objects.spielzeug[i].y++;
+        }
+        else selected.objects.spielzeug[i].y--;
+        break;
+      }
+    }
+  }
+  for (var i = 0; selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
+    data = canvas.getImageData(selected.objects.schmuck[i].x - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].radius*2, selected.objects.schmuck[i].radius*2);
+    for (var i1 = 0; i1 < data.data.length; i1 += 4) {
+    red = data.data[i1];
+    green = data.data[i1 + 1];
+    blue = data.data[i1 + 2];
+    alpha = data.data[i1 + 3];
+    if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+      if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.schmuck[i].radius*2)/*selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
+        selected.objects.schmuck[i].y += 3;
+      }
+      else selected.objects.schmuck[i].y -= 3;
+      break;
+    }
+  }
+}
+  }
+  else canvas.stroke();
+  // check cable moebel collision
   for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
     data = canvas.getImageData(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
     for (var i1 = 0; i1 < data.data.length; i1 += 4) {
