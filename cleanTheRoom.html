@@ -1517,7 +1517,7 @@ localStorage.setItem("storedName", name);
     x1 = coordinatesBefore.x;
     y1 = coordinatesBefore.y;
   }
-  if (wholeDistance >= cable.maxLength - 17) {
+  if (wholeDistance >= cable.maxLength - 33) {
     canvas.strokeStyle = "#FF2525";
     canvas.stroke();
     for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
@@ -1555,7 +1555,9 @@ localStorage.setItem("storedName", name);
   }
   else canvas.stroke();
   // check cable moebel collision
+  var cableCoord;
   for (var i = 0; selected.objects && selected.objects.moebel && i < selected.objects.moebel.length; i++) {
+    cableCoord = {x: 0, y: i1/4/selected.objects.moebel[i].width}
     data = canvas.getImageData(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
     for (var i1 = 0; i1 < data.data.length; i1 += 4) {
     red = data.data[i1];
@@ -1566,24 +1568,32 @@ localStorage.setItem("storedName", name);
     //   console.log("blac hit");
     // }
     // TODO: an richtiger Stelle einfügen (checken ob der Punkt davor auch zu dem Möbelstück gehört)
-    if (red == 0 && blue == 0 && alpha == 255 && green == 0 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
-      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
-      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
-      break;
-    }
-    else if (red == 0 && blue == 0 && alpha == 255 && green == 0 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
-      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
-      break;
-    }
-    else if (red == 0 && blue == 0 && alpha == 255 && green == 0 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
-      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
-      break;
-    }
-    else if (red == 0 && blue == 0 && alpha == 255 && green == 0 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
-      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
-      break;
-    }
-  }
+  if (Math.floor(i1/4/selected.objects.moebel[i].width) != Math.floor(cableCoord.y)) cableCoord.x = 0;
+  cableCoord.y = i1/4/selected.objects.moebel[i].width;
+   if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
+   // oben rechts
+   if (cableCoord.x > selected.objects.moebel[i].width/2 && cableCoord.y < selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
+     cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
+     break;
+   }
+   // unten rechts
+   if (cableCoord.x > selected.objects.moebel[i].width/2 && cableCoord.y > selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
+     cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
+     break;
+   }
+   // unten links
+   if (cableCoord.x < selected.objects.moebel[i].width/2 && cableCoord.y > selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
+     cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
+     break;
+   }
+   // oben links
+   if (cableCoord.x < selected.objects.moebel[i].width/2 && cableCoord.y < selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
+     cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
+     break;
+   }
+ }
+ cableCoord.x++;
+ }
   // canvas.stroke();
 
   // (means: back to beginning)
