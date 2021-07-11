@@ -30,6 +30,24 @@
   <br>
   opposite direction<input id="oppsositeDirection" type="checkbox">
   <br>
+  Lidar Sicht (alles einfarbig, muss also vorher gemerkt werden) <input type="checkbox" onchange="if (checked) lidarSetttings.style.display = 'inline'; else lidarSetttings.style.display = 'none';" id="lidarView">
+  <div style="display:none"  id="lidarSetttings">
+    <br>
+    Zeit bis aktiviert: <input type="text" id="timeCameraActive" value="3">
+    <br>
+    Kamera (normale Sicht) kann reaktiviert werden <input onchange="if (checked) pBatteryForNormalView.style.display = 'inline'; else pBatteryForNormalView.style.display = 'none'" id="manualCameraActivation" type="checkbox">
+    <p style="display:none"  id="pBatteryForNormalView">Akkuverbrauch (in Pixeln pro Sek.) <input id="batteryForNormalView" type="text" value="333"> </p>
+  </div>
+  <br>
+  Kabel statt Akku <input id="cableCheck" onchange="if (checked) {cableSettings.style.display = 'inline'; steckdose.style.display = 'inline';} else {cableSettings.style.display = 'none'; steckdose.style.display = 'none';}" type="checkbox">
+    <p id="cableSettings" style="display:none">
+      Länge (in pixel) <input type="text" id="cableLength" value="599">
+      <br>
+      <input type="checkbox" id="moveSpielzeug"> Spielzeug mit angespanntem Kabel schieben
+      <br>
+      <input type="checkbox" id="moveSchmuck"> Schmuck mit angespanntem Kabel schieben
+    </p>
+  <br>
   <p id="pPixelRateWidth">pixel rate width <input oninput="if (mode == 'creator') pixelRateChanged({width: value});" id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
   <br>
   <p id="pPixelRateHeight">pixel rate height <input id="pixelRateHeight" oninput="if (mode == 'creator') pixelRateChanged({height: value});" type="text"> <button type="button" onclick="resetPixelRate(['height']);" name="button">reset</button> </p>
@@ -64,7 +82,7 @@
       <br>
       <input type="checkbox" id="spielzeugWenigPlatz" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
       <br>
-      <input id="spielzeugPlatz" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
+      <input id="spielzeugPlatz" type="checkbox">Spielzeug bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
       <br>
       min. <input value="3" id="minSpielzeugSize" oninput="if (JSON.parse(maxSpielzeugSize.value) < JSON.parse(value)) {maxSpielzeugSize.value = JSON.parse(value) + 1}" value="3" min="1" type="range">
       <br>
@@ -166,6 +184,7 @@
   <button type="Löcher" onclick="elementSelected(id);" id="vertiefung" name="button">Loch</button>
   <button type="button" onclick="elementSelected(id);" id="ladestation" name="button">Ladestation</button>
   <button type="button" onclick="elementSelected(id);" id="leererStation" name="button">Entleerer</button>
+  <button type="button" onclick="elementSelected(id);" id="steckdose" style="display:none" name="button">Steckdose</button>
   <button type="button" onclick="elementSelected(id);" id="multiSelector" name="button">multi selector</button>
   <button type="button" onclick='document.onkeydown({key: "y", ctrlKey: true})' name="button"> --> </button>
   <br>
@@ -187,7 +206,7 @@
   <br>
   <input type="checkbox" id="spielzeugWenigPlatzEdit" checked="true">Spielzeug kann auch aufgesammelt werden,wenn im Staubsauger eigentlich nicht mer genug Platz ist
   <br>
-  <input id="spielzeugPlatzEdit" type="checkbox">Spielzeugt bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
+  <input id="spielzeugPlatzEdit" type="checkbox">Spielzeug bleibt nicht im Sauger und nimmt somit auch keinen Platz ein
   <br>
   <h3>Teppich</h3>
   Verlangsamung (rechts ist weniger)<input value="11" id="verlangsamungTeppichEdit" min="11" max="19" type="range">
@@ -283,7 +302,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
     }
   </style>
 </div>
-<div id="content">
+<div id="content" onclick="CameraManuallychanged();">
   <div class="shape" id="sphere1"></div>
   <div class="bars" id="energyBar"></div>
   <div class="bars" id="trashBar"></div>
@@ -294,6 +313,12 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
 };
+function CameraManuallychanged() {
+  if (lidarView.checked && manualCameraActivation.checked) {
+  lidarViewNow.byUser = lidarViewNow.boolean;
+  lidarViewNow.boolean = !lidarViewNow.boolean;
+}
+}
   function tryLevel() {
     if (mode == 'creator') {
       createNewPixelRate();
@@ -302,7 +327,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       }, 1133);
       document.getElementById('tryLevel').innerHTML = 'stop test';
     } else {
-       resetAfterTrying();
+       resetAfterTrying(null, "levelEditor");
      }
   }
   var mouseOverTrash = false;
@@ -392,8 +417,8 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       anythingSelected = false;
     }
   }// });
-  function resetAfterTrying(uploadHighscore) {
-    resetLevel();
+  function resetAfterTrying(uploadHighscore, levelEditor) {
+    resetLevel(levelEditor);
     try {
       audio.pause();
     } catch (e) {}
@@ -430,7 +455,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       if (!selected.objects[selected.element]) selected.objects[selected.element] = [];
       if (selected.radius > 0 && beginningPoint.x != undefined && beginningPoint.y != undefined && (selected.element == "staub" || selected.element == "schmuck" || selected.element == "spielzeug")) selected.objects[selected.element].push({x: beginningPoint.x, y:  beginningPoint.y, radius: selected.radius, collected: false});
       else if (!(isNaN(mausx - beginningPoint.x)) && !(isNaN(mausy - beginningPoint.y)) && mausx - beginningPoint.x != 0 && mausy - beginningPoint.y != 0) selected.objects[selected.element].push({x: beginningPoint.x, y: beginningPoint.y, width: mausx - beginningPoint.x, height: mausy - beginningPoint.y});
-      if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory - 1][selected.element].length) creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
+      if (!creationHistory[pointOfCreationHistory - 1][selected.element] || selected.objects[selected.element].length > creationHistory[pointOfCreationHistory - 1][selected.element].length) creationHistory.push(JSON.parse(JSON.stringify(selected.objects)));
       console.log("new point of history created");
       beginningPoint = {};
       if (selected.objects[selected.element].length > creationHistory[pointOfCreationHistory]) pointOfCreationHistory++;
@@ -533,6 +558,7 @@ Sensibilität des Joy-Sticks (je weiter rechts, desto mehr Weg muss zurrück gel
       selected.objects = JSON.parse(JSON.stringify(creationHistory[pointOfCreationHistory]));
       textBoxenGleichBehalten();
     }
+    if (event.key == "l") CameraManuallychanged();
   }
   function textBoxenGleichBehalten() {
     setTimeout(function () {
@@ -850,8 +876,8 @@ localStorage.setItem("storedName", name);
     if (highscores[mode][selected.pixelRate] != undefined && Object.keys(highscores[mode][selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
     if (!highscores[mode][selected.pixelRate]) highscores[mode][selected.pixelRate] = {};
     if (mode == "normal") highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlow.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlow.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
-    else highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeugEdit.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeugEdit.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlowEdit.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlowEdit.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatzEdit.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatzEdit.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
-    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "slowestSpeed", "zeitLangsamer" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection",/*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", "brokenCheck", "bounceWalls", */"bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz", "clearWhenSlow", "restartWhenSlow"]}
+    else highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeugEdit.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeugEdit.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlowEdit.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlowEdit.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatzEdit.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatzEdit.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked + ", lidar Sicht (einfarbig): " + lidarView.checked + ", Kamera kann manuell reaktiviert werden: " + manualCameraActivation.checked + ", Kabel statt Akku: " + cableCheck.checked + ", gespanntes Kabel kann Schmuck verschieben: " + moveSchmuck.checked + ", gespanntes Kabel kann Spielzeug verschieben: " + moveSpielzeug.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: []}};
+    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "slowestSpeed", "zeitLangsamer", "cableLength", "timeCameraActive", "batteryForNormalView" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection", "lidarView", "manualCameraActivation", "cableCheck", "moveSpielzeug", "moveSchmuck", /*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", */"brokenCheck", "bounceWalls", "bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz", "clearWhenSlow", "restartWhenSlow"]}
     for (var i = 0; i < Object.keys(convertList).length; i++) {
       for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
         if (mode == "normal") {
@@ -1137,6 +1163,7 @@ localStorage.setItem("storedName", name);
       //   y1 += (mausy - joyStick.coordinates.y)/JSON.parse(sensibility.value); //25;
       // }
       verfallsdaten.ladung -= speed.x + speed.y;
+      if (lidarViewNow.byUser && lidarView.checked && !lidarView.boolean) verfallsdaten.ladung -= batteryForNormalView.value*(25/1000);
     }
     if (slowDownSpielzeug.boolean && !stopSpielzeug.boolean) slowDown(slowDownSpielzeug.speed);
     boundingBoxCheck();
@@ -1186,7 +1213,7 @@ localStorage.setItem("storedName", name);
         var img = new Image();
         img.src = 'https://adi.nicolaiweitkemper.de/Bilder/lidarPattern.png';
         canvas.rect(selected.objects.moebel[i].x, selected.objects.moebel[i].y, selected.objects.moebel[i].width, selected.objects.moebel[i].height);
-        if (true) canvas.fillStyle = canvas.createPattern(img, "repeat");
+        if (lidarViewNow.boolean) canvas.fillStyle = canvas.createPattern(img, "repeat");
         canvas.fill();
       }
       checkMark(selected.objects.moebel[i], "rectangle");
@@ -1204,7 +1231,7 @@ localStorage.setItem("storedName", name);
 
       } catch (e) {
         canvas.fillStyle = "black";
-        if (true) canvas.fillStyle = "#FF8000";
+        if (lidarViewNow.boolean) canvas.fillStyle = "#FF8000";
         canvas.fillRect(selected.objects.vertiefung[i].x, selected.objects.vertiefung[i].y, selected.objects.vertiefung[i].width, selected.objects.vertiefung[i].height);
       }
       checkMark(selected.objects.vertiefung[i], "rectangle");
@@ -1306,7 +1333,7 @@ localStorage.setItem("storedName", name);
           canvas.arc(selected.objects.spielzeug[i].x, selected.objects.spielzeug[i].y, selected.objects.spielzeug[i].radius, 0, Math.PI*2, false);
           var img = new Image();
           img.src = 'https://adi.nicolaiweitkemper.de/Bilder/lidarPattern.png';
-          if (true) canvas.fillStyle = canvas.createPattern(img, "repeat");
+          if (lidarViewNow.boolean) canvas.fillStyle = canvas.createPattern(img, "repeat");
           canvas.fill();
         }
       }
@@ -1343,11 +1370,21 @@ localStorage.setItem("storedName", name);
           canvas.arc(selected.objects.schmuck[i].x, selected.objects.schmuck[i].y, selected.objects.schmuck[i].radius, 0, Math.PI*2, false);
           var img = new Image();
           img.src = 'https://adi.nicolaiweitkemper.de/Bilder/lidarPattern.png';
-          if (true) canvas.fillStyle = canvas.createPattern(img, "repeat");
+          if (lidarViewNow.boolean) canvas.fillStyle = canvas.createPattern(img, "repeat");
           canvas.fill();
         }
         checkMark(selected.objects.schmuck[i], "cycle");
       }
+    }
+    for (var i = 0; selected.objects && selected.objects.steckdose && i < selected.objects.steckdose.length; i++) {
+      canvas.fillStyle = "black";
+      canvas.fillRect(selected.objects.steckdose[i].x, selected.objects.steckdose[i].y, selected.objects.steckdose[i].width, selected.objects.steckdose[i].height);
+      canvas.fillStyle = "gray";
+      canvas.beginPath();
+      if (selected.objects.steckdose[i].height < selected.objects.steckdose[i].width) canvas.arc(selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2, selected.objects.steckdose[i].height/2, 0, Math.PI*2, false);
+      else canvas.arc(selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2, selected.objects.steckdose[i].width/2, 0, Math.PI*2, false);
+      canvas.fill();
+      if (cable.active && y1 > selected.objects.steckdose[i].y && y1 < selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2 && x1 > selected.objects.steckdose[i].x && x1 < selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2) cable.points[0]  = {x: selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, y: selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2};
     }
     var allStaubPixel = 0;
     for (var i = 0; selected.objects && selected.objects.staub && i < selected.objects.staub.length; i++) {
@@ -1377,7 +1414,7 @@ localStorage.setItem("storedName", name);
       if (!selected.objects.staub[i].collected && selected.objects.staub[i].x) {
         var img = new Image();
         img.src = 'https://adi.nicolaiweitkemper.de/Bilder/lidarPattern.png';
-        if (true) canvas.fillStyle = canvas.createPattern(img, "repeat");
+        if (lidarViewNow.boolean) canvas.fillStyle = canvas.createPattern(img, "repeat");
         canvas.fill();
         allStaubCollected = false;
       }
@@ -1426,7 +1463,7 @@ localStorage.setItem("storedName", name);
         if (confirm("Wollen sie ihr Level benennen?")) highscores.creator[selected.pixelRate][Object.keys(highscores.creator[selected.pixelRate])[0]].name = prompt("Wie wollen sie ihr level nennen?");
         if (!highscores.uploaded) highscores.uploaded = {};
         if (!highscores.uploaded[selected.pixelRate]) highscores.uploaded[selected.pixelRate] = {};
-        var gegenstaende = gegenstaende;
+        var gegenstaende = selected.gegenstaende;
         for (var i = 0; highscores.uploaded[selected.pixelRate][gegenstaende] != undefined; i++) {
           gegenstaende += "|";
         }
@@ -1492,7 +1529,9 @@ localStorage.setItem("storedName", name);
     canvas.stroke();
     canvas.closePath();
   }
-  cable.points[cable.points.length - 1] = {x: Math.round(x1), y: Math.round(y1)};
+  // cable actions
+  if (cable.active) {
+  cable.points[cable.points.length - 1] = {x: Math.round(nextCoordinates.x), y: Math.round(nextCoordinates.y)};
   canvas.strokeStyle = "black";
   canvas.beginPath();
   canvas.lineWidth = 10
@@ -1531,10 +1570,12 @@ localStorage.setItem("storedName", name);
     x1 = coordinatesBefore.x;
     y1 = coordinatesBefore.y;
   }
+
+  // cable-Spielzeug interaction
   if (wholeDistance >= cable.maxLength - 33) {
     canvas.strokeStyle = "#FF2525";
     canvas.stroke();
-    for (var i = 0; selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
+    for (var i = 0; moveSpielzeug.checked && selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
       data = canvas.getImageData(selected.objects.spielzeug[i].x - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius, selected.objects.spielzeug[i].radius*2, selected.objects.spielzeug[i].radius*2);
       for (var i1 = 0; i1 < data.data.length; i1 += 4) {
       red = data.data[i1];
@@ -1550,7 +1591,8 @@ localStorage.setItem("storedName", name);
       }
     }
   }
-  for (var i = 0; selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
+  // cable-Schmuck interaction
+  for (var i = 0; moveSchmuck.checked && selected.objects && selected.objects.schmuck && i < selected.objects.schmuck.length; i++) {
     data = canvas.getImageData(selected.objects.schmuck[i].x - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius, selected.objects.schmuck[i].radius*2, selected.objects.schmuck[i].radius*2);
     for (var i1 = 0; i1 < data.data.length; i1 += 4) {
     red = data.data[i1];
@@ -1612,6 +1654,7 @@ localStorage.setItem("storedName", name);
 
   // (means: back to beginning)
   // canvas.closePath();
+}
 }
 }
   }, 25);
@@ -1681,9 +1724,18 @@ localStorage.setItem("storedName", name);
       for (var i = 0; i < selected.objects.schmuck.length; i++) {
         selected.objects.schmuck[i].collected = false;
       }
-      cable = {points: [{x: 0, y: 0}, {x: 1, y: 1}], maxLength: 599};
+      lidarViewNow = {boolean: false, byUser: false};
+      cable = {points: [{x: 0, y: 0}, {x: 1, y: 1}], maxLength: cableLength.value, active: cableCheck.checked};
+      if (cable.active) selected.maxVerfallsdaten = {};
+      lidarViewNow.boolean = false;
+      if (lidarView.checked && type != "levelEditor") {
+        setTimeout(function () {
+          lidarViewNow.boolean = true;
+        }, timeCameraActive.value*1000);
+      }
     }, 1);
   }
+  var lidarViewNow = {boolean: false, byUser: false};
   var stopSpielzeug = {time: 0, boolean: false};
   var slowDownSpielzeug = {time: 0, boolean: false};
   var speed = {x: 0, y: 0, highest: 0};
