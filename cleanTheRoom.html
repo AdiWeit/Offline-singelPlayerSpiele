@@ -46,6 +46,8 @@
       <input type="checkbox" id="moveSpielzeug"> Spielzeug mit angespanntem Kabel schieben
       <br>
       <input type="checkbox" id="moveSchmuck"> Schmuck mit angespanntem Kabel schieben
+      <br>
+      <input type="checkbox" id="moveStaub"> Staub mit angespanntem Kabel schieben
     </p>
   <br>
   <p id="pPixelRateWidth">pixel rate width <input oninput="if (mode == 'creator') pixelRateChanged({width: value});" id="pixelRateWidth" type="text"> <button type="button" onclick="resetPixelRate(['width']);" name="button">reset</button> </p>
@@ -876,8 +878,8 @@ localStorage.setItem("storedName", name);
     if (highscores[mode][selected.pixelRate] != undefined && Object.keys(highscores[mode][selected.pixelRate]).includes(selected.gegenstaende)) selected.gegenstaende += "|";
     if (!highscores[mode][selected.pixelRate]) highscores[mode][selected.pixelRate] = {};
     if (mode == "normal") highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeug.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeug.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlow.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlow.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatz.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatz.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: [], steckdose: []}};
-    else highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeugEdit.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeugEdit.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlowEdit.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlowEdit.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatzEdit.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatzEdit.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked + ", lidar Sicht (einfarbig): " + lidarView.checked + ", Kamera kann manuell reaktiviert werden: " + manualCameraActivation.checked + ", Kabel statt Akku: " + cableCheck.checked + ", gespanntes Kabel kann Schmuck verschieben: " + moveSchmuck.checked + ", gespanntes Kabel kann Spielzeug verschieben: " + moveSpielzeug.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: [], steckdose: []}};
-    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "slowestSpeed", "zeitLangsamer", "cableLength", "timeCameraActive", "batteryForNormalView" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection", "lidarView", "manualCameraActivation", "cableCheck", "moveSpielzeug", "moveSchmuck", /*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", */"brokenCheck", "bounceWalls", "bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz", "clearWhenSlow", "restartWhenSlow"]}
+    else highscores[mode][selected.pixelRate][selected.gegenstaende] = {pixelRate: selected.pixelRate, settings: "Neustart wenn Wand berührt: " + brokenCheck.checked + ", bounce von Rändern: " + bounceWalls.checked + ", stoppe bei Spielzeug: " + stoppeBeiSpielzeugEdit.checked + ", werde langsamer bei Spielzeug: " + langsamerBeiSpielzeugEdit.checked + ", neu starten, wenn Geschwindigkeit zu gering wird: " + restartWhenSlowEdit.checked + ", oder bleibe stehen und mache danach weiter: " + clearWhenSlowEdit.checked + ", Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: " + spielzeugWenigPlatzEdit.checked + ", Spielzeug frisst keinen Platz im Speicher: " + spielzeugPlatzEdit.checked + ", gegen Steuerungsrichtung: " + oppsositeDirection.checked + ", lidar Sicht (einfarbig): " + lidarView.checked + ", Kamera kann manuell reaktiviert werden: " + manualCameraActivation.checked + ", Kabel statt Akku: " + cableCheck.checked + ", gespanntes Kabel kann Schmuck verschieben: " + moveSchmuck.checked + ", gespanntes Kabel kann Spielzeug verschieben: " + moveStaub.checked + ", gespanntes Kabel kann Staub verschieben: " + moveStaub.checked, settingsConverted: {value: {}, checked: {}}, objects: {vertiefung: [], staub: [], moebel: [], teppich: [], ladestation: [], leererStation: [], spielzeug: [], schmuck: [], steckdose: []}};
+    var convertList = {value: ["staubsaugerSize", "verlangsamungTeppich", "slowestSpeed", "zeitLangsamer", "cableLength", "timeCameraActive", "batteryForNormalView" /*"pixelBisLadenT", "pixelBisLeerenT", "staubAlsLadeBasisT", "StaubAlsLeerBasisT"*/], checked: ["oppsositeDirection", "lidarView", "manualCameraActivation", "cableCheck", "moveSpielzeug", "moveSchmuck", "moveStaub", /*"pixelBisLadenCheck", "StaubAlsLadeBasisCheck", "pixelBisLadenCheck", "StaubAlsLeerBasisCheck", */"brokenCheck", "bounceWalls", "bounceWalls", "stoppeBeiSpielzeug", "langsamerBeiSpielzeug", "spielzeugWenigPlatz", "spielzeugPlatz", "clearWhenSlow", "restartWhenSlow"]}
     for (var i = 0; i < Object.keys(convertList).length; i++) {
       for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
         if (mode == "normal") {
@@ -1609,6 +1611,23 @@ localStorage.setItem("storedName", name);
       break;
     }
   }
+}
+// cable-staub interaction
+for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub && i < selected.objects.staub.length; i++) {
+  data = canvas.getImageData(selected.objects.staub[i].x - selected.objects.staub[i].radius, selected.objects.staub[i].y - selected.objects.staub[i].radius, selected.objects.staub[i].radius*2, selected.objects.staub[i].radius*2);
+  for (var i1 = 0; i1 < data.data.length; i1 += 4) {
+  red = data.data[i1];
+  green = data.data[i1 + 1];
+  blue = data.data[i1 + 2];
+  alpha = data.data[i1 + 3];
+  if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+    if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.staub[i].radius*2)/*selected.objects.staub[i].y - selected.objects.staub[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
+      selected.objects.staub[i].y += 3;
+    }
+    else selected.objects.staub[i].y -= 3;
+    break;
+  }
+}
 }
   }
   else canvas.stroke();
