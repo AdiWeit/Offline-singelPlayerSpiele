@@ -453,8 +453,6 @@ function CameraManuallychanged() {
     selected = {objects: selected.objects, pixelRate: selected.pixelRate, element: selected.element}
     joyStick = undefined;
     highscores.creator = {};
-    energyBar.style.width = 0;
-    trashBar.style.width = 0;
     mode = "creator";
     changePause(false);
     textur.style.touchAction = 'none';
@@ -889,10 +887,6 @@ localStorage.setItem("storedName", name);
     x1 = 0;
     y1 = 0;
     settings.style.display = "none";
-    if (JSON.parse(anzahlLadestationen.value) > 0 || (mode == "creator" && Object.keys(selected.objects.ladestation).length > 0)) energyBar.style.display = "inline";
-    else energyBar.style.display = "none";
-    if (JSON.parse(anzahlEntleerer.value) || (mode == "creator" && Object.keys(selected.objects.leererStation).length > 0)) trashBar.style.display = "inline";
-    else trashBar.style.display = "none";
     textur.width = JSON.parse(pixelRateWidth.value); // screen.availWidth - 9;
     textur.height = JSON.parse(pixelRateHeight.value); // screen.availHeight - 9;
     console.log(screen.availWidth + " - " + textur.width);
