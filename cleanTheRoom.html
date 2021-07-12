@@ -78,7 +78,7 @@
         <br>
         <input checked="true" onchange="if (checked) clearWhenSlow.checked = false;" id="restartWhenSlow" type="checkbox">restart when speed gets too low
         <br>
-        <input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox" name="" value="">stay still when speed gets too low and continue with normal speed afterfords
+        <input onchange="if (checked) restartWhenSlow.checked = false;" id="clearWhenSlow" type="checkbox">stay still when speed gets too low and continue with normal speed afterfords
         <br>
       </p>
       <br>
@@ -231,6 +231,7 @@
 </div>
 <br>
 <select name="course" id="modeSelection" value="normal" onchange="modeSelected(value);">
+  <option value="tutorial">tutorial</option>
   <option value="normal">random</option>
   <option value="vorgefertigt">vorgefertigt</option>
   <option value="uploaded">uploaded level</option>
@@ -391,9 +392,33 @@ function CameraManuallychanged() {
       spezifischeSettings.style.display = "inline";
       textur.style.display = "none";
     }
+    if (value == "tutorial") {
+      selected = JSON.parse('{"objects":{"teppich":[{"x":100,"y":79,"width":244,"height":339}],"staub":[{"x":423,"y":111,"radius":24,"collected":false},{"x":396,"y":369,"radius":24,"collected":false},{"x":421,"y":217,"radius":24,"collected":true},{"x":221,"y":244,"radius":24,"collected":true},{"x":38,"y":239,"radius":24,"collected":true},{"x":421,"y":161,"radius":7,"collected":false},{"x":421,"y":281,"radius":7,"collected":true},{"x":417,"y":325,"radius":7,"collected":true}],"schmuck":[{"x":219,"y":133,"radius":24,"collected":false}],"spielzeug":[{"x":215,"y":341,"radius":24,"collected":false}],"moebel":[{"x":200,"y":12,"width":80,"height":53},{"x":147,"y":426,"width":144,"height":66}],"vertiefung":[{"x":320,"y":13,"width":132,"height":62}],"ladestation":[{"x":67,"y":12,"width":66,"height":25}],"leererStation":[{"x":12,"y":426,"width":44,"height":69}],"multiSelector":[],"steckdose":[]},"pixelRate":"1357 x 732","element":"vertiefung","gegenstaende":"loecher: 1, Moebel: 2, Teppich: 1, Ladestationen: 1, Entleerer: 1, Spielzeug: 1, schmuck: 1, Staub: 8, Steckdose: 0","maxVerfallsdaten":{"ladung":3111,"füllungLeft":200}}');
+      if (gerät == "Handy" && confirm("Wollen sie mit Joy-Stick spielen?")) joyStickPlay.checked = true;
+      resetLevel();
+      alert("Bewegen Sie den Staubsauger durch Bewegen der Maus, wenn sie einen Joy-Stick plaziert haben, oder durch Neigen des Gerätes, falls sie mit Bewegungssteuerung spielen. Erforschen Sie die Elemente dieses Spiels!");
+      explained = {
+        level: 1,
+        texts: {
+          staub: 'Ziel des Spiels ist es, den gesamten Staub weg zu saugen. Das erste Flöckchen haben sie bereits!',
+          spielzeug: 'Oh nein! Sie haben soeben Spielzeug der Kinder des Arbeitgebers aufgesaugt! Gott sei dank kann man das Spielzeugt wieder aus dem Müllbäutel rausfischen! Doch das dauert ein paar Sekunden. \nJe nach Einstellung kann Spielzeug auch ausschließlich den Sauger verlangsamen. Wenn der Staubsauger eines Levels zu schlecht ist (vom Arbeit und seiner Ausstattung abhängig), kann sogar der Bäutel von dem ganzen Spielzeug kaputt gehen und man muss von vorne aunfangen!',
+          schmuck: 'Sie haben soeben Schmuck aufgesaugt! Ihr Arbeitgeber ist so wütend auf sie, dass er sie feuert und Sie es bei einem anderen erneut probieren müssen. ',
+          moebel: 'Das sind Möbel! Sie müssen sie umfahren, aber immerhin schaden sie Ihnen nicht. ',
+          vertiefung: 'Oh nein! Sie haben den Staubsauger geschrottet! Er ist soeben die treppen rutergefallen! Sie kriegen zwar einen neuen Staubsauger, den müssen Sie jedoch größtenteils selber bezahlen. Zusätzlich müssen Sie zur Strafe von vorne anfangen. ',
+          teppich: 'Sie betreten einen Teppich! Auf der Kante fahren Sie wegen dem Höhenunterschied mit dem selben Drehmoment langsamer. Sie können zwar beschleunigen, doch passen Sie auf, dass Sie, sobald Sie auf dem Teppich sind, nicht mehr so schnell sind!',
+          batteryLow: 'Der Akku ist fast leer! Suchen sie die Ladestation oben links auf, um ihn in windeseile wieder zu füllen! Der grüne Balken auf dem Sauger zeigt den Akkufüllstand an. Sie können sich den Weg zur Ladestation immer oder nur bei kritisch niedrigem Füllstand anzeigen lassen (Einstellung bei Scrollen nach unten auffindbar. zum Scrollen auf dem Tablet mit Joy-Stick müssen sie zuvor mit zwei Fingern scrollen.',
+          entleerer: 'Sie haben schon so viel Staub weggesaugt, dass der Sauger fast voll ist! Die Restkapazität wird mit dem grauen Balken auf dem Staubsauger angezeigt. Der staub, der zu groß zum Einsaugen ist, wird nun durchlässig angezeigt.\nUm den Sauger zu entleeren, fahren Sie ihn bitte zu dem automatischen Entleerer links unten. Sie können sich den Weg zum Entleerer immer oder nur bei kritisch hohem Füllstand anzeigen lassen (Einstellung bei Scrollen nach unten auffindbar. zum Scrollen auf dem Tablet mit Joy-Stick müssen sie zuvor mit zwei Fingern scrollen.',
+          broken: 'Ihr Arbeitgeber hat wohl an Sicherheitsfunktionen gespart! Es gibt auch andere, die in Sauger mit Notbremsungen investieren, damit sie die Wand nicht zu stark anfahren! Vielleicht hat ihr Arbeitgeber viel Vertrauen in Sie?',
+          moebelSchlingen: 'Das Kabel wickelt sich um das Möbelstück! Das kann nicht rückgängig gemacht werden, also passen Sie auf, dass das Kabel so wenig Möbel wie möglich kreuzt!',
+          cableStretched: 'Das Kabel ist jetzt angespannt! Viel weiter geht es nicht mehr! Je nach Level kann ein gespanntes Kabel Schmuck, Spielzeug und sogar Staub bewegen!',
+          steckdose: 'Dies ist eine Steckdose! Fahren Sie auf den grauen Kreis, um das Kabel des Staubsaugers umzustecken, damit Sie mit ihrem Staubsauger noch weiter kommen!'
+        }
+      };
+    }
     mode = value;
     highscoresToList(highscores[mode]);
   }
+  var explained = {};
   var beginningPoint = {};
   function dbClickCanvas() {
     if ((beginningPoint.x != undefined && selected.element == "multiSelector" && gerät == "Handy")) mousedownOnCanvas();
@@ -1001,6 +1026,14 @@ localStorage.setItem("storedName", name);
       alertWhenFinishedSaving = false;
     }
   }, 2222);
+  function getSettings() {
+    for (var i = 0; i < Object.keys(selected.settingsConverted).length; i++) {
+      for (var i1 = 0; i1 < Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]]).length; i1++) {
+        if (Object.keys(selected.settingsConverted)[i] == "value") document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).value = selected.settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
+        else document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).checked = selected.settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
+      }
+    }
+  }
   function levelSelected(name) {
     //wegWeiser.style.display = "inline";
     for (var i = 0; i < Object.keys(highscores[mode]).length; i++) {
@@ -1008,12 +1041,7 @@ localStorage.setItem("storedName", name);
         console.log("level " + name + " with pixel rate " + Object.keys(highscores[mode])[i] + " selected!");
         // if ((Object.keys(highscores[mode])[i].toString().split(" x ")[0] > screen.availWidth || Object.keys(highscores[mode])[i].toString().split(" x ")[1] > screen.availHeight) && gerät == "Handy") alert("please turn the mobile device by 90°!");
         selected = {gegenstaende: name, maxVerfallsdaten: highscores[mode][Object.keys(highscores[mode])[i]][name].maxVerfallsdaten, pixelRate: Object.keys(highscores[mode])[i], objects: highscores[mode][Object.keys(highscores[mode])[i]][name].objects, settings: highscores[mode][Object.keys(highscores[mode])[i]][name].settings, settingsConverted: highscores[mode][Object.keys(highscores[mode])[i]][name].settingsConverted};
-        for (var i = 0; i < Object.keys(selected.settingsConverted).length; i++) {
-          for (var i1 = 0; i1 < Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]]).length; i1++) {
-            if (Object.keys(selected.settingsConverted)[i] == "value") document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).value = highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
-            else document.getElementById(Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]).checked = highscores[mode][selected.pixelRate][selected.gegenstaende].settingsConverted[Object.keys(selected.settingsConverted)[i]][Object.keys(selected.settingsConverted[Object.keys(selected.settingsConverted)[i]])[i1]];
-          }
-        }
+        getSettings();
         /*
         for (var i = 0; i < Object.keys(convertList).length; i++) {
           for (var i1 = 0; i1 < convertList[Object.keys(convertList)[i]].length; i1++) {
@@ -1123,6 +1151,7 @@ localStorage.setItem("storedName", name);
       var ball = {x: nextCoordinates.x, y: nextCoordinates.y, width: cssToNumber(sphere1.style.width), height: cssToNumber(sphere1.style.width)};
       if (isCollide(ball, selected.objects.moebel[i])) {
         noMoebelInFront = false;
+        explain('moebel');
       }
     }
     if (stopSpielzeug.boolean) {
@@ -1248,6 +1277,7 @@ localStorage.setItem("storedName", name);
       // canvas.fillRect(ball.x, ball.y, ball.width, 100);
       if (isCollide(ball, selected.objects.vertiefung[i]) && mode != "creator") {
         resetLevel("ab ins Loch!!!");
+        explain('vertiefung');
       }
       // if (x1 > selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width/2 && x1 < selected.objects.vertiefung[i].x + selected.objects.vertiefung[i].width && y1 > selected.objects.vertiefung[i].y && y1 < selected.objects.vertiefung[i].y + selected.objects.vertiefung[i].height) {
       //   console.log("going down from left");
@@ -1269,6 +1299,7 @@ localStorage.setItem("storedName", name);
       canvas.fillStyle = "green";//"#2EFE2E";
       canvas.fillRect(selected.objects.ladestation[i].x, selected.objects.ladestation[i].y, selected.objects.ladestation[i].width, selected.objects.ladestation[i].height);
       checkMark(selected.objects.ladestation[i], "rectangle");
+      if (verfallsdaten.ladung < 1555) explain('batteryLow');
       if (showWayLadestation.checked || (verfallsdaten.ladung < screen.availWidth + screen.availHeight/5 && showWayLaderWhenLow.checked)) {
         canvas.strokeStyle = "green";
         canvas.beginPath();
@@ -1299,6 +1330,7 @@ localStorage.setItem("storedName", name);
       // collect spielzeug
       if (mode != "creator" && !selected.objects.spielzeug[i].collected && ((!spielzeugWenigPlatz.checked && verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2) || spielzeugWenigPlatz.checked) && selected.objects.spielzeug[i].x > x1 + 8 && selected.objects.spielzeug[i].x + selected.objects.spielzeug[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.spielzeug[i].y > y1 + 8 && selected.objects.spielzeug[i].y + selected.objects.spielzeug[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.spielzeug[i].collected = true;
+        explain('spielzeug');
         if (verfallsdaten.füllungLeft > selected.objects.spielzeug[i].radius*2 && !spielzeugPlatz.checked && verfallsdaten.füllungLeft != undefined) verfallsdaten.füllungLeft -= selected.objects.spielzeug[i].radius*2;
         if (stoppeBeiSpielzeug.checked) stopSpielzeug = {boolean: true, time: 2000};
         if (langsamerBeiSpielzeug.checked && !slowDownSpielzeug.boolean) slowDownSpielzeug = {boolean: true, time: [/*JSON.parse(*/zeitLangsamer.value/*)*/], speed: 1.9};
@@ -1345,6 +1377,7 @@ localStorage.setItem("storedName", name);
       // collect Schmuck
       if (mode != "creator" && !selected.objects.schmuck[i].collected && selected.objects.schmuck[i].x > x1/* + 8*/ && selected.objects.schmuck[i].x + selected.objects.schmuck[i].radius < x1/* + 8*/ + cssToNumber(sphere1.style.width) && selected.objects.schmuck[i].y > y1/* + 8*/ && selected.objects.schmuck[i].y + selected.objects.schmuck[i].radius < y1/* + 8*/ + cssToNumber(sphere1.style.width)) {
         selected.objects.schmuck[i].collected = true;
+        explain('schmuck');
         try {
           audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
           audio.currentTime = 60*1 + 29.5;
@@ -1386,9 +1419,8 @@ localStorage.setItem("storedName", name);
       if (selected.objects.steckdose[i].height < selected.objects.steckdose[i].width) canvas.arc(selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2, selected.objects.steckdose[i].height/2, 0, Math.PI*2, false);
       else canvas.arc(selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2, selected.objects.steckdose[i].width/2, 0, Math.PI*2, false);
       canvas.fill();
-      if (cable.active && y1 > selected.objects.steckdose[i].y && y1 < selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2 && x1 > selected.objects.steckdose[i].x && x1 < selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2) {
-        cable.points = [{x: selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, y: selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2}, {x: 1, y: 1}];
-      }
+      if (cable.active && y1 > selected.objects.steckdose[i].y && y1 < selected.objects.steckdose[i].y + selected.objects.steckdose[i].height && x1 > selected.objects.steckdose[i].x && x1 < selected.objects.steckdose[i].x + selected.objects.steckdose[i].width) explain('steckdose');
+      if (cable.active && y1 > selected.objects.steckdose[i].y && y1 < selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2 && x1 > selected.objects.steckdose[i].x && x1 < selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2) cable.points = [{x: selected.objects.steckdose[i].x + selected.objects.steckdose[i].width/2, y: selected.objects.steckdose[i].y + selected.objects.steckdose[i].height/2}, {x: 1, y: 1}];
     }
     var allStaubPixel = 0;
     for (var i = 0; selected.objects && selected.objects.staub && i < selected.objects.staub.length; i++) {
@@ -1396,6 +1428,7 @@ localStorage.setItem("storedName", name);
       allStaubPixel += selected.objects.staub[i].radius*2;
       if (mode != "creator" && (verfallsdaten.füllungLeft >= selected.objects.staub[i].radius*2 || !verfallsdaten.füllungLeft) && !selected.objects.staub[i].collected && selected.objects.staub[i].x > x1 + 8 && selected.objects.staub[i].x + selected.objects.staub[i].radius < x1 + 8 + cssToNumber(sphere1.style.width) && selected.objects.staub[i].y > y1 + 8 && selected.objects.staub[i].y + selected.objects.staub[i].radius < y1 + 8 + cssToNumber(sphere1.style.width)) {
         selected.objects.staub[i].collected = true;
+        explain('staub');
         if (verfallsdaten.füllungLeft != undefined) {
           verfallsdaten.füllungLeft -= selected.objects.staub[i].radius*2;
         }
@@ -1412,7 +1445,10 @@ localStorage.setItem("storedName", name);
       }
       canvas.fillStyle = "#A4A4A4";
       canvas.globalAlpha = 1;
-      if (!(verfallsdaten.füllungLeft >= selected.objects.staub[i].radius*2) && verfallsdaten.füllungLeft != undefined) canvas.globalAlpha = 0.5;
+      if (!(verfallsdaten.füllungLeft >= selected.objects.staub[i].radius*2) && verfallsdaten.füllungLeft != undefined) {
+        canvas.globalAlpha = 0.5;
+        explain('entleerer');
+      }
       canvas.beginPath();
       canvas.arc(selected.objects.staub[i].x, selected.objects.staub[i].y, selected.objects.staub[i].radius, 0, Math.PI*2, false);
       if (!selected.objects.staub[i].collected && selected.objects.staub[i].x) {
@@ -1434,7 +1470,26 @@ localStorage.setItem("storedName", name);
       //     syncFinished = false;
       //   }, 1);
       // }
-      if (syncFinished == true && mode != "testLevel") {
+      if (mode == "tutorial") {
+        explained.level++;
+        if (explained.level == 2) {
+        alert("Der Arbetgeber dieses Levels hat wohl gespart! Der Stauubsauger hat keinen Akku, sondern ein Stromkabel! Dafür brauchen Sie keinen Entleerer, weil der Staubsauger genügend lagerungskapazität hat. Versuchen Sie erneut, allen Staub aufzusammeln!");
+        // selected = JSON.parse('{"pixelRate":"1591 x 1191","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false, lidar Sicht (einfarbig): false, Kamera kann manuell reaktiviert werden: false, Kabel statt Akku: false, gespanntes Kabel kann Schmuck verschieben: false, gespanntes Kabel kann Spielzeug verschieben: false, gespanntes Kabel kann Staub verschieben: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless","cableLength":"599","timeCameraActive":"3","batteryForNormalView":"333"},"checked":{"oppsositeDirection":false,"lidarView":false,"manualCameraActivation":false,"cableCheck":false,"moveSpielzeug":false,"moveSchmuck":false,"moveStaub":false,"brokenCheck":true,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"vertiefung":[],"staub":[],"moebel":[],"teppich":[],"ladestation":[],"leererStation":[],"spielzeug":[],"schmuck":[],"steckdose":[]}, "maxVerfallsdaten": {}}'/*'{"objects":{"staub":[{"x":262,"y":333,"radius":21,"collected":false},{"x":383,"y":431,"radius":21,"collected":false},{"x":203,"y":37,"radius":21,"collected":false},{"x":289,"y":128,"radius":21,"collected":false},{"x":149,"y":205,"radius":21,"collected":false},{"x":68,"y":245,"radius":21,"collected":false},{"x":118,"y":321,"radius":21,"collected":false},{"x":52,"y":372,"radius":21,"collected":false},{"x":473,"y":282,"radius":24,"collected":false},{"x":447,"y":374,"radius":24,"collected":false},{"x":395,"y":425,"radius":18,"collected":false,"selected":false,"beginningPoint":{"x":422,"y":400}}],"schmuck":[{"x":160,"y":481,"radius":21,"collected":false},{"x":28,"y":319,"radius":21,"collected":false},{"x":467,"y":42,"radius":21,"collected":false},{"x":352,"y":414,"radius":11,"collected":false}],"spielzeug":[{"x":159,"y":414,"radius":21,"collected":false},{"x":25,"y":244,"radius":21,"collected":false},{"x":472,"y":100,"radius":21,"collected":false},{"x":346,"y":403,"radius":9,"collected":false,"selected":false,"beginningPoint":{"x":373,"y":411}},{"x":370,"y":406,"radius":12,"collected":false}],"teppich":[],"moebel":[{"x":55,"y":32,"width":70,"height":96},{"x":360,"y":67,"width":73,"height":77},{"x":209,"y":365,"width":125,"height":97},{"x":53,"y":409,"width":61,"height":52}],"vertiefung":[],"ladestation":[],"leererStation":[],"multiSelector":[],"steckdose":[]},"pixelRate":"500 x 500","element":"spielzeug","maxVerfallsdaten":{}}'*/);
+        // selected = JSON.parse('{"objects":{"staub":[{"x":262,"y":339,"radius":21,"collected":false},{"x":203,"y":37,"radius":21,"collected":false},{"x":289,"y":128,"radius":21,"collected":false},{"x":149,"y":208,"radius":21,"collected":false},{"x":68,"y":245,"radius":21,"collected":false},{"x":118,"y":321,"radius":21,"collected":false},{"x":52,"y":375,"radius":21,"collected":false},{"x":473,"y":282,"radius":24,"collected":false},{"x":447,"y":374,"radius":24,"collected":false},{"x":395,"y":425,"radius":18,"collected":false,"selected":false,"beginningPoint":{"x":422,"y":400}},{"x":388,"y":374,"radius":16,"collected":false,"selected":false,"beginningPoint":{"x":359,"y":374}}],"schmuck":[{"x":160,"y":481,"radius":21,"collected":false},{"x":28,"y":322,"radius":21,"collected":false},{"x":467,"y":42,"radius":21,"collected":false},{"x":346,"y":410,"radius":13,"collected":false}, {"x":319,"y":345,"radius":10,"collected":false}],"spielzeug":[{"x":159,"y":414,"radius":21,"collected":false},{"x":25,"y":245,"radius":21,"collected":false},{"x":472,"y":100,"radius":21,"collected":false},{"x":375,"y":345,"radius":15,"collected":false}],"teppich":[],"moebel":[{"x":76,"y":32,"width":70,"height":96},{"x":360,"y":67,"width":73,"height":77},{"x":209,"y":365,"width":125,"height":97},{"x":53,"y":409,"width":61,"height":52}],"vertiefung":[],"ladestation":[],"leererStation":[],"multiSelector":[],"steckdose":[{"x":370,"y":155,"width":60,"height":34}]},"pixelRate":"500 x 500","element":"spielzeug","maxVerfallsdaten":{},"settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false, lidar Sicht (einfarbig): false, Kamera kann manuell reaktiviert werden: false, Kabel statt Akku: false, gespanntes Kabel kann Schmuck verschieben: false, gespanntes Kabel kann Spielzeug verschieben: false, gespanntes Kabel kann Staub verschieben: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless","cableLength":"599","timeCameraActive":"3","batteryForNormalView":"333"},"checked":{"oppsositeDirection":false,"lidarView":false,"manualCameraActivation":false,"cableCheck":true,"moveSpielzeug":true,"moveSchmuck":true,"moveStaub":true,"brokenCheck":true,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}}}');
+        selected = JSON.parse('{"objects":{"staub":[{"x":262,"y":339,"radius":21,"collected":false},{"x":203,"y":37,"radius":21,"collected":false},{"x":289,"y":128,"radius":21,"collected":false},{"x":149,"y":208,"radius":21,"collected":false},{"x":68,"y":245,"radius":21,"collected":false},{"x":118,"y":321,"radius":21,"collected":false},{"x":52,"y":375,"radius":21,"collected":false},{"x":473,"y":282,"radius":24,"collected":true},{"x":447,"y":374,"radius":24,"collected":false},{"x":395,"y":425,"radius":18,"collected":false,"selected":false,"beginningPoint":{"x":422,"y":400}},{"x":388,"y":374,"radius":16,"collected":false,"selected":false,"beginningPoint":{"x":359,"y":374}},{"x":576,"y":48,"radius":24,"collected":true},{"x":576,"y":136,"radius":24,"collected":true},{"x":586,"y":217,"radius":24,"collected":true},{"x":588,"y":282,"radius":24,"collected":true},{"x":584,"y":356,"radius":24,"collected":true},{"x":579,"y":428,"radius":24,"collected":true}],"schmuck":[{"x":160,"y":481,"radius":21,"collected":false},{"x":28,"y":322,"radius":21,"collected":false},{"x":467,"y":42,"radius":21,"collected":false},{"x":346,"y":410,"radius":13,"collected":false}, {"x":319,"y":345,"radius":10,"collected":false}],"spielzeug":[{"x":159,"y":414,"radius":21,"collected":false},{"x":25,"y":245,"radius":21,"collected":false},{"x":472,"y":100,"radius":21,"collected":false},{"x":375,"y":345,"radius":15,"collected":false}],"teppich":[],"moebel":[{"x":76,"y":32,"width":70,"height":96},{"x":360,"y":67,"width":73,"height":77},{"x":209,"y":365,"width":125,"height":97},{"x":53,"y":409,"width":61,"height":52}],"vertiefung":[],"ladestation":[],"leererStation":[],"multiSelector":[],"steckdose":[{"x":370,"y":155,"width":60,"height":34}]},"pixelRate":"700 x 500","element":"spielzeug","maxVerfallsdaten":{},"settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false, lidar Sicht (einfarbig): false, Kamera kann manuell reaktiviert werden: false, Kabel statt Akku: false, gespanntes Kabel kann Schmuck verschieben: false, gespanntes Kabel kann Spielzeug verschieben: false, gespanntes Kabel kann Staub verschieben: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless","cableLength":"599","timeCameraActive":"3","batteryForNormalView":"333"},"checked":{"oppsositeDirection":false,"lidarView":false,"manualCameraActivation":false,"cableCheck":true,"moveSpielzeug":true,"moveSchmuck":true,"moveStaub":true,"brokenCheck":true,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}}}');
+      }
+      if (explained.level == 3) {
+        alert('Nun ist leider eine weltweite Pandemie ausgebrochen und Sie müssen von zu Hause arbeiten. Zum Glück kann der Staubsauger Ihres Arbeitgebers die Umgebung scannen, sodass nicht die ganze Zeit die Kamera laufen muss. Das verbraucht nämlich (je nach Modell bzw. Level verschieden) viel Energie, da das aktuelle Bild ständig übertragen werden muss.Aber seien Sie vorsichtig! Der Scann kann keinen Treppen nach unten erkennen! Trotz des Energieverbrauchs könnenn Sie bei Bedarf die Kamera durch Anklicken des Staubsaugers oder Drücken der taste "L" aktivieren und deaktivieren. Zu Beginn ist je nach Modell die Kamera verschieden lange aktiv, da die Umgebung noch gescannt werden muss. ');
+        selected = JSON.parse('{"pixelRate":"1100 x 800","settings":"Neustart wenn Wand berührt: true, bounce von Rändern: false, stoppe bei Spielzeug: true, werde langsamer bei Spielzeug: false, neu starten, wenn Geschwindigkeit zu gering wird: true, oder bleibe stehen und mache danach weiter: false, Spielzeug kann auch bei zu wenig Platz aufgesammelt werden: true, Spielzeug frisst keinen Platz im Speicher: false, gegen Steuerungsrichtung: false, lidar Sicht (einfarbig): true, Kamera kann manuell reaktiviert werden: true, Kabel statt Akku: false, gespanntes Kabel kann Schmuck verschieben: false, gespanntes Kabel kann Spielzeug verschieben: false, gespanntes Kabel kann Staub verschieben: false","settingsConverted":{"value":{"staubsaugerSize":"50","verlangsamungTeppich":"11","slowestSpeed":"1.3","zeitLangsamer":"endless","cableLength":"599","timeCameraActive":"2","batteryForNormalView":"333"},"checked":{"oppsositeDirection":false,"lidarView":true,"manualCameraActivation":true,"cableCheck":false,"moveSpielzeug":false,"moveSchmuck":false,"moveStaub":false,"brokenCheck":true,"bounceWalls":false,"stoppeBeiSpielzeug":true,"langsamerBeiSpielzeug":false,"spielzeugWenigPlatz":true,"spielzeugPlatz":false,"clearWhenSlow":false,"restartWhenSlow":true}},"objects":{"staub":[{"x":699,"y":372,"radius":24,"collected":false},{"x":610,"y":490,"radius":24,"collected":false},{"x":515,"y":604,"radius":24,"collected":false},{"x":473,"y":407,"radius":24,"collected":false},{"x":765,"y":609,"radius":24,"collected":false}],"schmuck":[{"x":640,"y":616,"radius":24,"collected":false},{"x":737,"y":491,"radius":24,"collected":false},{"x":505,"y":500,"radius":24,"collected":false},{"x":586,"y":399,"radius":24,"collected":false}],"spielzeug":[{"x":698,"y":288,"radius":24,"collected":false},{"x":468,"y":308,"radius":24,"collected":false},{"x":372,"y":417,"radius":24,"collected":false},{"x":407,"y":591,"radius":24,"collected":false},{"x":511,"y":723,"radius":24,"collected":false},{"x":777,"y":719,"radius":24,"collected":false},{"x":882,"y":602,"radius":24,"collected":false},{"x":862,"y":363,"radius":24,"collected":false}],"teppich":[],"moebel":[{"x":111,"y":11,"width":109,"height":74},{"x":227,"y":740,"width":175,"height":53}],"vertiefung":[{"x":92,"y":384,"width":126,"height":292}],"ladestation":[],"leererStation":[],"multiSelector":[],"steckdose":[]},"maxVerfallsdaten":{"ladung":2400,"füllungLeft":240},"name":"lidar demonstration"}')
+      }
+      if (explained.level == 4) {
+        alert('Prima! Nun wissen Sie ja, wie das Spiel läuft, also wagen Sie sich ruhig an die vorgefertigten Level!')
+        modeSelected("vorgefertigt");
+      }
+        getSettings();
+        resetLevel();
+      }
+      else if (syncFinished == true && mode != "testLevel") {
         if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores = {};
         if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name]) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name] = {};
         if (!highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät]) highscores[mode][selected.pixelRate][selected.gegenstaende].highscores[name][gerät] = {};
@@ -1484,7 +1539,7 @@ localStorage.setItem("storedName", name);
           uploadCources.push({mode: "uploaded", pixelRate: selected.pixelRate, gegenstaende: gegenstaende/*, joyStickPlay: (joyStickPlay.checked + "").replace("true", "joy-stick").replace("false", "no joy-stick"), highscores: mins + ":" + secs + ":" + "0" + tenths*/, data: highscores.uploaded[selected.pixelRate][gegenstaende]});
           localStorage.setItem("uploadCourcesCleanTheRoom", JSON.stringify(uploadCources));
         }
-        resetAfterTrying(true);
+        resetAfterTrying(true, "levelEditor");
       }
     }
     // sphere1.style.top = "175";
@@ -1505,8 +1560,7 @@ localStorage.setItem("storedName", name);
         trashBar.style.left = cssToNumber(sphere1.style.left) + 19 + cssToNumber(trashBar.style.width)//cssToNumber(sphere1.style.width) - 50;
         trashBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(trashBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
       }
-      // else {
-      //   trashBar.style.width = 0;
+      else trashBar.style.width = 0;
       //   verfallsdaten.füllungLeft += cssToNumber(sphere1.style.width);
       // }
       if (selected.maxVerfallsdaten.ladung > 0/*selected.objects.ladestation.length > 0*/) {
@@ -1516,8 +1570,7 @@ localStorage.setItem("storedName", name);
         energyBar.style.left = cssToNumber(sphere1.style.left) + 11// + cssToNumber(sphere1.style.width) - 50;
         energyBar.style.top = cssToNumber(sphere1.style.top) + 5 + (40 - cssToNumber(energyBar.style.height)) + cssToNumber(sphere1.style.height) - 50;
       }
-      // else {
-      //   energyBar.style.width = 0;
+      else energyBar.style.width = 0;
       //   verfallsdaten.ladung += speed.x + speed.y;
       // }
   }
@@ -1577,6 +1630,7 @@ localStorage.setItem("storedName", name);
 
   // cable-Spielzeug interaction
   if (wholeDistance >= cable.maxLength - 33) {
+    explain('cableStretched');
     canvas.strokeStyle = "#FF2525";
     canvas.stroke();
     for (var i = 0; moveSpielzeug.checked && selected.objects && selected.objects.spielzeug && i < selected.objects.spielzeug.length; i++) {
@@ -1587,6 +1641,7 @@ localStorage.setItem("storedName", name);
       blue = data.data[i1 + 2];
       alpha = data.data[i1 + 3];
       if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+        // explain('moveCycles');
         if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.spielzeug[i].radius*2)/*selected.objects.spielzeug[i].y - selected.objects.spielzeug[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
           selected.objects.spielzeug[i].y++;
         }
@@ -1604,6 +1659,7 @@ localStorage.setItem("storedName", name);
     blue = data.data[i1 + 2];
     alpha = data.data[i1 + 3];
     if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+      // explain('moveCycles');
       if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.schmuck[i].radius*2)/*selected.objects.schmuck[i].y - selected.objects.schmuck[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
         selected.objects.schmuck[i].y += 3;
       }
@@ -1621,6 +1677,7 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
   blue = data.data[i1 + 2];
   alpha = data.data[i1 + 3];
   if (red == 255 && blue == 37 && alpha == 255 && green == 37) {
+    // explain('moveCycles');
     if (i1 < data.data.length/2 - (canvas.lineWidth*selected.objects.staub[i].radius*2)/*selected.objects.staub[i].y - selected.objects.staub[i].radius/*coordinatesBefore.y*/ /*> y1*/) {
       selected.objects.staub[i].y += 3;
     }
@@ -1651,21 +1708,25 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
    // oben rechts
    if (cableCoord.x > selected.objects.moebel[i].width/2 && cableCoord.y < selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
+     explain('moebelSchlingen');
      break;
    }
    // unten rechts
    if (cableCoord.x > selected.objects.moebel[i].width/2 && cableCoord.y > selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x + selected.objects.moebel[i].width + canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
+     explain('moebelSchlingen');
      break;
    }
    // unten links
    if (cableCoord.x < selected.objects.moebel[i].width/2 && cableCoord.y > selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth}))) {
      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y + selected.objects.moebel[i].height + canvas.lineWidth});
+     explain('moebelSchlingen');
      break;
    }
    // oben links
    if (cableCoord.x < selected.objects.moebel[i].width/2 && cableCoord.y < selected.objects.moebel[i].height/2 && !JSON.stringify(cable.points).includes(JSON.stringify({x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth}))) {
      cable.points.splice(cable.points.length - 1, 0, {x: selected.objects.moebel[i].x - canvas.lineWidth, y: selected.objects.moebel[i].y - canvas.lineWidth});
+     explain('moebelSchlingen');
      break;
    }
  }
@@ -1679,6 +1740,12 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
 }
 }
   }, 25);
+  function explain(type) {
+    if (mode == "tutorial" && !explained[type]) {
+      alert(explained.texts[type]);
+      explained[type] = true;
+    }
+  }
   var cable = {points: [{x: 0, y: 0}, {x: 1, y: 1}], maxLength: 599};
   var audio;
   var cleanerAudioVar;
@@ -1706,6 +1773,7 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
     } catch (e) {console.log("audio not playable!")}
   }
   function resetLevel(type, texturNotVisible) {
+    if (type == "broken") explain('broken');
     setTimeout(function () {
       window.scroll(9, 9);
     }, 500);
@@ -1747,11 +1815,11 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
       }
       lidarViewNow = {boolean: false, byUser: false};
       cable = {points: [{x: 0, y: 0}, {x: 1, y: 1}], maxLength: cableLength.value, active: cableCheck.checked};
-      if (cable.active) selected.maxVerfallsdaten = {};
+      if (cable.active) selected.maxVerfallsdaten.ladung = undefined;
       lidarViewNow.boolean = false;
       if (lidarView.checked && type != "levelEditor") {
         setTimeout(function () {
-          lidarViewNow.boolean = true;
+        if (document.getElementById('tryLevel').innerHTML != 'try out your level (clear it to be able to upload it)' || creationDiv.style.display == "none") lidarViewNow.boolean = true;
         }, timeCameraActive.value*1000);
       }
     }, 1);
@@ -1772,6 +1840,7 @@ for (var i = 0; moveStaub.checked && selected.objects && selected.objects.staub 
     );
   }
   function slowDown(pSpeed) {
+    explain('teppich');
     console.log("slow down");
     //if (!pSpeed) var pSpeed = "Test";
     y1 -= speed.y/ /*1.1*/ pSpeed*direction.y;
