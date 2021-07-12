@@ -985,6 +985,7 @@ localStorage.setItem("storedName", name);
   //     verfallsdaten.füllungLeft += selected.objects.staub[i].radius*2;
   //   }
   // }
+    verfallsdaten.füllungLeft = selected.objects.staub.reduce((acc, val) => acc + val.radius*2, 0);
     if (StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisT.value)//11;
     else if (StaubAlsLadeBasisCheckEdit.checked && mode == "creator") verfallsdaten.ladung = verfallsdaten.füllungLeft*JSON.parse(staubAlsLadeBasisTEdit.value)//11;
     else if (!StaubAlsLadeBasisCheck.checked && mode == "normal") verfallsdaten.ladung = JSON.parse(pixelBisLadenT.value);
