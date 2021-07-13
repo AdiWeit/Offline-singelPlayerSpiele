@@ -61,7 +61,7 @@
 <br>
 Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked) value = figuresUnlocked; beginnRound();" value="3" type="text">
 <br>
-<input type="range" min="10" onchange="canvasClicked(); beginnRound();" oninput="if (!pause.boolean) canvasClicked(); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
+<input type="range" min="10" onchange="canvasClicked(); if (inRound) beginnRound();" oninput="if (!pause.boolean) canvasClicked(); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
 <table id="scores">
@@ -173,9 +173,13 @@ console.log("PC");
     if (!highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] && modeSelection.value != "training") highscores[name][numberFigures.value][sliderSize.value][modeSelection.value] = {1: 0, 2: 0, 3: 0};
     else if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && !shield) {
       lives.now--;
-      for (var screenNow of screen) {
-        if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) screenNow.damageless = false;
-      }
+      screen.forEach((screenNow, i1) => {
+        if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) {
+          screenNow.damageless = false;
+          addToStatistic(i1);
+        }
+      });
+
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
       if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now]) {
@@ -416,6 +420,9 @@ localStorage.setItem("storedName", name);
     dbGet("scrollingBall", "figureXP " + name).then(result => {
       figureXP = result;
     });
+    dbGet("scrollingBall", "statistics " + name).then(result => {
+      statistics = result;
+    });
     dbGet("scrollingBall", "highscores").then(result => {
       highscores = result;
       if (!highscores[name]) highscores[name] = {/*autoScroll: {1: 0, 2: 0, 3: 0}, againstThePC: {1: 0, 2: 0, 3: 0}, scrollWaagerecht: {1: 0, 2: 0, 3: 0}*/};
@@ -466,6 +473,7 @@ localStorage.setItem("storedName", name);
     }
   }
   document.getElementById('newHighscore').style.display = "none";
+  var inRound = false;
   var Bild;
   var dbSetWarteschlange = [];
   setInterval(function () {
@@ -512,11 +520,12 @@ else if (gerät == "PC") {
 }
   }
   function beginnRound(resetNoLive) {
-    // if (modeSelection.value == "training") {
+    inRound = false;
+    if (modeSelection.value == "training") {
       statistics[modeSelection.value] = {};
       statisticTextur.style.display = "inline";
       textur.width = 426;
-    // }
+    }
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
       if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
@@ -525,6 +534,7 @@ else if (gerät == "PC") {
         var time = 3000;
         if (instatntRestart.checked && resetNoLive) time = 0;
         setTimeout(function () {
+          inRound = true;
           beginnRoundP2(resetNoLive);
         }, time);
       }
@@ -679,11 +689,11 @@ else if (gerät == "PC") {
       //   screen[i].notRight = true;
       // }
       if (screen[i].y > 752 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "left") {
-        addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+        addToStatistic(i, "end"); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
         if (speed != 0 && screen[i].y <= /*-876 - 426*//*-1229*/-752/*376*/ && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {
-          addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
+          addToStatistic(i, "end"); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 390));}
         else if ((screen[i].y > 752 && modeSelection.value != "againstThePC") && !(modeSelection.value == "scrollWaagerecht" && direction.stringDirection == "right")) {
-        addToStatistic(i); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
+        addToStatistic(i, "end"); screen.splice(i, 1); screen.push(createNewFigure(screen.length, 0));}
       // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
@@ -693,24 +703,27 @@ else if (gerät == "PC") {
     }
   }
 }
-  function addToStatistic(i) {
-    if (pixelMoved > 0 && !screen[i].link.includes("Start") && !statistics[modeSelection.value][screen[i].link]) statistics[modeSelection.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
-    if (pixelMoved > 0 && !screen[i].link.includes("Start") && screen[i].damageless) {
+  function addToStatistic(i, time) {
+    if (pixelMoved > 0 && (!screen[i].link.includes("Start"))) {
+      if (!statistics[modeSelection.value][screen[i].link]) statistics[modeSelection.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
+    if (screen[i].damageless) {
       statistics[modeSelection.value][screen[i].link].right++;
       statistics[modeSelection.value][screen[i].link].streak++;
       statistics[modeSelection.value].all.streak++;
       if (statistics[modeSelection.value][screen[i].link].streak > statistics[modeSelection.value][screen[i].link].longest) statistics[modeSelection.value][screen[i].link].longest++;
       if (statistics[modeSelection.value].all && statistics[modeSelection.value].all.streak > statistics[modeSelection.value].all.longest) statistics[modeSelection.value].all.longest++;
     }
-    else if (pixelMoved > 0 && !screen[i].link.includes("Start"))  {
+    else if (time != "end") {
       statistics[modeSelection.value][screen[i].link].streak = 0;
       statistics[modeSelection.value][screen[i].link].wrong++;
       statistics[modeSelection.value].all.streak = 0;
     }
+  }
     showStatistic();
     setTimeout(function () {
       showStatistic(true);
     }, 100);
+    dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
   function showStatistic(secondRender) {
