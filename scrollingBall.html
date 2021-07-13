@@ -80,6 +80,7 @@ Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked)
 </table>
 <h1 id="nameEingeloggt" onclick='changeName();'></h1>
 <script>
+var alertWhenFinishedSaving = false;
 window.onbeforeunload = function(){
 console.log("Leave Website");
   if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -511,11 +512,11 @@ else if (gerät == "PC") {
 }
   }
   function beginnRound(resetNoLive) {
-    if (modeSelection.value == "training") {
-      statistics["training"] = {};
+    // if (modeSelection.value == "training") {
+      statistics[modeSelection.value] = {};
       statisticTextur.style.display = "inline";
       textur.width = 426;
-    }
+    // }
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
       if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
@@ -724,7 +725,7 @@ else if (gerät == "PC") {
     for (var i = 0; i < Object.keys(statistics[modeSelection.value]).length; i++) {
       var srcNow = Object.keys(statistics[modeSelection.value])[i];
       if (srcNow != "all" || secondRender) {
-      if (x*113 + 100 > statisticTextur.width) {
+      if (x*121 + 100 > statisticTextur.width) {
         yPlus += 25*Object.keys(statistics[modeSelection.value][srcNow]).length + 113;
         x = 0;
       }
@@ -733,13 +734,13 @@ else if (gerät == "PC") {
           if (Object.keys(statistics[modeSelection.value])[i1] != "all") {
           var img = new Image();
           img.src = Object.keys(statistics[modeSelection.value])[i1];
-          statisticCanvas.drawImage(img, x*113 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1), 100);
+          statisticCanvas.drawImage(img, x*121 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1), 100);
         //   if (Object.keys(statistics[modeSelection.value])[i1].split('/schema') && objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema1')[1].split('.png')[0]]) {
         //   for (var objective of objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema')[1].split('.png')[0]]) {
         //     var sizeRelationToOriginal = 1.0;
         //     if (objective.sizeRelationToOriginal) sizeRelationToOriginal = objective.sizeRelationToOriginal;
         //     scale2 = sizeRelationToOriginal;
-        //     drawPath_V2(doneShapes[objective.shape], x*113 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1) + objective.position.x, yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1) + objective.position.y, scale2, (6666 / (7777/2) * Math.PI) + 0, "", "red", statisticCanvas, true); //360 every 2 second
+        //     drawPath_V2(doneShapes[objective.shape], x*121 + (100/(Object.keys(statistics[modeSelection.value]).length - 1))*(i1 - 1) + objective.position.x, yPlus, 100/(Object.keys(statistics[modeSelection.value]).length - 1) + objective.position.y, scale2, (6666 / (7777/2) * Math.PI) + 0, "", "red", statisticCanvas, true); //360 every 2 second
         //   }
         // }
         }
@@ -748,7 +749,7 @@ else if (gerät == "PC") {
       else {
         var img = new Image();
         img.src = srcNow;
-        statisticCanvas.drawImage(img, x*113, yPlus, 100, 100);
+        statisticCanvas.drawImage(img, x*121, yPlus, 100, 100);
         if (srcNow.split('/schema')[1] && objectives[srcNow.split('/schema')[1].split('.png')[0]]) {
         for (var objective of objectives[srcNow.split('/schema')[1].split('.png')[0]]) {
           var sizeRelationToOriginal = 1.0;
@@ -756,11 +757,11 @@ else if (gerät == "PC") {
           scale2 = sizeRelationToOriginal*(100/426);
           if (objective.heart && objective.heart.onceInMiliSec) {
             scale2 = ((-1) * 0.4 + sizeRelationToOriginal)*(100/426);
-            drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
+            drawPath_V2(doneShapes[objective.shape], x*121 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
             scale2 = ((1) * 0.4 + sizeRelationToOriginal)*(100/426);
-            drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
+            drawPath_V2(doneShapes[objective.shape], x*121 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "rgba(0, 0, 0, 0.5)", statisticCanvas, true); //360 every 2 second
           }
-          else drawPath_V2(doneShapes[objective.shape], x*113 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", statisticCanvas, true); //360 every 2 second
+          else drawPath_V2(doneShapes[objective.shape], x*121 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", statisticCanvas, true); //360 every 2 second
         }
       }
       }
@@ -769,7 +770,7 @@ else if (gerät == "PC") {
       for (var i1 = 0; (srcNow != "all" || Object.keys(statistics[modeSelection.value]).length > 2) && i1 < Object.keys(statistics[modeSelection.value][srcNow]).length; i1++) {
         var text = Object.keys(statistics[modeSelection.value][srcNow])[i1];
         var data = statistics[modeSelection.value][srcNow][text];
-        statisticCanvas.fillText(text + ":" + data, x*113, 123 + 27*i1 + yPlus);
+        statisticCanvas.fillText(text + ":" + data, x*121, 123 + 27*i1 + yPlus);
         if (srcNow != "all" && (text == "right" || text == "wrong")) statistics[modeSelection.value].all[text] += data;
       }
       x++;
