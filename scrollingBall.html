@@ -54,7 +54,7 @@
   <button type="button" id="backToNormal" onclick="sliderSpeed.value = 10" name="button">back to normal</button>
 </div>
 <br>
-<button type="button" id="showHighscores" onclick="if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value); innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
+<button type="button" id="showHighscores" onclick="if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value, true); speed = 0; innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
 <br>
 <h2 id="textTextBoxLives" onclick="alert('Hier können sie einstellen, wie viele Leben sie innerhalb einer Runde haben wollen. Da es für jedes Leben eigene highscores gibt, können sie hier bis zu 11 Leben einstellen. Wenn sie also z.B. den highscore der Punkte, bevor sie ihr erstes Leben verlieren verbessern wollen, geben sie hier 1 ein und drücken sie enter, damit sie es immer direkt nach einem Lebensverlust von neuem probieren können.');">amount of lives [i]</h2>
 <input id="textBoxLives" type="text" onchange="textBoxLivesChanged(value)" value="3" name="vehicle">
@@ -211,8 +211,8 @@ var before;
 
       if (newHighscore) {canvas.clearRect(0, 0, 7000, 7000); newHighscore = false;}
       if (modeSelection.value == "training") lives.now++;
-      if (modeSelection.value != "training" && pixelMoved - 853 > highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now]) {
-        highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved);
+      if (modeSelection.value != "training" && pixelMoved.withoutShield - 853 > highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now]) {
+        highscores[name][numberFigures.value][sliderSize.value][modeSelection.value][lives.beginning - lives.now] = Math.round(pixelMoved.withoutShield);
         dbSetWarteschlange.push({tag: "highscores", data: highscores});//dbSet("scrollingBall", "highscores", highscores);
       //  document.getElementById('newHighscore').style.display = "inline";
       Bild = new Image();
@@ -413,7 +413,7 @@ localStorage.setItem("storedName", name);
       // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
 
       canvas.setTransform(1, 0, 0, 1, 0, 0);
-      if (screenIncludes) requestAnimationFrame(renderLoop);
+      if (screenIncludes && !pause.boolean) requestAnimationFrame(renderLoop);
   }
 
 
@@ -520,18 +520,21 @@ localStorage.setItem("storedName", name);
     textur.style.transform = "rotate(" + 0 + "deg)";
     var directions = [1, 1, -1];
     var selectedDirection = directions[Math.round(Math.random()*1)];
-    if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5;}
-    else if (modeSelection.value == "scrollWaagerecht") {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5}
-    else {direction = {direction: 1 /*beginning: pixelMoved,*/}; speed = 1;};
+    if (modeSelection.value == "againstThePC") {direction = {direction: selectedDirection, /*beginning: pixelMoved.withoutShield,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5;}
+    else if (modeSelection.value == "scrollWaagerecht") {direction = {direction: 1, /*beginning: pixelMoved.withoutShield,*/ needed: (Math.round(Math.random()*150) + 150)}; speed = 0.5}
+    else {direction = {direction: 1 /*beginning: pixelMoved.withoutShield,*/}; speed = 1;};
   // textur.width = 852;
   scores.style.display = "none";
   countdown = [3,2,1,"Go!", "reallyGo!"];
   figuresUsed = [];
-  pixelMoved = 0;
+  pixelMoved = {withoutShield: 0, all: 0};
   screen = [];
   lives.now = lives.beginning;
   shield = true;
-  if (modeSelection.value == "againstThePC") screen.push(createNewFigure(0, 0));
+  if (modeSelection.value == "againstThePC") {
+    screen.push(createNewFigure(0, 0));
+    screen[screen.length - 1].start = true;
+  }
   for (var i = 1; i < 4; i++) {
     screen.push(createNewFigure(i, 0, resetNoLive));
   }
@@ -583,7 +586,12 @@ else if (gerät == "PC") {
     if (countdown.length == 2) {canvas.fillStyle = "green"; clearInterval(countdownInt);
     setTimeout(function () {
       countdown.shift();
-      if (pause.onCountDown) {speed = pause.speed; shield = false; pause.onCountDown = false;}
+      if (pause.onCountDown) {
+        speed = pause.speed;
+        shield = false;
+        pause.onCountDown = false;
+        requestAnimationFrame(renderLoop);
+      }
     }, 1000);
   }
     canvas.font = "70px Georgia";
@@ -660,7 +668,6 @@ else if (gerät == "PC") {
   }
   var moveUpInt;
   function modeSelected(value) {
-    // TODO:
     if (value == "scrollWaagerecht") statisticTextur.style.display = "none";
     else statisticTextur.style.display = "inline";
     clearInterval(moveUpInt);
@@ -669,49 +676,70 @@ else if (gerät == "PC") {
     else {statisticTextur.style.display = "none"; showUnlockedElements(0); visible([["trainingHTMLElements", "inline"], ["showHighscores", "none"], ["textBoxLives", "none"], ["textTextBoxLives", "none"]]); if (figuresTraining.length == 0) visible([["beginnTraining", "none"]]); else visible([["beginnTraining", "inline"]]);}
     }
   var speed = 1;
-  var pixelMoved = 0;
+  var pixelMoved = {withoutShield: 0, all: 0};
   function moveUp() {
     if (speed != "none") {
-    var directions = [-1, 1, 1]
+    var directions = [-1, 1]
     var selectedDirection = directions[Math.round(Math.random()*(directions.length - 1))];
     var i1 = 0;
     for (var i = 0; i < screen.length; i++) {
       if (!(screen[i].y < 400 || screen[i].y > 840)) i1++;
     }
-    if (modeSelection.value == "scrollWaagerecht" && (!((pixelMoved/13333 + "").includes(".")) || pixelMoved == 0)) {
-      direction = {direction: 1, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + 2000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/
+    if (modeSelection.value == "scrollWaagerecht" && (!((pixelMoved.withoutShield/13333 + "").includes(".")) || pixelMoved.withoutShield == 0)) {
+      direction = {direction: 1, turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + 2000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved.withoutShield != 0) screen.shift();*/
     }
-    if (modeSelection.value == "againstThePC" && (!((pixelMoved/13333 + "").includes(".")) || pixelMoved == 0/*|| !(i1 > 0)*/ || screen[1].y < 0)) {direction = {direction: 1, /*beginning: pixelMoved,*/ needed: pixelMoved + 1833}; speed = 0.5; /*if (pixelMoved != 0) screen.shift();*/}
-    if (modeSelection.value == "againstThePC" && pixelMoved >= direction.needed) {
+    if (modeSelection.value == "againstThePC" && ((!((pixelMoved.withoutShield/13333 + "").includes(".")) && pixelMoved.withoutShield != 0)/*|| !(i1 > 0)*/ || screen[1].y < 0)) {
+      speed = 0;
+      shield = true;
+      setTimeout(function () {
+        shield = false;
+      }, 3000);
+        direction = {direction: 1, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + 1833}; /*if (pixelMoved.withoutShield != 0) screen.shift();*/
+        screen[1].y = 0;
+        setTimeout(function () {
+          speed = 0.5;
+      }, 1000);
+    }
+    if (modeSelection.value == "againstThePC" && pixelMoved.withoutShield >= direction.needed) {
       speed = 0;
       shield = true;
       setTimeout(function () {
         shield = false;
       }, 3000);
       setTimeout(function () {
-        if (selectedDirection > 0) {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: pixelMoved + (Math.round(Math.random()*100) + 300)/2}; speed = 1;}
-        else {direction = {direction: selectedDirection, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)}; speed = 0.5;}
+        if (selectedDirection > 0) {
+          direction = {direction: selectedDirection, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + (Math.round(Math.random()*100) + 300)/2};
+          speed = 0.5;
+        }
+        else {direction = {direction: selectedDirection, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + Math.round(Math.random()*800) + 800*(screen.length/7)}; speed = 0.5;}
+        for (var screenNow of screen) {
+          screenNow.hadShield = false;
+          screenNow.damageless = true;
+        }
       }, 1000);
     }
-    if (modeSelection.value == "scrollWaagerecht" && pixelMoved >= direction.needed) {
+    if (modeSelection.value == "scrollWaagerecht" && pixelMoved.withoutShield >= direction.needed) {
       speed = 0;
       shield = true;
       directionBefore = direction.stringDirection;
-      if ((direction.stringDirection == "up" && Math.round(Math.random()*1) == 0)/* || directionBefore == "left"*/) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
-      else if (direction.stringDirection == "up"/* || directionBefore == "right"*/) {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 800*(screen.length/7)};}
-      else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved,*/ needed: pixelMoved + Math.round(Math.random()*800) + 1777};}
+      if ((direction.stringDirection == "up" && Math.round(Math.random()*1) == 0)/* || directionBefore == "left"*/) {direction = {direction: 1, stringDirection: "right", turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      else if (direction.stringDirection == "up"/* || directionBefore == "right"*/) {direction = {direction: 1, stringDirection: "left", turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + Math.round(Math.random()*800) + 800*(screen.length/7)};}
+      else {direction = {direction: 1, stringDirection: "up", directionBefore: directionBefore, turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + Math.round(Math.random()*800) + 1777};}
       // if (direction.stringDirection == "right") screen.pop();
       if (directionBefore == "right") direction.turned = 90;
       else if (directionBefore == "left") direction.turned = -90;
       rotateInt = setInterval(rotateCanvas, 50);
       i2 = 0;
     }
-    if (before && countdown.length == 0) before.data.y += speed;
-    if (speed > 0 && !shield && modeSelection.value != "training") pixelMoved += speed;
-    // else pixelMoved -= speed;
-    if (screen[3].link.includes("Start") && screen[3].y > 711 && screen[3].y < 715) shield = false;
-    // if (pixelMoved == 852*1) {shield = false;}
-    // if (!((pixelMoved/555 + "").includes(".")) && speed < 2) speed += 0.1;
+    if (before && countdown.length == 0) before.data.y += speed*direction.direction;
+    if (speed > 0 && !shield && modeSelection.value != "training") {
+      pixelMoved.withoutShield += speed;
+    }
+    if (speed != 0 && !countdown.length)  pixelMoved.all += speed;
+    // else pixelMoved.withoutShield -= speed;
+    if (pixelMoved.all >= 376 && pixelMoved.all < 376 + speed/*screen[3].link.includes("Start") && screen[3].y > 711 && screen[3].y < 715*/) shield = false;
+    // if (pixelMoved.withoutShield == 852*1) {shield = false;}
+    // if (!((pixelMoved.withoutShield/555 + "").includes(".")) && speed < 2) speed += 0.1;
     for (var i = 0; i < screen.length && countdown.length == 0; i++) {
       screen[i].y += direction.direction*speed;
       // for (var i1 = 0; objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]] != undefined && i1 < Object.keys(objectives[screen[i].link.toString().split('https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema')[1].toString().split('.png')[0]]).length; i1++) {
@@ -734,14 +762,14 @@ else if (gerät == "PC") {
       // if (screen[i].y < /*-876 - 426*//*-1229*/-352 && modeSelection.value == "scrollWaagerecht" && direction.stringDirection && direction.stringDirection == "right") {screen.splice(i, 1); screen.push(createNewFigure(screen.length, -390));}
       if (screen[i].y > 752  && modeSelection.value == "againstThePC" && screen[i].pushed != true) {screen.push(createNewFigure(/*screen.length - 1*/3, 0)); screen[i].pushed = true /*screen.shift();*/}
     }
-    if (countdown.length == 0) {
+    if (countdown.length == 0 && !pause.boolean) {
     Layout();
     Layout();
     }
   }
 }
   function addToStatistic(i, time) {
-    if ((!screen[i].link.includes("Start")) && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
+    if (direction.direction == 1 && speed != 0 && (!screen[i].link.includes("Start")) && !screen[i].start && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
       if (!statistics[modeSelection.value][sliderSize.value]) statistics[modeSelection.value][sliderSize.value] = {};
       if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
       if (!statistics[modeSelection.value][sliderSize.value][screen[i].link]) statistics[modeSelection.value][sliderSize.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
@@ -761,7 +789,7 @@ else if (gerät == "PC") {
     setTimeout(function () {
       showStatistic(true);
     }, 100);
-    dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
+    // dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
   }
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
@@ -870,7 +898,8 @@ else if (gerät == "PC") {
   }
 
   var highscoresDisplayedBefore = {};
-  function showScores(highscores, mode) {
+  function showScores(highscores, mode, manually) {
+    if (manually) statisticTextur.style.display = "inline";
     scores.style.display = "inline";
     for (var i = 0; i < Object.keys(highscoresDisplayedBefore).length + 11 && Object.keys(highscoresDisplayedBefore).length > 0; i++) {
       try {
