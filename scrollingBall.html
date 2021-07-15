@@ -61,6 +61,7 @@
 <br>
 Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked) value = figuresUnlocked; beginnRound();" value="3" type="text">
 <br>
+<h1>ball size</h1>
 <input type="range" min="10" onchange="canvasClicked(); if (inRound) beginnRound();" oninput="if (!pause.boolean) canvasClicked(); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
 <br>
@@ -259,8 +260,8 @@ localStorage.setItem("storedName", name);
   var canvas = textur.getContext('2d'); //Dimension
   var screen = [];
   var figuresUnlocked = 3;
-  var totalFigures = 14;
-  var figureXP = {have: 0, needed: [3333*30, 4444*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30, 10000*30, 11111*30, 13333*30, 13333*30, 14444*30, 15555*30]};
+  var totalFigures = 15;
+  var figureXP = {have: 0, needed: [3333*30, 4444*30, 5555*30, 7777*30, 8888*30, 9999*30, 10000*30, 11111*30, 13333*30, 13333*30, 14444*30, 15555*30]};
   var figuresUsed = [];
   var figuresTraining = [];
   var countdown = [3,2,1,"Go!", "reallyGo!"];
@@ -465,7 +466,6 @@ localStorage.setItem("storedName", name);
   var countdownInt;
   function addXP(beginningXP, finishedXP) {
     figureXP.have += 30;
-    try {
       Bild = new Image();
       Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schema" + (figuresUnlocked) + ".png";
       console.log( figureXP.have/figureXP.needed[figuresUnlocked - 3] + " - " + figureXP.needed[figuresUnlocked - 3]*(figureXP.have/figureXP.needed[figuresUnlocked - 3]));
@@ -473,6 +473,11 @@ localStorage.setItem("storedName", name);
       textur.height = Bild.height*(figureXP.have/figureXP.needed[figuresUnlocked - 3]);
       canvas.drawImage(Bild, 0, 0);
       textur.style.display = "inline";
+      if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
+        figuresUnlocked++;
+        numberFigures.value = figuresUnlocked;
+        figureXP.have = 0;
+      }
       if (!(figureXP.have < finishedXP) || figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
         if (figuresUnlockedGot) dbSetWarteschlange.push({tag: "figuresUnlocked " + name, data: figuresUnlocked});
         dbSetWarteschlange.push({tag: "figureXP " + name, data: figureXP});
@@ -480,30 +485,24 @@ localStorage.setItem("storedName", name);
           beginnRoundP2();
         }, 2222);
       }
-      if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
-        figuresUnlocked++;
-        numberFigures.value = figuresUnlocked;
-        figureXP.have = 0;
+      else if (figuresUnlocked == totalFigures) {
+        setTimeout(function () {
+          beginnRoundP2();
+        }, 1777);
       }
       else if (figureXP.have < finishedXP) {
         setTimeout(function () {
           addXP(beginningXP, finishedXP);
         }, 1);
       }
-    } catch (e) {
-      console.log("every figure unlocked!");
-      setTimeout(function () {
-        beginnRoundP2();
-      }, 1777);
     }
-  }
   document.getElementById('newHighscore').style.display = "none";
   var inRound = false;
   var Bild;
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      // dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -733,6 +732,7 @@ else if (gerät == "PC") {
 }
   function addToStatistic(i, time) {
     if ((!screen[i].link.includes("Start")) && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
+      if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
       if (!statistics[modeSelection.value][sliderSize.value]) statistics[modeSelection.value][sliderSize.value] = {};
       if (!statistics[modeSelection.value][sliderSize.value][screen[i].link]) statistics[modeSelection.value][sliderSize.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
     if (screen[i].damageless) {
@@ -760,7 +760,6 @@ else if (gerät == "PC") {
     var yPlus = 0;
     var x = 0;
     if (!secondRender) {
-      if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
       statistics[modeSelection.value][sliderSize.value].all.right = 0;
       statistics[modeSelection.value][sliderSize.value].all.wrong = 0;
     }
@@ -806,6 +805,7 @@ else if (gerät == "PC") {
           else drawPath_V2(doneShapes[objective.shape], x*121 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", statisticCanvas, true); //360 every 2 second
         }
       }
+      if (123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length + yPlus > statisticTextur.height) statisticTextur.height = 123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length + yPlus;
       }
       statisticCanvas.fillStyle = "black";
       statisticCanvas.font = "25px Georgia";
