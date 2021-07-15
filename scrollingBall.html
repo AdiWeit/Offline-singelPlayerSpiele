@@ -63,7 +63,9 @@ Anzahl Figuren: <input id="numberFigures" onchange="if (value > figuresUnlocked)
 <br>
 <h1>ball size</h1>
 <input type="range" min="10" onchange="canvasClicked(); if (inRound) beginnRound();" oninput="if (!pause.boolean) canvasClicked(); sphere1.style.height = value + 'px'; sphere1.style.width = value + 'px';" max="30" value="30" class="slider" id="sliderSize">
+<br>
 <input type="checkbox" id="instatntRestart" checked="true">instant restart
+<input type="checkbox" checked="true" id="showXp"> show unlocking of new part
 <br>
 <table id="scores">
   <!-- <tr>
@@ -183,7 +185,7 @@ var before;
     green = data.data[1];
     blue = data.data[2];
     alpha = data.data[3];
-    if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && countdown.length == 0 && shield) {
+    if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && shield) {
     screen.forEach((screenNow, i1) => {
       if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) {
         if (screenNow.damageless && !screenNow.hadShield) {
@@ -502,7 +504,7 @@ localStorage.setItem("storedName", name);
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      // dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -554,8 +556,16 @@ else if (gerät == "PC") {
       canvas.clearRect(0, 0, textur.width, textur.height);
       speed = "none";
       showScores(highscores, modeSelection.value);
-      if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
+      if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked && showXp.checked) addXP(figureXP.have, figureXP.have + (Math.round(pixelMoved))*(sliderSize.value - 9));
       else {
+        if (figuresUnlocked != totalFigures && numberFigures.value == figuresUnlocked) {
+          figureXP.have += (Math.round(pixelMoved))*(sliderSize.value - 9);
+          if (figureXP.have >= figureXP.needed[figuresUnlocked - 3]) {
+            figureXP.have = figureXP.have - figureXP.needed[figuresUnlocked - 3];
+            figuresUnlocked++;
+            numberFigures.value = figuresUnlocked;
+          }
+        }
         showScores(highscores, modeSelection.value);
         var time = 3000;
         if (instatntRestart.checked && resetNoLive) time = 0;
@@ -732,8 +742,8 @@ else if (gerät == "PC") {
 }
   function addToStatistic(i, time) {
     if ((!screen[i].link.includes("Start")) && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
-      if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
       if (!statistics[modeSelection.value][sliderSize.value]) statistics[modeSelection.value][sliderSize.value] = {};
+      if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
       if (!statistics[modeSelection.value][sliderSize.value][screen[i].link]) statistics[modeSelection.value][sliderSize.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
     if (screen[i].damageless) {
       statistics[modeSelection.value][sliderSize.value][screen[i].link].right++;
