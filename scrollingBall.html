@@ -54,7 +54,9 @@
   <button type="button" id="backToNormal" onclick="sliderSpeed.value = 10" name="button">back to normal</button>
 </div>
 <br>
-<button type="button" id="showHighscores" onclick="if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value, true); speed = 0; innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
+<button type="button" id="showHighscores" onclick="changeScoreDirection.style.display = 'none'; if (innerHTML == 'show highscores') {showScores(highscores, modeSelection.value, true); speed = 0; innerHTML = 'play next round'} else {beginnRound(); scores.style.display = 'none';innerHTML = 'show highscores'} " name="button">show highscores</button>
+<br>
+<button type="button" id="changeScoreDirection" onclick="changeScoreDirectionFunc(innerHTML);" style="display:none" name="button">show opposite direction statistics (now forwards)</button>
 <br>
 <h2 id="textTextBoxLives" onclick="alert('Hier können sie einstellen, wie viele Leben sie innerhalb einer Runde haben wollen. Da es für jedes Leben eigene highscores gibt, können sie hier bis zu 11 Leben einstellen. Wenn sie also z.B. den highscore der Punkte, bevor sie ihr erstes Leben verlieren verbessern wollen, geben sie hier 1 ein und drücken sie enter, damit sie es immer direkt nach einem Lebensverlust von neuem probieren können.');">amount of lives [i]</h2>
 <input id="textBoxLives" type="text" onchange="textBoxLivesChanged(value)" value="3" name="vehicle">
@@ -105,6 +107,13 @@ var gerät = "PC"//"PC"
 console.log("PC");
 }
 var before;
+function changeScoreDirectionFunc(pInnerHTML) {
+  direction.direction *= -1;
+  showStatistic();
+  if (pInnerHTML.includes('forwards')) pInnerHTML = pInnerHTML.replace('forwards', 'backwards');
+  else pInnerHTML = pInnerHTML.replace('backwards', 'forwards');
+  changeScoreDirection.innerHTML = pInnerHTML;
+}
   // ballMovement:
   var x1 = 0, y1 = 0,
     x2 = 0, y2 = 0,
@@ -170,11 +179,11 @@ var before;
     sphere1.style.left = x1 + "px";
     screen.forEach((screenNow, i1) => {
       if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) {
-        if (/*before.activeScreen != i1 && */(before.data.y != screenNow.y && !((speed > 0 && before.data.y < screenNow.y) || (speed < 0 && before.data.y > screenNow.y))/* && (figuresSelected > 1 || modeSelection.value != "training")*/)) {
+        if (!countdown.length && /*before.activeScreen != i1 && */(before.data.y != screenNow.y && ((direction.direction > 0 && before.data.y > screenNow.y) || (direction.direction < 0 && before.data.y < screenNow.y))/* && (figuresSelected > 1 || modeSelection.value != "training")*/)) {
           console.log(screen[before.activeScreen].link);
           addToStatistic(before.activeScreen);
         }
-        if (!((speed > 0 && before.data.y < screenNow.y) || (speed < 0 && before.data.y > screenNow.y))) {
+        if (((direction.direction > 0 && before.data.y > screenNow.y) || (direction.direction < 0 && before.data.y < screenNow.y))) {
           before.activeScreen = JSON.parse(JSON.stringify(i1));
           before.data = JSON.parse(JSON.stringify(screenNow));
         }
@@ -463,7 +472,7 @@ localStorage.setItem("storedName", name);
       modeSelected("autoScroll");
     });
   }
-  var direction = {};
+  var direction = {direction: 1};
 //  beginnRound();
   var countdownInt;
   function addXP(beginningXP, finishedXP) {
@@ -706,16 +715,16 @@ else if (gerät == "PC") {
       setTimeout(function () {
         shield = false;
       }, 3000);
+      for (var screenNow of screen) {
+        screenNow.hadShield = false;
+        screenNow.damageless = true;
+      }
       setTimeout(function () {
         if (selectedDirection > 0) {
           direction = {direction: selectedDirection, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + (Math.round(Math.random()*100) + 300)/2};
           speed = 0.5;
         }
         else {direction = {direction: selectedDirection, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + Math.round(Math.random()*800) + 800*(screen.length/7)}; speed = 0.5;}
-        for (var screenNow of screen) {
-          screenNow.hadShield = false;
-          screenNow.damageless = true;
-        }
       }, 1000);
     }
     if (modeSelection.value == "scrollWaagerecht" && pixelMoved.withoutShield >= direction.needed) {
@@ -769,27 +778,25 @@ else if (gerät == "PC") {
   }
 }
   function addToStatistic(i, time) {
-    if (direction.direction == 1 && speed != 0 && (!screen[i].link.includes("Start")) && !screen[i].start && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
+    if (speed != 0 && (!screen[i].link.includes("Start")) && !screen[i].start && !screen[i].hadShield && (!time/* || (modeSelection.value == "training" && figuresSelected < 2)*/)) {
       if (!statistics[modeSelection.value][sliderSize.value]) statistics[modeSelection.value][sliderSize.value] = {};
-      if (!statistics[modeSelection.value][sliderSize.value].all) statistics[modeSelection.value][sliderSize.value].all = {streak: 0, longest: 0, right: 0, wrong: 0};
-      if (!statistics[modeSelection.value][sliderSize.value][screen[i].link]) statistics[modeSelection.value][sliderSize.value][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
+      if (!statistics[modeSelection.value][sliderSize.value][direction.direction]) statistics[modeSelection.value][sliderSize.value][direction.direction] = {};
+      if (!statistics[modeSelection.value][sliderSize.value][direction.direction].all) statistics[modeSelection.value][sliderSize.value][direction.direction].all = {streak: 0, longest: 0, right: 0, wrong: 0};
+      if (!statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link]) statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link] = {streak: 0, longest: 0, right: 0, wrong: 0};
     if (screen[i].damageless) {
-      statistics[modeSelection.value][sliderSize.value][screen[i].link].right++;
-      statistics[modeSelection.value][sliderSize.value][screen[i].link].streak++;
-      statistics[modeSelection.value][sliderSize.value].all.streak++;
-      if (statistics[modeSelection.value][sliderSize.value][screen[i].link].streak > statistics[modeSelection.value][sliderSize.value][screen[i].link].longest) statistics[modeSelection.value][sliderSize.value][screen[i].link].longest++;
-      if (statistics[modeSelection.value][sliderSize.value].all && statistics[modeSelection.value][sliderSize.value].all.streak > statistics[modeSelection.value][sliderSize.value].all.longest) statistics[modeSelection.value][sliderSize.value].all.longest++;
+      statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].right++;
+      statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].streak++;
+      statistics[modeSelection.value][sliderSize.value][direction.direction].all.streak++;
+      if (statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].streak > statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].longest) statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].longest++;
+      if (statistics[modeSelection.value][sliderSize.value][direction.direction].all && statistics[modeSelection.value][sliderSize.value][direction.direction].all.streak > statistics[modeSelection.value][sliderSize.value][direction.direction].all.longest) statistics[modeSelection.value][sliderSize.value][direction.direction].all.longest++;
     }
     else {
-      statistics[modeSelection.value][sliderSize.value][screen[i].link].streak = 0;
-      statistics[modeSelection.value][sliderSize.value][screen[i].link].wrong++;
-      statistics[modeSelection.value][sliderSize.value].all.streak = 0;
+      statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].streak = 0;
+      statistics[modeSelection.value][sliderSize.value][direction.direction][screen[i].link].wrong++;
+      statistics[modeSelection.value][sliderSize.value][direction.direction].all.streak = 0;
     }
     showStatistic();
-    setTimeout(function () {
-      showStatistic(true);
-    }, 100);
-    // dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
+    dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
   }
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
@@ -798,22 +805,22 @@ else if (gerät == "PC") {
     var yPlus = 0;
     var x = 0;
     if (!secondRender) {
-      statistics[modeSelection.value][sliderSize.value].all.right = 0;
-      statistics[modeSelection.value][sliderSize.value].all.wrong = 0;
+      statistics[modeSelection.value][sliderSize.value][direction.direction].all.right = 0;
+      statistics[modeSelection.value][sliderSize.value][direction.direction].all.wrong = 0;
     }
-    for (var i = 0; i < Object.keys(statistics[modeSelection.value][sliderSize.value]).length; i++) {
-      var srcNow = Object.keys(statistics[modeSelection.value][sliderSize.value])[i];
+    for (var i = 0; i < Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length; i++) {
+      var srcNow = Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction])[i];
       if (srcNow != "all" || secondRender) {
       if (x*121 + 100 > statisticTextur.width) {
-        yPlus += 25*Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length + 113;
+        yPlus += 25*Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow]).length + 113;
         x = 0;
       }
-      if (srcNow == "all" && Object.keys(statistics[modeSelection.value][sliderSize.value]).length > 2) {
-        for (var i1 = 0; i1 < Object.keys(statistics[modeSelection.value][sliderSize.value]).length; i1++) {
-          if (Object.keys(statistics[modeSelection.value][sliderSize.value])[i1] != "all") {
+      if (srcNow == "all" && Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length > 2) {
+        for (var i1 = 0; i1 < Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length; i1++) {
+          if (Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction])[i1] != "all") {
           var img = new Image();
-          img.src = Object.keys(statistics[modeSelection.value][sliderSize.value])[i1];
-          statisticCanvas.drawImage(img, x*121 + (100/(Object.keys(statistics[modeSelection.value][sliderSize.value]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value][sliderSize.value]).length - 1), 100);
+          img.src = Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction])[i1];
+          statisticCanvas.drawImage(img, x*121 + (100/(Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length - 1))*(i1 - 1), yPlus, 100/(Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length - 1), 100);
         //   if (Object.keys(statistics[modeSelection.value])[i1].split('/schema') && objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema1')[1].split('.png')[0]]) {
         //   for (var objective of objectives[Object.keys(statistics[modeSelection.value])[i1].split('/schema')[1].split('.png')[0]]) {
         //     var sizeRelationToOriginal = 1.0;
@@ -843,18 +850,23 @@ else if (gerät == "PC") {
           else drawPath_V2(doneShapes[objective.shape], x*121 + objective.position.x*(100/426), yPlus + objective.position.y*(100/376), scale2, (0 / (7777/2) * Math.PI) + 0, "", "black", statisticCanvas, true); //360 every 2 second
         }
       }
-      if (123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length + yPlus > statisticTextur.height) statisticTextur.height = 123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length + yPlus;
+      if (123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow]).length + yPlus > statisticTextur.height) statisticTextur.height = 123 + 27*Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow]).length + yPlus;
       }
       statisticCanvas.fillStyle = "black";
       statisticCanvas.font = "25px Georgia";
-      for (var i1 = 0; (srcNow != "all" || Object.keys(statistics[modeSelection.value][sliderSize.value]).length > 2) && i1 < Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow]).length; i1++) {
-        var text = Object.keys(statistics[modeSelection.value][sliderSize.value][srcNow])[i1];
-        var data = statistics[modeSelection.value][sliderSize.value][srcNow][text];
+      for (var i1 = 0; (srcNow != "all" || Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction]).length > 2) && i1 < Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow]).length; i1++) {
+        var text = Object.keys(statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow])[i1];
+        var data = statistics[modeSelection.value][sliderSize.value][direction.direction][srcNow][text];
         statisticCanvas.fillText(text + ":" + data, x*121, 123 + 27*i1 + yPlus);
-        if (srcNow != "all" && (text == "right" || text == "wrong")) statistics[modeSelection.value][sliderSize.value].all[text] += data;
+        if (srcNow != "all" && (text == "right" || text == "wrong")) statistics[modeSelection.value][sliderSize.value][direction.direction].all[text] += data;
       }
       x++;
     }
+    }
+    if (!secondRender) {
+      setTimeout(function () {
+        showStatistic(true);
+      }, 100);
     }
   }
   //var angle = 30;
@@ -899,7 +911,11 @@ else if (gerät == "PC") {
 
   var highscoresDisplayedBefore = {};
   function showScores(highscores, mode, manually) {
-    if (manually) statisticTextur.style.display = "inline";
+    if (manually) {
+      statisticTextur.style.display = "inline";
+      if (modeSelection.value == "againstThePC") changeScoreDirection.style.display = "inline";
+      showStatistic();
+    }
     scores.style.display = "inline";
     for (var i = 0; i < Object.keys(highscoresDisplayedBefore).length + 11 && Object.keys(highscoresDisplayedBefore).length > 0; i++) {
       try {
