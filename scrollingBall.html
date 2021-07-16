@@ -186,9 +186,7 @@ function changeScoreDirectionFunc(pInnerHTML) {
         }
       }
     });
-    data = [canvas.getImageData(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted + sphere1.style.height.replace("px", ""), sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted, 1, sphere1.style.height.replace("px", "")), canvas.getImageData(x1Converted, y1Converted + sphere1.style.height.replace("px", ""), 1, sphere1.style.height.replace("px", ""))];
-      // canvas.fillStyle = "red";
-      // canvas.fillRect(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), sphere1.style.height.replace("px", ""));
+      data = [canvas.getImageData(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted + JSON.parse(sphere1.style.height.replace("px", "")), sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted, 1, sphere1.style.height.replace("px", "")), canvas.getImageData(x1Converted + JSON.parse(sphere1.style.height.replace("px", "")), y1Converted, 1, sphere1.style.height.replace("px", ""))];
     for (var data of data) {
     for (var i = 0; i < data.data.length; i += 4) {
       red = data.data[i];
@@ -244,7 +242,7 @@ function changeScoreDirectionFunc(pInnerHTML) {
   }
   function deactivateShield() {
     setTimeout(function () {
-      if (countdown.length == 0 && speed > 0) shield = false;
+      if (countdown.length == 0 && speed != 0) shield = false;
       else if (countdown.length == 0) deactivateShield();
     }, 2000);
   }
