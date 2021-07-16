@@ -163,24 +163,15 @@ function changeScoreDirectionFunc(pInnerHTML) {
     boundingBoxCheck();
     var convertedPlus = {x: 1, y: 1};
     if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1 - 8; y1Converted = y1 - 20;}
-    else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - 30 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
-    else {x1Converted = y1  + 29; y1Converted = textur.height - (x1 - textur.getBoundingClientRect().left) - 1; convertedPlus.y = -1;}
+    // else if (direction.stringDirection == "left") {x1Converted = textur.height + 63 - (y1 - 63) + 9 - sphere1.style.width.replace("px", ""); y1Converted = (x1 - textur.getBoundingClientRect().left);/*780 - x1 - 60 - 33*/}
+    else if (direction.stringDirection == "left") {x1Converted = textur.height + 63 + 7 - (y1) - sphere1.style.width.replace("px", ""); y1Converted = (x1 - textur.getBoundingClientRect().left);/*780 - x1 - 60 - 33*/}
+    else {x1Converted = y1  + 30; y1Converted = textur.height - (x1 - textur.getBoundingClientRect().left) - sphere1.style.width.replace("px", ""); convertedPlus.y = -1;}
+    // 30 + y1, textur.height - (x1 - textur.getBoundingClientRect().left) - 1
     // else {x1Converted = textur.height - y1; y1Converted = x1  + 29}
 
     // if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1 - 8; y1Converted = y1 - 20;}
     // else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - 30 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
     // else {x1Converted = y1 - 20 + 37 + 13; y1Converted = 779 - x1 - 8 + 5 + 23 - 30}
-    for (var i = 0; i < 4; i++) {
-    var numbers = [
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")), y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + 1*convertedPlus.y * JSON.parse(sphere1.style.width.replace("px", "")) / 2], //rechts
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/], // oben
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ +1*convertedPlus.y * JSON.parse(sphere1.style.height.replace("px", ""))/* - 5*/], // unten
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ +1*convertedPlus.y * JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
-    ]
-    // for (var i1 = 0; i1 < numbers.length; i1++) {
-    //   canvas.fillStyle = "red";
-    //   canvas.fillRect(numbers[i1][0], numbers[i1][1], 10, 10);
-    // }
     /*if (modeSelection.value != "scrollWithBall")*/ sphere1.style.top = y1 + "px";
     sphere1.style.left = x1 + "px";
     screen.forEach((screenNow, i1) => {
@@ -195,11 +186,14 @@ function changeScoreDirectionFunc(pInnerHTML) {
         }
       }
     });
-    data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
-    red = data.data[0];
-    green = data.data[1];
-    blue = data.data[2];
-    alpha = data.data[3];
+    data = canvas.getImageData(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), sphere1.style.height.replace("px", ""));
+      canvas.fillStyle = "red";
+      canvas.fillRect(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), sphere1.style.height.replace("px", ""));
+    for (var i = 0; i < data.data.length; i += 4) {
+      red = data.data[i];
+      green = data.data[i + 1];
+      blue = data.data[i + 2];
+      alpha = data.data[i + 3];
     if (((red == 0 && blue == 0 && alpha == 255 && green == 0 && speed != 0) || (((x1 > 400 || y1 > 742) && (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up")) || (modeSelection.value == "scrollWaagerecht" && direction.stringDirection && (direction.stringDirection == "right" && (x1 > 683 || x1 < 59 || y1 > 779)) || (direction.stringDirection == "left" && ((x1 < 60 || y1 < 8) || (x1 > 780 || y1 > 400)))))) && shield) {
     screen.forEach((screenNow, i1) => {
       if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) {
