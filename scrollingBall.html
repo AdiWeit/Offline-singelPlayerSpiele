@@ -161,15 +161,21 @@ function changeScoreDirectionFunc(pInnerHTML) {
     if (!before) before = {data: {link: "https://adi.nicolaiweitkemper.de/Bilder/scrollingBall/schemaStart.png", x: 0, y: 376 - 0*376, notRight: true}, activeScreen: 3};
 
     boundingBoxCheck();
+    var convertedPlus = {x: 1, y: 1};
     if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1 - 8; y1Converted = y1 - 20;}
-    else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
-    else {x1Converted = y1 - 20 + 37 + 13; y1Converted = 779 - x1 - 8 + 5 + 23}
+    else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - 30 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
+    else {x1Converted = y1  + 29; y1Converted = textur.height - (x1 - textur.getBoundingClientRect().left) - 1; convertedPlus.y = -1;}
+    // else {x1Converted = textur.height - y1; y1Converted = x1  + 29}
+
+    // if (modeSelection.value != "scrollWaagerecht" || !direction.stringDirection || direction.stringDirection == "up") {x1Converted = x1 - 8; y1Converted = y1 - 20;}
+    // else if (direction.stringDirection == "left") {x1Converted = textur.height + 60 - 30 - y1; y1Converted = x1 - 57;/*780 - x1 - 60 - 33*/}
+    // else {x1Converted = y1 - 20 + 37 + 13; y1Converted = 779 - x1 - 8 + 5 + 23 - 30}
     for (var i = 0; i < 4; i++) {
     var numbers = [
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")), y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")) / 2], //rechts
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/], // oben
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.height.replace("px", ""))/* - 5*/], // unten
-      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
+      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")), y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ + 1*convertedPlus.y * JSON.parse(sphere1.style.width.replace("px", "")) / 2], //rechts
+      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/], // oben
+      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/ + 1*convertedPlus.x * JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ +1*convertedPlus.y * JSON.parse(sphere1.style.height.replace("px", ""))/* - 5*/], // unten
+      [/*(*/x1Converted/* - JSON.parse(sphere1.style.width.replace("px", ""))/2)*/, y1Converted/* - JSON.parse(sphere1.style.height.replace("px", ""))/2)*/ +1*convertedPlus.y * JSON.parse(sphere1.style.height.replace("px", "")) / 2]  // link
     ]
     // for (var i1 = 0; i1 < numbers.length; i1++) {
     //   canvas.fillStyle = "red";
@@ -513,7 +519,7 @@ localStorage.setItem("storedName", name);
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      // dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -737,6 +743,7 @@ else if (gerät == "PC") {
       // if (direction.stringDirection == "right") screen.pop();
       if (directionBefore == "right") direction.turned = 90;
       else if (directionBefore == "left") direction.turned = -90;
+      textur.width = 852;
       rotateInt = setInterval(rotateCanvas, 50);
       i2 = 0;
     }
@@ -796,7 +803,7 @@ else if (gerät == "PC") {
       statistics[modeSelection.value][sliderSize.value][direction.direction].all.streak = 0;
     }
     showStatistic();
-    dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
+    // dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
   }
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
@@ -900,6 +907,7 @@ else if (gerät == "PC") {
     if ((direction.stringDirection == "up" && window.innerWidth < window.innerHeight) || (direction.stringDirection != "up" && window.innerWidth > window.innerHeight)) {
       window.scroll(0, 0);
       setTimeout(function () {
+        if (direction.stringify == "up") textur.width = 426;
         shield = false;
         if (direction.stringDirection == "up") speed = 1;
         else if (direction.stringDirection == "left") speed = 0.5;
