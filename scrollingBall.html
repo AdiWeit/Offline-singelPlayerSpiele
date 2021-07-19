@@ -180,19 +180,24 @@ function changeScoreDirectionFunc(pInnerHTML) {
     sphere1.style.left = x1 + "px";
     screen.forEach((screenNow, i1) => {
       if (y1Converted > 20 + screenNow.y && y1Converted < 20 + screenNow.y + 376) {
-        if (!countdown.length && /*before.activeScreen != i1 && */(before.data.y != screenNow.y && ((direction.direction > 0 && before.data.y > screenNow.y) || (direction.direction < 0 && before.data.y < screenNow.y))/* && (figuresSelected > 1 || modeSelection.value != "training")*/)) {
+        if (speed && !countdown.length && /*before.activeScreen != i1 && */(before.data.y != screenNow.y && ((direction.direction*speed > 0 && before.data.y > screenNow.y) || (direction.direction*speed < 0 && before.data.y < screenNow.y))/* && (figuresSelected > 1 || modeSelection.value != "training")*/)) {
           console.log(screen[before.activeScreen].link);
           screen.forEach((currenScreen, i2) => {
             if (currenScreen.link == before.data.link) addToStatistic(i2);
           });
         }
-        if (((direction.direction > 0 && before.data.y > screenNow.y) || (direction.direction < 0 && before.data.y < screenNow.y))) {
+        if (!speed || ((direction.direction*speed > 0 && before.data.y > screenNow.y) || (direction.direction*speed < 0 && before.data.y < screenNow.y))) {
           before.activeScreen = JSON.parse(JSON.stringify(i1));
           before.data = JSON.parse(JSON.stringify(screenNow));
         }
       }
     });
-      data = [canvas.getImageData(x1Converted, y1Converted, sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted + JSON.parse(sphere1.style.height.replace("px", "")), sphere1.style.width.replace("px", ""), 1), canvas.getImageData(x1Converted, y1Converted, 1, sphere1.style.height.replace("px", "")), canvas.getImageData(x1Converted + JSON.parse(sphere1.style.height.replace("px", "")), y1Converted, 1, sphere1.style.height.replace("px", ""))];
+    // canvas.fillStyle = "red";
+    // canvas.fillRect(x1Converted + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1Converted, 1, 1);
+    // canvas.fillRect(x1Converted, y1Converted + JSON.parse(sphere1.style.height.replace("px", ""))/2, 1, 1);
+    // canvas.fillRect(x1Converted + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1Converted + JSON.parse(sphere1.style.height.replace("px", "")), 1, 1);
+    // canvas.fillRect(x1Converted + JSON.parse(sphere1.style.width.replace("px", "")), y1Converted + JSON.parse(sphere1.style.height.replace("px", ""))/2, 1, 1);
+      data = [canvas.getImageData(x1Converted + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1Converted, 1, 1), canvas.getImageData(x1Converted, y1Converted + JSON.parse(sphere1.style.height.replace("px", ""))/2, 1, 1), canvas.getImageData(x1Converted + JSON.parse(sphere1.style.width.replace("px", ""))/2, y1Converted + JSON.parse(sphere1.style.height.replace("px", "")), 1, 1), canvas.getImageData(x1Converted + JSON.parse(sphere1.style.width.replace("px", "")), y1Converted + JSON.parse(sphere1.style.height.replace("px", ""))/2, 1, 1)];
     for (var data of data) {
     for (var i = 0; i < data.data.length; i += 4) {
       red = data.data[i];
@@ -531,6 +536,11 @@ localStorage.setItem("storedName", name);
     before = undefined;
     if (gerät == "Handy") {
     textur.height = 752;
+    textur.width = 426;
+    statisticTextur.width = window.innerWidth - 426 - 37;
+    statisticTextur.style.top = "5px";
+    statisticTextur.style.right = "3px";
+    statisticTextur.style.left = "";
     document.getElementById('newHighscore').style.display = "none";
     textur.style.transform = "rotate(" + 0 + "deg)";
     var directions = [1, 1, -1];
@@ -699,7 +709,7 @@ else if (gerät == "PC") {
       if (!(screen[i].y < 400 || screen[i].y > 840)) i1++;
     }
     if (modeSelection.value == "scrollWaagerecht" && (!((pixelMoved.withoutShield/13333 + "").includes(".")) || pixelMoved.withoutShield == 0)) {
-      direction = {direction: 1, turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + 2000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved.withoutShield != 0) screen.shift();*/
+      direction = {direction: 1, turned: 0, /*beginning: pixelMoved.withoutShield,*/ needed: pixelMoved.withoutShield + 1000, stringDirection: "up"}; speed = 0.5; /*if (pixelMoved.withoutShield != 0) screen.shift();*/
     }
     if (modeSelection.value == "againstThePC" && ((!((pixelMoved.withoutShield/13333 + "").includes(".")) && pixelMoved.withoutShield != 0)/*|| !(i1 > 0)*/ || screen[1].y < 0)) {
       speed = 0;
@@ -907,6 +917,8 @@ else if (gerät == "PC") {
       clearInterval(rotateInt);
       checkTurnedInt = setInterval(checkTurned, 1000);
       if (direction.stringDirection == "up") {
+        textur.width = 426;
+        statisticTextur.width = window.innerWidth - 426 - 37;
         statisticTextur.style.top = "5px";
         statisticTextur.style.right = "3px";
         statisticTextur.style.left = "";
