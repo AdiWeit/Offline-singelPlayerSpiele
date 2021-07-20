@@ -50,7 +50,7 @@
   <button type="button" id="beginnTraining" onclick="style.display = 'none'; setInterval(moveUp, 10); beginnRound();" name="button">beginn</button>
   <br>
   <h1>change speed: </h1>
-  <input type="range" min="1" oninput="speed=value/10;" max="10" value="10" class="slider" id="sliderSpeed">
+  <input type="range" min="1" oninput="speed=value/10; pause.speed=value/2" max="10" value="10" class="slider" id="sliderSpeed">
   <button type="button" id="backToNormal" onclick="sliderSpeed.value = 10" name="button">back to normal</button>
 </div>
 <br>
@@ -524,7 +524,7 @@ localStorage.setItem("storedName", name);
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      // dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSet("scrollingBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -756,11 +756,11 @@ else if (gerät == "PC") {
       statisticTextur.style.display = 'none';
       i2 = 0;
     }
-    if (before && countdown.length == 0) before.data.y += speed*direction.direction;
-    if (speed > 0 && !shield && modeSelection.value != "training") {
-      pixelMoved.withoutShield += speed;
+    if (before && !countdown.length) before.data.y += speed*direction.direction;
+    if (speed != 0 && !shield && modeSelection.value != "training") {
+      pixelMoved.withoutShield += Math.abs(speed);
     }
-    if (speed != 0 && !countdown.length)  pixelMoved.all += speed;
+    if (speed != 0 && !countdown.length)  pixelMoved.all += Math.abs(speed);
     // else pixelMoved.withoutShield -= speed;
     if (pixelMoved.all >= 376 && pixelMoved.all < 376 + speed/*screen[3].link.includes("Start") && screen[3].y > 711 && screen[3].y < 715*/) shield = false;
     // if (pixelMoved.withoutShield == 852*1) {shield = false;}
@@ -815,7 +815,7 @@ else if (gerät == "PC") {
       statistics[modeSelection.value][sliderSize.value][directionParam].all.streak = 0;
     }
     showStatistic();
-    // dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
+    dbSetWarteschlange.push({tag: "statistics " + name, data: statistics});
   }
   }
   var statisticCanvas = statisticTextur.getContext('2d'); //Dimension
@@ -914,6 +914,7 @@ else if (gerät == "PC") {
     if ((direction.stringDirection == "up" || direction.stringDirection == "left") && direction.directionBefore == "right") direction.turned--;
     else direction.turned++;
     if (i2 == 90 && direction.stringDirection != "left" && directionBefore != "left" || (i2 == 220 && (direction.stringDirection == "left" || directionBefore == "left"))) {
+      if (direction.stringDirection == "up" && direction.directionBefore == "right") textur.style.transform = "rotate(0deg)";
       clearInterval(rotateInt);
       checkTurnedInt = setInterval(checkTurned, 1000);
       if (direction.stringDirection == "up") {
@@ -933,7 +934,7 @@ else if (gerät == "PC") {
     }
   }
   function checkTurned() {
-    if ((direction.stringDirection == "up" && window.innerWidth < window.innerHeight) || (direction.stringDirection != "up" && window.innerWidth > window.innerHeight)) {
+    if ((direction.stringDirection == "up"/* && window.innerWidth < window.innerHeight*/) || (direction.stringDirection != "up" && window.innerWidth > window.innerHeight)) {
       window.scroll(0, 0);
       setTimeout(function () {
         if (direction.stringify == "up") textur.width = 426;
