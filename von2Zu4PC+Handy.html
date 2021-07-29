@@ -11,7 +11,7 @@
 <canvas id="textur" width="2570" height="888" style="touch-action: none"></canvas>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDataPlayer();"offline"'></h1>
 <script>
-  var alertWhenFinishedSaving = true;
+  var alertWhenFinishedSaving = false;
   window.onbeforeunload = function(){
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -118,7 +118,7 @@ localStorage.setItem("storedName", name);
   canvas.fill();
   */
     if (gerät == "Handy") {
-      // $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
+      $('head').append('<link rel="stylesheet" href="https://adi.nicolaiweitkemper.de/von2Zu4Handy.css" type="text/css" />');
       modeSelection.style.fontSize = "100";
       BNeueRunde.style.fontSize = "50";
       BAndereBenutzerAnzeigen.style.fontSize = "75";
