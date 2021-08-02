@@ -21,6 +21,9 @@ anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie m�
 <br>
 auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
+spawnpoint ändern erlaubt: <input type="checkbox" checked="true" id="changeSpawnPoint">
+<br>
+<br>
 beenden, wenn alle Bahnhöfe grün/alle Personen mitgenommen <input type="checkbox" id="justBahnhoefe">
 <br>
 Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="text">
@@ -85,7 +88,7 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
     if ((!warn || confirm("WARNUNG: Dies muss die Datei sein, mit der sie nachher offline spielen wollen! Andernfalls werden die Highscores nicht auftauchen! Trotzdem fortfahren?"))) {
       pSaveAutomaticly.style.display = "inline";
       if (!localStorage.getItem("saveAutomaticlyHelpTheTrain")) {
-        saveAutomaticly.checked = confirm("Wollen sie, dass die Daten immer hochgeladen werden, wenn sie diese Datei öffnen?");
+        saveAutomaticly.checked = confirm("Wollen sie, dass die aktuellen Daten immer automatisch lokal gespeichert werden, wenn sie diese Datei öffnen?");
         localStorage.setItem("saveAutomaticlyHelpTheTrain", saveAutomaticly.checked);
       }
       localStorage.setItem("downloadedHighscoresHelpTheTrain", JSON.stringify(highscores));
@@ -343,6 +346,8 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
     //anzahlRandomTrains.value = JSON.parse(innerHTML.toString().split("Zeit bis Züge losfahren: ")[1].toString().split(", ")[0]);
     //randomTrainsAtBahnhof.value = JSON.parse(innerHTML.toString().split("Züge an Bahnhof: ")[1].toString().split(", ")[0]);
     justBahnhoefe.checked = JSON.parse(innerHTML.toString().split("beenden, wenn alle Bahnhöfe grün: ")[1].toString().split(", ")[0]);
+    if (!innerHTML.toString().split("spawn point verändern: ")[1]) changeSpawnPoint.checked = true;
+    else changeSpawnPoint.checked = JSON.parse(innerHTML.toString().split("spawn point verändern: ")[1].toString().split(", ")[0]);
     brownCollide.checked = JSON.parse(innerHTML.toString().split("braune Züge können kollidierenden: ")[1].toString().split(", ")[0]);
     stayingTrainCollision.checked = JSON.parse(innerHTML.toString().split("Kollision auch mit stehenden Zügen: ")[1].toString().split(", ")[0]);
     justTrainBahnhof.checked = JSON.parse(innerHTML.toString().split(", braune Züge dürfen keinen Bahnhof berühren: ")[1].toString().split("|")[0]);
@@ -361,7 +366,7 @@ use fast train audio<input onchange="playTrainAudio(true);" checked="true" id="f
     }
     else textur.style.display = "inline";
     selectedSettings = "Anzahl Kurven: " + anzahlKurven.value + ", Anzahl Weichen: " + anzahlWeichen.value + ", Anzahl Geraden: " + anzahlGeraden.value + ", Anzahl Puffer: " + anzahlPuffer.value + ", Anzahl Bahnhoefe: " + anzahlBahnhoefe.value /*+ ", Zeit bis Züge losfahren: " + anzahlRandomTrains.value  + ", anzahl Züge zur Behinderung: " + anzahlRandomTrains.value + ", anzahl Züge an Bahnhof: " + randomTrainsAtBahnhof.value*/ + ", breite: " + breite.value + ", höhe: " + hoehe.value +  ", bei Test rotieren: " + rotateInRound.checked + ", alle Züge können Personen mitnehmen/Bahnhöfe grün machen: " + everybodyBahnhofAccess.checked + ", alle Züge müssen das Ziel erreichen: " + everybodyMustFinish.checked + ", alle Züge können das Ziel erreichen: " + everybodyCanFinish.checked + ", Zug ist bei Erreichen des Ziels weg: " + disapearWhenFinished.checked + ", mili sec. zwischen Zügen: " + timeBetweenTrains.value + ", Zeit bis zufällige Züge losfahren: " + timeBetweenRandomTrains.value + ", Anzahl Züge: " + anzahlZuege.value + ", beenden, wenn alle Bahnhöfe grün: " +
-    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", Kollision auch mit stehenden Zügen: " + stayingTrainCollision.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
+    justBahnhoefe.checked + ", " + "auch braune Züge können kollidierenden: " + brownCollide.checked + ", Kollision auch mit stehenden Zügen: " + stayingTrainCollision.checked + ", spawn point verändern: " + changeSpawnPoint.checked + ", braune Züge dürfen keinen Bahnhof berühren: " + justTrainBahnhof.checked;
     if (restore) {field = highscores[selected].data.field; train = highscores[selected].data.trains}
     if (!restore && Object.keys(highscores).includes(selectedSettings) && confirm("Diese Einstelungen wurden bereits von jemandem getroffen! Sie können das Level mit den Einstellungen spielen. Wollen sie dennoch ein neues Level mit den selben Einstellungen erstellen?")) {
       for (var i = 0; Object.keys(highscores).includes(selectedSettings); i++) {
@@ -543,7 +548,7 @@ function Layout(times) {
     }, 70);
   }*/
   canvas.fillStyle = "red";
-  canvas.fillRect((field.length*3*50)/ 2 + 10, field[0].length*3*50 + 10, 40, 40);
+  if (changeSpawnPoint.checked) canvas.fillRect((field.length*3*50)/ 2 + 10, field[0].length*3*50 + 10, 40, 40);
   //var trainColors = ["red", "brown"];
   for (var i = 0; i < train.length; i++) {
     if (i != 0) canvas.fillStyle = "brown"//trainColors[i];
@@ -609,7 +614,7 @@ function canvasClicked() {
         //     }
         if ((/*gerät == "PC" && */xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom) /*|| (gerät == "Handy" && xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus - scrollY > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus - scrollY < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom)*/) {
           console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
-          if (!inRound && i == train[0].spawnPoint.x && i1 == train[0].spawnPoint.y && i2 == train[0].spawnPoint.i2 && i3 == train[0].spawnPoint.i3)  {
+          if (changeSpawnPoint.checked && !inRound && i == train[0].spawnPoint.x && i1 == train[0].spawnPoint.y && i2 == train[0].spawnPoint.i2 && i3 == train[0].spawnPoint.i3)  {
             var moveTrain = true;
             selected.type = "train";
           }
