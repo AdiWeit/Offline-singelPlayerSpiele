@@ -10,7 +10,8 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
-      bullet.y = this.position - bullet.height;
+      // bullet.y = this.position - bullet.height;
+      bullet.speed += 5;
       bullets.push(bullet);
       player.bullets.got.splice(player.selectedBullet, 1);
     }
@@ -31,6 +32,13 @@
   function animateBullet(time) {
     canvas.fillStyle = "black";
     canvas.fillRect(0, 0, textur.width, textur.height);
+    // show selected player bullet
+    canvas.fillStyle = "red";
+    var selectedBullet = player.bullets.got[player.selectedBullet];
+    if (selectedBullet) {
+    selectedBullet.y = player.position - selectedBullet.height;
+    canvas.fillRect(selectedBullet.x, selectedBullet.y, selectedBullet.width, selectedBullet.height);
+    }
     canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 110, player.position, 50, 50);
     for (var cannon of cannons) {
@@ -42,6 +50,7 @@
       }
     }
     bullets.forEach((bullet, i) => {
+      // player bullet collision check
       if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
         console.log("hit bullet!");
         if (player.bullets.got.length < player.bullets.max) {
@@ -51,13 +60,26 @@
         }
         bullets.splice(i, 1);
       }
+      // player bullet cannons collision check
+      if (bullet.fromPlayer) {
+        cannons.forEach((cannon, i1) => {
+          if (isCollide(cannon, bullet)) cannons.splice(i1, 1);
+        });
+      }
+      // player bullet enemy bullet collision check
+      if (selectedBullet && isCollide(selectedBullet, bullet)) {
+        bullets.splice(i, 1);
+        player.bullets.got.splice(player.selectedBullet, 1);
+      }
       canvas.fillStyle = "white";
+      if (bullet.fromPlayer) canvas.fillStyle = "red";
       canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       bullet.x += bullet.speed*bullet.direction.x;
       bullet.y += bullet.speed*bullet.direction.y;
     });
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
     // room layout
+    canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 50, 0, 20, window.innerHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
