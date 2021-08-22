@@ -2,7 +2,20 @@
 <script>
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777};
-  var player = {position: window.innerHeight/2, collecting: {max: 1, got: []}, speed: 10}
+  class Player {
+    constructor() {
+    this.position = window.innerHeight/2;
+    this.bullets = {max: 1, got: []};
+    this.speed = 10;
+    this.selectedBullet = 0;
+    }
+    shoot = (bullet) => {
+      bullet.y = this.position - bullet.height;
+      bullets.push(bullet);
+      player.bullets.got.splice(player.selectedBullet, 1);
+    }
+  }
+  var player = new Player();
   startGame();
   function startGame() {
     requestAnimationFrame(animateBullet);
@@ -25,22 +38,24 @@
       cannon.timeGone += 16;
       if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
         cannon.timeGone = 1;
-        bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+        bullets.push(JSON.parse(JSON.stringify({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction})));
       }
     }
-    for (var bullet of bullets) {
-      if (isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
+    bullets.forEach((bullet, i) => {
+      if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
         console.log("hit bullet!");
-        if (player.collecting.got.length < player.collecting.max) {
-          player.collecting.got.push(bullet);
-          delete bullet
+        if (player.bullets.got.length < player.bullets.max) {
+          bullet.direction.x = -1;
+          bullet.fromPlayer = true;
+          player.bullets.got.push(bullet);
         }
+        bullets.splice(i, 1);
       }
       canvas.fillStyle = "white";
       canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       bullet.x += bullet.speed*bullet.direction.x;
       bullet.y += bullet.speed*bullet.direction.y;
-    }
+    });
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
     // room layout
     canvas.fillRect(window.innerWidth - 50, 0, 20, window.innerHeight);
@@ -56,6 +71,9 @@
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
     if (event.key.toLowerCase().includes("down")) player.position += player.speed;
+    if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
+    if (event.key.toLowerCase().includes("right") && player.selectedBullet < player.selecting.got.length + 1) player.selectedBullet++;
+    if (event.key == " ") player.shoot(player.bullets.got[player.selectedBullet]);
   }
 
 function isCollide(a, b) {
