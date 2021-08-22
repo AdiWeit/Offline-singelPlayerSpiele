@@ -1,0 +1,67 @@
+<canvas id="textur" width="300" height="300"></canvas>
+<script>
+  var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
+  var speed = {bullet: 3, cannon: 1777};
+  var player = {position: window.innerHeight/2, collecting: {max: 1, got: []}, speed: 10}
+  startGame();
+  function startGame() {
+    requestAnimationFrame(animateBullet);
+  }
+  var canvas = textur.getContext('2d');
+  textur.width = window.innerWidth - textur.getBoundingClientRect().left;
+  textur.height = window.innerHeight - textur.getBoundingClientRect().top - 10;
+  canvas.fillStyle = "black";
+  canvas.fillRect(0, 0, textur.width, textur.height);
+  //   var cannons = [{x: 10, y: 10, width: 17, height: 17, speed: 1777, bulletSpeed: 10, timeGone: 0, direction: {x: 1, y: 0}}];
+  var cannons = [];
+  var bullets = [];
+  function animateBullet(time) {
+    canvas.fillStyle = "black";
+    canvas.fillRect(0, 0, textur.width, textur.height);
+    canvas.fillStyle = "white";
+    canvas.fillRect(window.innerWidth - 110, player.position, 50, 50);
+    for (var cannon of cannons) {
+      canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
+      cannon.timeGone += 16;
+      if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
+        cannon.timeGone = 1;
+        bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+      }
+    }
+    for (var bullet of bullets) {
+      if (isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
+        console.log("hit bullet!");
+        if (player.collecting.got.length < player.collecting.max) {
+          player.collecting.got.push(bullet);
+          delete bullet
+        }
+      }
+      canvas.fillStyle = "white";
+      canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+      bullet.x += bullet.speed*bullet.direction.x;
+      bullet.y += bullet.speed*bullet.direction.y;
+    }
+    bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
+    // room layout
+    canvas.fillRect(window.innerWidth - 50, 0, 20, window.innerHeight);
+    newCannon.time.got += 16;
+    if (newCannon.time.got >= newCannon.time.needed) {
+      var size = Math.round(Math.random()*140) + 10;
+      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size) + 10, width: size, height: size, speed: speed.cannon, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      newCannon.counter++;
+      newCannon.time.got = 0;
+    }
+    requestAnimationFrame(animateBullet);
+  }
+  document.onkeydown = function(event) {
+    if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
+    if (event.key.toLowerCase().includes("down")) player.position += player.speed;
+  }
+
+function isCollide(a, b) {
+  return (a.x < b.x + b.width &&
+   a.x + a.width > b.x &&
+   a.y < b.y + b.height &&
+   a.y + a.height > b.y)
+}
+</script>
