@@ -108,9 +108,9 @@
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       // increasing difficulty
-      if (newCannon.time.needed > window.innerHeight*4) newCannon.time.needed -= 16;
-      if (player.speed < 22) player.speed += 0.1;
-      if (player.bullets.max < 3 && !(newCannon.counter/10 + "").includes('.')) player.bullets.max++;
+      if (newCannon.time.needed > window.innerHeight*3) newCannon.time.needed -= 16;
+      if (player.speed < 33) player.speed += 0.1;
+      if (player.bullets.max < 6 && !(newCannon.counter/10 + "").includes('.')) player.bullets.max++;
       newCannon.time.got = 0;
     }
     // layout ammo
