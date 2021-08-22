@@ -2,6 +2,7 @@
 <script>
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777};
+  var lives = {beginning: 133, now: 133};
   class Player {
     constructor() {
     this.position = window.innerHeight/2;
@@ -10,9 +11,11 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
+      console.log("shoot!");
       // bullet.y = this.position - bullet.height;
       bullet.speed += 5;
-      bullets.push(bullet);
+      bullets.push(JSON.parse(JSON.stringify(bullet)));
+      if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
       player.bullets.got.splice(player.selectedBullet, 1);
     }
   }
@@ -50,13 +53,19 @@
       }
     }
     bullets.forEach((bullet, i) => {
+      // bullet room collision
+      if (bullet.x + bullet.width > window.innerWidth - 50) {
+        lives.now -= bullet.width;
+        bullets.splice(i, 1);
+      }
+      else {
       // player bullet collision check
       if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
         console.log("hit bullet!");
         if (player.bullets.got.length < player.bullets.max) {
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
-          player.bullets.got.push(bullet);
+          player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
         }
         bullets.splice(i, 1);
       }
@@ -67,14 +76,19 @@
         });
       }
       var playerBullets = bullets.filter(a => a.fromPlayer);
-      playerBullets.push(selectedBullet);
+      if (selectedBullet) playerBullets.push(JSON.parse(JSON.stringify(selectedBullet)));
       // player bullet enemy bullet collision check
-        for (var playerBullet of playerBullets) {
-          if (playerBullet && isCollide(playerBullet, bullet) && JSON.stringify(playerBullet) != JSON.stringify(bullet)) {
+      playerBullets.forEach((playerBullet, i1) => {
+        if (playerBullet && !bullet.fromPlayer && isCollide(playerBullet, bullet) && JSON.stringify(playerBullet) != JSON.stringify(bullet)) {
           bullets.splice(i, 1);
-          player.bullets.got.splice(player.selectedBullet, 1);
+          if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
+          if (i1 == playerBullets.length - 1 && selectedBullet) {
+            console.log("deffed with bullet on hand!");
+            player.bullets.got.splice(player.selectedBullet, 1);
+          }
         }
-        }
+      });
+    }
       canvas.fillStyle = "white";
       if (bullet.fromPlayer) canvas.fillStyle = "red";
       canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
@@ -84,7 +98,9 @@
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
     // room layout
     canvas.fillStyle = "white";
-    canvas.fillRect(window.innerWidth - 50, 0, 20, window.innerHeight);
+    canvas.fillRect(window.innerWidth - 50, 0, 35, window.innerHeight);
+    canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
+    canvas.fillRect(window.innerWidth - 50, 0, 35, window.innerHeight*(lives.now/lives.beginning));
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
       var size = Math.round(Math.random()*140) + 10;
@@ -97,13 +113,29 @@
       if (player.bullets.max < 6 && !(newCannon.counter/10 + "").includes('.')) player.bullets.max++;
       newCannon.time.got = 0;
     }
+    // layout ammo
+    var lastAmmoPosition = 0;
+    for (var i = 0; i < player.bullets.max; i++) {
+      var bullet = player.bullets.got[i];
+      if (player.bullets.got[i]) {
+        canvas.fillStyle = "rgba(255, 0, 0, 0.5)";
+        canvas.fillRect(10 + lastAmmoPosition, 10, bullet.width, bullet.height);
+        if (i == player.selectedBullet) canvas.fillRect(10 + lastAmmoPosition, 10 + bullet.height + 10, bullet.width, 10);
+        lastAmmoPosition += bullet.width + 10;
+      }
+      else {
+        canvas.fillStyle = "rgba(255, 255, 255, 0.5)";
+        canvas.fillRect(10 + lastAmmoPosition, 10, 50, 50);
+        lastAmmoPosition += 60;
+      }
+    }
     requestAnimationFrame(animateBullet);
   }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
     if (event.key.toLowerCase().includes("down")) player.position += player.speed;
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
-    if (event.key.toLowerCase().includes("right") && player.selectedBullet < player.selecting.got.length + 1) player.selectedBullet++;
+    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length) player.selectedBullet++;
     if (event.key == " ") player.shoot(player.bullets.got[player.selectedBullet]);
   }
 
