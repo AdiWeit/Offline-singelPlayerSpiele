@@ -66,11 +66,15 @@
           if (isCollide(cannon, bullet)) cannons.splice(i1, 1);
         });
       }
+      var playerBullets = bullets.filter(a => a.fromPlayer);
+      playerBullets.push(selectedBullet);
       // player bullet enemy bullet collision check
-      if (selectedBullet && isCollide(selectedBullet, bullet)) {
-        bullets.splice(i, 1);
-        player.bullets.got.splice(player.selectedBullet, 1);
-      }
+        for (var playerBullet of playerBullets) {
+          if (playerBullet && isCollide(playerBullet, bullet) && JSON.stringify(playerBullet) != JSON.stringify(bullet)) {
+          bullets.splice(i, 1);
+          player.bullets.got.splice(player.selectedBullet, 1);
+        }
+        }
       canvas.fillStyle = "white";
       if (bullet.fromPlayer) canvas.fillStyle = "red";
       canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
@@ -84,7 +88,8 @@
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
       var size = Math.round(Math.random()*140) + 10;
-      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size) + 10, width: size, height: size, speed: speed.cannon, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size, height: size, speed: speed.cannon, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       newCannon.time.got = 0;
     }
