@@ -100,7 +100,7 @@
     canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 50, 0, 35, window.innerHeight);
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
-    canvas.fillRect(window.innerWidth - 50, 0, 35, window.innerHeight*(lives.now/lives.beginning));
+    canvas.fillRect(window.innerWidth - 50, -window.innerHeight*(lives.now/lives.beginning) + window.innerHeight, 35, window.innerHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
       var size = Math.round(Math.random()*140) + 10;
@@ -110,7 +110,7 @@
       // increasing difficulty
       if (newCannon.time.needed > window.innerHeight*4) newCannon.time.needed -= 16;
       if (player.speed < 22) player.speed += 0.1;
-      if (player.bullets.max < 6 && !(newCannon.counter/10 + "").includes('.')) player.bullets.max++;
+      if (player.bullets.max < 3 && !(newCannon.counter/10 + "").includes('.')) player.bullets.max++;
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -129,7 +129,7 @@
         lastAmmoPosition += 60;
       }
     }
-    requestAnimationFrame(animateBullet);
+    if (lives.now > 0) requestAnimationFrame(animateBullet);
   }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
