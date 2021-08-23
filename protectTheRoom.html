@@ -3,6 +3,8 @@
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777};
   var lives = {beginning: 133, now: 133};
+  var highscores = {};
+  var name = "Adron";
   class Player {
     constructor() {
     this.position = window.innerHeight/2;
@@ -17,6 +19,8 @@
       bullets.push(JSON.parse(JSON.stringify(bullet)));
       if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
       player.bullets.got.splice(player.selectedBullet, 1);
+      player.reload = {index: player.selectedBullet, left: 1111};
+      player.selectedBullet = -1;
     }
   }
   var player = new Player();
@@ -61,10 +65,11 @@
       else {
       // player bullet collision check
       if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
-        console.log("hit bullet!");
+        console.log("player hit bullet!");
         if (player.bullets.got.length < player.bullets.max) {
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
+          bullet.x += 50;
           player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
         }
         bullets.splice(i, 1);
@@ -129,13 +134,25 @@
         lastAmmoPosition += 60;
       }
     }
+    // TODO: Schrift größer (Schuss Anzeige weiter unten)
+    canvas.fillStyle = "rgba(255, 255, 255, 0.5)";
+    canvas.fillText("score: " + newCannon.counter, 10, 8);
+    if (player.selectedBullet == -1) {
+    	player.reload.left -= 16;
+    	if (player.reload.left < 1) {
+      	player.selectedBullet = player.reload.index;
+      }
+    }
     if (lives.now > 0) requestAnimationFrame(animateBullet);
+    else {
+    	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
+    }
   }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
     if (event.key.toLowerCase().includes("down")) player.position += player.speed;
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
-    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length) player.selectedBullet++;
+    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) player.selectedBullet++;
     if (event.key == " ") player.shoot(player.bullets.got[player.selectedBullet]);
   }
 
@@ -145,4 +162,8 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
+// TODO: sounds
+// newCannon.time.needed -= window.innerHeight*3;
+// player.speed = 33;
+// player.bullets.max = 6;
 </script>
