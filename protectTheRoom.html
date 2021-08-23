@@ -124,19 +124,19 @@
       var bullet = player.bullets.got[i];
       if (player.bullets.got[i]) {
         canvas.fillStyle = "rgba(255, 0, 0, 0.5)";
-        canvas.fillRect(10 + lastAmmoPosition, 10, bullet.width, bullet.height);
-        if (i == player.selectedBullet) canvas.fillRect(10 + lastAmmoPosition, 10 + bullet.height + 10, bullet.width, 10);
+        canvas.fillRect(10 + lastAmmoPosition, 10 + 27, bullet.width, bullet.height);
+        if (i == player.selectedBullet) canvas.fillRect(10 + lastAmmoPosition, 10 + 27 + bullet.height + 10, bullet.width, 10);
         lastAmmoPosition += bullet.width + 10;
       }
       else {
-        canvas.fillStyle = "rgba(255, 255, 255, 0.5)";
-        canvas.fillRect(10 + lastAmmoPosition, 10, 50, 50);
+        canvas.fillStyle = "rgba(131, 123, 123, 0.5)";
+        canvas.fillRect(10 + lastAmmoPosition, 10 + 27, 50, 50);
         lastAmmoPosition += 60;
       }
     }
-    // TODO: Schrift größer (Schuss Anzeige weiter unten)
-    canvas.fillStyle = "rgba(255, 255, 255, 0.5)";
-    canvas.fillText("score: " + newCannon.counter, 10, 8);
+    canvas.font = "35px Arial";
+    canvas.fillStyle = "rgba(131, 123, 123, 0.5)";
+    canvas.fillText("score: " + newCannon.counter, 10, 8 + 20);
     if (player.selectedBullet == -1) {
     	player.reload.left -= 16;
     	if (player.reload.left < 1) {
