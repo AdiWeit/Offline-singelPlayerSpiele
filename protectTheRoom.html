@@ -72,7 +72,7 @@
           new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav').play();
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
-          bullet.x += 50;
+          bullet.x = window.innerWidth - 110 + 50 - bullet.width;
           player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
         }
         bullets.splice(i, 1);
@@ -115,8 +115,17 @@
     canvas.fillRect(window.innerWidth - 50, -window.innerHeight*(lives.now/lives.beginning) + window.innerHeight, 35, window.innerHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
-      var size = Math.round(Math.random()*140) + 10;
+      var size = Math.round(Math.random()*140) + player.speed;
       cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size, height: size, speed: speed.cannon, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      // do {
+      // var cannonCollsion = false;
+      // for (var cannon of cannons) {
+      //   if (cannons[cannons.length - 1] && isCollide(cannon, cannons[cannons.length - 1]) && JSON.stringify(cannon) != JSON.stringify(cannons[cannons.length - 1])) {
+      //     cannons[cannons.length - 1].y = Math.round(Math.random()*window.innerHeight - size);
+      //     cannonCollsion = true;
+      //   }
+      // }
+      // } while (cannonCollsion);
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       // increasing difficulty
@@ -169,8 +178,8 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-// TODO: sounds
-// newCannon.time.needed -= window.innerHeight*3;
+// newCannon.time.needed -= window.innerHeight*3.3//3;
 // player.speed = 33;
 // player.bullets.max = 6;
+// speed.bullet = 11;
 </script>
