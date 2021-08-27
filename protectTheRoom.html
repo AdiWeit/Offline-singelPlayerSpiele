@@ -14,6 +14,7 @@
     }
     shoot = (bullet) => {
       console.log("shoot!");
+      if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
       // bullet.y = this.position - bullet.height;
       bullet.speed += 5;
       bullets.push(JSON.parse(JSON.stringify(bullet)));
@@ -61,12 +62,14 @@
       if (bullet.x + bullet.width > window.innerWidth - 50) {
         lives.now -= bullet.width;
         bullets.splice(i, 1);
+        new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav').play();
       }
       else {
       // player bullet collision check
       if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
         console.log("player hit bullet!");
         if (player.bullets.got.length < player.bullets.max) {
+          new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav').play();
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
           bullet.x += 50;
@@ -77,7 +80,10 @@
       // player bullet cannons collision check
       if (bullet.fromPlayer) {
         cannons.forEach((cannon, i1) => {
-          if (isCollide(cannon, bullet)) cannons.splice(i1, 1);
+          if (isCollide(cannon, bullet)) {
+            cannons.splice(i1, 1);
+            new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/cannon_explosion.wav').play();
+          }
         });
       }
       var playerBullets = bullets.filter(a => a.fromPlayer);
@@ -86,6 +92,7 @@
       playerBullets.forEach((playerBullet, i1) => {
         if (playerBullet && !bullet.fromPlayer && isCollide(playerBullet, bullet) && JSON.stringify(playerBullet) != JSON.stringify(bullet)) {
           bullets.splice(i, 1);
+          new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot_shot.wav').play();
           if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
           if (i1 == playerBullets.length - 1 && selectedBullet) {
             console.log("deffed with bullet on hand!");
