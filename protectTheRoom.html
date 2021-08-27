@@ -1,7 +1,7 @@
 <canvas id="textur" width="300" height="300"></canvas>
 <script>
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
-  var speed = {bullet: 3, cannon: 1777};
+  var speed = {bullet: 3, cannon: 1777, minTime: 1777};
   var lives = {beginning: 133, now: 133};
   var highscores = {};
   var name = "Adron";
@@ -20,7 +20,7 @@
       bullets.push(JSON.parse(JSON.stringify(bullet)));
       if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
       player.bullets.got.splice(player.selectedBullet, 1);
-      player.reload = {index: player.selectedBullet, left: 1111};
+      player.reload = {index: player.selectedBullet, left: 333};
       player.selectedBullet = -1;
     }
   }
@@ -116,7 +116,8 @@
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
       var size = Math.round(Math.random()*140) + player.speed;
-      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size, height: size, speed: speed.cannon, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
       // for (var cannon of cannons) {
@@ -129,9 +130,14 @@
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       // increasing difficulty
-      if (newCannon.time.needed > window.innerHeight*3) newCannon.time.needed -= 16;
+      // newCannon.time.needed -= window.innerHeight*3.3//3;
+      // player.speed = 33;
+      // player.bullets.max = 6;
+      // speed.bullet = 11;
+      if (newCannon.time.needed > window.innerHeight*3.3) newCannon.time.needed -= 16;
       if (player.speed < 33) player.speed += 0.1;
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
+      if (speed.bullet < 11) speed.bullet += 0.1;
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -178,8 +184,9 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-// newCannon.time.needed -= window.innerHeight*3.3//3;
+newCannon.time.needed -= window.innerHeight*3//3;
 // player.speed = 33;
 // player.bullets.max = 6;
 // speed.bullet = 11;
+// // speed.minTime = 999;
 </script>
