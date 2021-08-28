@@ -136,13 +136,9 @@
       // player.bullets.max = 6;
       // speed.bullet = 11;
       if (newCannon.time.needed > window.innerHeight*3.3) newCannon.time.needed -= 16;
-      else maxedOut('spawn time');
-      if (player.speed < 33) player.speed += 0.15;
-      else maxedOut("player speed");
+      if (player.speed < 33) player.speed += 0.2;
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
-      if (player.bullets.max >= 6) maxedOut("ammo");
       if (speed.bullet < 11) speed.bullet += 0.1;
-      else maxedOut('bullet speed');
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -174,11 +170,6 @@
     else {
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
-  }
-  var maxedOut = {};
-  function maxedOut(type) {
-    if (!maxedOut[type]) console.log(type + " maxed out!");
-    maxedOut[type] = true;
   }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
