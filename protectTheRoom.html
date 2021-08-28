@@ -1,4 +1,5 @@
 <canvas id="textur" width="300" height="300"></canvas>
+<input id="useMultAmmo" type="checkbox"> ammo tactive
 <script>
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777, minTime: 1777};
@@ -135,9 +136,13 @@
       // player.bullets.max = 6;
       // speed.bullet = 11;
       if (newCannon.time.needed > window.innerHeight*3.3) newCannon.time.needed -= 16;
-      if (player.speed < 33) player.speed += 0.1;
+      else maxedOut('spawn time');
+      if (player.speed < 33) player.speed += 0.15;
+      else maxedOut("player speed");
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
+      if (player.bullets.max >= 6) maxedOut("ammo");
       if (speed.bullet < 11) speed.bullet += 0.1;
+      else maxedOut('bullet speed');
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -170,6 +175,11 @@
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
   }
+  var maxedOut = {};
+  function maxedOut(type) {
+    if (!maxedOut[type]) console.log(type + " maxed out!");
+    maxedOut[type] = true;
+  }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
     if (event.key.toLowerCase().includes("down")) player.position += player.speed;
@@ -184,9 +194,14 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-newCannon.time.needed -= window.innerHeight*3//3;
+// newCannon.time.needed -= window.innerHeight*2//3;
 // player.speed = 33;
 // player.bullets.max = 6;
 // speed.bullet = 11;
-// // speed.minTime = 999;
+// reloadAmmo max
+// newCannon.time.needed -= window.innerHeight*1.5//3;
+// player.speed = 33;
+// player.bullets.max = 6;
+// speed.bullet = 3;
+// speed.minTime = 999;
 </script>
