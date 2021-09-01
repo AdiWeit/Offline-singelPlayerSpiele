@@ -1,11 +1,12 @@
 <canvas id="textur" width="300" height="300"></canvas>
-<input id="useMultAmmo" type="checkbox"> ammo tactive
+<input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
 <script>
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777, minTime: 1777};
   var lives = {beginning: 133, now: 133};
   var highscores = {};
   var name = "Adron";
+  var phase = {name: "normal"}
   class Player {
     constructor() {
     this.position = window.innerHeight/2;
@@ -69,7 +70,7 @@
       // player bullet collision check
       if (!bullet.fromPlayer && isCollide(bullet, {x: window.innerWidth - 110, y: player.position, width: 50, height: 50})) {
         console.log("player hit bullet!");
-        if (player.bullets.got.length < player.bullets.max) {
+        if (player.bullets.got.length < player.bullets.max && phase.name != "useAmmo") {
           new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav').play();
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
@@ -130,12 +131,37 @@
       // } while (cannonCollsion);
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
+      if (phase.counter) phase.counter--;
       // increasing difficulty
       // newCannon.time.needed -= window.innerHeight*3.3//3;
       // player.speed = 33;
       // player.bullets.max = 6;
       // speed.bullet = 11;
-      if (newCannon.time.needed > window.innerHeight*3.3) newCannon.time.needed -= 16;
+      if (newCannon.time.needed > window.innerHeight*1.7 && phase.name == "normal") newCannon.time.needed -= 16;
+        else if (useMultAmmo.checked && phase.counter == 0) {
+       if (phase.name == "normal" || phase.name == "useAmmo") {
+         setTimeout(function () {
+           newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
+           player.speed = 33;
+           player.bullets.max = 6;
+           speed.bullet = 3;
+           phase.counter = 9;
+           phase.name = "collectAmmo";
+           console.log(phase.name);
+         }, 1555);
+        }
+        else if (phase.name == "collectAmmo") {
+          newCannon.time.needed = window.innerHeight*1.4//3;
+          player.speed = 45;
+          player.bullets.max = 6;
+          speed.bullet = 11;
+          phase.counter = 5;
+          bullets.pop();
+          phase.name = "useAmmo";
+          console.log(phase.name);
+        }
+      }
+      else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
       if (player.speed < 33) player.speed += 0.2;
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
       if (speed.bullet < 11) speed.bullet += 0.1;
@@ -166,7 +192,7 @@
       	player.selectedBullet = player.reload.index;
       }
     }
-    if (lives.now > 0) requestAnimationFrame(animateBullet);
+    if (true/*lives.now > 0*/) requestAnimationFrame(animateBullet);
     else {
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
@@ -185,12 +211,13 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-// newCannon.time.needed -= window.innerHeight*2//3;
-// player.speed = 33;
-// player.bullets.max = 6;
-// speed.bullet = 11;
+newCannon.time.needed = window.innerHeight*1.7//3;
+player.speed = 33;
+player.bullets.max = 6;
+speed.bullet = 11;
 // reloadAmmo max
 // newCannon.time.needed -= window.innerHeight*1.5//3;
+// newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
 // player.speed = 33;
 // player.bullets.max = 6;
 // speed.bullet = 3;
