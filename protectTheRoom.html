@@ -27,6 +27,7 @@
     this.position = window.innerHeight/2;
     this.bullets = {max: 1, got: []};
     this.speed = 10;
+    if (gerät == "Handy") this.speed = 15;
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
@@ -294,24 +295,32 @@ document.addEventListener('touchmove', touch);
 document.addEventListener('touchstart', touch);
 document.addEventListener('touchend', touch);
 // document.getElementById('textur').style = "touch-action: none";
+var swipe = {};
 function touch(ev) {
   if (ev.touches[1]) player.shoot();
   if (ev.type == "touchstart") {
     var firstTouch = getTouches(ev)[0];
     xDown = firstTouch.clientX;
     yDown = firstTouch.clientY;
+    swipe = {beginning: {x: firstTouch.clientX, y: firstTouch.clientY}, counter: -5};
   }
   if (ev.type == "touchmove") {
-    if (ev.touches[1]) console.log("swipe1");
-    var xDiff = xDown - ev.touches[0].clientX;
+    swipe.counter++;
+    var xDiff = swipe.beginning.x - ev.touches[0].clientX;
     var yDiff = yDown - ev.touches[0].clientY;
     firstTouch = getTouches(ev)[0];
     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-        if ( xDiff > 0 ) {
+      console.log(swipe.counter);
+      if (swipe.counter == 10 || swipe.counter == -1) {
+        swipe.counter = 0;
+        if ( xDiff > 0 && player.selectedBullet > 0) {
+          player.selectedBullet--;
             /* left swipe */
-        } else {
+        } else if (xDiff < 0 && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
             /* right swipe */
+            player.selectedBullet++;
         }
+      }
     } else {
         if ( yDiff > 0 ) {
             /* up swipe */
