@@ -1,6 +1,21 @@
-<canvas id="textur" width="300" height="300"></canvas>
+<meta charset="utf-8">
+<title>protect the room</title>
+<canvas id="textur" onclick="player.shoot();" width="300" height="300"></canvas>
+<div id="settings">
 <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
+<button onclick="startGame(); settings.style.display = 'none';">start</button>
+</div>
 <script>
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {var gerät = "Handy";}
+  else var gerät = "PC";
+  console.log(gerät);
   var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
   var speed = {bullet: 3, cannon: 1777, minTime: 1777};
   var lives = {beginning: 133, now: 133};
@@ -16,6 +31,7 @@
     }
     shoot = (bullet) => {
       console.log("shoot!");
+      bullet = player.bullets.got[player.selectedBullet];
       if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
       // bullet.y = this.position - bullet.height;
       bullet.speed += 5;
@@ -27,8 +43,9 @@
     }
   }
   var player = new Player();
-  startGame();
   function startGame() {
+  disableScroll();
+  window.scroll(0, 0);
     requestAnimationFrame(animateBullet);
   }
   var canvas = textur.getContext('2d');
@@ -138,14 +155,15 @@
       // player.bullets.max = 6;
       // speed.bullet = 11;
       if (newCannon.time.needed > window.innerHeight*1.7 && phase.name == "normal") newCannon.time.needed -= 16;
+      else if (!useMultAmmo.checked && newCannon.time.needed > window.innerHeight*1.2) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
        if (phase.name == "normal" || phase.name == "useAmmo") {
          setTimeout(function () {
            newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
+           if (gerät == "Handy") newCannon.time.needed += 1333;
            player.speed = 33;
-           player.bullets.max = 6;
-           speed.bullet = 3;
-           phase.counter = 9;
+           speed.bullet = 5//3;
+           phase.counter = player.bullets.max + 3;//9;
            phase.name = "collectAmmo";
            console.log(phase.name);
          }, 1555);
@@ -153,21 +171,23 @@
         else if (phase.name == "collectAmmo") {
           newCannon.time.needed = window.innerHeight*1.4//3;
           player.speed = 45;
-          player.bullets.max = 6;
           speed.bullet = 11;
-          phase.counter = 5;
+          phase.counter = player.bullets.max - 2 //4;
           bullets.pop();
           phase.name = "useAmmo";
           console.log(phase.name);
+          player.bullets.max++;
         }
       }
       else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
       if (player.speed < 33) player.speed += 0.2;
+      else if (!useMultAmmo.checked && player.speed < 89) player.speed += 0.2;
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
       if (speed.bullet < 11) speed.bullet += 0.1;
       newCannon.time.got = 0;
     }
     // layout ammo
+    player.bullets.got.sort((x, y) => x.width - y.width);
     var lastAmmoPosition = 0;
     for (var i = 0; i < player.bullets.max; i++) {
       var bullet = player.bullets.got[i];
@@ -192,7 +212,7 @@
       	player.selectedBullet = player.reload.index;
       }
     }
-    if (true/*lives.now > 0*/) requestAnimationFrame(animateBullet);
+    if (lives.now > 0) requestAnimationFrame(animateBullet);
     else {
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
@@ -203,7 +223,7 @@
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
     if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) player.selectedBullet++;
     if (event.key == " ") player.shoot(player.bullets.got[player.selectedBullet]);
-  }
+}
 
 function isCollide(a, b) {
   return (a.x < b.x + b.width &&
@@ -211,15 +231,104 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-newCannon.time.needed = window.innerHeight*1.7//3;
-player.speed = 33;
-player.bullets.max = 6;
-speed.bullet = 11;
+// newCannon.time.needed = window.innerHeight*1.7//3;
+// player.speed = 33;
+// player.bullets.max = 6;
+// speed.bullet = 11;
 // reloadAmmo max
 // newCannon.time.needed -= window.innerHeight*1.5//3;
 // newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
 // player.speed = 33;
 // player.bullets.max = 6;
 // speed.bullet = 3;
-// speed.minTime = 999;
+// // speed.minTime = 999;
+// evenFaster max:
+newCannon.time.needed = window.innerHeight*1.2//3;
+player.speed = 89;
+player.bullets.max = 6;
+speed.bullet = 11;
+
+// enableand disable scrolling
+// left: 37, up: 38, right: 39, down: 40,
+// spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
+var keys = {37: 1, 38: 1, 39: 1, 40: 1};
+
+function preventDefault(e) {
+  e.preventDefault();
+}
+
+function preventDefaultForScrollKeys(e) {
+  if (keys[e.keyCode]) {
+    preventDefault(e);
+    return false;
+  }
+}
+
+// modern Chrome requires { passive: false } when adding event
+var supportsPassive = false;
+try {
+  window.addEventListener("test", null, Object.defineProperty({}, 'passive', {
+    get: function () { supportsPassive = true; }
+  }));
+} catch(e) {}
+
+var wheelOpt = supportsPassive ? { passive: false } : false;
+var wheelEvent = 'onwheel' in document.createElement('div') ? 'wheel' : 'mousewheel';
+
+// call this to Disable
+function disableScroll() {
+  window.addEventListener('DOMMouseScroll', preventDefault, false); // older FF
+  window.addEventListener(wheelEvent, preventDefault, wheelOpt); // modern desktop
+  window.addEventListener('touchmove', preventDefault, wheelOpt); // mobile
+  window.addEventListener('keydown', preventDefaultForScrollKeys, false);
+}
+
+// call this to Enable
+function enableScroll() {
+  window.removeEventListener('DOMMouseScroll', preventDefault, false);
+  window.removeEventListener(wheelEvent, preventDefault, wheelOpt);
+  window.removeEventListener('touchmove', preventDefault, wheelOpt);
+  window.removeEventListener('keydown', preventDefaultForScrollKeys, false);
+}
+document.addEventListener('touchmove', touch);
+document.addEventListener('touchstart', touch);
+document.addEventListener('touchend', touch);
+// document.getElementById('textur').style = "touch-action: none";
+function touch(ev) {
+  if (ev.touches[1]) player.shoot();
+  if (ev.type == "touchstart") {
+    var firstTouch = getTouches(ev)[0];
+    xDown = firstTouch.clientX;
+    yDown = firstTouch.clientY;
+  }
+  if (ev.type == "touchmove") {
+    if (ev.touches[1]) console.log("swipe1");
+    var xDiff = xDown - ev.touches[0].clientX;
+    var yDiff = yDown - ev.touches[0].clientY;
+    firstTouch = getTouches(ev)[0];
+    if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
+        if ( xDiff > 0 ) {
+            /* left swipe */
+        } else {
+            /* right swipe */
+        }
+    } else {
+        if ( yDiff > 0 ) {
+            /* up swipe */
+            player.position -= player.speed/3;
+        } else {
+            /* down swipe */
+            player.position += player.speed/3;
+        }
+    }
+  }
+  // toggleFullscreen(document.body);
+}
+var xDown;
+var yDown;
+
+function getTouches(ev) {
+return ev.touches ||             // browser API
+       ev.originalEvent.touches; // jQuery
+}
 </script>
