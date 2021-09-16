@@ -2,8 +2,8 @@
 <title>protect the room</title>
 <canvas id="textur" onclick="player.shoot();" width="300" height="300"></canvas>
 <div id="settings">
-<input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
-<button onclick="startGame(); settings.style.display = 'none';">start</button>
+  <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
+  <button onclick="startGame(); settings.style.display = 'none';">start</button>
 </div>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
@@ -16,9 +16,9 @@
   ) {var gerät = "Handy";}
   else var gerät = "PC";
   console.log(gerät);
-  var newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
-  var speed = {bullet: 3, cannon: 1777, minTime: 1777};
-  var lives = {beginning: 133, now: 133};
+  var newCannon;
+  var speed ;
+  var lives;
   var highscores = {};
   var name = "Adron";
   var phase = {name: "normal"}
@@ -45,8 +45,15 @@
   }
   var player = new Player();
   function startGame() {
-  disableScroll();
-  window.scroll(0, 0);
+    newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
+    speed = {bullet: 3, cannon: 1777, minTime: 1777};
+    lives = {beginning: 133, now: 133};
+    phase = {name: "normal"};
+    player = new Player();
+    cannons = [];
+    bullets = [];
+    disableScroll();
+    window.scroll(0, 0);
     requestAnimationFrame(animateBullet);
   }
   var canvas = textur.getContext('2d');
@@ -215,6 +222,8 @@
     }
     if (lives.now > 0) requestAnimationFrame(animateBullet);
     else {
+      settings.style.display = "inline";
+      enableScroll();
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
   }
