@@ -5,6 +5,12 @@
   <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
   <button onclick="startGame(); settings.style.display = 'none';">start</button>
 </div>
+<body>
+<div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
+<div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
+<input checked="true" type="checkbox" onchange="if (checked) playerObj.space.playVideo(); else playerObj.space.pauseVideo();">play space music
+<input type="checkbox" onchange="if (checked) {playerObj.fight.seekTo(Math.round(Math.random()*36048));  playerObj.fight.playVideo();} else playerObj.fight.pauseVideo();">play fight music
+<script src="https://www.youtube.com/player_api"></script>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -54,6 +60,23 @@
     bullets = [];
     disableScroll();
     window.scroll(0, 0);
+    // newCannon.time.needed = window.innerHeight*1.7//3;
+    // player.speed = 33;
+    // player.bullets.max = 6;
+    // speed.bullet = 11;
+    // reloadAmmo max
+    // newCannon.time.needed -= window.innerHeight*1.5//3;
+    // newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
+    // player.speed = 33;
+    // player.bullets.max = 6;
+    // speed.bullet = 3;
+    // // speed.minTime = 999;
+    // evenFaster max:
+    // TODO: bei Zeit auch width beachten
+    newCannon.time.needed = window.innerHeight*1.2//3;
+    player.speed = 89;
+    player.bullets.max = 6;
+    speed.bullet = 11;
     requestAnimationFrame(animateBullet);
   }
   var canvas = textur.getContext('2d');
@@ -142,8 +165,9 @@
     canvas.fillRect(window.innerWidth - 50, -window.innerHeight*(lives.now/lives.beginning) + window.innerHeight, 35, window.innerHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
-      var size = Math.round(Math.random()*140) + player.speed;
-      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      var size = Math.round(Math.random()*(140 - player.speed)) + player.speed;
+      // size = size*((window.innerWidth*window.innerHeight)/(1600*1069));
+      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size*(((window.innerWidth*window.innerHeight)/(1600*1069)))*1.7, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
@@ -241,22 +265,6 @@ function isCollide(a, b) {
    a.y < b.y + b.height &&
    a.y + a.height > b.y)
 }
-// newCannon.time.needed = window.innerHeight*1.7//3;
-// player.speed = 33;
-// player.bullets.max = 6;
-// speed.bullet = 11;
-// reloadAmmo max
-// newCannon.time.needed -= window.innerHeight*1.5//3;
-// newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
-// player.speed = 33;
-// player.bullets.max = 6;
-// speed.bullet = 3;
-// // speed.minTime = 999;
-// evenFaster max:
-newCannon.time.needed = window.innerHeight*1.2//3;
-player.speed = 89;
-player.bullets.max = 6;
-speed.bullet = 11;
 
 // enableand disable scrolling
 // left: 37, up: 38, right: 39, down: 40,
@@ -348,5 +356,30 @@ var yDown;
 function getTouches(ev) {
 return ev.touches ||             // browser API
        ev.originalEvent.touches; // jQuery
+}
+
+// audio:
+var playerObj = {space: null, fight: null};
+function onYouTubePlayerAPIReady() {
+  var playerOby = new YT.Player('spacePlayer', {
+      videoId: 'tNkZsRW7h2c', // this is the id of the video at youtube (the stuff after "?v=")
+      loop: true,
+      events: {
+          onReady: function (e) {
+              playerObj.space = e.target;
+              e.target.playVideo();
+            },
+      }
+  });
+  var playerOby = new YT.Player('fightPlayer', {
+      videoId: 'abg4hqQs5b8', // this is the id of the video at youtube (the stuff after "?v=")
+      loop: true,
+      events: {
+          onReady: function (e) {
+              playerObj.fight = e.target;
+            },
+      }
+  });
+  // you can do more stuff with the player variable
 }
 </script>
