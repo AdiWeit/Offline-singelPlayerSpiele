@@ -22,6 +22,7 @@
   ) {var gerät = "Handy";}
   else var gerät = "PC";
   console.log(gerät);
+  var wHeight = window.innerHeight;
   var newCannon;
   var speed ;
   var lives;
@@ -30,7 +31,7 @@
   var phase = {name: "normal"}
   class Player {
     constructor() {
-    this.position = window.innerHeight/2;
+    this.position = wHeight/2;
     this.bullets = {max: 1, got: []};
     this.speed = 10;
     if (gerät == "Handy") this.speed = 15;
@@ -51,7 +52,7 @@
   }
   var player = new Player();
   function startGame() {
-    newCannon = {time: {needed: window.innerHeight*5, got: window.innerHeight*5 - 16}, counter: 0}
+    newCannon = {time: {needed: wHeight*5, got: wHeight*5 - 16}, counter: 0}
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
     lives = {beginning: 133, now: 133};
     phase = {name: "normal"};
@@ -60,28 +61,33 @@
     bullets = [];
     disableScroll();
     window.scroll(0, 0);
-    // newCannon.time.needed = window.innerHeight*1.7//3;
+    // newCannon.time.needed = wHeight*1.7//3;
     // player.speed = 33;
     // player.bullets.max = 6;
     // speed.bullet = 11;
     // reloadAmmo max
-    // newCannon.time.needed -= window.innerHeight*1.5//3;
-    // newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
+    // newCannon.time.needed -= wHeight*1.5//3;
+    // newCannon.time.needed = wHeight*5 - wHeight*1.5//3;
     // player.speed = 33;
     // player.bullets.max = 6;
     // speed.bullet = 3;
     // // speed.minTime = 999;
     // evenFaster max:
-    // TODO: bei Zeit auch width beachten
-    newCannon.time.needed = window.innerHeight*1.2//3;
-    player.speed = 89;
+    // newCannon.time.needed = convertNumber *1.2//3;
+    // player.speed = 89;
+    // player.bullets.max = 6;
+    // speed.bullet = 11;
+    // requestAnimationFrame(animateBullet);
+    // evenFaster max:
+    newCannon.time.needed = convertNumber *1//3;
+    player.speed = adaptToHeight(99);
     player.bullets.max = 6;
-    speed.bullet = 11;
+    speed.bullet = 13;
     requestAnimationFrame(animateBullet);
   }
   var canvas = textur.getContext('2d');
   textur.width = window.innerWidth - textur.getBoundingClientRect().left;
-  textur.height = window.innerHeight - textur.getBoundingClientRect().top - 10;
+  textur.height = wHeight - textur.getBoundingClientRect().top - 10;
   canvas.fillStyle = "black";
   canvas.fillRect(0, 0, textur.width, textur.height);
   //   var cannons = [{x: 10, y: 10, width: 17, height: 17, speed: 1777, bulletSpeed: 10, timeGone: 0, direction: {x: 1, y: 0}}];
@@ -160,20 +166,20 @@
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
     // room layout
     canvas.fillStyle = "white";
-    canvas.fillRect(window.innerWidth - 50, 0, 35, window.innerHeight);
+    canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
-    canvas.fillRect(window.innerWidth - 50, -window.innerHeight*(lives.now/lives.beginning) + window.innerHeight, 35, window.innerHeight);
+    canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
-      var size = Math.round(Math.random()*(140 - player.speed)) + player.speed;
-      // size = size*((window.innerWidth*window.innerHeight)/(1600*1069));
-      cannons.push({x: 33, y: Math.round(Math.random()*window.innerHeight - size), width: size*(((window.innerWidth*window.innerHeight)/(1600*1069)))*1.7, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
+      // size = size*((window.innerWidth*wHeight)/(1600*1069));
+      cannons.push({x: 33, y: Math.round(Math.random()*wHeight - size), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
       // for (var cannon of cannons) {
       //   if (cannons[cannons.length - 1] && isCollide(cannon, cannons[cannons.length - 1]) && JSON.stringify(cannon) != JSON.stringify(cannons[cannons.length - 1])) {
-      //     cannons[cannons.length - 1].y = Math.round(Math.random()*window.innerHeight - size);
+      //     cannons[cannons.length - 1].y = Math.round(Math.random()*wHeight - size);
       //     cannonCollsion = true;
       //   }
       // }
@@ -182,31 +188,37 @@
       newCannon.counter++;
       if (phase.counter) phase.counter--;
       // increasing difficulty
-      // newCannon.time.needed -= window.innerHeight*3.3//3;
+      // newCannon.time.needed -= convertNumber *3.3//3;
       // player.speed = 33;
       // player.bullets.max = 6;
       // speed.bullet = 11;
-      if (newCannon.time.needed > window.innerHeight*1.7 && phase.name == "normal") newCannon.time.needed -= 16;
-      else if (!useMultAmmo.checked && newCannon.time.needed > window.innerHeight*1.2) newCannon.time.needed -= 16;
+      var original = wHeight;
+      if (newCannon.time.needed > convertNumber *1.7 && phase.name == "normal") newCannon.time.needed -= 16;
+      else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1.2) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
        if (phase.name == "normal" || phase.name == "useAmmo") {
          setTimeout(function () {
-           newCannon.time.needed = window.innerHeight*5 - window.innerHeight*1.5//3;
+           phase.name = "collectAmmo";
+           adaptToScreen();
+           newCannon.time.needed = convertNumber *5 - convertNumber *1.5//3;
            if (gerät == "Handy") newCannon.time.needed += 1333;
-           player.speed = 33;
+           setTimeout(function () {
+             player.speed = /*adaptToHeight(*/33;
+           }, 1777);
            speed.bullet = 5//3;
            phase.counter = player.bullets.max + 3;//9;
-           phase.name = "collectAmmo";
            console.log(phase.name);
          }, 1555);
         }
         else if (phase.name == "collectAmmo") {
-          newCannon.time.needed = window.innerHeight*1.4//3;
+          phase.name = "useAmmo";
+          adaptToScreen();
+          newCannon.time.needed = convertNumber *1.4//3;
           player.speed = 45;
+          if (gerät == "Handy") player.speed = adaptToHeight(90);
           speed.bullet = 11;
           phase.counter = player.bullets.max - 2 //4;
           bullets.pop();
-          phase.name = "useAmmo";
           console.log(phase.name);
           player.bullets.max++;
         }
@@ -256,9 +268,32 @@
     if (event.key.toLowerCase().includes("down")) player.position += player.speed;
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
     if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) player.selectedBullet++;
-    if (event.key == " ") player.shoot(player.bullets.got[player.selectedBullet]);
+    if (event.key == " ") {
+      try {
+        player.shoot(player.bullets.got[player.selectedBullet]);
+      }
+      catch (e) {console.log("no ammo");}
+      return false;
+    }
 }
-
+var convertNumber;
+adaptToScreen();
+function adaptToScreen() {
+  convertNumber = ((wHeight*window.innerWidth));
+  var handyPlus = 0;
+  if (gerät == "Handy" && phase.name != "collectAmmo") handyPlus = 10;
+  else if (gerät == "Handy") handyPlus = -0.1;
+  if (convertNumber/1069/1600 < 1) convertNumber *= (convertNumber/1069/1600)*(1.29 + handyPlus) + 1;
+  else if (convertNumber/1069/1600 > 1) convertNumber *= (convertNumber/1069/1600)*1.7;
+  convertNumber /= window.innerWidth;
+}
+function adaptToHeight(original) {
+  // original*(wHeight/1069)*1.4;
+  for (var i = 1.4; gerät == "Handy" && i >= 1; i -= 0.1) {
+    if (original*(wHeight/1069)*i < original && wHeight < 1069) original *= (wHeight/1069)*i;
+  }
+  return original;
+}
 function isCollide(a, b) {
   return (a.x < b.x + b.width &&
    a.x + a.width > b.x &&
