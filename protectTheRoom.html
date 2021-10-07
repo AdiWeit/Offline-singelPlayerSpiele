@@ -128,7 +128,8 @@
           new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav').play();
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
-          bullet.x = window.innerWidth - 110 + 50 - bullet.width;
+          if (phase.name != "collectAmmo") bullet.x = window.innerWidth - 110 + 50 - bullet.width;
+          else bullet.x = window.innerWidth - 110 + (bullet.width/2)/* + 50*/ - bullet.width;
           player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
         }
         bullets.splice(i, 1);
@@ -171,9 +172,10 @@
     canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
     newCannon.time.got += 16;
     if (newCannon.time.got >= newCannon.time.needed) {
-      var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
+      if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
+      else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
-      cannons.push({x: 33, y: Math.round(Math.random()*wHeight - size), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      cannons.push({x: 33, y: Math.round(Math.random()*wHeight - size), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
