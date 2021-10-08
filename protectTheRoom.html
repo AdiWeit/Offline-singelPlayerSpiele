@@ -1,9 +1,11 @@
 <meta charset="utf-8">
 <title>protect the room</title>
+<div id="space_key">space key</div>
 <canvas id="textur" onclick="player.shoot();" width="300" height="300"></canvas>
 <div id="settings">
   <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
-  <button onclick="startGame(); settings.style.display = 'none';">start</button>
+  <button onclick="startGame(tutorialCheck.checked); settings.style.display = 'none';">start</button>
+<input id="tutorialCheck" type="checkbox">tutorial
 </div>
 <body>
 <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
@@ -11,6 +13,28 @@
 <input checked="true" type="checkbox" onchange="if (checked) playerObj.space.playVideo(); else playerObj.space.pauseVideo();">play space music
 <input type="checkbox" onchange="if (checked) {playerObj.fight.seekTo(Math.round(Math.random()*36048));  playerObj.fight.playVideo();} else playerObj.fight.pauseVideo();">play fight music
 <script src="https://www.youtube.com/player_api"></script>
+<style>
+  #space_key {
+  background-color: white;
+  width: 555px;
+  height: 150px;
+  border: 5px solid gray;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 100px;
+  text-align: center;
+  display: none;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+</style>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -38,6 +62,11 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
+      if (tutorial.status == "shoot") {
+        space_key.style.display = "none";
+        cannons.push({x: 33, y: 13, width: 33, height: 33, speed: 330, bulletSpeed: 11, timeGone: 0, direction: {x: 1, y: 0}});
+        tutorial.status = "finished";
+      }
       console.log("shoot!");
       bullet = player.bullets.got[player.selectedBullet];
       if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
@@ -50,8 +79,9 @@
       player.selectedBullet = -1;
     }
   }
+  var tutorial = {status: 'no'};
   var player = new Player();
-  function startGame() {
+  function startGame(pTutorial) {
     newCannon = {time: {needed: wHeight*5, got: wHeight*5 - 16}, counter: 0}
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
     lives = {beginning: 133, now: 133};
@@ -59,6 +89,8 @@
     player = new Player();
     cannons = [];
     bullets = [];
+    tutorial = {status: 'no'};
+    if (pTutorial) tutorial = {status: 'moveDown'};
     disableScroll();
     window.scroll(0, 0);
     // newCannon.time.needed = wHeight*1.7//3;
@@ -79,11 +111,12 @@
     // speed.bullet = 11;
     // requestAnimationFrame(animateBullet);
     // evenFaster max:
-    newCannon.time.needed = convertNumber *1//3;
-    player.speed = adaptToHeight(99);
-    player.bullets.max = 6;
-    speed.bullet = 13;
+    // newCannon.time.needed = convertNumber *1//3;
+    // player.speed = adaptToHeight(99);
+    // player.bullets.max = 6;
+    // speed.bullet = 13;
     requestAnimationFrame(animateBullet);
+    if (pTutorial) cannons.push({x: 33, y: window.innerHeight - 50 - (133*(((window.innerWidth*wHeight)/(1600*1069)))*1.7), width: 133, height: 133, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
   }
   var canvas = textur.getContext('2d');
   textur.width = window.innerWidth - textur.getBoundingClientRect().left;
@@ -104,7 +137,6 @@
     canvas.fillRect(selectedBullet.x, selectedBullet.y, selectedBullet.width, selectedBullet.height);
     }
     canvas.fillStyle = "white";
-    canvas.fillRect(window.innerWidth - 110, player.position, 50, 50);
     for (var cannon of cannons) {
       canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
       cannon.timeGone += 16;
@@ -131,6 +163,7 @@
           if (phase.name != "collectAmmo" || window.innerWidth - 110 + (bullet.width/2)/* + 50*/ - bullet.width >= window.innerWidth - 50 - bullet.width) bullet.x = window.innerWidth - 110 + 50 - bullet.width;
           else bullet.x = window.innerWidth - 110 + (bullet.width/2)/* + 50*/ - bullet.width;
           player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
+          if (tutorial.status == "waiting for bullet 2") tutorial.status = "shoot";
         }
         bullets.splice(i, 1);
       }
@@ -152,8 +185,9 @@
           new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot_shot.wav').play();
           if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
           if (i1 == playerBullets.length - 1 && selectedBullet) {
-            console.log("deffed with bullet on hand!");
+            console.log("defended with bullet on hand!");
             player.bullets.got.splice(player.selectedBullet, 1);
+            if (tutorial.status == "waiting for bullet") tutorial.status = "waiting for bullet 2";
           }
         }
       });
@@ -171,11 +205,11 @@
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
     canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
     newCannon.time.got += 16;
-    if (newCannon.time.got >= newCannon.time.needed) {
+    if (newCannon.time.got >= newCannon.time.needed && !tutorialCheck.checked) {
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
-      cannons.push({x: 33, y: Math.round(Math.random()*wHeight - size), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      cannons.push({x: 33, y: Math.round(Math.random()*(wHeight - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7))), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
@@ -265,10 +299,31 @@
       enableScroll();
     	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
     }
+    // player layout
+canvas.fillStyle = "white";
+canvas.fillRect(window.innerWidth - 110, player.position, 50, 50);
+var arrows = {left: new Image(), right: new Image(), up: new Image(), down: new Image()};
+for (var direc of Object.keys(arrows)) {
+  arrows[direc].src = 'https://adi.nicolaiweitkemper.de/Bilder/keys/' + direc + '_arrow.png';
+}
+if (tutorial.status.includes("move")) {
+  if (tutorial.status == "moveDown") canvas.drawImage(arrows.up, window.innerWidth - 110, player.position - 50, 50, 50);
+  else canvas.drawImage(arrows.up, window.innerWidth - 110 + 5, player.position - 50, 40, 40);
+  if (tutorial.status == "moveDown") canvas.drawImage(arrows.down, window.innerWidth - 110 + 5, player.position + 50, 40, 40);
+  else canvas.drawImage(arrows.down, window.innerWidth - 110, player.position + 50, 50, 50);
+}
+if (tutorial.status == "shoot") {
+  space_key.style.display = "inline";
+}
   }
   document.onkeydown = function(event) {
-    if (event.key.toLowerCase().includes("up")) player.position -= player.speed;
-    if (event.key.toLowerCase().includes("down")) player.position += player.speed;
+    if (event.key.toLowerCase().includes("up")) {
+      player.position -= player.speed;
+    }
+    if (event.key.toLowerCase().includes("down")) {
+      player.position += player.speed;
+      if (player.position >= cannons[0].y + player.speed) tutorial.status = "waiting for bullet";
+    }
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
     if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) player.selectedBullet++;
     if (event.key == " ") {
