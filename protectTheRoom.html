@@ -63,18 +63,27 @@
     }
     shoot = (bullet) => {
       if (tutorial.status == "shoot") {
-        space_key.style.display = "none";
-        cannons.push({x: 33, y: 13, width: 33, height: 33, speed: 330, bulletSpeed: 11, timeGone: 0, direction: {x: 1, y: 0}});
-        tutorial.status = "finished";
+        space_key.style.fontSize = "80px";
+        space_key.innerHTML = 'collect "bullets"';
+        // space_key.style.display = "none";
+        setTimeout(function () {
+          tutorial.status = "collectAmmo";
+          tutorial.counter = 0;
+          player.bullets.max++;
+          bullets.push({speed: 6, x: 33, y: window.innerHeight/3 - 133, width: 133, height: 133, direction: {x: 1, y: 0}});
+          setTimeout(function () {
+            bullets.push({speed: 5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
+          }, 3333);
+        }, 4000);
       }
       console.log("shoot!");
-      bullet = player.bullets.got[player.selectedBullet];
+      bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
       if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
       // bullet.y = this.position - bullet.height;
       bullet.speed += 5;
       bullets.push(JSON.parse(JSON.stringify(bullet)));
-      if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
       player.bullets.got.splice(player.selectedBullet, 1);
+      if (player.selectedBullet == player.bullets.got.length && player.selectedBullet > 0) player.selectedBullet--;
       player.reload = {index: player.selectedBullet, left: 333};
       player.selectedBullet = -1;
     }
@@ -164,6 +173,12 @@
           else bullet.x = window.innerWidth - 110 + (bullet.width/2)/* + 50*/ - bullet.width;
           player.bullets.got.push(JSON.parse(JSON.stringify(bullet)));
           if (tutorial.status == "waiting for bullet 2") tutorial.status = "shoot";
+          if (tutorial.status == "collectAmmo") {
+            tutorial.counter++;
+            if (tutorial.counter > 1) {
+              tutorial.status = "choose right ammo";
+            }
+          }
         }
         bullets.splice(i, 1);
       }
@@ -173,6 +188,16 @@
           if (isCollide(cannon, bullet)) {
             cannons.splice(i1, 1);
             new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/cannon_explosion.wav').play();
+            if (tutorial.status == "kill cannons") {
+              tutorial.counter++;
+              if (tutorial.counter > 2) {
+                player.bullets.max = 1;
+                space_key.style.display = "none";
+                space_key.style.display = "none";
+                tutorialCheck.checked = false;
+                tutorial.status = "no";
+              }
+            }
           }
         });
       }
@@ -205,7 +230,7 @@
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
     canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
     newCannon.time.got += 16;
-    if (newCannon.time.got >= newCannon.time.needed && !tutorialCheck.checked) {
+    if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
@@ -293,7 +318,7 @@
       	player.selectedBullet = player.reload.index;
       }
     }
-    if (lives.now > 0) requestAnimationFrame(animateBullet);
+    if (lives.now > 0 && !(tutorial.status == "no" && tutorialCheck.checked)) requestAnimationFrame(animateBullet);
     else {
       settings.style.display = "inline";
       enableScroll();
@@ -315,6 +340,17 @@ if (tutorial.status.includes("move")) {
 if (tutorial.status == "shoot") {
   space_key.style.display = "inline";
 }
+  if (tutorial.status == "choose right ammo") {
+    space_key.style.display = "none";
+    canvas.fillStyle = "rgba(255, 255, 255, 0.6)";
+    canvas.fillRect(0, 200, window.innerWidth, window.innerHeight);
+    canvas.fillRect(255, 0, window.innerWidth - 255, 200);
+    var img = new Image();
+    img.src = 'http://adi.nicolaiweitkemper.de/Bilder/keys/left_arrow.png';
+    canvas.drawImage(img, 45, 195, 50, 50);
+    img.src = 'http://adi.nicolaiweitkemper.de/Bilder/keys/right_arrow.png';
+    canvas.drawImage(img, 165, 195, 40, 40);
+  }
   }
   document.onkeydown = function(event) {
     if (event.key.toLowerCase().includes("up")) {
@@ -322,10 +358,21 @@ if (tutorial.status == "shoot") {
     }
     if (event.key.toLowerCase().includes("down")) {
       player.position += player.speed;
-      if (player.position >= cannons[0].y + player.speed) tutorial.status = "waiting for bullet";
+      if (cannons[0] && player.position >= cannons[0].y + player.speed && tutorial.status == "moveDown") tutorial.status = "waiting for bullet";
     }
     if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
-    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) player.selectedBullet++;
+    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
+      player.selectedBullet++;
+      if (tutorial.status == "choose right ammo") {
+        tutorial.status = "kill cannons";
+        tutorial.counter = 0;
+        cannons.push({x: 33, y: 10, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+        cannons.push({x: 33, y: 100, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+        cannons.push({x: 33, y: 200, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+        space_key.style.display = "inline";
+        space_key.innerHTML = "kill them!";
+      }
+    }
     if (event.key == " ") {
       try {
         player.shoot(player.bullets.got[player.selectedBullet]);
