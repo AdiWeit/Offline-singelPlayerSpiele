@@ -1,6 +1,6 @@
 <meta charset="utf-8">
 <title>protect the room</title>
-<div id="space_key">space key</div>
+<div id="space_key">space key/<br>(left) click</div>
 <canvas id="textur" onclick="player.shoot();" width="300" height="300"></canvas>
 <div id="settings">
   <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
@@ -23,7 +23,7 @@
   left: 50%;
   top: 50%;
   transform: translate(-50%,-50%);
-  font-size: 100px;
+  font-size: 60px;
   text-align: center;
   display: none;
 
@@ -62,8 +62,9 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
+      if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
       if (tutorial.status == "shoot") {
-        space_key.style.fontSize = "80px";
+        space_key.style.fontSize = "120px";
         space_key.innerHTML = 'collect "bullets"';
         // space_key.style.display = "none";
         setTimeout(function () {
@@ -88,6 +89,7 @@
       player.selectedBullet = -1;
     }
   }
+}
   var tutorial = {status: 'no'};
   var player = new Player();
   function startGame(pTutorial) {
@@ -125,6 +127,7 @@
     // player.bullets.max = 6;
     // speed.bullet = 13;
     requestAnimationFrame(animateBullet);
+    space_key.innerHTML = 'space key/<br>(left) click';
     if (pTutorial) cannons.push({x: 33, y: window.innerHeight - 50 - (133*(((window.innerWidth*wHeight)/(1600*1069)))*1.7), width: 133, height: 133, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
   }
   var canvas = textur.getContext('2d');
@@ -188,7 +191,7 @@
           if (isCollide(cannon, bullet)) {
             cannons.splice(i1, 1);
             new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/cannon_explosion.wav').play();
-            if (tutorial.status == "kill cannons") {
+            if (tutorial.status == "kill/shoot cannons") {
               tutorial.counter++;
               if (tutorial.counter > 2) {
                 player.bullets.max = 1;
@@ -364,7 +367,7 @@ if (tutorial.status == "shoot") {
     if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
       player.selectedBullet++;
       if (tutorial.status == "choose right ammo") {
-        tutorial.status = "kill cannons";
+        tutorial.status = "kill/shoot cannons";
         tutorial.counter = 0;
         cannons.push({x: 33, y: 10, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
         cannons.push({x: 33, y: 100, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
