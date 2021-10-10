@@ -106,7 +106,7 @@
   function startGame(pTutorial) {
     space_key.style.display = "none";
     space_key.style.fontSize = 60;
-    newCannon = {time: {needed: wHeight*5, got: wHeight*5 - 16}, counter: 0}
+    newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
     lives = {beginning: 133, now: 133};
     phase = {name: "normal"};
@@ -243,6 +243,7 @@
       bullet.y += bullet.speed*bullet.direction.y;
     });
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
+    if (!bullets.length && gerät == "Handy" && tutorial.status == "no" && newCannon.counter) newCannon.time.needed = JSON.parse(JSON.stringify(newCannon.time.got));
     // room layout
     canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
@@ -253,7 +254,7 @@
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
-      cannons.push({x: 33, y: Math.round(Math.random()*(wHeight - 5 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7))), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
+      cannons.push({x: 33, y: Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7))), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: speed.bullet, timeGone: 0, direction: {x: 1, y: 0}});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
