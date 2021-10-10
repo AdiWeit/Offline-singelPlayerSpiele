@@ -69,7 +69,7 @@
     }
     shoot = (bullet) => {
       if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
-      if (tutorial.status == "shoot") {
+      if (tutorial.status == "shoot" && bullet) {
         space_key.style.fontSize = "120px";
         space_key.innerHTML = 'collect';
         // space_key.style.display = "none";
@@ -130,7 +130,7 @@
     // // speed.minTime = 999;
     // evenFaster max:
     // newCannon.time.needed = convertNumber *1.2//3;
-    // player.speed = 89;
+    // player.speed = adaptToHeight(89);
     // player.bullets.max = 6;
     // speed.bullet = 11;
     // requestAnimationFrame(animateBullet);
@@ -243,7 +243,7 @@
       bullet.y += bullet.speed*bullet.direction.y;
     });
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-    if (!bullets.length && gerät == "Handy" && tutorial.status == "no" && newCannon.counter) newCannon.time.needed = JSON.parse(JSON.stringify(newCannon.time.got));
+    if (!bullets.length && gerät == "Handy" && tutorial.status == "no" && newCannon.counter && newCannon.counter < 3) newCannon.time.needed = JSON.parse(JSON.stringify(newCannon.time.got));
     // room layout
     canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
@@ -268,15 +268,10 @@
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       if (phase.counter) phase.counter--;
-      // increasing difficulty
-      // newCannon.time.needed -= convertNumber *3.3//3;
-      // player.speed = 33;
-      // player.bullets.max = 6;
-      // speed.bullet = 11;
       var original = wHeight;
       // TODO: handy Optimierung: Beginn Phasen check und neue Werte für max. eingeben
-      if (newCannon.time.needed > convertNumber *1.7 && phase.name == "normal") newCannon.time.needed -= 16;
-      else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1.2) newCannon.time.needed -= 16;
+      if (newCannon.time.needed > convertNumber *1.2 && phase.name == "normal") newCannon.time.needed -= 16;
+      else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
        if (phase.name == "normal" || phase.name == "useAmmo") {
          setTimeout(function () {
@@ -307,10 +302,13 @@
         }
       }
       else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
-      if (player.speed < 33) player.speed += 0.2;
-      else if (!useMultAmmo.checked && player.speed < 89) player.speed += 0.2;
+      if (player.speed < 89 && gerät != "Handy") player.speed += 0.2;
+      else if (player.speed < 89) player.speed += 0.3;
+      else if (!useMultAmmo.checked && player.speed < adaptToHeight(99)) player.speed += 0.2;
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.')) player.bullets.max++;
-      if (speed.bullet < 11) speed.bullet += 0.1;
+      if (speed.bullet < 11 && gerät != "Handy") speed.bullet += 0.1;
+      else if (speed.bullet < 11) speed.bullet += 0.2;
+      else if (!useMultAmmo.checked && speed.bullet < 13) speed.bullet += 0.1;
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -485,16 +483,7 @@ document.onkeydown = function(event) {
   }
   if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
   if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
-    player.selectedBullet++;
-    if (tutorial.status == "choose right ammo") {
-      tutorial.status = "kill/shoot cannons";
-      tutorial.counter = 0;
-      cannons.push({x: 33, y: 10, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-      cannons.push({x: 33, y: 100, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-      cannons.push({x: 33, y: 200, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-      space_key.style.display = "inline";
-      space_key.innerHTML = "kill them!";
-    }
+    incAmmoIndex();
   }
   if (event.key == " ") {
     try {
