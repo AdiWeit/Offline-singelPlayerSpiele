@@ -10,7 +10,7 @@
 <body>
 <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
 <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
-<input checked="true" type="checkbox" onchange="if (checked) playerObj.space.playVideo(); else playerObj.space.pauseVideo();">play space music
+<input checked="true" id="spaceMusicCheck" type="checkbox" onchange="if (checked) playerObj.space.playVideo(); else playerObj.space.pauseVideo(); localStorage.setItem('spaceMusic', checked);">play space music
 <input type="checkbox" onchange="if (checked) {playerObj.fight.seekTo(Math.round(Math.random()*36048));  playerObj.fight.playVideo();} else playerObj.fight.pauseVideo();">play fight music
 <script src="https://www.youtube.com/player_api"></script>
 <style>
@@ -39,6 +39,7 @@
 <div>Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
 <script>
   var swipeStr = "";
+  if (localStorage.getItem('spaceMusic') == "false") spaceMusicCheck.checked = false;
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -559,7 +560,7 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
-              e.target.playVideo();
+              if (localStorage.getItem('spaceMusic') == "true" || localStorage.getItem('spaceMusic') == null) e.target.playVideo();
             },
       }
   });
