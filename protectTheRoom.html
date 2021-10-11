@@ -4,8 +4,8 @@
 <canvas id="textur" width="300" height="300"></canvas>
 <div id="settings">
   <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
+  <input id="tutorialCheck" type="checkbox">tutorial
   <button onclick="startGame(tutorialCheck.checked); settings.style.display = 'none';">start</button>
-<input id="tutorialCheck" type="checkbox">tutorial
 </div>
 <body>
 <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
@@ -69,37 +69,41 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
-      if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
-      if (tutorial.status == "shoot" && bullet) {
-        space_key.style.fontSize = "120px";
-        space_key.innerHTML = 'collect';
-        // space_key.style.display = "none";
-        setTimeout(function () {
-          tutorial.status = "collectAmmo";
-          tutorial.counter = 0;
-          player.bullets.max++;
-          bullets.push({speed: 6, x: 33, y: window.innerHeight/3 - 133, width: 133, height: 133, direction: {x: 1, y: 0}});
+      try {
+        if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
+        if (tutorial.status == "shoot" && bullet) {
+          space_key.style.fontSize = "120px";
+          space_key.innerHTML = 'collect';
+          // space_key.style.display = "none";
           setTimeout(function () {
-            bullets.push({speed: 5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
+            tutorial.status = "collectAmmo";
+            tutorial.counter = 0;
+            player.bullets.max++;
+            bullets.push({speed: 6, x: 33, y: window.innerHeight/3 - 133, width: 133, height: 133, direction: {x: 1, y: 0}});
             setTimeout(function () {
-              if (tutorial.status == "collectAmmo") {
-                restartTutorial();
-              }
-            }, 5000);
-          }, 3333);
-        }, 4000);
+              bullets.push({speed: 5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
+              setTimeout(function () {
+                if (tutorial.status == "collectAmmo") {
+                  restartTutorial();
+                }
+              }, 5000);
+            }, 3333);
+          }, 4000);
+        }
+        console.log("shoot!");
+        bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
+        if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
+        // bullet.y = this.position - bullet.height;
+        bullet.speed += 5;
+        bullets.push(JSON.parse(JSON.stringify(bullet)));
+        player.bullets.got.splice(player.selectedBullet, 1);
+        if (player.selectedBullet == player.bullets.got.length && player.selectedBullet > 0) player.selectedBullet--;
+        player.reload = {index: player.selectedBullet, left: 333};
+        player.selectedBullet = -1;
       }
-      console.log("shoot!");
-      bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
-      if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
-      // bullet.y = this.position - bullet.height;
-      bullet.speed += 5;
-      bullets.push(JSON.parse(JSON.stringify(bullet)));
-      player.bullets.got.splice(player.selectedBullet, 1);
-      if (player.selectedBullet == player.bullets.got.length && player.selectedBullet > 0) player.selectedBullet--;
-      player.reload = {index: player.selectedBullet, left: 333};
-      player.selectedBullet = -1;
-    }
+      } catch (e) {
+        console.log("can not shoot (no ammo?)");
+      }
   }
 }
   var tutorial = {status: 'no'};
@@ -142,7 +146,10 @@
     // speed.bullet = 13;
     requestAnimationFrame(animateBullet);
     space_key.innerHTML = 'space key/<br>(left) click';
-    if (pTutorial) cannons.push({x: 33, y: window.innerHeight - 50 - (133*(((window.innerWidth*wHeight)/(1600*1069)))*1.7), width: 133, height: 133, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+    if (pTutorial) {
+      cannons.push({x: 33, y: window.innerHeight - 50 - (133*(((window.innerWidth*wHeight)/(1600*1069)))*1.7), width: 133, height: 133, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+      tutorialCheck.checked = true;
+    }
   }
   var canvas = textur.getContext('2d');
   textur.width = window.innerWidth - textur.getBoundingClientRect().left;
@@ -210,9 +217,9 @@
               if (tutorial.counter > 2) {
                 player.bullets.max = 1;
                 space_key.style.display = "none";
-                space_key.style.display = "none";
                 tutorialCheck.checked = false;
                 tutorial.status = "no";
+                localStorage.setItem('tutorialPlayed', true);
               }
             }
           }
@@ -270,7 +277,6 @@
       newCannon.counter++;
       if (phase.counter) phase.counter--;
       var original = wHeight;
-      // TODO: handy Optimierung: Beginn Phasen check und neue Werte für max. eingeben
       if (newCannon.time.needed > convertNumber *1.2 && phase.name == "normal") newCannon.time.needed -= 16;
       else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
@@ -382,26 +388,6 @@ if (tutorial.status == "shoot") {
       startGame(true);
     }, 100);
   }
-  document.onkeydown = function(event) {
-    if (event.key.toLowerCase().includes("up")) {
-      player.position -= player.speed;
-    }
-    if (event.key.toLowerCase().includes("down")) {
-      player.position += player.speed;
-      if (cannons[0] && player.position >= cannons[0].y + player.speed && tutorial.status == "moveDown") tutorial.status = "waiting for bullet";
-    }
-    if (event.key.toLowerCase().includes("left") && player.selectedBullet > 0) player.selectedBullet--;
-    if (event.key.toLowerCase().includes("right") && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
-      incAmmoIndex();
-    }
-    if (event.key == " ") {
-      try {
-        player.shoot(player.bullets.got[player.selectedBullet]);
-      }
-      catch (e) {console.log("no ammo");}
-      return false;
-    }
-}
 var convertNumber;
 adaptToScreen();
 function adaptToScreen() {
@@ -420,6 +406,7 @@ function adaptToHeight(original) {
   }
   return original;
 }
+if (!localStorage.getItem('tutorialPlayed')) startGame(true);
 function isCollide(a, b) {
   return (a.x < b.x + b.width &&
    a.x + a.width > b.x &&
@@ -487,10 +474,7 @@ document.onkeydown = function(event) {
     incAmmoIndex();
   }
   if (event.key == " ") {
-    try {
       player.shoot(player.bullets.got[player.selectedBullet]);
-    }
-    catch (e) {console.log("no ammo");}
     return false;
   }
 }
