@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <title>protect the room</title>
 <div class="shapes" id="space_key">space key/<br>(left) click</div>
 <canvas id="textur" width="300" height="300"></canvas>
@@ -11,19 +12,32 @@
   <input id="enhancedModeCheck" type="checkbox"> enhanced
   <button onclick="startGame(tutorialCheck.checked); settings.style.display = 'none';">start</button>
 </div>
-<div id="endScreen" style="display: none" class="shapes">
+<div id="endScreen" class="shapes">
     <div class="ScoreText" id="scoreText">
       score:16000
     </div>
-    <div class="scoreText" id="highscoreText">
+    <div class="ScoreText" id="highscoreText">
       highscore:160000
     </div>
+    <div id="app" style="display: none">
+      <ol class="ScoreText" id="highscoreList">
+        <li v-for="abc in highscoresDb"> {{ abc }} </li>
+      </ol>
+    </div>
+    <div>
+      <h5 class="scoreText" id="soundHeader">sound</h5>
+      <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
+      <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
+      <a class="scoreText" id="spaceMusicA"><input style="accent-color:green;" checked="true" id="spaceMusicCheck" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
+      <a class="scoreText" id="fightMusicA"><input style="accent-color:green; background:black;" id="fightMusicCheck" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
+      <img class="ScoreText" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" id="muteButton" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png">
+      <input type="range" class="scoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
+      <input type="range" class="scoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
+      </div>
+    <button type="button" id="retryButton" class="scoreText" onclick="startGame(tutorialCheck.checked); endScreen.style.display = 'none';" name="button">⟲</button>
+    <img class="ScoreText" onmousedown="style.width = '4.8vw'; openSettings();" onmouseup="style.width = '5vw';" id="settingsButton" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
 <body>
-<div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
-<div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
-<input checked="true" id="spaceMusicCheck" type="checkbox" onchange="if (checked) playerObj.space.playVideo(); else playerObj.space.pauseVideo(); localStorage.setItem('spaceMusic', checked);">play space music
-<input type="checkbox" onchange="if (checked) {playerObj.fight.seekTo(Math.round(Math.random()*36048));  playerObj.fight.playVideo();} else playerObj.fight.pauseVideo();">play fight music
 <script src="https://www.youtube.com/player_api"></script>
 <style>
   #space_key {
@@ -58,13 +72,101 @@
   transform: translate(-50%,-50%);
 }
 #scoreText {
-  top: 75px;
+  top: 7vh;
   font-size: 8vw;
 }
 #highscoreText {
-  top: 171px;
+  top: 16vh;
   font-size: 4.5vw;
 }
+#highscoreList {
+  top: 35vh;
+  font-size: 3.7vw;
+  overflow: scroll;
+  max-height: 35vh;
+  /* left: 7vw; */
+  padding-left: 80px;
+  /* list-style-type: none; */
+}
+#retryButton {
+  bottom: 0.7vh;
+  font-size: 4.5vw;
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+}
+#retryButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#retryButton:active {
+  font-size: 4.3vw;
+}
+#settingsButton {
+  bottom: 1.3vw;
+  width: 5vw;
+  left: 66%;
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+}
+#settingsButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#settingsButton:click {
+  font-size: 4.3vw;
+}
+#soundHeader {
+  top: 15vh;
+}
+#spaceMusicA {
+  top: 27vh;
+  font-size: 2vw;
+  left: 28%;
+}
+#fightMusicA {
+  top: 27vh;
+  font-size: 2vw;
+  left: 71%;
+}
+#muteButton {
+  width: 5vw;
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+  left: 50%;
+  top: 32vh;
+}
+#muteButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#volControlSpaceMusic {
+  left: 23%;
+  top: 32vh;
+}
+#volControlFightMusic {
+  left: 67%;
+  top: 32vh;
+  accent-color: red;
+}
+::-webkit-scrollbar {
+  width: 1vw;
+}
+::-webkit-scrollbar-track {
+  border-radius: 100vw;
+  background: hsla(0, 0%, 72%, 0.19);
+  margin-block: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: rgb(40, 40, 40);
+  border-radius: 100vw;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: black;
+}
+::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+}
+
 .shapes {
   position: absolute;
   left: 50%;
@@ -76,6 +178,15 @@
 <br>
 <div>Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
 <script>
+  function musicSelected(id, checked) {
+    if (checked) {
+      playerObj[id.split('Music')[0]].playVideo();
+      document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'green';
+    } else {
+      playerObj[id.split('Music')[0]].pauseVideo();
+      document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
+    } localStorage.setItem('spaceMusic', checked);
+  }
   endScreen.style.width = window.innerWidth/2;
   endScreen.style.height = window.innerHeight/1.4;
   var swipeStr = "";
@@ -98,6 +209,17 @@
   var speed ;
   var lives;
   var highscores = {};
+  try {
+    var app = new Vue({
+      el: '#app',
+      data: {
+        highscoresDb: ["a", "b", "c", "d", "Adrian:6000000", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"]
+      }
+    })
+    highscoreList.style.paddingLeft = 3.6 + ((app.highscoresDb.length) + "").length*1.5 + "vw";
+  } catch (e) {
+    console.log("vue not available (no Internet connection?)");
+  }
   var name = "Adron";
   var phase = {name: "normal"}
   class Player {
@@ -202,6 +324,10 @@
   //   var cannons = [{x: 10, y: 10, width: 17, height: 17, speed: 1777, bulletSpeed: 10, timeGone: 0, direction: {x: 1, y: 0}}];
   var cannons = [];
   var bullets = [];
+  var arrows = {left: new Image(), right: new Image(), up: new Image(), down: new Image()};
+  for (var direc of Object.keys(arrows)) {
+    arrows[direc].src = 'https://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + direc + '_arrow.png';
+  }
   function animateBullet(time) {
     canvas.fillStyle = "black";
     canvas.fillRect(0, 0, textur.width, textur.height);
@@ -405,10 +531,6 @@
     // player layout
 canvas.fillStyle = "white";
 canvas.fillRect(player.position.x, player.position.y, 50, 50);
-var arrows = {left: new Image(), right: new Image(), up: new Image(), down: new Image()};
-for (var direc of Object.keys(arrows)) {
-  arrows[direc].src = 'https://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + direc + '_arrow.png';
-}
 if (tutorial.status.includes("move") && gerät == "PC") {
   canvas.drawImage(arrows.up, player.position.x, player.position.y - 50, 50, 50);
   canvas.drawImage(arrows.down, player.position.x + 5, player.position.y + 50, 40, 40);
@@ -439,6 +561,27 @@ if (tutorial.status == "shoot") {
     point.counter -= 16;
     if (point.counter <= 0) points.show.shift();
   }
+  }
+  function endGame() {
+    endScreen.style.top = 0 - (endScreen.style.height.replace('px', ''))/2 + "px";
+    endScreen.style.display = "inline";
+    endGameAnimation(convertCss(endScreen.style.top));
+  }
+  function endGameAnimation(y, bounce) {
+    endScreen.style.top = y;
+    if (convertCss(endScreen.style.top) < wHeight/2 + 50 && !bounce) {
+      setTimeout(function () {
+        endGameAnimation(convertCss(endScreen.style.top) + 15);
+      }, 1);
+    }
+    else if (convertCss(endScreen.style.top) > wHeight/2) {
+      setTimeout(function () {
+        endGameAnimation(convertCss(endScreen.style.top) - 5, true);
+      }, 1);
+    }
+  }
+  function convertCss(data) {
+    return JSON.parse(data.replace('px', ''))
   }
   function restartTutorial() {
     tutorial.status = "no";
@@ -618,7 +761,8 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
-              if (localStorage.getItem('spaceMusic') == "true" || localStorage.getItem('spaceMusic') == null) e.target.playVideo();
+              if (localStorage.getItem('spaceMusic') == "true" || localStorage.getItem('spaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
+              else musicSelected('spaceMusicCheck', false);
             },
       }
   });
