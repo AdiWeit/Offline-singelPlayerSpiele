@@ -20,34 +20,34 @@
     </div>
     <div id="settings" style="display: none">
     <div>
-      <h5 class="scoreText" id="soundHeader">sound</h5>
+      <h5 class="ScoreText" id="soundHeader">sound</h5>
       <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
-      <a class="scoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
-      <a class="scoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green; background:black;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
-      <img class="ScoreText" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png">
-      <input type="range" class="scoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
-      <input type="range" class="scoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
+      <a class="ScoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
+      <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green; background:black;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
+      <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png">
+      <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
       </div>
       <div>
-        <h5 id="gameplayHeader" class="scoreText">gameplay</h5>
-        <a class="scoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
+        <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
+        <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
         <input id="tutorialCheck" type="checkbox">tutorial
-        <a class="scoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
+        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
     <!-- TODO: home hinzufügen -->
-    <img class="ScoreText" id="playButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
-    <img class="ScoreText" id="homeButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
-    <button type="button" id="retryButton" class="scoreText" onclick="retry();" name="button">⟲</button>
+    <img class="ScoreText button" id="playButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+    <img class="ScoreText button" id="homeButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
+    <button class="ScoreText button" id="retryButton" onclick="retry();" name="button">⟲</button>
     <!-- TODO: zurrück button -->
-    <img class="ScoreText" id="settingsButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; settings.style.display = 'inline'; highscoreList.style.display = 'none';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="settingsButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; settings.style.display = 'inline'; highscoreList.style.display = 'none';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
-<img draggable="false" id="pauseButton" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
+<img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
 <script src="https://www.youtube.com/player_api"></script>
 <style>
-  /* big menuContent: */
+  /* big menuContent and classes: */
   #space_key {
     font-size: 60px;
   background-color: rgba(255, 0, 0, 0.5);
@@ -74,6 +74,25 @@
   transform: translate(-50%,-50%);
   font-size: 60px;
 }
+.menuContent {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  text-align: center;
+}
+.button {
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
 .ScoreText {
   position: absolute;
   left: 50%;
@@ -98,14 +117,11 @@
   padding-left: 80px;
   /* list-style-type: none; */
 }
-/* buttons:  */
+/* button:  */
 #playButton {
   width: 5vw;
   bottom: 11vh;
   font-size: 1vw;
-  background: hsla(0, 0%, 72%, 0.19);
-  border-radius: 15%;
-  border: 3px solid hsla(0, 0%, 2%, 0.4);
 }
 #playButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
@@ -113,9 +129,6 @@
 #retryButton {
   bottom: 0.2vh;
   font-size: 4.5vw;
-  background: hsla(0, 0%, 72%, 0.19);
-  border-radius: 15%;
-  border: 3px solid hsla(0, 0%, 2%, 0.4);
 }
 #retryButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
@@ -127,9 +140,6 @@
   bottom: 1.3vh;
   width: 5vw;
   left: 66%;
-  border: 3px solid hsla(0, 0%, 2%, 0.4);
-  background: hsla(0, 0%, 72%, 0.19);
-  border-radius: 15%;
 }
 #settingsButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
@@ -138,9 +148,6 @@
   bottom: 1.3vh;
   width: 5vw;
   left: 34%;
-  border: 3px solid hsla(0, 0%, 2%, 0.4);
-  background: hsla(0, 0%, 72%, 0.19);
-  border-radius: 15%;
 }
 #homeButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
@@ -150,13 +157,6 @@
   top: 15px;
   right: 49px;
   width: 22px;
-
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
 /* settings menu: sound*/
 #soundHeader {
@@ -181,9 +181,6 @@
 }
 #muteButton {
   width: 5vw;
-  border: 3px solid hsla(0, 0%, 2%, 0.4);
-  background: hsla(0, 0%, 72%, 0.19);
-  border-radius: 15%;
   left: 50%;
   top: 32vh;
 }
@@ -235,13 +232,6 @@
   background: rgba(0,0,0,0);
 }
 
-.menuContent {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%,-50%);
-  text-align: center;
-}
 </style>
 <br>
 <div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
@@ -632,6 +622,7 @@ if (tutorial.status == "shoot") {
     if (point.counter <= 0) points.show.shift();
   }
   }
+  // menu interactions
   function endGame() {
     enableScroll();
     // TODO: highscore system
