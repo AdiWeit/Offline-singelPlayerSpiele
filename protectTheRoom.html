@@ -6,12 +6,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geostar+Fill&display=swap" rel="stylesheet">
-<div id="settings">
-  <input id="useMultAmmo" checked="true" type="checkbox"> ammo tactive
-  <input id="tutorialCheck" type="checkbox">tutorial
-  <input id="enhancedModeCheck" type="checkbox"> enhanced
-  <button onclick="startGame(tutorialCheck.checked); settings.style.display = 'none';">start</button>
-</div>
 <div id="endScreen" class="shapes">
     <div class="ScoreText" id="scoreText">
       score:16000
@@ -19,11 +13,12 @@
     <div class="ScoreText" id="highscoreText">
       highscore:160000
     </div>
-    <div id="app" style="display: none">
+    <div id="app">
       <ol class="ScoreText" id="highscoreList">
         <li v-for="abc in highscoresDb"> {{ abc }} </li>
       </ol>
     </div>
+    <div id="settings" style="display: none">
     <div>
       <h5 class="scoreText" id="soundHeader">sound</h5>
       <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
@@ -34,12 +29,25 @@
       <input type="range" class="scoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
       <input type="range" class="scoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
       </div>
-    <button type="button" id="retryButton" class="scoreText" onclick="startGame(tutorialCheck.checked); endScreen.style.display = 'none';" name="button">⟲</button>
-    <img class="ScoreText" onmousedown="style.width = '4.8vw'; openSettings();" onmouseup="style.width = '5vw';" id="settingsButton" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+      <div>
+        <h5 id="gameplayHeader" class="scoreText">gameplay</h5>
+        <a class="scoreText" id="useMultAmmoA"><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
+        <input id="tutorialCheck" type="checkbox">tutorial
+        <a class="scoreText" id="enhancedModeA"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
+      </div>
+    </div>
+    <!-- TODO: home hinzufügen -->
+    <img class="ScoreText" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" id="playButton" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+    <img class="ScoreText" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" id="homeButton" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
+    <button type="button" id="retryButton" class="scoreText" onclick="retry();" name="button">⟲</button>
+    <!-- TODO: zurrück button -->
+    <img class="ScoreText" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; settings.style.display = 'inline'; highscoreList.style.display = 'none';" id="settingsButton" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
+<img draggable="false" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" id="pauseButton" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
 <script src="https://www.youtube.com/player_api"></script>
 <style>
+  /* big shapes: */
   #space_key {
     font-size: 60px;
   background-color: rgba(255, 0, 0, 0.5);
@@ -71,6 +79,7 @@
   left: 50%;
   transform: translate(-50%,-50%);
 }
+/* pause menu: */
 #scoreText {
   top: 7vh;
   font-size: 8vw;
@@ -80,16 +89,29 @@
   font-size: 4.5vw;
 }
 #highscoreList {
-  top: 35vh;
-  font-size: 3.7vw;
+  top: 29vh;
+  font-size: 3.5vw;
   overflow: scroll;
-  max-height: 35vh;
+  /* max-height: 27vh; */
+  max-height: 25vh;
   /* left: 7vw; */
   padding-left: 80px;
   /* list-style-type: none; */
 }
+/* buttons:  */
+#playButton {
+  width: 5vw;
+  bottom: 11vh;
+  font-size: 1vw;
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+}
+#playButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
 #retryButton {
-  bottom: 0.7vh;
+  bottom: 0.2vh;
   font-size: 4.5vw;
   background: hsla(0, 0%, 72%, 0.19);
   border-radius: 15%;
@@ -102,9 +124,17 @@
   font-size: 4.3vw;
 }
 #settingsButton {
-  bottom: 1.3vw;
+  bottom: 1.3vh;
   width: 5vw;
   left: 66%;
+  border: 3px solid hsla(0, 0%, 2%, 0.4);
+  background: hsla(0, 0%, 72%, 0.19);
+  border-radius: 15%;
+}
+#homeButton {
+  bottom: 1.3vh;
+  width: 5vw;
+  left: 34%;
   border: 3px solid hsla(0, 0%, 2%, 0.4);
   background: hsla(0, 0%, 72%, 0.19);
   border-radius: 15%;
@@ -112,11 +142,26 @@
 #settingsButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
+#homeButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
 #settingsButton:click {
   font-size: 4.3vw;
 }
+#pauseButton {
+  position: absolute;
+  top: 15px;
+  right: 49px;
+  width: 22px;
+}
+/* settings menu */
 #soundHeader {
-  top: 15vh;
+  top: 14vh;
+  font-size: 5vh;
+}
+#gameplayHeader {
+  top: 31vh;
+  font-size: 5vh;
 }
 #spaceMusicA {
   top: 27vh;
@@ -126,7 +171,9 @@
 #fightMusicA {
   top: 27vh;
   font-size: 2vw;
-  left: 71%;
+  left: 35vw;
+  text-size.adjust: auto;
+  text-size-adjust: 80%;
 }
 #muteButton {
   width: 5vw;
@@ -144,9 +191,25 @@
   top: 32vh;
 }
 #volControlFightMusic {
-  left: 67%;
+  left: 35vw;
   top: 32vh;
   accent-color: red;
+}
+
+#useMultAmmoA {
+  left: 35vw;
+  font-size: 2vw;
+  /* top: 50vh; */
+  top: 44.5vh;
+  accent-color: green;
+}
+#enhancedModeA {
+  /* left: 9vw; */
+  left: 15vw;
+  font-size: 2vw;
+  /* top: 50vh; */
+  top: 44.5vh;
+  accent-color: green;
 }
 ::-webkit-scrollbar {
   width: 1vw;
@@ -176,8 +239,9 @@
 }
 </style>
 <br>
-<div>Icon made from <a href="http://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
+<div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
 <script>
+  // TODO: Homescrreen asblenden bei automatischem Tutorialbeginn beachten
   function musicSelected(id, checked) {
     if (checked) {
       playerObj[id.split('Music')[0]].playVideo();
@@ -272,8 +336,11 @@
   var player = new Player();
   var points = {counter: 0, show: []};
   function startGame(pTutorial) {
+    pause.boolean = false;
     points = {counter: 0, show: []};
     space_key.style.display = "none";
+    settings.style.display = 'none';
+    highscoreList.style.display = 'inline';
     space_key.style.fontSize = 60;
     newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
     if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
@@ -521,12 +588,10 @@
       	player.selectedBullet = player.reload.index;
       }
     }
-    if (lives.now > 0 && !(tutorial.status == "no" && tutorialCheck.checked)) requestAnimationFrame(animateBullet);
+    if (lives.now > 0 && !(tutorial.status == "no" && tutorialCheck.checked) && !pause.boolean) requestAnimationFrame(animateBullet);
     else {
       if (lives.now <= 0 && tutorial.status != "no") restartTutorial();
-      settings.style.display = "inline";
-      enableScroll();
-    	if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
+      if (!pause.boolean) endGame();
     }
     // player layout
 canvas.fillStyle = "white";
@@ -548,10 +613,10 @@ if (tutorial.status == "shoot") {
     canvas.fillRect(0, 200, window.innerWidth, window.innerHeight);
     canvas.fillRect(255, 0, window.innerWidth - 255, 200);
     var img = new Image();
-    img.src = 'http://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + 'left_arrow.png';
+    img.src = 'https://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + 'left_arrow.png';
     canvas.drawImage(img, 45, 195, 40, 40);
     var img = new Image();
-    img.src = 'http://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + 'right_arrow.png';
+    img.src = 'https://adi.nicolaiweitkemper.de/Bilder/keys/' + swipeStr + 'right_arrow.png';
     canvas.drawImage(img, 165, 195, 50, 50);
   }
   // show new points
@@ -563,9 +628,44 @@ if (tutorial.status == "shoot") {
   }
   }
   function endGame() {
+    enableScroll();
+    // TODO: highscore system
+    if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
+    showMenu();
+  }
+  function showMenu() {
     endScreen.style.top = 0 - (endScreen.style.height.replace('px', ''))/2 + "px";
     endScreen.style.display = "inline";
     endGameAnimation(convertCss(endScreen.style.top));
+  }
+  var pause = {boolean: false};
+  function pauseF(boolean) {
+    pause.boolean = boolean;
+    if (boolean) {
+      highscoreList.style.maxHeight = "19vh";
+      highscoreList.style.top = "24vh";
+      showMenu();
+    }
+    else {
+      highscoreList.style.maxHeight = "25vh";
+      highscoreList.style.top = "29vh";
+      hideMenu(wHeight/2);
+      setTimeout(function () {
+        animateBullet();
+      }, 500);
+    }
+  }
+  function retry() {
+    pauseF(false);
+    setTimeout(function () {
+      startGame(tutorialCheck.checked);
+    }, 500);
+  }
+  function hideMenu(y) {
+    endScreen.style.top = y;
+      setTimeout(function () {
+        if (convertCss(endScreen.style.top) > -wHeight/2) hideMenu(convertCss(endScreen.style.top) - 15);
+      }, 1);
   }
   function endGameAnimation(y, bounce) {
     endScreen.style.top = y;
