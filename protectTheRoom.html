@@ -1,8 +1,8 @@
 <meta charset="utf-8">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <title>protect the room</title>
-<div class="shapes" id="space_key">space key/<br>(left) click</div>
-<canvas id="textur" width="300" height="300"></canvas>
+<div onclick="player.shoot();" class="shapes" id="space_key">space key/<br>(left) click</div>
+<canvas onclick="player.shoot();" id="textur" width="300" height="300"></canvas>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geostar+Fill&display=swap" rel="stylesheet">
@@ -31,9 +31,9 @@
       </div>
       <div>
         <h5 id="gameplayHeader" class="scoreText">gameplay</h5>
-        <a class="scoreText" id="useMultAmmoA"><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
+        <a class="scoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
         <input id="tutorialCheck" type="checkbox">tutorial
-        <a class="scoreText" id="enhancedModeA"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
+        <a class="scoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
     <!-- TODO: home hinzufügen -->
@@ -153,6 +153,13 @@
   top: 15px;
   right: 49px;
   width: 22px;
+
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 /* settings menu */
 #soundHeader {
@@ -241,7 +248,6 @@
 <br>
 <div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
 <script>
-  // TODO: Homescrreen asblenden bei automatischem Tutorialbeginn beachten
   function musicSelected(id, checked) {
     if (checked) {
       playerObj[id.split('Music')[0]].playVideo();
@@ -309,7 +315,7 @@
             setTimeout(function () {
               bullets.push({speed: 5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
               setTimeout(function () {
-                if (tutorial.status == "collectAmmo") {
+                if (tutorial.status == "collectAmmo" && palyer.bullets.got.length > 0) {
                   restartTutorial();
                 }
               }, 5000);
@@ -339,7 +345,7 @@
     pause.boolean = false;
     points = {counter: 0, show: []};
     space_key.style.display = "none";
-    settings.style.display = 'none';
+    endScreen.style.display = 'none';
     highscoreList.style.display = 'inline';
     space_key.style.fontSize = 60;
     newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
@@ -591,7 +597,7 @@
     if (lives.now > 0 && !(tutorial.status == "no" && tutorialCheck.checked) && !pause.boolean) requestAnimationFrame(animateBullet);
     else {
       if (lives.now <= 0 && tutorial.status != "no") restartTutorial();
-      if (!pause.boolean) endGame();
+      if (!pause.boolean && !pause.inProgress) endGame();
     }
     // player layout
 canvas.fillStyle = "white";
@@ -639,8 +645,9 @@ if (tutorial.status == "shoot") {
     endGameAnimation(convertCss(endScreen.style.top));
   }
   var pause = {boolean: false};
-  function pauseF(boolean) {
+  function pauseF(boolean, notReactivateGame) {
     pause.boolean = boolean;
+    pause.inProgress = true;
     if (boolean) {
       highscoreList.style.maxHeight = "19vh";
       highscoreList.style.top = "24vh";
@@ -651,12 +658,17 @@ if (tutorial.status == "shoot") {
       highscoreList.style.top = "29vh";
       hideMenu(wHeight/2);
       setTimeout(function () {
-        animateBullet();
+        settings.style.display = "none";
+        highscoreList.style.display = "inline";
+        if (!notReactivateGame) animateBullet();
       }, 500);
     }
+    setTimeout(function () {
+      pause.inProgress = false;
+    }, 499);
   }
   function retry() {
-    pauseF(false);
+    pauseF(false, true);
     setTimeout(function () {
       startGame(tutorialCheck.checked);
     }, 500);
@@ -877,5 +889,4 @@ function onYouTubePlayerAPIReady() {
   });
   // you can do more stuff with the player variable
 }
-document.addEventListener("click", player.shoot);
 </script>
