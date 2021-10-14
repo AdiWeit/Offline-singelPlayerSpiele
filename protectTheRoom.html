@@ -36,12 +36,11 @@
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
-    <!-- TODO: home hinzufügen -->
-    <img class="ScoreText button" id="playButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
-    <img class="ScoreText button" id="homeButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
-    <img class="ScoreText button" id="retryButton" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; retry();" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
+    <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+    <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
+    <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; retry();" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
     <!-- <button class="ScoreText button" id="retryButton" onclick="retry();" name="button">⟲</button> -->
-    <img class="ScoreText button" id="settingsButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
@@ -154,12 +153,12 @@
 #settingsButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
-#homeButton {
+#tutorialButton {
   bottom: 1.3vh;
   width: 5vw;
   left: 34%;
 }
-#homeButton:hover {
+#tutorialButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
 #pauseButton {
