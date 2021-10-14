@@ -37,13 +37,13 @@
       </div>
     </div>
     <!-- TODO: home hinzufügen -->
-    <img class="ScoreText button" id="playButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
-    <img class="ScoreText button" id="homeButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
-    <button class="ScoreText button" id="retryButton" onclick="retry();" name="button">⟲</button>
-    <!-- TODO: zurrück button -->
-    <img class="ScoreText button" id="settingsButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; settings.style.display = 'inline'; highscoreList.style.display = 'none';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="playButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+    <img class="ScoreText button" id="homeButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/home_icon.png">
+    <img class="ScoreText button" id="retryButton" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; retry();" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
+    <!-- <button class="ScoreText button" id="retryButton" onclick="retry();" name="button">⟲</button> -->
+    <img class="ScoreText button" id="settingsButton" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
-<img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
+<img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
 <script src="https://www.youtube.com/player_api"></script>
 <style>
@@ -117,25 +117,32 @@
   padding-left: 80px;
   /* list-style-type: none; */
 }
-/* button:  */
+/* buttons:  */
 #playButton {
   width: 5vw;
-  bottom: 11vh;
+  /* bottom: 6.9vh; */
+  bottom: 1.3vh;
   font-size: 1vw;
 }
 #playButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
 #retryButton {
-  bottom: 0.2vh;
-  font-size: 4.5vw;
+  /* bottom: 2.25vh; */
+  /* bottom: 14.5vh; */
+  width: 3.5vw;
+  bottom: 20%;
+  /* font-size: 5vw; */
 }
 #retryButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
-#retryButton:active {
-  font-size: 4.3vw;
+/* #retryButton:active {
+  font-size: 2.3vw;
 }
+#retryButton:not( :hover ) {
+  font-size: 2.5vw;
+} */
 #settingsButton {
   bottom: 1.3vh;
   width: 5vw;
@@ -235,6 +242,8 @@
 </style>
 <br>
 <div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
+<br>
+<div>Icons made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <script>
   function musicSelected(id, checked) {
     if (checked) {
@@ -289,6 +298,8 @@
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
+      console.log("shoot!");
+      bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
       try {
         if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
         if (tutorial.status == "shoot" && bullet) {
@@ -310,8 +321,6 @@
             }, 3333);
           }, 4000);
         }
-        console.log("shoot!");
-        bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
         if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
         // bullet.y = this.position.y - bullet.height;
         bullet.speed += 5;
@@ -370,6 +379,10 @@
     // player.speed = adaptToHeight(99);
     // player.bullets.max = 6;
     // speed.bullet = 13;
+    // enhanced mode max:
+    // player.speed = 33;
+    // speed.bullet = 9;
+    // newCannon.time.needed = convertNumber *2.5;
     requestAnimationFrame(animateBullet);
     space_key.innerHTML = 'space key/<br>(left) click';
     if (pTutorial) {
@@ -486,7 +499,7 @@
       bullet.y += bullet.speed*bullet.direction.y;
     });
     bullets = bullets.filter(b => b.x < textur.width && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-    if (!bullets.length && gerät == "Handy" && tutorial.status == "no" && newCannon.counter && newCannon.counter < 3) newCannon.time.needed = JSON.parse(JSON.stringify(newCannon.time.got));
+    if (!enhancedModeCheck.checked && !bullets.length && gerät == "Handy" && tutorial.status == "no" && newCannon.counter && newCannon.counter < 3) newCannon.time.needed = JSON.parse(JSON.stringify(newCannon.time.got));
     // room layout
     canvas.fillStyle = "white";
     canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
@@ -495,10 +508,11 @@
     newCannon.time.got += 16;
     // change variables
     if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
+      console.log("new cannon! Interval: " + newCannon.time.needed);
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
-      var bulletSpeed = speed.bullet;
       if (enhancedModeCheck.checked) bulletSpeed = Math.round(Math.random()*(bulletSpeed - 2)) + 2;
+      console.log("bullet speed: " + bulletSpeed);
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
       cannons.push({x: 33, y: Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7))), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: bulletSpeed, timeGone: 0, direction: {x: 1, y: 0}, points: 3000});
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
@@ -515,6 +529,7 @@
       newCannon.counter++;
       if (phase.counter) phase.counter--;
       var original = wHeight;
+      if (!enhancedModeCheck.checked) {
       if (newCannon.time.needed > convertNumber *1.2 && phase.name == "normal") newCannon.time.needed -= 16;
       else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
@@ -546,11 +561,21 @@
           player.bullets.max++;
         }
       }
+    }
+    // TODO: übersichtli<cher
+    else if (gerät == "Handy" && newCannon.time.needed > convertNumber) newCannon.time.needed -= 16;
+    else if (newCannon.time.needed > convertNumber *2.5) newCannon.time.needed -= 16;
+      // TODO: Mode: Zwischenstufe: normale Fähigkeiten + verschiedene Geschwindigkeiten
+      // TODO: maxima für neuen mode verändern (bullet speed, cannon interval)
       else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
+      if (enhancedModeCheck.checked && player.speed < 33) player.speed += 0.3;
+      else if (!enhancedModeCheck.checked) {
       if (player.speed < 89 && gerät != "Handy") player.speed += 0.2;
       else if (player.speed < 89) player.speed += 0.3;
       else if (!useMultAmmo.checked && player.speed < adaptToHeight(99)) player.speed += 0.2;
+    }
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.') && !enhancedModeCheck.checked) player.bullets.max++;
+      if (enhancedModeCheck.checked && speed.bullets < 9) speed.bullet += 0.1;
       if (speed.bullet < 11 && gerät != "Handy") speed.bullet += 0.1;
       else if (speed.bullet < 11) speed.bullet += 0.2;
       else if (!useMultAmmo.checked && speed.bullet < 13) speed.bullet += 0.1;
@@ -669,6 +694,18 @@ if (tutorial.status == "shoot") {
         if (convertCss(menus.style.top) > -wHeight/2) hideMenu(convertCss(menus.style.top) - 15);
       }, 1);
   }
+  function changeSettingsVis(src) {
+    if (src.includes('settings')) {
+      settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png'
+      settings.style.display = 'inline';
+      highscoreList.style.display = 'none';
+    }
+    else {
+      settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
+      settings.style.display = 'none';
+      highscoreList.style.display = 'inline';
+    }
+  }
   function endGameAnimation(y, bounce) {
     menus.style.top = y;
     if (convertCss(menus.style.top) < wHeight/2 + 50 && !bounce) {
@@ -750,6 +787,7 @@ function disableScroll() {
   window.addEventListener(wheelEvent, preventDefault, wheelOpt); // modern desktop
   window.addEventListener('touchmove', preventDefault, wheelOpt); // mobile
   window.addEventListener('keydown', preventDefaultForScrollKeys, false);
+  textur.style.touchAction = 'none';
 }
 
 // call this to Enable
@@ -758,6 +796,7 @@ function enableScroll() {
   window.removeEventListener(wheelEvent, preventDefault, wheelOpt);
   window.removeEventListener('touchmove', preventDefault, wheelOpt);
   window.removeEventListener('keydown', preventDefaultForScrollKeys, false);
+  textur.style.touchAction = '';
 }
 document.addEventListener('touchmove', touch);
 document.addEventListener('touchstart', touch);
@@ -772,32 +811,51 @@ document.onkeydown = function(event) {
     player.position.y += player.speed;
     if (cannons[0] && player.position.y >= cannons[0].y + player.speed && tutorial.status == "moveDown") tutorial.status = "waiting for bullet";
   }
-  if (event.key.toLowerCase().includes("left")) {
-    if (player.selectedBullet > 0) player.selectedBullet--;
-    if (enhancedModeCheck.checked) {
-      player.position.x -= player.speed;
-      player.bullets.got.map((a) => {
-        a.x -= player.speed;
-        return a;
-      });
-    }
-  }
-  if (event.key.toLowerCase().includes("right")) {
-    if (player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) incAmmoIndex();
-    if (enhancedModeCheck.checked) {
-      player.position.x += player.speed;
-      player.bullets.got.map((a) => {
-        a.x += player.speed;
-        return a;
-      });
-    }
-  }
+  if (event.key.toLowerCase().includes("left")) decX();
+  if (event.key.toLowerCase().includes("right")) incX();
   if (event.key == " ") {
+    try {
       player.shoot(player.bullets.got[player.selectedBullet]);
+    } catch (e) {}
     return false;
   }
 }
-
+function incAmmoIndex() {
+  player.selectedBullet++;
+  if (tutorial.status == "choose right ammo") {
+    tutorial.status = "kill/shoot cannons";
+    tutorial.counter = 0;
+    cannons.push({x: 33, y: 10, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+    cannons.push({x: 33, y: 100, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+    cannons.push({x: 33, y: 200, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
+    space_key.style.display = "inline";
+    space_key.innerHTML = "kill them!";
+  }
+}
+function incX() {
+  var speed = player.speed;
+  if (enhancedModeCheck.checked && gerät == "Handy") speed = player.speed/3;
+  if (player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) incAmmoIndex();
+  if (enhancedModeCheck.checked) {
+    player.position.x += speed;
+    player.bullets.got.map((a) => {
+      a.x += speed;
+      return a;
+    });
+  }
+}
+function decX() {
+  var speed = player.speed;
+  if (enhancedModeCheck.checked && gerät == "Handy") speed = player.speed/3;
+  if (player.selectedBullet > 0) player.selectedBullet--;
+  if (enhancedModeCheck.checked) {
+    player.position.x -= speed;
+    player.bullets.got.map((a) => {
+      a.x -= speed;
+      return a;
+    });
+  }
+}
 function touch(ev) {
   if (ev.touches[1]) player.shoot();
   if (ev.type == "touchstart") {
@@ -812,14 +870,14 @@ function touch(ev) {
     var yDiff = yDown - ev.touches[0].clientY;
     firstTouch = getTouches(ev)[0];
     if ( Math.abs( xDiff ) > Math.abs( yDiff ) ) {/*most significant*/
-      if (swipe.counter == 10 || swipe.counter == -1) {
+      if (swipe.counter == 10 || swipe.counter == -1 || enhancedModeCheck.checked) {
         swipe.counter = 0;
-        if ( xDiff > 0 && player.selectedBullet > 0) {
-          player.selectedBullet--;
+        if ( xDiff > 0) {
+          decX();
             /* left swipe */
-        } else if (xDiff < 0 && player.selectedBullet + 1 < player.bullets.got.length && player.selectedBullet != -1) {
+        } else if (xDiff < 0) {
             /* right swipe */
-            incAmmoIndex();
+            incX();
         }
       }
     } else {
@@ -835,21 +893,8 @@ function touch(ev) {
   }
   // toggleFullscreen(document.body);
 }
-// TODO: tablet support enhanced mode (control)
 var xDown;
 var yDown;
-function incAmmoIndex() {
-  player.selectedBullet++;
-  if (tutorial.status == "choose right ammo") {
-    tutorial.status = "kill/shoot cannons";
-    tutorial.counter = 0;
-    cannons.push({x: 33, y: 10, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-    cannons.push({x: 33, y: 100, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-    cannons.push({x: 33, y: 200, width: 33, height: 33, speed: 3000, bulletSpeed: 3, timeGone: 0, direction: {x: 1, y: 0}});
-    space_key.style.display = "inline";
-    space_key.innerHTML = "kill them!";
-  }
-}
 function getTouches(ev) {
 return ev.touches ||             // browser API
        ev.originalEvent.touches; // jQuery
