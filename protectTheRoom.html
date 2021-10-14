@@ -32,7 +32,7 @@
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
         <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <input id="tutorialCheck" style="display:none" type="checkbox">tutorial
+        <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
@@ -108,11 +108,12 @@
   font-size: 4.5vw;
 }
 #highscoreList {
-  top: 29vh;
+  /* top: 29vh; */
+  top: 42%;
   font-size: 3.5vw;
   overflow: scroll;
-  /* max-height: 27vh; */
-  max-height: 25vh;
+  max-height: 27vh;
+  /* max-height: 30vh; */
   /* left: 7vw; */
   padding-left: 80px;
   /* list-style-type: none; */
@@ -247,6 +248,16 @@
 <br>
 <div>Icons made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <script>
+  setTimeout(function () {
+    // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().top + menus.getBoundingClientRect().top)/2 + "px";
+    // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2 + menus.getBoundingClientRect().top + "px";
+    highscoreList.style.top = (highscoreText.getBoundingClientRect().top + (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2) - menus.getBoundingClientRect().top + 18 + "px";
+    // for (var i = highscoreText.getBoundingClientRect().bottom; highscoreList.getBoundingClientRect().bottom < retryButton.getBoundingClientRect().top - 7; i++) {
+    //   highscoreList.style.top = i + 'px';
+    // }
+    // highscoreList.style.top = i/2 + menus.getBoundingClientRect().top;
+    highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
+  }, 100);
   function musicSelected(id, checked) {
     if (checked) {
       playerObj[id.split('Music')[0]].playVideo();
@@ -666,14 +677,8 @@ if (tutorial.status == "shoot") {
   function pauseF(boolean, notReactivateGame) {
     pause.boolean = boolean;
     pause.inProgress = true;
-    if (boolean) {
-      highscoreList.style.maxHeight = "19vh";
-      highscoreList.style.top = "24vh";
-      showMenu();
-    }
+    if (boolean) showMenu();
     else {
-      highscoreList.style.maxHeight = "25vh";
-      highscoreList.style.top = "29vh";
       hideMenu(wHeight/2);
       setTimeout(function () {
         settings.style.display = "none";
