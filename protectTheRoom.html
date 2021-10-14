@@ -32,7 +32,7 @@
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
         <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <input id="tutorialCheck" type="checkbox">tutorial
+        <input id="tutorialCheck" style="display:none" type="checkbox">tutorial
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
@@ -131,7 +131,9 @@
   /* bottom: 2.25vh; */
   /* bottom: 14.5vh; */
   width: 3.5vw;
-  bottom: 20%;
+  bottom: 7.3vw;
+  /* width: 3.5vw;
+  bottom: 20%; */
   /* font-size: 5vw; */
 }
 #retryButton:hover {
@@ -511,6 +513,7 @@
       console.log("new cannon! Interval: " + newCannon.time.needed);
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
+      var bulletSpeed = speed.bullet;
       if (enhancedModeCheck.checked) bulletSpeed = Math.round(Math.random()*(bulletSpeed - 2)) + 2;
       console.log("bullet speed: " + bulletSpeed);
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
