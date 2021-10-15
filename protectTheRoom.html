@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <title>protect the room</title>
 <div onclick="player.shoot();" class="menuContent" id="space_key">space key/<br>(left) click</div>
 <canvas onclick="player.shoot();" id="textur" width="300" height="300"></canvas>
@@ -8,10 +9,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Geostar+Fill&display=swap" rel="stylesheet">
 <div id="menus" class="menuContent">
     <div class="ScoreText" id="scoreText">
-      score:16000
+      score:0
     </div>
+    <!-- TODO: remove? (instead button to show your name in scoreboard) -->
     <div class="ScoreText" id="highscoreText">
-      highscore:160000
+      highscore:0
     </div>
     <div id="app">
       <ol class="ScoreText" id="highscoreList">
@@ -37,9 +39,9 @@
       </div>
     </div>
     <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
-    <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw';" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
-    <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; retry();" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
-    <!-- <button class="ScoreText button" id="retryButton" onclick="retry();" name="button">⟲</button> -->
+    <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; restartTutorial(true);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
+    <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; pauseF(false, true);" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
+    <!-- <button class="ScoreText button" id="retryButton" onclick="pauseF(false, true);" name="button">⟲</button> -->
     <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
@@ -115,7 +117,7 @@
   /* max-height: 30vh; */
   /* left: 7vw; */
   padding-left: 80px;
-  /* list-style-type: none; */
+   /* list-style-type: none; */
 }
 /* buttons:  */
 #playButton {
@@ -243,10 +245,43 @@
 
 </style>
 <br>
+<!-- TODO: add credits (icon) -->
 <div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
 <br>
 <div>Icons made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <script>
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+  };
+  var dbSetWarteschlange = [];
+  var alertWhenFinishedSaving = false;
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("protectTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+    else if (alertWhenFinishedSaving) {
+      alert("Saving finished! You can now leave the website!");
+      alertWhenFinishedSaving = false;
+    }
+  }, 2222);
+  getDbHighscores(true);
+  function getDbHighscores(pShowHighscores, upload) {
+    dbGet("protectTheRoom", "highscores").then(result => {
+      highscores = result;
+      if (pShowHighscores) {
+        showHighscores(upload);
+        showMenu(upload);
+      }
+    }).catch(function(e) {
+      console.error(e);
+      if (pShowHighscores) {
+        showHighscores(upload);
+        showMenu(upload);
+      }
+    });
+  }
   setTimeout(function () {
     // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().top + menus.getBoundingClientRect().top)/2 + "px";
     // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2 + menus.getBoundingClientRect().top + "px";
@@ -264,12 +299,12 @@
     } else {
       playerObj[id.split('Music')[0]].pauseVideo();
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
-    } localStorage.setItem('spaceMusic', checked);
+    } localStorage.setItem('protectTheRoomSpaceMusic', checked);
   }
   menus.style.width = window.innerWidth/2;
   menus.style.height = window.innerHeight/1.4;
   var swipeStr = "";
-  if (localStorage.getItem('spaceMusic') == "false") spaceMusicCheck.checked = false;
+  if (localStorage.getItem('protectTheRoomSpaceMusic') == "false") spaceMusicCheck.checked = false;
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -287,19 +322,27 @@
   var newCannon;
   var speed ;
   var lives;
-  var highscores = {};
+  var highscores = {enhanced: {PC: {}, Handy: {}}, normal: {useAmmo: {PC: {}, Handy: {}}, notUseAmmo: {PC: {}, Handy: {}}}, speedDiff: {PC: {}, Handy: {}}};
   try {
     var app = new Vue({
       el: '#app',
       data: {
-        highscoresDb: ["a", "b", "c", "d", "Adrian:6000000", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p"]
+        highscoresDb: []
       }
     })
+    showMenu();
     highscoreList.style.paddingLeft = 3.6 + ((app.highscoresDb.length) + "").length*1.5 + "vw";
   } catch (e) {
     console.log("vue not available (no Internet connection?)");
   }
-  var name = "Adron";
+  if (!localStorage.getItem("storedName")) {
+    var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+    while (Object.keys(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+      var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+    }
+  }
+  else var name = localStorage.getItem("storedName");
+  localStorage.setItem("storedName", name);
   var phase = {name: "normal"}
   class Player {
     constructor() {
@@ -478,7 +521,7 @@
                 space_key.style.display = "none";
                 tutorialCheck.checked = false;
                 tutorial.status = "no";
-                localStorage.setItem('tutorialPlayed', true);
+                localStorage.setItem('protectTheRoomTutorialPlayed', true);
               }
             }
           }
@@ -521,6 +564,7 @@
     // change variables
     if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
       console.log("new cannon! Interval: " + newCannon.time.needed);
+      // TODO: block cannons spawning in each other
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       var bulletSpeed = speed.bullet;
@@ -660,16 +704,38 @@ if (tutorial.status == "shoot") {
     if (point.counter <= 0) points.show.shift();
   }
   }
+  var highscoresNow;
+  // TODO: refresh after changing settings
+  function showHighscores(addNew) {
+    highscoresNow = getHighscoresNow();
+    if (addNew && tutorial.status == "no" && (!highscoresNow[name] || newCannon.counter > highscoresNow[name])) {
+      highscoresNow[name] = newCannon.counter;
+      dbSetWarteschlange.push({tag: "highscores", data: highscores});
+    }
+    app._data.highscoresDb = [];
+    Object.keys(highscoresNow).map((key, index) => app._data.highscoresDb.push(key + ':' + highscoresNow[key]));
+    app._data.highscoresDb.sort((a, b) => b.split(':')[1] - a.split(':')[1]);
+  }
+  function getHighscoresNow() {
+    var highscoresNow;
+    if (enhancedModeCheck.checked) highscoresNow = highscores.enhanced[gerät];
+    // else if (speedDiffModeCheck.checked) highscores.speedDiff[gerät];
+    else if (useMultAmmo.checked && newCannon && newCannon.time.needed < convertNumber *1.2) highscoresNow = highscores.normal.useAmmo[gerät];
+    else highscoresNow = highscores.normal.notUseAmmo[gerät];
+    return highscoresNow;
+  }
   // menu interactions
   function endGame() {
     enableScroll();
-    // TODO: highscore system
-    if (!highscores[name] || newCannon.counter > highscores[name]) highscores[name] = newCannon.counter;
-    showMenu();
+    getDbHighscores(true);
   }
-  function showMenu() {
+  function showMenu(gameEnded) {
+    if (!gameEnded) showHighscores();
     menus.style.top = 0 - (menus.style.height.replace('px', ''))/2 + "px";
     menus.style.display = "inline";
+    if (enhancedModeCheck.checked) scoreText.innerHTML = 'score:' + points.counter;
+    else if (newCannon) scoreText.innerHTML = 'score:' + newCannon.counter;
+    if (highscoresNow[name]) highscoreText.innerHTML = 'highscore:' + highscoresNow[name];
     endGameAnimation(convertCss(menus.style.top));
   }
   var pause = {boolean: false};
@@ -682,18 +748,13 @@ if (tutorial.status == "shoot") {
       setTimeout(function () {
         settings.style.display = "none";
         highscoreList.style.display = "inline";
-        if (!notReactivateGame) animateBullet();
+        if (!newCannon || !newCannon.counter || notReactivateGame) startGame();
+        else if (!notReactivateGame) animateBullet();
       }, 500);
     }
     setTimeout(function () {
       pause.inProgress = false;
     }, 499);
-  }
-  function retry() {
-    pauseF(false, true);
-    setTimeout(function () {
-      startGame(tutorialCheck.checked);
-    }, 500);
   }
   function hideMenu(y) {
     menus.style.top = y;
@@ -729,10 +790,10 @@ if (tutorial.status == "shoot") {
   function convertCss(data) {
     return JSON.parse(data.replace('px', ''))
   }
-  function restartTutorial() {
+  function restartTutorial(byUser) {
     tutorial.status = "no";
     setTimeout(function () {
-      startGame(true);
+      if (!byUser || !newCannon.counter || (byUser && newCannon.counter && confirm('Do you really want to start the tutorial? You would loose the progress in your current game session!'))) startGame(true);
     }, 100);
   }
 var convertNumber;
@@ -753,7 +814,7 @@ function adaptToHeight(original) {
   }
   return original;
 }
-if (!localStorage.getItem('tutorialPlayed')) startGame(true);
+if (!localStorage.getItem('protectTheRoomTutorialPlayed')) startGame(true);
 function isCollide(a, b) {
   return (a.x < b.x + b.width &&
    a.x + a.width > b.x &&
@@ -916,7 +977,7 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
-              if (localStorage.getItem('spaceMusic') == "true" || localStorage.getItem('spaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
+              if (localStorage.getItem('protectTheRoomSpaceMusic') == "true" || localStorage.getItem('protectTheRoomSpaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
               else musicSelected('spaceMusicCheck', false);
             },
       }
