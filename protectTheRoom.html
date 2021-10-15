@@ -588,9 +588,33 @@
       newCannon.counter++;
       if (phase.counter) phase.counter--;
       var original = wHeight;
+      var progressObj = {
+      notEnhanced:
+      {
+        cannonInterval: {
+          normal: newCannon.time.needed > convertNumber *1.2 && phase.name == "normal",
+          notUseAmmo: !useMultAmmo.checked && newCannon.time.needed > convertNumber *1
+        },
+        playerSpeed: {
+          PC: player.speed < 89 && gerät == "PC",
+          Handy: player.speed < 89 && gerät == "Handy"
+        },
+        bulletSpeed: {
+          PC: speed.bullet < 11 && gerät == "PC",
+          Handy: speed.bullet < 11 && gerät == "Handy",
+          notUseAmmo: !useMultAmmo.checked && speed.bullet < 13
+        }
+      },
+      enhanced: {
+          cannonInterval: {
+            Handy: newCannon.time.needed > convertNumber && gerät == "Handy",
+            PC: newCannon.time.needed > convertNumber *2.5 && gerät == "PC",
+            bothNoMultiAmmo: !useMultAmmo.checked && player.speed < adaptToHeight(99)
+          },
+        }
+      };
       if (!enhancedModeCheck.checked) {
-      if (newCannon.time.needed > convertNumber *1.2 && phase.name == "normal") newCannon.time.needed -= 16;
-      else if (!useMultAmmo.checked && newCannon.time.needed > convertNumber *1) newCannon.time.needed -= 16;
+      if (progressObj.notEnhanced.cannonInterval.normal || progressObj.notEnhanced.cannonInterval.notUseAmmo) newCannon.time.needed -= 16;
         else if (useMultAmmo.checked && phase.counter == 0) {
        if (phase.name == "normal" || phase.name == "useAmmo") {
          setTimeout(function () {
@@ -620,24 +644,22 @@
           player.bullets.max++;
         }
       }
+      else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
+
+      if (progressObj.notEnhanced.playerSpeed.PC || progressObj.notEnhanced.playerSpeed.bothNoMultiAmmo) player.speed += 0.2;
+      else if (progressObj.notEnhanced.playerSpeed.Handy) player.speed += 0.3;
+      if (progressObj.notEnhanced.bulletSpeed.PC) speed.bullet += 0.1;
+      else if (progressObj.notEnhanced.bulletSpeed.Handy) speed.bullet += 0.2;
+      else if (progressObj.notEnhanced.bulletSpeed.notUseAmmo) speed.bullet += 0.1;
     }
-    // TODO: übersichtli<cher
-    else if (gerät == "Handy" && newCannon.time.needed > convertNumber) newCannon.time.needed -= 16;
-    else if (newCannon.time.needed > convertNumber *2.5) newCannon.time.needed -= 16;
+    else {
+      if (progressObj.enhanced.cannonInterval.Handy || progressObj.enhanced.cannonInterval.PC) newCannon.time.needed -= 16;
+      if (player.speed < 33) player.speed += 0.3;
+      if (speed.bullets < 9) speed.bullet += 0.1;
+    }
       // TODO: Mode: Zwischenstufe: normale Fähigkeiten + verschiedene Geschwindigkeiten
       // TODO: maxima für neuen mode verändern (bullet speed, cannon interval)
-      else if (useMultAmmo.checked && !phase.counter) phase.counter = 7;
-      if (enhancedModeCheck.checked && player.speed < 33) player.speed += 0.3;
-      else if (!enhancedModeCheck.checked) {
-      if (player.speed < 89 && gerät != "Handy") player.speed += 0.2;
-      else if (player.speed < 89) player.speed += 0.3;
-      else if (!useMultAmmo.checked && player.speed < adaptToHeight(99)) player.speed += 0.2;
-    }
       if (player.bullets.max < 6 && !(newCannon.counter/(10 + Math.round(newCannon.counter/10)) + "").includes('.') && !enhancedModeCheck.checked) player.bullets.max++;
-      if (enhancedModeCheck.checked && speed.bullets < 9) speed.bullet += 0.1;
-      if (speed.bullet < 11 && gerät != "Handy") speed.bullet += 0.1;
-      else if (speed.bullet < 11) speed.bullet += 0.2;
-      else if (!useMultAmmo.checked && speed.bullet < 13) speed.bullet += 0.1;
       newCannon.time.got = 0;
     }
     // layout ammo
