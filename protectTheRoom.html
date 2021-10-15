@@ -354,8 +354,8 @@
     }
     shoot = (bullet) => {
       console.log("shoot!");
-      bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
       try {
+      bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
         if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
         if (tutorial.status == "shoot" && bullet) {
           space_key.style.fontSize = "120px";
@@ -393,7 +393,9 @@
   var tutorial = {status: 'no'};
   var player = new Player();
   var points = {counter: 0, show: []};
+  var settingsStr = "";
   function startGame(pTutorial) {
+    settingsStr = enhancedModeCheck.checked + "," + useMultAmmo.checked;
     pause.boolean = false;
     points = {counter: 0, show: []};
     space_key.style.display = "none";
@@ -705,7 +707,6 @@ if (tutorial.status == "shoot") {
   }
   }
   var highscoresNow;
-  // TODO: refresh after changing settings
   function showHighscores(addNew) {
     highscoresNow = getHighscoresNow();
     if (addNew && tutorial.status == "no" && (!highscoresNow[name] || newCannon.counter > highscoresNow[name])) {
@@ -748,6 +749,16 @@ if (tutorial.status == "shoot") {
       setTimeout(function () {
         settings.style.display = "none";
         highscoreList.style.display = "inline";
+        settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
+        if (!(!newCannon || !newCannon.counter || notReactivateGame) && "" + enhancedModeCheck.checked + ',' + useMultAmmo.checked != settingsStr) {
+          if (confirm('You changed the gamemode, although the current game session is still running! Are you sure you want to begin a new round with the new settings? Your current round will be lost!')) {
+          notReactivateGame = true;
+        }
+        else {
+          enhancedModeCheck.checked = JSON.parse(settingsStr.split(',')[0]);
+          useMultAmmo.checked = JSON.parse(settingsStr.split(',')[1]);
+        }
+        }
         if (!newCannon || !newCannon.counter || notReactivateGame) startGame();
         else if (!notReactivateGame) animateBullet();
       }, 500);
@@ -769,6 +780,7 @@ if (tutorial.status == "shoot") {
       highscoreList.style.display = 'none';
     }
     else {
+      showHighscores();
       settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
       settings.style.display = 'none';
       highscoreList.style.display = 'inline';
