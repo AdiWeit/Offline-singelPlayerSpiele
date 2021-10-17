@@ -412,6 +412,7 @@
     space_key.style.fontSize = 60;
     newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
     if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
+    if (differentSpeedCheck.checked && gerät == "Handy") newCannon.time.needed = convertNumber*4;
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
     lives = {beginning: 133, now: 133};
     phase = {name: "normal"};
@@ -449,10 +450,12 @@
     // speed.bullet = 9;
     // newCannon.time.needed = convertNumber *2.5;
     // differentSpeeeds max:
-    newCannon.time.needed = convertNumber *2.5//3;
-    player.speed = adaptToHeight(59);
-    player.bullets.max = 6;
-    speed.bullet = 11;
+    // newCannon.time.needed = convertNumber *2.5//3;
+    // // Handy:
+    // newCannon.time.needed = convertNumber *1.77//3;
+    // player.speed = adaptToHeight(59);
+    // player.bullets.max = 6;
+    // speed.bullet = 11;
     requestAnimationFrame(animateBullet);
     space_key.innerHTML = 'space key/<br>(left) click';
     if (pTutorial) {
@@ -579,14 +582,31 @@
     // change variables
     if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
       console.log("new cannon! Interval: " + newCannon.time.needed);
-      // TODO: block cannons spawning in each other
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
       var bulletSpeed = speed.bullet;
-      if (enhancedModeCheck.checked || differentSpeedCheck.checked) bulletSpeed = Math.round(Math.random()*(bulletSpeed - 2)) + 2;
+      if (enhancedModeCheck.checked || differentSpeedCheck.checked) {
+        bulletSpeed = Math.round(Math.random()*(bulletSpeed - 2)) + 2;
+        if (gerät == "Handy") bulletSpeed = Math.round(Math.random()*(speed.bullet - 0.5)) + 0.5;
+      }
       console.log("bullet speed: " + bulletSpeed);
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
-      cannons.push({x: 33, y: Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7))), width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: bulletSpeed, timeGone: 0, direction: {x: 1, y: 0}, points: 3000});
+      var yPos = Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7)));
+      var builtCannon = {x: 33, y: yPos, width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: bulletSpeed, timeGone: 0, direction: {x: 1, y: 0}, points: 3000};
+      cannons.map(data => {
+        if (isCollide(data, builtCannon)) {
+          // reduce returns biggest
+          if (builtCannon.y > wHeight/2) builtCannon.y = data.y - builtCannon.height - 23;//data.height;
+          else builtCannon.y = data.y + data.height + 23;
+          // var biggestHeight = [data.height, builtCannon.height].reduce((x, y) => y > x ? y : x);
+          // if (builtCannon.y > wHeight/2) builtCannon.y -= biggestHeight + 5;//data.height;
+          // else builtCannon.y += biggestHeight + 5;
+          // if (data.y > builtCannon.y) builtCannon.y -= data.height;
+          // else if (builtCannon.y + builtCannon.height*2 < wHeight) builtCannon.y += builtCannon.height;
+          // else builtCannon.y = data.y - builtCannon.height - 5;
+        }
+      });
+      cannons.push(builtCannon);
       // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
       // do {
       // var cannonCollsion = false;
@@ -625,8 +645,16 @@
             PC: newCannon.time.needed > convertNumber *2.5 && gerät == "PC",
             bothNoMultiAmmo: !useMultAmmo.checked && player.speed < adaptToHeight(99)
           },
-          playerSpeed: {all: player.speed < 33},
-          bulletSpeed: {all: speed.bullets < 9}
+          playerSpeed: player.speed < 33,
+          bulletSpeed: speed.bullets < 9
+        },
+        differentSpeed: {
+          playerSpeed: player.speed < adaptToHeight(59),
+          bulletSpeed: speed.bullet < 11,
+          cannonInterval: {
+            PC: convertNumber *2.5 && gerät == "PC",
+            Handy: convertNumber *1.77 && gerät == "Handy"
+          }
         }
       };
       if (!enhancedModeCheck.checked) {
@@ -661,13 +689,20 @@
         }
       }
       else if (useMultAmmo.checked && !differentSpeedCheck.checked && !phase.counter) phase.counter = 7;
+      if (differentSpeedCheck.checked) {
+        if (progressObj.differentSpeed.playerSpeed) player.speed += 0.1;
+        if (progressObj.differentSpeed.bulletSpeed) speed.bullet += 0.1;
+        if (progressObj.differentSpeed.cannonInterval.PC || progressObj.differentSpeed.cannonInterval.Handy) newCannon.time.needed -= 16;
+      }
+      else {
       // not enhanced mode
       if (progressObj.notEnhanced.playerSpeed.PC || progressObj.notEnhanced.playerSpeed.bothNoMultiAmmo) player.speed += 0.2;
       else if (progressObj.notEnhanced.playerSpeed.Handy) player.speed += 0.3;
       if (progressObj.notEnhanced.bulletSpeed.PC) speed.bullet += 0.1;
       else if (progressObj.notEnhanced.bulletSpeed.Handy) speed.bullet += 0.2;
       else if (progressObj.notEnhanced.bulletSpeed.notUseAmmo) speed.bullet += 0.1;
-      if (progressObj.notEnhanced.maxBullets) player.bullets.max++;
+    }
+    if (progressObj.notEnhanced.maxBullets) player.bullets.max++;
     }
     // enhanced mode
     else {
