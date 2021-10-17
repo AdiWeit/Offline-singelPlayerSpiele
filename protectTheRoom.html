@@ -11,15 +11,15 @@
     <div class="ScoreText" id="scoreText">
       score:0
     </div>
-    <!-- TODO: remove? (instead button to show your name in scoreboard) -->
     <div class="ScoreText" id="highscoreText">
       highscore:0
     </div>
     <div id="app">
       <ol class="ScoreText" id="highscoreList">
-        <li v-for="abc in highscoresDb"> {{ abc }} </li>
+        <li :id="abc.split(':')[0]" v-for="abc in highscoresDb"> {{ abc }} </li>
       </ol>
     </div>
+    <button type="button" class="scoreText" onclick="scrollToHighscore();" id="scrollButton">me</button>
     <div id="settings" style="display: none">
     <div>
       <h5 class="ScoreText" id="soundHeader">sound</h5>
@@ -119,8 +119,17 @@
   /* left: 7vw; */
   padding-left: 80px;
    /* list-style-type: none; */
+   scroll-behavior: smooth;
 }
 /* buttons:  */
+#scrollButton {
+  border: none;
+  background: hsla(0, 0%, 2%, 0.4);
+  color: rgba(255, 255, 255, 0.5);
+  top: 20vh;
+  width: 50px;
+  height: 20px;
+}
 #playButton {
   width: 5vw;
   /* bottom: 6.9vh; */
@@ -886,6 +895,14 @@ if (tutorial.status == "shoot") {
     setTimeout(function () {
       if (!byUser || !newCannon.counter || (byUser && newCannon.counter && confirm('Do you really want to start the tutorial? You would loose the progress in your current game session!'))) startGame(true);
     }, 100);
+  }
+  function scrollToHighscore() {
+    document.getElementById(name).scrollIntoView();
+    window.scroll(0, 0);
+    document.getElementById(name).style.backgroundColor = "rgba(255, 255, 0, 0.5)";
+    setTimeout(function () {
+      document.getElementById(name).style.backgroundColor = "";
+    }, 1111);
   }
 var convertNumber;
 adaptToScreen();
