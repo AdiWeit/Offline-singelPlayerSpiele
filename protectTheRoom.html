@@ -14,12 +14,12 @@
     <div class="ScoreText" id="highscoreText">
       highscore:0
     </div>
-    <div id="app" style="display:none">
+    <div id="app">
       <ol class="ScoreText" id="highscoreList">
+        <button type="button" class="scoreText" onclick="scrollToHighscore();" id="scrollButton">me</button>
         <li :id="abc.split(':')[0]" v-for="abc in highscoresDb"> {{ abc }} </li>
       </ol>
     </div>
-    <button type="button" class="scoreText" onclick="scrollToHighscore();" id="scrollButton">me</button>
     <div id="settings" style="display: none">
     <div>
       <h5 class="ScoreText" id="soundHeader">sound</h5>
@@ -39,8 +39,8 @@
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
-    <div id="credits">
-      <div class="scoreText" id="onlineWebFontsCredits">Icons made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
+    <div style="display:none" id="credits">
+      <div class="scoreText" id="onlineWebFontsCredits">Icons made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0:</div>
         <img class="ScoreText button" id="playButtonCredit" title="Click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.onlinewebfonts.com/icon/404212', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
         <a class="scoreText" id="authorCreditsPlayButton">@ Stroblb</a>
         <img class="ScoreText button" id="tutorialButtonCredit" title="(edited be myself). Click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.onlinewebfonts.com/icon/118712', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
@@ -135,6 +135,8 @@
   font-size: 30px;
   font-weight: bold;
   left: 17vw;
+  text-size.adjust: auto;
+  text-size-adjust: 60%;
 }
 #flaticonCredits {
   top: 47vh;
@@ -929,6 +931,16 @@ if (tutorial.status == "shoot") {
     if (highscoresNow[name]) highscoreText.innerHTML = 'highscore:' + highscoresNow[name];
     endGameAnimation(convertCss(menus.style.top));
   }
+  function showCredits() {
+    credits.style.display = 'inline';
+    if (onlineWebFontsCredits.getBoundingClientRect().top < highscoreText.getBoundingClientRect().bottom) {
+      highscoreText.style.display = 'none';
+      scoreText.style.display = 'none';
+      onlineWebFontsCredits.style.top = "12vh";
+    }
+    highscoreList.style.display = "none";
+    settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png';
+  }
   var pause = {boolean: false};
   function pauseF(boolean, notReactivateGame) {
     pause.boolean = boolean;
@@ -975,6 +987,9 @@ if (tutorial.status == "shoot") {
       settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
       settings.style.display = 'none';
       highscoreList.style.display = 'inline';
+      credits.style.display = 'none';
+      highscoreText.style.display = 'inline';
+      scoreText.style.display = 'inline';
     }
   }
   function endGameAnimation(y, bounce) {
