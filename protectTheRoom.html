@@ -14,7 +14,7 @@
     <div class="ScoreText" id="highscoreText">
       highscore:0
     </div>
-    <div id="app">
+    <div id="app" style="display:none">
       <ol class="ScoreText" id="highscoreList">
         <li :id="abc.split(':')[0]" v-for="abc in highscoresDb"> {{ abc }} </li>
       </ol>
@@ -39,11 +39,27 @@
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
       </div>
     </div>
+    <div id="credits">
+      <div class="scoreText" id="onlineWebFontsCredits">Icons made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
+        <img class="ScoreText button" id="playButtonCredit" title="Click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.onlinewebfonts.com/icon/404212', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+        <a class="scoreText" id="authorCreditsPlayButton">@ Stroblb</a>
+        <img class="ScoreText button" id="tutorialButtonCredit" title="(edited be myself). Click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.onlinewebfonts.com/icon/118712', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
+        <a class="scoreText" id="authorCreditsSettingsButton">@ Distriarte Publicidad</a>
+        <img class="ScoreText button" id="settingsButtonCredit" title="click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.onlinewebfonts.com/icon/215188', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+        <a class="scoreText" id="authorCreditsShareicon">@ fatih<a></a>
+      <div class="scoreText" id="shareiconCredits">icon from <a href="https:www.shareicon.net">shareicon</a> by <a href="https://www.shareicon.net/author/people">'people'</a>:</div>
+        <img class="ScoreText button" draggable="false" id="creditsButtonCredit" title="click to open on website" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; window.open('https://www.shareicon.net/drawing-people-education-student-desk-humanpictos-850448', '_blank');" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
+      <br>
+      <div class="scoreText" id="flaticonCredits">Icon made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
+        <img class="ScoreText button" id="highscoreListButtonCredit" title="click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.flaticon.com/free-icon/winner_809526?term=winner&page=1&position=2&page=1&position=2&related_id=809526&origin=style', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png">
+        <!-- TODO: mute button? -->
+    </div>
     <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
     <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; restartTutorial(true);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
     <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; pauseF(false, true);" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
     <!-- <button class="ScoreText button" id="retryButton" onclick="pauseF(false, true);" name="button">⟲</button> -->
     <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; showCredits();" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
@@ -109,6 +125,24 @@
   top: 16vh;
   font-size: 4.5vw;
 }
+#onlineWebFontsCredits {
+  top: 22vh;
+  font-size: 30px;
+  font-weight: bold;
+}
+#shareiconCredits {
+  top: 39vh;
+  font-size: 30px;
+  font-weight: bold;
+  left: 17vw;
+}
+#flaticonCredits {
+  top: 47vh;
+  font-size: 30px;
+  font-weight: bold;
+  left: 17vw;
+  text-align: left;
+}
 #highscoreList {
   /* top: 29vh; */
   top: 42%;
@@ -139,6 +173,16 @@
 #playButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
+#playButtonCredit {
+  width: 5vw;
+  /* bottom: 6.9vh; */
+  top: 29vh;
+  font-size: 1vw;
+  left: 19vw;
+}
+#playButtonCredit:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
 #retryButton {
   /* bottom: 2.25vh; */
   /* bottom: 14.5vh; */
@@ -165,6 +209,16 @@
 #settingsButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
+#settingsButtonCredit {
+  width: 5vw;
+  /* bottom: 6.9vh; */
+  top: 29vh;
+  font-size: 1vw;
+  left: 26vw;
+}
+#settingsButtonCredit:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
 #tutorialButton {
   bottom: 1.3vh;
   width: 5vw;
@@ -173,11 +227,54 @@
 #tutorialButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
+#tutorialButtonCredit {
+  width: 5vw;
+  /* bottom: 6.9vh; */
+  top: 29vh;
+  font-size: 1vw;
+  left: 34vw;
+}
+#tutorialButtonCredit:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
 #pauseButton {
   position: absolute;
   top: 15px;
   right: 49px;
   width: 22px;
+}
+#creditsButton {
+  /* bottom: -3vh; */
+  bottom: -2vh;
+  height: 4vh;
+}
+#creditsButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#creditsButtonCredit {
+  height: 4vh;
+  /* bottom: 6.9vh; */
+  top: 39vh;
+  font-size: 5vw;
+  left: 32vw;
+}
+#creditsButtonCredit:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#authorCreditsShareicon {
+  top: 35vh;
+  font-size: 2vw;
+  left: 26.4vw;
+}
+#authorCreditsPlayButton {
+  top: 35vh;
+  font-size: 2vw;
+  left: 19vw;
+}
+#authorCreditsSettingsButton {
+  top: 35vh;
+  font-size: 1.3vw;
+  left: 36vw;
 }
 /* settings menu: sound*/
 #soundHeader {
@@ -206,6 +303,16 @@
   top: 32vh;
 }
 #muteButton:hover {
+  background: hsla(0, 0%, 50%, 0.19);
+}
+#highscoreListButtonCredit {
+  width: 5vw;
+  /* bottom: 6.9vh; */
+  top: 47vh;
+  font-size: 5vw;
+  left: 34vw;
+}
+#highscoreListButtonCredit:hover {
   background: hsla(0, 0%, 50%, 0.19);
 }
 #volControlSpaceMusic {
@@ -262,10 +369,6 @@
 
 </style>
 <br>
-<!-- TODO: add credits (icon) -->
-<div>Icon made from <a href="https://www.onlinewebfonts.com/icon">Icon Fonts</a> is licensed by CC BY 3.0</div>
-<br>
-<div>Icons made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
 <script>
   window.onbeforeunload = function(){
   console.log("Leave Website");
