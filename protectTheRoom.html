@@ -452,7 +452,9 @@
     // differentSpeeeds max:
     // newCannon.time.needed = convertNumber *2.5//3;
     // // Handy:
-    // newCannon.time.needed = convertNumber *1.77//3;
+    // newCannon.time.needed = convertNumber *1.4//3;
+    // speed.bullet = 8;
+    //
     // player.speed = adaptToHeight(59);
     // player.bullets.max = 6;
     // speed.bullet = 11;
@@ -650,10 +652,13 @@
         },
         differentSpeed: {
           playerSpeed: player.speed < adaptToHeight(59),
-          bulletSpeed: speed.bullet < 11,
+          bulletSpeed: {
+            PC: speed.bullet < 11 && gerät == "PC",
+            Handy: speed.bullet < 8 && gerät == "Handy"
+          },
           cannonInterval: {
             PC: convertNumber *2.5 && gerät == "PC",
-            Handy: convertNumber *1.77 && gerät == "Handy"
+            Handy: convertNumber *1.4/*77*/ && gerät == "Handy"
           }
         }
       };
@@ -691,7 +696,7 @@
       else if (useMultAmmo.checked && !differentSpeedCheck.checked && !phase.counter) phase.counter = 7;
       if (differentSpeedCheck.checked) {
         if (progressObj.differentSpeed.playerSpeed) player.speed += 0.1;
-        if (progressObj.differentSpeed.bulletSpeed) speed.bullet += 0.1;
+        if (progressObj.differentSpeed.bulletSpeed.PC || progressObj.differentSpeed.bulletSpeed.Handy) speed.bullet += 0.1;
         if (progressObj.differentSpeed.cannonInterval.PC || progressObj.differentSpeed.cannonInterval.Handy) newCannon.time.needed -= 16;
       }
       else {
@@ -710,7 +715,6 @@
       if (progressObj.enhanced.playerSpeed.all) player.speed += 0.3;
       if (progressObj.enhanced.bulletSpeed.all) speed.bullet += 0.1;
     }
-      // TODO: maxima für neuen mode verändern (bullet speed, cannon interval)
       newCannon.time.got = 0;
     }
     // layout ammo
@@ -834,7 +838,7 @@ if (tutorial.status == "shoot") {
           differentSpeedCheck.checked = JSON.parse(settingsStr.split(',')[2]);
         }
         }
-        if (!newCannon || !newCannon.counter || notReactivateGame || lives.now <= 0) startGame();
+        if ((tutorial.status == "no" || notReactivateGame) && (!newCannon || !newCannon.counter || lives.now <= 0)) startGame(tutorialCheck.checked);
         else if (!notReactivateGame) animateBullet();
       }, 500);
     }
