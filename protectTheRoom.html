@@ -15,8 +15,8 @@
       highscore:0
     </div>
     <div id="app">
+      <button type="button" class="scoreText" onclick="scrollToHighscore();" id="scrollButton">me</button>
       <ol class="ScoreText" id="highscoreList">
-        <button type="button" class="scoreText" onclick="scrollToHighscore();" id="scrollButton">me</button>
         <li :id="abc.split(':')[0]" v-for="abc in highscoresDb"> {{ abc }} </li>
       </ol>
     </div>
@@ -522,7 +522,7 @@
     points = {counter: 0, show: []};
     space_key.style.display = "none";
     menus.style.display = 'none';
-    highscoreList.style.display = 'inline';
+    document.getElementById('app').style.display = 'inline';
     space_key.style.fontSize = 60;
     newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
     if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
@@ -938,7 +938,7 @@ if (tutorial.status == "shoot") {
       scoreText.style.display = 'none';
       onlineWebFontsCredits.style.top = "12vh";
     }
-    highscoreList.style.display = "none";
+    document.getElementById('app').style.display = "none";
     settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png';
   }
   var pause = {boolean: false};
@@ -950,7 +950,7 @@ if (tutorial.status == "shoot") {
       hideMenu(wHeight/2);
       setTimeout(function () {
         settings.style.display = "none";
-        highscoreList.style.display = "inline";
+        document.getElementById('app').style.display = "inline";
         settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
         if (!(!newCannon || !newCannon.counter || notReactivateGame) && "" + enhancedModeCheck.checked + ',' + useMultAmmo.checked + ',' + differentSpeedCheck.checked != settingsStr) {
           if (confirm('You changed the gamemode, although the current game session is still running! Are you sure you want to begin a new round with the new settings? Your current round will be lost!')) {
@@ -980,13 +980,13 @@ if (tutorial.status == "shoot") {
     if (src.includes('settings')) {
       settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png'
       settings.style.display = 'inline';
-      highscoreList.style.display = 'none';
+      document.getElementById('app').style.display = 'none';
     }
     else {
       showHighscores();
       settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/settings.png';
       settings.style.display = 'none';
-      highscoreList.style.display = 'inline';
+      document.getElementById('app').style.display = 'inline';
       credits.style.display = 'none';
       highscoreText.style.display = 'inline';
       scoreText.style.display = 'inline';
