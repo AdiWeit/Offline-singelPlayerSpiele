@@ -1199,4 +1199,18 @@ function onYouTubePlayerAPIReady() {
   });
   // you can do more stuff with the player variable
 }
+var mouseUp = "ignore";
+for (var button of document.getElementsByClassName("button")) {
+  button.addEventListener("mousedown", function(){
+    mouseUp = false;
+    playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click).mp3');
+  });
+  button.addEventListener("mouseup", function(){
+    mouseUp = true;
+    playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3');
+  });
+  button.addEventListener("mouseout", function(){
+    if (!mouseUp) playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3');
+  });
+}
 </script>
