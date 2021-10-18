@@ -26,10 +26,12 @@
       <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <a class="ScoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
-      <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green; background:black;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
-      <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png">
+      <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
+      <a class="ScoreText" id="ingameSoundEffectsA"><input id="ingameSoundEffectsCheck" style="accent-color:green;" type="checkbox" checked="true" onchange=" if (checked) audio.volume = JSON.parse(volControlIngameSound.value)/100; else audio.volume = 0;">play ingame sound effects</a>
+      <!-- <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png"> -->
       <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
       <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlIngameSound" oninput="audio.volume = JSON.parse(value)/100;" min="0" value="100" max="100">
       </div>
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
@@ -52,7 +54,6 @@
       <br>
       <div class="scoreText" id="flaticonCredits">Icon made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
         <img class="ScoreText button" id="highscoreListButtonCredit" title="click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.flaticon.com/free-icon/winner_809526?term=winner&page=1&position=2&page=1&position=2&related_id=809526&origin=style', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png">
-        <!-- TODO: mute button? -->
     </div>
     <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
     <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; restartTutorial(true);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
@@ -290,23 +291,28 @@
 #spaceMusicA {
   top: 27vh;
   font-size: 2vw;
-  left: 28%;
+  left: 18%;
 }
 #fightMusicA {
   top: 27vh;
   font-size: 2vw;
-  left: 35vw;
+  left: 44vw;
   text-size.adjust: auto;
   text-size-adjust: 80%;
 }
-#muteButton {
+#ingameSoundEffectsA {
+  top: 28.5vh;
+  font-size: 2vw;
+  left: 57%;
+}
+/* #muteButton {
   width: 5vw;
   left: 50%;
   top: 32vh;
 }
 #muteButton:hover {
   background: hsla(0, 0%, 50%, 0.19);
-}
+} */
 #highscoreListButtonCredit {
   width: 5vw;
   /* bottom: 6.9vh; */
@@ -318,13 +324,18 @@
   background: hsla(0, 0%, 50%, 0.19);
 }
 #volControlSpaceMusic {
-  left: 23%;
+  left: 18%;
   top: 32vh;
 }
 #volControlFightMusic {
-  left: 35vw;
+  left: 44vw;
   top: 32vh;
   accent-color: red;
+}
+#volControlIngameSound {
+  left: 57%;
+  top: 32vh;
+  accent-color: green;
 }
 /* settings menu: gameplay */
 #useMultAmmoA {
@@ -441,6 +452,8 @@
   else var gerät = "PC";
   console.log(gerät);
   var wHeight = window.innerHeight;
+  // var ingameSound = {boolean: true, volume: 100};
+  var audio = new Audio();
   var newCannon;
   var speed ;
   var lives;
@@ -498,7 +511,7 @@
             }, 3333);
           }, 4000);
         }
-        if (bullet) new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav').play();
+        if (bullet) playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav')
         // bullet.y = this.position.y - bullet.height;
         bullet.speed += 5;
         bullets.push(JSON.parse(JSON.stringify(bullet)));
@@ -615,14 +628,14 @@
       if (bullet.x + bullet.width > window.innerWidth - 50) {
         lives.now -= bullet.width;
         bullets.splice(i, 1);
-        new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav').play();
+        playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav')
       }
       else {
       // player picks bullet
       if (!bullet.fromPlayer && isCollide(bullet, {x: player.position.x, y: player.position.y, width: 50, height: 50})) {
         console.log("player picks bullet!");
         if (player.bullets.got.length < player.bullets.max && phase.name != "useAmmo") {
-          new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav').play();
+          playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/pick_bullet.wav')
           bullet.direction.x = -1;
           bullet.fromPlayer = true;
           if (phase.name != "collectAmmo" || player.position.x + (bullet.width/2)/* + 50*/ - bullet.width >= window.innerWidth - 50 - bullet.width) bullet.x = player.position.x + 50 - bullet.width;
@@ -643,7 +656,7 @@
         cannons.forEach((cannon, i1) => {
           if (isCollide(cannon, bullet)) {
             cannons.splice(i1, 1);
-            new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/cannon_explosion.wav').play();
+            playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/cannon_explosion.wav')
             if (enhancedModeCheck.checked) {
               points.counter += cannon.points;
               points.show.push({data: cannon, counter: 1333});
@@ -668,7 +681,7 @@
       playerBullets.forEach((playerBullet, i1) => {
         if (playerBullet && !bullet.fromPlayer && isCollide(playerBullet, bullet) && JSON.stringify(playerBullet) != JSON.stringify(bullet)) {
           bullets.splice(i, 1);
-          new Audio('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot_shot.wav').play();
+          playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot_shot.wav')
           if (player.selectedBullet == player.bullets.got.length - 1 && player.selectedBullet > 0) player.selectedBullet--;
           if (i1 == playerBullets.length - 1 && selectedBullet) {
             console.log("defended with bullet on hand!");
@@ -916,6 +929,11 @@ if (tutorial.status == "shoot") {
     else if (useMultAmmo.checked && newCannon && newCannon.time.needed < convertNumber *1.2) highscoresNow = highscores.normal.useAmmo[gerät];
     else highscoresNow = highscores.normal.notUseAmmo[gerät];
     return highscoresNow;
+  }
+  function playSoundEffect(src) {
+    var newAudio = new Audio(src);
+    newAudio.volume = audio.volume;
+    newAudio.play();
   }
   // menu interactions
   function endGame() {
