@@ -35,10 +35,10 @@
       </div>
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
-        <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but you won't be able to move left and right, so you of cause will get only one point per cannon. Instead of being able to go left and right, you have the ability to store some bullets over time. "><input id="differentSpeedCheck" checked="true" type="checkbox"> different speed</a>
+        <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
+        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" checked="true" name="mode" type="radio"> different speed</a>
         <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
-        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" type="checkbox"> enhanced</a>
+        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" type="radio"> enhanced</a>
       </div>
     </div>
     <div style="display:none" id="credits">
@@ -1203,7 +1203,7 @@ var mouseUp = "ignore";
 for (var button of document.getElementsByClassName("button")) {
   button.addEventListener("mousedown", function(){
     mouseUp = false;
-    playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click).mp3');
+    playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click)_v2.mp3'/*'https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click).mp3'*/);
   });
   button.addEventListener("mouseup", function(){
     mouseUp = true;
