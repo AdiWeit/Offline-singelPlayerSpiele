@@ -60,8 +60,8 @@
     <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; restartTutorial(true);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
     <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; pauseF(false, true);" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
     <!-- <button class="ScoreText button" id="retryButton" onclick="pauseF(false, true);" name="button">⟲</button> -->
-    <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeSettingsVis(src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
-    <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; showCredits();" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
+    <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; menuChangeAnimation(window.innerWidth/2, false, false, changeSettingsVis, src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; menuChangeAnimation(window.innerWidth/2, false, false, showCredits);" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
@@ -926,6 +926,7 @@ if (tutorial.status == "shoot") {
       onlineWebFontsCredits.style.top = "12vh";
     }
     document.getElementById('app').style.display = "none";
+    settings.style.display = "none";
     settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png';
   }
   var pause = {boolean: false};
@@ -991,6 +992,24 @@ if (tutorial.status == "shoot") {
         endGameAnimation(convertCss(menus.style.top) - 5, true);
       }, 1);
     }
+  }
+  // menuChangeAnimation(window.innerWidth/2);
+  function menuChangeAnimation(x, wasOnLeft, bounce, newMenuFunc, src) {
+    menus.style.left = x;
+    setTimeout(function () {
+      if (x > window.innerWidth + menus.getBoundingClientRect().width/2) {
+        x = - menus.getBoundingClientRect().width;
+        wasOnLeft = true;
+        newMenuFunc(src);
+      }
+      if (!wasOnLeft || (x <= window.innerWidth/2 + 30 && !bounce && bounce != "back"))  menuChangeAnimation(x + 35, wasOnLeft, bounce, newMenuFunc, src);
+      else {
+        if (x >= window.innerWidth/2 - 30 && bounce != "back")  menuChangeAnimation(x - 4, wasOnLeft, true);
+        else if (x <= window.innerWidth/2) {
+          menuChangeAnimation(x + 4, wasOnLeft, "back");
+        }
+      }
+    }, 1);
   }
   function convertCss(data) {
     return JSON.parse(data.replace('px', ''))
