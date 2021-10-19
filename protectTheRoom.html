@@ -36,9 +36,10 @@
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
         <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" checked="true" name="mode" type="radio"> different speed</a>
+        <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline';" id="normalModeCheck" name="mode" type="radio"> normal mode</a>
+        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" checked="true" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> different speed</a>
         <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
-        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" type="radio"> enhanced</a>
+        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> enhanced</a>
       </div>
     </div>
     <div style="display:none" id="credits">
@@ -301,16 +302,22 @@
 }
 /* settings menu: gameplay */
 #useMultAmmoA {
-  left: 38vw;
+  left: 36.7vw;
   font-size: 2vw;
   /* top: 50vh; */
-  top: 44.5vh;
+  top: 46.5vh;
   accent-color: green;
 }
 #differentSpeedA {
   left: 22vw;
   font-size: 2vw;
   /* top: 50vh; */
+  top: 44.5vh;
+  accent-color: green;
+}
+#normalA {
+  left: 37vw;
+  font-size: 2vw;
   top: 44.5vh;
   accent-color: green;
 }
