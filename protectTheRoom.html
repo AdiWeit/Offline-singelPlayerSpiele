@@ -993,6 +993,7 @@ if (tutorial.status == "shoot") {
       }, 1);
     }
   }
+  var direcitonIfs;
   // menuChangeAnimation(window.innerWidth/2);
   function menuChangeAnimation(x, wasOnLeft, bounce, direction, newMenuFunc, src) {
     if (direction === true) {
@@ -1001,20 +1002,38 @@ if (tutorial.status == "shoot") {
     }
     menus.style.left = x;
     setTimeout(function () {
-      if ((x > window.innerWidth + menus.getBoundingClientRect().width/2 && direction == 1) || (direction == -1 && x < - menus.getBoundingClientRect().width/2)) {
+      direcitonIfs = loadDirectionIfs(x);
+      if (direcitonIfs[direction].offScreenMove) {
         x = - menus.getBoundingClientRect().width;
         if (direction == -1) x = window.innerWidth + menus.getBoundingClientRect().width;
         wasOnLeft = true;
         newMenuFunc(src);
+        direcitonIfs = loadDirectionIfs(x);
       }
-      if (!wasOnLeft || (((x <= window.innerWidth/2 + 30 && direction == 1) || (direction == -1 && x >= window.innerWidth/2 - 30)) && !bounce && bounce != "back"))  menuChangeAnimation(x + 35*direction, wasOnLeft, bounce, direction, newMenuFunc, src);
+      if (!wasOnLeft || (direcitonIfs[direction].onScreenMove && !bounce && bounce != "back"))  menuChangeAnimation(x + 35*direction, wasOnLeft, bounce, direction, newMenuFunc, src);
       else {
-        if (((x >= window.innerWidth/2 - 30 && direction == 1) || (direction == -1 && x <= window.innerWidth/2 + 30)) && bounce != "back")  menuChangeAnimation(x - 4*direction, wasOnLeft, true, direction);
-        else if ((x <= window.innerWidth/2 && direction == 1) || (direction == -1 && x >= window.innerWidth/2)) {
+        if (direcitonIfs[direction].bounceBackwards && bounce != "back")  menuChangeAnimation(x - 4*direction, wasOnLeft, true, direction);
+        else if (direcitonIfs[direction].bounceBack) {
           menuChangeAnimation(x + 4*direction, wasOnLeft, "back", direction);
         }
       }
     }, 1);
+  }
+  function loadDirectionIfs(x) {
+    return {
+      1: {
+        offScreenMove: x > window.innerWidth + menus.getBoundingClientRect().width/2,
+        onScreenMove: x <= window.innerWidth/2 + 30,
+        bounceBackwards: x >= window.innerWidth/2 - 30,
+        bounceBack: x <= window.innerWidth/2
+      },
+      "-1": {
+        offScreenMove: x < - menus.getBoundingClientRect().width/2,
+        onScreenMove: x >= window.innerWidth/2 - 30,
+        bounceBackwards: x <= window.innerWidth/2 + 30,
+        bounceBack: x >= window.innerWidth/2
+      }
+    };
   }
   function convertCss(data) {
     return JSON.parse(data.replace('px', ''))
