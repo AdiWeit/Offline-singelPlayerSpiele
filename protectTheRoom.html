@@ -35,7 +35,7 @@
       </div>
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
-        <a class="ScoreText" id="useMultAmmoA" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
+        <a class="ScoreText" id="useMultAmmoA" style="display:none" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
         <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline';" id="normalModeCheck" name="mode" type="radio"> normal mode</a>
         <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" checked="true" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> different speed</a>
         <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
@@ -510,7 +510,7 @@
     if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
     if (differentSpeedCheck.checked && gerät == "Handy") newCannon.time.needed = convertNumber*4;
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
-    lives = {beginning: 133, now: 133};
+    lives = {beginning: 133, now: 133, shield: true};
     phase = {name: "normal"};
     player = new Player();
     cannons = [];
@@ -595,6 +595,7 @@
     bullets.forEach((bullet, i) => {
       // bullet hits room
       if (bullet.x + bullet.width > window.innerWidth - 50) {
+        if (lives.now <= 0) lives.shield = false;
         lives.now -= bullet.width;
         bullets.splice(i, 1);
         playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav')
@@ -676,6 +677,8 @@
     canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
     canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
+    canvas.fillStyle = "hsl(187, 99%, 49%)";
+    if (lives.now >= 0) canvas.fillRect(window.innerWidth - 50 - 7, 0, 7, wHeight);
     newCannon.time.got += 16;
     // change variables
     if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
@@ -840,7 +843,7 @@
       	player.selectedBullet = player.reload.index;
       }
     }
-    if (lives.now > 0 && !(tutorial.status == "no" && tutorialCheck.checked) && !pause.boolean) requestAnimationFrame(animateBullet);
+    if ((lives.now > 0 || lives.shield) && !(tutorial.status == "no" && tutorialCheck.checked) && !pause.boolean) requestAnimationFrame(animateBullet);
     else {
       if (lives.now <= 0 && tutorial.status != "no") restartTutorial();
       if (!pause.boolean && !pause.inProgress) endGame();
