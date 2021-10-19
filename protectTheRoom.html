@@ -424,7 +424,7 @@
   // var ingameSound = {boolean: true, volume: 100};
   var audio = new Audio();
   var newCannon;
-  var speed ;
+  var speed;
   var lives;
   var highscores = {enhanced: {PC: {}, Handy: {}}, normal: {useAmmo: {PC: {}, Handy: {}}, notUseAmmo: {PC: {}, Handy: {}}}, speedDiff: {PC: {}, Handy: {}}};
   try {
@@ -510,7 +510,7 @@
     if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
     if (differentSpeedCheck.checked && gerät == "Handy") newCannon.time.needed = convertNumber*4;
     speed = {bullet: 3, cannon: 1777, minTime: 1777};
-    lives = {beginning: 133, now: 133, shield: true};
+    lives = {beginning: 133, now: 133, shield: true, shieldDamageAnimationY: {boolean: false, number: 0}};
     phase = {name: "normal"};
     player = new Player();
     cannons = [];
@@ -596,6 +596,7 @@
       // bullet hits room
       if (bullet.x + bullet.width > window.innerWidth - 50) {
         if (lives.now <= 0) lives.shield = false;
+        else lives.shieldDamageAnimationY = {boolean: true, number: 0, position: player.position.y};
         lives.now -= bullet.width;
         bullets.splice(i, 1);
         playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav')
@@ -677,8 +678,16 @@
     canvas.fillRect(window.innerWidth - 50, 0, 35, wHeight);
     canvas.fillStyle = "rgba(40, 228, 70, 0.55)";
     canvas.fillRect(window.innerWidth - 50, -wHeight*(lives.now/lives.beginning) + wHeight, 35, wHeight);
-    canvas.fillStyle = "hsl(187, 99%, 49%)";
+    canvas.fillStyle = "hsl(187, 91%, 49%)";
     if (lives.now >= 0) canvas.fillRect(window.innerWidth - 50 - 7, 0, 7, wHeight);
+    if (lives.shieldDamageAnimationY.boolean && lives.now > 0) {
+      canvas.fillStyle = "hsl(186, 100%, 76%)";
+      // canvas.fillStyle = "red";
+      canvas.fillRect(window.innerWidth - 50 - 7, lives.shieldDamageAnimationY.position + lives.shieldDamageAnimationY.number, 7, 50);
+      canvas.fillRect(window.innerWidth - 50 - 7, lives.shieldDamageAnimationY.position - lives.shieldDamageAnimationY.number, 7, 50);
+      lives.shieldDamageAnimationY.number += 10;
+      if (lives.shieldDamageAnimationY.number + lives.shieldDamageAnimationY.position > wHeight && lives.shieldDamageAnimationY.position - lives.shieldDamageAnimationY.number < 0) lives.shieldDamageAnimationY.boolean = false;
+    }
     newCannon.time.got += 16;
     // change variables
     if (newCannon.time.got >= newCannon.time.needed && tutorial.status == "no") {
