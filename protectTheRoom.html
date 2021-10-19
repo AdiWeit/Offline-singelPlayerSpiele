@@ -27,11 +27,11 @@
       <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <a class="ScoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
       <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
-      <a class="ScoreText" id="ingameSoundEffectsA"><input id="ingameSoundEffectsCheck" style="accent-color:green;" type="checkbox" checked="true" onchange=" if (checked) audio.volume = JSON.parse(volControlIngameSound.value)/100; else audio.volume = 0;">play ingame sound effects</a>
+      <a class="ScoreText" id="ingameSoundEffectsA"><input id="ingameSoundEffectsCheck" style="accent-color:green;" type="checkbox" checked="true" onchange="musicSelected(id, checked); if (checked) audio.volume = JSON.parse(volControlIngameSoundEffects.value)/100; else audio.volume = 0;">play ingame sound effects</a>
       <!-- <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png"> -->
       <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
       <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
-      <input type="range" class="ScoreText" id="volControlIngameSound" oninput="audio.volume = JSON.parse(value)/100;" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlIngameSoundEffects" oninput="audio.volume = JSON.parse(value)/100;" min="0" value="100" max="100">
       </div>
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
@@ -295,7 +295,7 @@
   top: 32vh;
   accent-color: red;
 }
-#volControlIngameSound {
+#volControlIngameSoundEffects {
   left: 57%;
   top: 32vh;
   accent-color: green;
@@ -396,10 +396,10 @@
   }, 100);
   function musicSelected(id, checked) {
     if (checked) {
-      playerObj[id.split('Music')[0]].playVideo();
+      if (!id.includes('ingame')) playerObj[id.split('Music')[0]].playVideo();
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'green';
     } else {
-      playerObj[id.split('Music')[0]].pauseVideo();
+      if (!id.includes('ingame')) playerObj[id.split('Music')[0]].pauseVideo();
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
     } localStorage.setItem('protectTheRoomSpaceMusic', checked);
   }
