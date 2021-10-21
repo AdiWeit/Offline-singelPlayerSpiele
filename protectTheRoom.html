@@ -64,7 +64,7 @@
     <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; menuChangeAnimation(window.innerWidth/2, false, false, true, changeSettingsVis, src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
     <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, showCredits);" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
-<img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; pauseF(true);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
+<img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; if (!pause.boolean) pauseF(true); else pauseF(false);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
 <script src="https://www.youtube.com/player_api"></script>
 <style>
