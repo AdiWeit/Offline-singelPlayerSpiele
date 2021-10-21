@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="user-scalable=no">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <title>protect the room</title>
@@ -36,8 +37,8 @@
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
         <a class="ScoreText" id="useMultAmmoA" style="display:none" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline';" id="normalModeCheck" name="mode" type="radio"> normal mode</a>
-        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" checked="true" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> different speed</a>
+        <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline';" id="normalModeCheck" name="mode" checked="true" type="radio"> normal mode</a>
+        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> different speed</a>
         <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
         <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> enhanced</a>
       </div>
@@ -85,6 +86,7 @@
 }
 #menus {
   border-radius: 15%;
+  overflow-x: hidden;
 
   background-color: rgba(255, 255, 255, 0.5);
   border: 3px solid white;
@@ -462,24 +464,25 @@
       console.log("shoot!");
       try {
       bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
-        if (tutorial.status == "no" || tutorial.status.includes("shoot")) {
-        if (tutorial.status == "shoot" && bullet) {
+        if (tutorial.status == "no" || tutorial.status.includes("shoot") || tutorial.status.includes('waiting for bullet')) {
+        if ((tutorial.status == "shoot" || tutorial.status.includes('waiting for bullet')) && bullet) {
           space_key.style.fontSize = "120px";
-          space_key.innerHTML = 'collect';
+          space_key.style.display = 'inline';
+          space_key.innerHTML = 'collect 2';
           // space_key.style.display = "none";
           setTimeout(function () {
             tutorial.status = "collectAmmo";
             tutorial.counter = 0;
             player.bullets.max++;
-            bullets.push({speed: 6, x: 33, y: window.innerHeight/3 - 133, width: 133, height: 133, direction: {x: 1, y: 0}});
+            bullets.push({speed: 3, x: 33, y: window.innerHeight/3 - 133, width: 133, height: 133, direction: {x: 1, y: 0}});
             setTimeout(function () {
-              bullets.push({speed: 5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
+              bullets.push({speed: 3.5, x: 33, y: 33, width: 50, height: 50, direction: {x: 1, y: 0}});
               setTimeout(function () {
-                if (tutorial.status == "collectAmmo" && palyer.bullets.got.length > 0) {
+                if (tutorial.status == "collectAmmo" && player.bullets.got.length > 0) {
                   restartTutorial();
                 }
-              }, 5000);
-            }, 3333);
+              }, 10000);
+            }, 5333);
           }, 4000);
         }
         if (bullet) playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/shot.wav')
@@ -664,6 +667,7 @@
             console.log("defended with bullet on hand!");
             player.bullets.got.splice(player.selectedBullet, 1);
             if (tutorial.status == "collectAmmo") {
+              alert('Do not destroy it with your selected bullet(red)! Instead go a bit higher so only the white player will hit the bullet!');
               restartTutorial();
             }
             if (tutorial.status == "waiting for bullet") tutorial.status = "waiting for bullet 2";
@@ -1074,7 +1078,7 @@ if (tutorial.status == "shoot") {
   function restartTutorial(byUser) {
     tutorial.status = "no";
     setTimeout(function () {
-      if (!byUser || !newCannon.counter || (byUser && newCannon.counter && confirm('Do you really want to start the tutorial? You would loose the progress in your current game session!'))) startGame(true);
+      if (!byUser || !newCannon || !newCannon.counter || (byUser && newCannon.counter && confirm('Do you really want to start the tutorial? You would loose the progress in your current game session!'))) startGame(true);
     }, 100);
   }
   function scrollToHighscore() {
