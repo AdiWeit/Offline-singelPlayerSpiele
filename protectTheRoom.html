@@ -600,13 +600,16 @@
     bullets.forEach((bullet, i) => {
       // bullet hits room
       if (bullet.x + bullet.width > window.innerWidth - 50) {
-        if (lives.now <= 0) lives.shield = false;
+        if (lives.now <= 0) {
+          lives.shield = false;
+        }
         else {
           lives.shieldDamageAnimationY = {boolean: true, number: 0, position: bullet.y + bullet.height/2, height: bullet.height/2};
           if (lives.damageAnimation.boolean) lives.damageAnimation.livesAfter -= bullet.width;
           else lives.damageAnimation = {livesBefore: lives.now, livesAfter: lives.now - bullet.width, boolean: true, beginning: lives.now};
         }
         lives.now -= bullet.width;
+        if (lives.now <= 0 && tutorial.status == "takeDamage" && lives.shield) alert('The shield of your starbase broke! One more hit no matter how big and you loose! (This is what you want ;)  )');
         bullets.splice(i, 1);
         playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/damage.wav')
       }
@@ -644,13 +647,15 @@
             if (tutorial.status == "kill/shoot cannons") {
               tutorial.counter++;
               if (tutorial.counter > 2) {
-                player.bullets.max = 1;
-                space_key.style.display = "none";
-                tutorialCheck.checked = false;
-                tutorial.status = "no";
-                localStorage.setItem('protectTheRoomTutorialPlayed', true);
-              }
+              tutorial.status = "takeDamage";
+              space_key.innerHTML = 'loose! (take damage: do not collect them)';
+              space_key.style.fontSize = 60;
+              setTimeout(function () {
+                cannons.push({x: 33, y: 10, width: 50, height: 50, speed: 3000, bulletSpeed: 5, timeGone: 0, direction: {x: 1, y: 0}});
+                // cannons.push({x: 33, y: 150, width: 50, height: 50, speed: 3000, bulletSpeed: 5, timeGone: 0, direction: {x: 1, y: 0}});
+              }, 1000);
             }
+          }
           }
           if (cannon.points - 16 >= 1) cannon.points -= 16;
         });
@@ -870,8 +875,21 @@
     }
     if ((lives.now > 0 || lives.shield) && !(tutorial.status == "no" && tutorialCheck.checked) && !pause.boolean) requestAnimationFrame(animateBullet);
     else {
-      if (lives.now <= 0 && tutorial.status != "no") restartTutorial();
-      if (!pause.boolean && !pause.inProgress) endGame();
+      if (lives.now <= 0 && tutorial.status != "no") {
+        if (tutorial.status == "takeDamage") {
+          lives.now = lives.beginning;
+            player.bullets.max = 1;
+            space_key.style.display = "none";
+            tutorialCheck.checked = false;
+            tutorial.status = "no";
+            localStorage.setItem('protectTheRoomTutorialPlayed', true);
+            cannons = [];
+            bullets = [];
+            animateBullet();
+        }
+        else restartTutorial();
+      }
+      else if (!pause.boolean && !pause.inProgress) endGame();
     }
     // player layout
 canvas.fillStyle = "white";
