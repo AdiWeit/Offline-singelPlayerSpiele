@@ -430,8 +430,8 @@
     // highscoreList.style.top = i/2 + menus.getBoundingClientRect().top;
     highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
   }, 100);
-  function musicSelected(id, checked) {
-    changeSettings(id, ["checked"], [checked]);
+  function musicSelected(id, checked, doNotStore) {
+    if (!doNotStore) changeSettings(id, ["checked"], [checked]);
     if (checked) {
       if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
       if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
@@ -440,12 +440,13 @@
     } else {
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].pauseVideo();
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
-    } localStorage.setItem('protectTheRoomSpaceMusic', checked);
+    }
+    // localStorage.setItem('protectTheRoomSpaceMusic', checked);
   }
   menus.style.width = window.innerWidth/2;
   menus.style.height = window.innerHeight/1.4;
   var swipeStr = "";
-  if (localStorage.getItem('protectTheRoomSpaceMusic') == "false") spaceMusicCheck.checked = false;
+  // if (localStorage.getItem('protectTheRoomSpaceMusic') == "false") spaceMusicCheck.checked = false;
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -461,7 +462,7 @@
   console.log(gerät);
   var wHeight = window.innerHeight;
   // var ingameSound = {boolean: true, volume: 100};
-  var settingsObj = {spaceMusicCheck: {checked: true}, fightMusicCheck: {checked: false}, ingameSoundEffectsCheck: {checked: true}, customMusicCheck: {checked: false}, musicURL: {value: ''}, musicTime: {value: ''}, volControlFightMusic: {value: '100'}, volControlSpaceMusic: {value: '100'}, volControlCustomMusic: {value: '100'}, volControlIngameSoundEffects: {value: '100'}, useMultAmmo: {checked: true}, normalModeCheck: {checked: true}, differentSpeedCheck: {checked: false}, enhancedModeCheck: {checked: true}};
+  var settingsObj = {spaceMusicCheck: {checked: true}, fightMusicCheck: {checked: false}, ingameSoundEffectsCheck: {checked: true}, customMusicCheck: {checked: false}, musicURL: {value: ''}, musicTime: {value: ''}, volControlFightMusic: {value: '100'}, volControlSpaceMusic: {value: '100'}, volControlCustomMusic: {value: '100'}, volControlIngameSoundEffects: {value: '100'}, useMultAmmo: {checked: true}, normalModeCheck: {checked: true}, differentSpeedCheck: {checked: false}, enhancedModeCheck: {checked: false}};
   var audio = new Audio();
   var newCannon;
   var speed;
@@ -1071,17 +1072,26 @@ if (tutorial.status == "shoot") {
       scoreText.style.display = 'inline';
     }
   }
-  function customPlayerF(URL, id) {
+  function customPlayerF(URL, id, doNotStore) {
+    document.getElementById(id).value = URL;
     var playerOby = new YT.Player('customPlayer', {
         videoId: URL.split('?v=')[1], // this is the id of the video at youtube (the stuff after "?v=")
         loop: true,
         events: {
             onReady: function (e) {
                 playerObj.custom = e.target;
+                musicTime.value = settingsObj.musicTime.value;
+                for (var id of Object.keys(settingsObj)) {
+                  for (var param of Object.keys(settingsObj[id])) {
+                    document.getElementById(id)[param] = settingsObj[id][param];
+                  }
+                  if (id.includes('MusicCheck')) musicSelected(id, settingsObj[id].checked, true);
+                  if (id.includes('volControl') && !id.includes('Ingame')) playerObj[id.split('Control')[1].replace('Music', '').toLowerCase()].setVolume(settingsObj[id].value);
+                }
               },
         }
     });
-    changeSettings(id, ['value'], [URL]);
+    if (!doNotStore) changeSettings(id, ['value'], [URL]);
   }
   function changeSettings(id, params, values) {
     if (id.includes('differentSpeed') || id.includes('Mode')) {
@@ -1093,13 +1103,6 @@ if (tutorial.status == "shoot") {
       settingsObj[id][param] = values[i];
     });
     localStorage.setItem('protectTheRoomSettings', JSON.stringify(settingsObj));
-  }
-  // getSettings
-  if (localStorage.getItem('protectTheRoomSettings')) settingsObj = JSON.parse(localStorage.getItem('protectTheRoomSettings'));
-  for (var id of Object.keys(settingsObj)) {
-    for (var param of Object.keys(settingsObj[id])) {
-      document.getElementById(id)[param] = settingsObj[id][param];
-    }
   }
   function endGameAnimation(y, bounce) {
     menus.style.top = y;
@@ -1354,8 +1357,8 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
-              if (localStorage.getItem('protectTheRoomSpaceMusic') == "true" || localStorage.getItem('protectTheRoomSpaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
-              else musicSelected('spaceMusicCheck', false);
+              // if (localStorage.getItem('protectTheRoomSpaceMusic') == "true" || localStorage.getItem('protectTheRoomSpaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
+              // else musicSelected('spaceMusicCheck', false);
             },
       }
   });
@@ -1365,6 +1368,9 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.fight = e.target;
+              // getSettings
+              if (localStorage.getItem('protectTheRoomSettings')) settingsObj = JSON.parse(localStorage.getItem('protectTheRoomSettings'));
+              customPlayerF(settingsObj.musicURL.value, 'musicURL', true);
             },
       }
   });
