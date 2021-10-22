@@ -30,22 +30,22 @@
       <a class="ScoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
       <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
       <a class="ScoreText" id="customMusicA"><input id="customMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play custom music</a>
-      <input class="scoreText Input" type="text" onchange="customPlayerF(value);" id="musicURL" placeholder="youtube URL/Link/web adress">
-      <input class="scoreText Input" type="text" onchange="" id="musicTime" placeholder="beginning time (like 5:7 or 0:7)">
+      <input class="scoreText Input" type="text" onchange="customPlayerF(value, id);" id="musicURL" placeholder="youtube URL/Link/web adress">
+      <input class="scoreText Input" type="text" onchange="playerObj.custom.seekTo(value.split(':')[0]*60 + JSON.parse(value.split(':')[1])); changeSettings(id, ['value'], [value]);" id="musicTime" placeholder="beginning time (like 5:7 or 0:7)">
       <a class="ScoreText" id="ingameSoundEffectsA"><input id="ingameSoundEffectsCheck" style="accent-color:green;" type="checkbox" checked="true" onchange="musicSelected(id, checked); if (checked) audio.volume = JSON.parse(volControlIngameSoundEffects.value)/100; else audio.volume = 0;">play ingame sound effects</a>
       <!-- <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png"> -->
-      <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
-      <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
-      <input type="range" class="ScoreText" id="volControlCustomMusic" oninput="playerObj.custom.setVolume(value);" min="0" value="100" max="100">
-      <input type="range" class="ScoreText" id="volControlIngameSoundEffects" oninput="audio.volume = JSON.parse(value)/100;" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value); changeSettings(id, ['value'], [value]);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value); changeSettings(id, ['value'], [value]);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlCustomMusic" oninput="playerObj.custom.setVolume(value); changeSettings(id, ['value'], [value]);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlIngameSoundEffects" oninput="audio.volume = JSON.parse(value)/100; changeSettings(id, ['value'], [value]);" min="0" value="100" max="100">
       </div>
       <div>
         <h5 id="gameplayHeader" class="ScoreText">gameplay</h5>
-        <a class="ScoreText" id="useMultAmmoA" style="display:none" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" type="checkbox"> ammo tactic</a>
-        <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline';" id="normalModeCheck" name="mode" checked="true" type="radio"> normal mode</a>
-        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> different speed</a>
+        <a class="ScoreText" id="useMultAmmoA" style="display:none" title="the maximal difficulty is lowered and instead you have to collect ammo in one phase and shoot it in the other when the max. difficulty is reached."><input id="useMultAmmo" checked="true" onchange="changeSettings(id, ['checked'], [checked]);" type="checkbox"> ammo tactic</a>
+        <a class="ScoreText" id="normalA" title="This is the normal mode. You can move up and down and can store multiple ammo with some time passing. "><input onchange="if (checked) useMultAmmoA.style.display = 'inline'; changeSettings(id, ['checked'], [checked]);" id="normalModeCheck" name="mode" checked="true" type="radio"> normal mode</a>
+        <a class="ScoreText" id="differentSpeedA" title="This is a version between the normal one and enhanced mode. The bullets will fly with different speed, but everything else is like in normal mode. "><input id="differentSpeedCheck" name="mode" onchange="useMultAmmoA.style.display = 'none'; changeSettings(id, ['checked'], [checked]);" type="radio"> different speed</a>
         <a style="display:none"><input id="tutorialCheck" type="checkbox">tutorial</a>
-        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" onchange="useMultAmmoA.style.display = 'none';" type="radio"> enhanced</a>
+        <a class="ScoreText" id="enhancedModeA" title="Gives you the ability to move left and right, but takes the ability to store your ammo away. Furthermore, you now receive points based on your speed, so try to be fast, but don't risk too much!"><input id="enhancedModeCheck" name="mode" onchange="useMultAmmoA.style.display = 'none'; changeSettings(id, ['checked'], [checked]);" type="radio"> enhanced</a>
       </div>
     </div>
     <div style="display:none" id="credits">
@@ -431,6 +431,7 @@
     highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
   }, 100);
   function musicSelected(id, checked) {
+    changeSettings(id, ["checked"], [checked]);
     if (checked) {
       if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
       if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
@@ -460,6 +461,7 @@
   console.log(gerät);
   var wHeight = window.innerHeight;
   // var ingameSound = {boolean: true, volume: 100};
+  var settingsObj = {spaceMusicCheck: {checked: true}, fightMusicCheck: {checked: false}, ingameSoundEffectsCheck: {checked: true}, customMusicCheck: {checked: false}, musicURL: {value: ''}, musicTime: {value: ''}, volControlFightMusic: {value: '100'}, volControlSpaceMusic: {value: '100'}, volControlCustomMusic: {value: '100'}, volControlIngameSoundEffects: {value: '100'}, useMultAmmo: {checked: true}, normalModeCheck: {checked: true}, differentSpeedCheck: {checked: false}, enhancedModeCheck: {checked: true}};
   var audio = new Audio();
   var newCannon;
   var speed;
@@ -1069,7 +1071,7 @@ if (tutorial.status == "shoot") {
       scoreText.style.display = 'inline';
     }
   }
-  function customPlayerF(URL) {
+  function customPlayerF(URL, id) {
     var playerOby = new YT.Player('customPlayer', {
         videoId: URL.split('?v=')[1], // this is the id of the video at youtube (the stuff after "?v=")
         loop: true,
@@ -1079,6 +1081,25 @@ if (tutorial.status == "shoot") {
               },
         }
     });
+    changeSettings(id, ['value'], [URL]);
+  }
+  function changeSettings(id, params, values) {
+    if (id.includes('differentSpeed') || id.includes('Mode')) {
+      settingsObj.normalModeCheck.checked = false;
+      settingsObj.enhancedModeCheck.checked = false;
+      settingsObj.differentSpeedCheck.checked = false;
+    }
+    params.forEach((param, i) => {
+      settingsObj[id][param] = values[i];
+    });
+    localStorage.setItem('protectTheRoomSettings', JSON.stringify(settingsObj));
+  }
+  // getSettings
+  if (localStorage.getItem('protectTheRoomSettings')) settingsObj = JSON.parse(localStorage.getItem('protectTheRoomSettings'));
+  for (var id of Object.keys(settingsObj)) {
+    for (var param of Object.keys(settingsObj[id])) {
+      document.getElementById(id)[param] = settingsObj[id][param];
+    }
   }
   function endGameAnimation(y, bounce) {
     menus.style.top = y;
