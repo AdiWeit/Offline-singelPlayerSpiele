@@ -26,12 +26,17 @@
       <h5 class="ScoreText" id="soundHeader">sound</h5>
       <div id="spacePlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <div id="fightPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
+      <div id="customPlayer" style="position: absolute; top: -9999px; left: -9999px;"></div>
       <a class="ScoreText" id="spaceMusicA"><input id="spaceMusicCheck" style="accent-color:green;" checked="true" type="checkbox" onchange="musicSelected(id, checked);">play space music</a>
       <a class="ScoreText" id="fightMusicA"><input id="fightMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play fight music</a>
+      <a class="ScoreText" id="customMusicA"><input id="customMusicCheck" style="accent-color:green;" type="checkbox" onchange="musicSelected(id, checked);">play custom music</a>
+      <input class="scoreText Input" type="text" onchange="customPlayerF(value);" id="musicURL" placeholder="youtube URL/Link/web adress">
+      <input class="scoreText Input" type="text" onchange="" id="musicTime" placeholder="beginning time (like 5:7 or 0:7)">
       <a class="ScoreText" id="ingameSoundEffectsA"><input id="ingameSoundEffectsCheck" style="accent-color:green;" type="checkbox" checked="true" onchange="musicSelected(id, checked); if (checked) audio.volume = JSON.parse(volControlIngameSoundEffects.value)/100; else audio.volume = 0;">play ingame sound effects</a>
       <!-- <img class="ScoreText button" id="muteButton" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; changeMute();" src="https://adi.nicolaiweitkemper.de/Bilder/500px-Mute_Icon.svg.png"> -->
       <input type="range" class="ScoreText" id="volControlSpaceMusic" oninput="playerObj.space.setVolume(value);" min="0" value="100" max="100">
       <input type="range" class="ScoreText" id="volControlFightMusic" oninput="playerObj.fight.setVolume(value);" min="0" value="100" max="100">
+      <input type="range" class="ScoreText" id="volControlCustomMusic" oninput="playerObj.custom.setVolume(value);" min="0" value="100" max="100">
       <input type="range" class="ScoreText" id="volControlIngameSoundEffects" oninput="audio.volume = JSON.parse(value)/100;" min="0" value="100" max="100">
       </div>
       <div>
@@ -278,6 +283,28 @@
   text-size.adjust: auto;
   text-size-adjust: 80%;
 }
+#customMusicA {
+  top: 35.5vh;
+  font-size: 2vw;
+  left: 10vw;
+  text-size.adjust: auto;
+  text-size-adjust: 80%;
+}
+.Input {
+  background: gray;
+  color: white;
+}
+.Input::-webkit-input-placeholder {
+  color: white;
+}
+#musicURL {
+  top: 35.8vh;
+  left: 24.5vw;
+}
+#musicTime {
+  top: 35.8vh;
+  left: 38.5vw;
+}
 #ingameSoundEffectsA {
   top: 28.5vh;
   font-size: 2vw;
@@ -297,6 +324,11 @@
 #volControlFightMusic {
   left: 44vw;
   top: 32vh;
+  accent-color: red;
+}
+#volControlCustomMusic {
+  left: 10vw;
+  top: 38.5vh;
   accent-color: red;
 }
 #volControlIngameSoundEffects {
@@ -400,6 +432,8 @@
   }, 100);
   function musicSelected(id, checked) {
     if (checked) {
+      if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
+      if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].playVideo();
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'green';
     } else {
@@ -1034,6 +1068,17 @@ if (tutorial.status == "shoot") {
       highscoreText.style.display = 'inline';
       scoreText.style.display = 'inline';
     }
+  }
+  function customPlayerF(URL) {
+    var playerOby = new YT.Player('customPlayer', {
+        videoId: URL.split('?v=')[1], // this is the id of the video at youtube (the stuff after "?v=")
+        loop: true,
+        events: {
+            onReady: function (e) {
+                playerObj.custom = e.target;
+              },
+        }
+    });
   }
   function endGameAnimation(y, bounce) {
     menus.style.top = y;
