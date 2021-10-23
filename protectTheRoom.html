@@ -1150,6 +1150,7 @@ if (tutorial.status == "shoot") {
     }, 1);
   }
   function looseAnimation(x, y, width, height, firstCall, pTop) {
+    if (height > 50) height = 50;
     canvas.fillStyle = 'black';
     for (var i = x + 1; firstCall && i < x + width - (height/3 + 5); i += height/3 + 5) {
       // canvas.fillRect(i, y + 1, height/3, height/3);
@@ -1158,7 +1159,7 @@ if (tutorial.status == "shoot") {
         looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
       }
       else looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
-      looseAnimation(i + height/3/2, y + height - height/3/2 - 1, width, height, false, 3);
+      looseAnimation(i + height/3/2, y + deathBullet.height - height/3/2 - 1, width, height, false, 3);
     }
     if (!firstCall) {
     canvas.beginPath();
