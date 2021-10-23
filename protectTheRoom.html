@@ -1155,22 +1155,29 @@ if (tutorial.status == "shoot") {
     for (var i = x + 1; firstCall && i < x + width - (height/3 + 5); i += height/3 + 5) {
       // canvas.fillRect(i, y + 1, height/3, height/3);
       // canvas.fillRect(i, y + height - height/3 - 1, height/3, height/3);
+      if (height >= 50) {
       if (i == x + 1) {
         looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
       }
       else looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
       looseAnimation(i + height/3/2, y + deathBullet.height - height/3/2 - 1, width, height, false, 3);
     }
+    else if (i == x + 1) {
+      looseAnimation(i + height/2, y + height/2, width, height, false, -3);
+    }
+  }
     if (!firstCall) {
     canvas.beginPath();
-    canvas.arc(x, y, height/3/2, 0, Math.PI*2, false);
+    if (height >= 50) canvas.arc(x, y, height/3/2, 0, Math.PI*2, false);
+    else canvas.arc(x, y, height/2 - 1, 0, Math.PI*2, false);
     canvas.fill();
     setTimeout(function () {
       canvas.fillStyle = "white";
       canvas.beginPath();
-      canvas.arc(x, y, height/3/2 + 1, 0, Math.PI*2, false);
+      if (height >= 50) canvas.arc(x, y, height/3/2 + 1, 0, Math.PI*2, false);
+      else canvas.arc(x, y, height/2, 0, Math.PI*2, false);
       canvas.fill();
-      if (x - height/3/2 < window.innerWidth - 49) looseAnimation(x + 1, y, width, height, null, pTop);
+      if ((x - height/3/2 < window.innerWidth - 49) || (height < 50 && x - height/2 < window.innerWidth - 49)) looseAnimation(x + 1, y, width, height, null, pTop);
       else if (y + pTop > 0 && y + pTop < wHeight) looseAnimation(x, y + pTop, width, height, null, pTop);
     }, 1);
   }
