@@ -72,6 +72,7 @@
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; if (!pause.boolean) pauseF(true); else pauseF(false);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
 <script src="https://www.youtube.com/player_api"></script>
+<!-- <p style="font-size: 0.9rem;font-style: italic;"><img style="display: block;" src="https://live.staticflickr.com/8457/8058234718_6172eb6e24_b.jpg" alt="Top of Enterprise Refit"><a href="https://www.flickr.com/photos/93857621@N00/8058234718">"Top of Enterprise Refit"</a><span> by <a href="https://www.flickr.com/photos/93857621@N00">Matt_A</a></span> is licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/2.0/?ref=ccsearch&atype=html" style="margin-right: 5px;">CC BY-NC-ND 2.0</a><a href="https://creativecommons.org/licenses/by-nc-nd/2.0/?ref=ccsearch&atype=html" target="_blank" rel="noopener noreferrer" style="display: inline-block;white-space: none;margin-top: 2px;margin-left: 3px;height: 22px !important;"><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc_icon.svg?image_id=50946b83-16ac-4f76-920a-8923c6bb32f4" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-by_icon.svg" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-nc_icon.svg" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-nd_icon.svg" /></a></p> -->
 <style>
   /* big menuContent and classes: */
   #space_key {
@@ -436,9 +437,11 @@
       if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
       if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].playVideo();
+      else audio.volume = JSON.parse(volControlIngameSoundEffects.value)/100;
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'green';
     } else {
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].pauseVideo();
+      else audio.volume = 0;
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
     }
     // localStorage.setItem('protectTheRoomSpaceMusic', checked);
@@ -639,6 +642,7 @@
       if (bullet.x + bullet.width > window.innerWidth - 50) {
         if (lives.now <= 0) {
           lives.shield = false;
+          deathBullet = bullet;
         }
         else {
           lives.shieldDamageAnimationY = {boolean: true, number: 0, position: bullet.y + bullet.height/2, height: bullet.height/2};
@@ -987,11 +991,13 @@ if (tutorial.status == "shoot") {
     newAudio.volume = audio.volume;
     newAudio.play();
   }
-  // menu interactions
+  var deathBullet = {};
   function endGame() {
+    looseAnimation(deathBullet.x, deathBullet.y, deathBullet.width, deathBullet.height, true);
     enableScroll();
     getDbHighscores(true, true);
   }
+  // menu interactions
   function showMenu(gameEnded) {
     if (!gameEnded) showHighscores();
     menus.style.top = 0 - (menus.style.height.replace('px', ''))/2 + "px";
@@ -1085,7 +1091,7 @@ if (tutorial.status == "shoot") {
                   for (var param of Object.keys(settingsObj[id])) {
                     document.getElementById(id)[param] = settingsObj[id][param];
                   }
-                  if (id.includes('MusicCheck')) musicSelected(id, settingsObj[id].checked, true);
+                  if (id.includes('MusicCheck') || id.includes('ingameSoundEffects')) musicSelected(id, settingsObj[id].checked, true);
                   if (id.includes('volControl') && !id.includes('Ingame')) playerObj[id.split('Control')[1].replace('Music', '').toLowerCase()].setVolume(settingsObj[id].value);
                 }
               },
@@ -1142,6 +1148,49 @@ if (tutorial.status == "shoot") {
         }
       }
     }, 1);
+  }
+  function looseAnimation(x, y, width, height, firstCall, pTop) {
+    canvas.fillStyle = 'black';
+    for (var i = x + 1; firstCall && i < x + width - (height/3 + 5); i += height/3 + 5) {
+      // canvas.fillRect(i, y + 1, height/3, height/3);
+      // canvas.fillRect(i, y + height - height/3 - 1, height/3, height/3);
+      if (i == x + 1) {
+        looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
+      }
+      else looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
+      looseAnimation(i + height/3/2, y + height - height/3/2 - 1, width, height, false, 3);
+    }
+    if (!firstCall) {
+    canvas.beginPath();
+    canvas.arc(x, y, height/3/2, 0, Math.PI*2, false);
+    canvas.fill();
+    setTimeout(function () {
+      canvas.fillStyle = "white";
+      canvas.beginPath();
+      canvas.arc(x, y, height/3/2 + 1, 0, Math.PI*2, false);
+      canvas.fill();
+      if (x - height/3/2 < window.innerWidth - 49) looseAnimation(x + 1, y, width, height, null, pTop);
+      else if (y + pTop > 0 && y + pTop < wHeight) looseAnimation(x, y + pTop, width, height, null, pTop);
+    }, 1);
+  }
+    // canvas.fillStyle = 'black';
+    // for (var i = x + 1; i < x + width - (height/3 + 5); i += height/3 + 5) {
+    //   // canvas.fillRect(i, y + 1, height/3, height/3);
+    //   // canvas.fillRect(i, y + height - height/3 - 1, height/3, height/3);
+    //     canvas.beginPath();
+    //     canvas.arc(i + height/3/2, y + height/3/2 + 1, height/3/2, 0, Math.PI*2, false);
+    //     canvas.fill();
+    //     canvas.beginPath();
+    //     canvas.arc(i + height/3/2, y + height - height/3/2 - 1, height/3/2, 0, Math.PI*2, false);
+    //     canvas.fill();
+    // }
+    // setTimeout(function () {
+    //   if (x < window.innerWidth - 49) {
+    //     canvas.fillStyle = "white";
+    //     canvas.fillRect(x, y, width  + 50, height);
+    //     looseAnimation(x + 1, y, width, height);
+    //   }
+    // }, 1);
   }
   function loadDirectionIfs(x) {
     return {
