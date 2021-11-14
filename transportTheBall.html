@@ -11,7 +11,7 @@
   <!-- <option id="oppositeSelection" value="opposite">opposite</option> -->
   <option value="showScores">show scores</option>
 </select>
-<input id="easyMaps" type="checkbox"> easy map versions
+<input id="easyMaps" checked="true" type="checkbox"> easy map versions
 <br>
 <input type="checkbox" onchange="inOrAgainstDirection *= -1; setupLevel(true);" id="oppositeCheck"> opposite
 <br>
@@ -62,8 +62,32 @@
   <div class="shape" id="sphere2"></div>
 </div>
 <table id="scores"></table>
-
+<br>
+<script src="https://www.youtube.com/player_api"></script>
+<button type="button" onclick="showYoutubeVideo();" name="button">watch developer playing level (easy maps: all level)</button>
+<br>
+<div id="vidPlayer"></div>
 <script>
+  var playerObj;
+  var videoIdConverter = {false: {normal: ['tNKoG81CSsI', '_lo9GVktIYk', 'TAg3bnXQKzE', '9SRwETnuRpM', '4K9d9zPykzc', 'y9vokKUCqv4', 'WTWq4Zb2Wd4'], magnet: ['S25pXS6_cDw', 'Lr0aWLST98w', 'WiNPZDJTpVg', '82uctW_BFL8', 'cdWIeg-Oh60', 'hdzR8xr8Osw'], slide: ['1SD5ktvjsu0', 'aBXU5I4BIz8', '5YJOncx1g64', 'Fl8mipUtMCs', 'Jz5Jai65VNg', 'y73vFUkyTx0', 'l5OHULD2_0Y', 'vSABPJ-wbgU', 'ik1UHtkdPEE', '7-QwkxkX9zg'], allDirections: ['u_o_XDMCgHo', 'jqtwOmw71mc', 'rBzDROxUWuI', '8C24IJ0H0IM', 'B573LNYlK0M', 'V00AcXUHn1g']}, true: {normal: 'YbzMNy-zm_o', magnet: '4xYN1uSPKPA', allDirections: 'Q7ND0Q31ml0', slide: 'NgKgJiJmEJU'}}
+  function showYoutubeVideo() {
+    if (!easyMaps.checked) var vidID = videoIdConverter[easyMaps.checked][level.mode][level.aktuell - 1]
+    else var vidID = videoIdConverter[easyMaps.checked][level.mode];
+    if (playerObj) {
+      playerObj.loadVideoById(vidID);
+    }
+    else {
+    playerObj = new YT.Player('vidPlayer', {
+        videoId: vidID, // this is the id of the video at youtube (the stuff after "?v=")
+        loop: true,
+        events: {
+            onReady: function (e) {
+                e.target.playVideo();
+              },
+        }
+    });
+  }
+  }
   function normalSensibility() {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
     else if (!level[level.mode][level.aktuell].sensibility) sensibility = {x: 17, y: 17};
