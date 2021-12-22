@@ -456,15 +456,16 @@
       if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
       if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].playVideo();
-      else audio.volume = JSON.parse(volControlIngameSoundEffects.value)/100;
+      else ingameSounds = true;
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'green';
     } else {
       if (!id.includes('ingame')) playerObj[id.split('Music')[0]].pauseVideo();
-      else audio.volume = 0;
+      else ingameSounds = false;
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
     }
     // localStorage.setItem('protectTheRoomSpaceMusic', checked);
   }
+  var ingameSounds;
   menus.style.width = window.innerWidth/2;
   menus.style.height = window.innerHeight/1.4;
   var swipeStr = "";
@@ -1026,7 +1027,7 @@ if (tutorial.status == "shoot") {
   function playSoundEffect(src) {
     var newAudio = new Audio(src);
     newAudio.volume = audio.volume;
-    newAudio.play();
+    if (ingameSounds) newAudio.play();
   }
   var deathBullet = {};
   function endGame() {
