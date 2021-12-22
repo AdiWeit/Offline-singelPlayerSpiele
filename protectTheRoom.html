@@ -395,6 +395,7 @@
   };
   var dbSetWarteschlange = [];
   var alertWhenFinishedSaving = false;
+  var offline = false;
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
       dbSet("protectTheRoom", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
@@ -406,8 +407,21 @@
     }
   }, 2222);
   getDbHighscores(true);
+  setTimeout(function () {
+    if (!offline && localStorage.getItem('protectTheRoomSaveNew') != "undefined" && localStorage.getItem('protectTheRoomSaveNew')) {
+      var newHighscoresList = JSON.parse(localStorage.getItem('protectTheRoomSaveNew'));
+      for (var newHighscore of newHighscoresList) {
+        var pathParts = newHighscore.path.split('-');
+        if (pathParts.length == 2 && highscores[pathParts[0]][pathParts[1]][newHighscore.name] < newHighscore.data) highscores[pathParts[0]][pathParts[1]][newHighscore.name] = newHighscore.data;
+        if (pathParts.length == 3 && highscores[pathParts[0]][pathParts[1]][pathParts[2]][newHighscore.name] < newHighscore.data) highscores[pathParts[0]][pathParts[1]][pathParts[2]][newHighscore.name] = newHighscore.data;
+      }
+      dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});
+      localStorage.setItem('protectTheRoomSaveNew', "undefined");
+    }
+  }, 1111);
   function getDbHighscores(pShowHighscores, upload) {
     dbGet("protectTheRoom", "highscores").then(result => {
+      localStorage.setItem('protectTheRoomHighscores', result);
       highscores = JSON.parse(result);
       if (pShowHighscores) {
         showHighscores(upload);
@@ -415,6 +429,11 @@
       }
     }).catch(function(e) {
       console.error(e);
+      if ((e + "").includes('Failed to fetch')) {
+        offline = true;
+        if (localStorage.getItem('protectTheRoomHighscores')) highscores = JSON.parse(localStorage.getItem('protectTheRoomHighscores'));
+        else alert('please visit this site when you have access to the internet to get the current highscores!');
+      }
       if (pShowHighscores) {
         showHighscores(upload);
         showMenu(upload);
@@ -972,19 +991,37 @@ if (tutorial.status == "shoot") {
     if (addNew && tutorial.status == "no" && (!highscoresNow[name] || newCannon.counter > highscoresNow[name])) {
       highscoresNow[name] = newCannon.counter;
       // JSON nötig wegen leeren Objekten (werden sonst zu leeren Arrays)
-      dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});
+      if (!offline) dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});
+      else if (!localStorage.getItem('protectTheRoomSaveNew') || localStorage.getItem('protectTheRoomSaveNew') == "undefined") localStorage.setItem('protectTheRoomSaveNew', JSON.stringify([{path: getHighscoresNow(true) + "-" + gerät, data: newCannon.counter, name: name}]));
+      else {
+        var newHighscoresList = JSON.parse(localStorage.getItem('protectTheRoomSaveNew'));
+        newHighscoresList.push({path: getHighscoresNow(true) + "-" + gerät, data: newCannon.counter, name: name});
+        localStorage.setItem('protectTheRoomSaveNew', JSON.stringify(newHighscoresList));
+      }
     }
     app._data.highscoresDb = [];
     Object.keys(highscoresNow).map((key, index) => app._data.highscoresDb.push(key + ':' + highscoresNow[key]));
     app._data.highscoresDb.sort((a, b) => b.split(':')[1] - a.split(':')[1]);
   }
-  function getHighscoresNow() {
+  function getHighscoresNow(returnPath) {
     var highscoresNow;
-    if (enhancedModeCheck.checked) highscoresNow = highscores.enhanced[gerät];
-    else if (differentSpeedCheck.checked) highscoresNow = highscores.speedDiff[gerät];
-    else if (useMultAmmo.checked && newCannon && newCannon.time.needed < convertNumber *1.2) highscoresNow = highscores.normal.useAmmo[gerät];
-    else highscoresNow = highscores.normal.notUseAmmo[gerät];
-    return highscoresNow;
+    if (enhancedModeCheck.checked) {
+      highscoresNow = highscores.enhanced[gerät];
+      if (returnPath) return "enhanced";
+    }
+    else if (differentSpeedCheck.checked) {
+      highscoresNow = highscores.speedDiff[gerät];
+      if (returnPath) return "speedDiff";
+    }
+    else if (useMultAmmo.checked && newCannon && newCannon.time.needed < convertNumber *1.2) {
+      highscoresNow = highscores.normal.useAmmo[gerät];
+      if (returnPath) return "normal-useAmmo";
+    }
+    else {
+      highscoresNow = highscores.normal.notUseAmmo[gerät];
+      if (returnPath) return "normal-notUseAmmo";
+    }
+    if (!returnPath) return highscoresNow;
   }
   function playSoundEffect(src) {
     var newAudio = new Audio(src);
