@@ -516,8 +516,8 @@
     constructor() {
     this.position = {x: window.innerWidth - 110, y: wHeight/2};
     this.bullets = {max: 1, got: []};
-    this.speed = 10;
-    if (gerät == "Handy") this.speed = 15;
+    this.speed = /*wHeight/50/4;*/adaptToHeight(10);
+    if (gerät == "Handy") adaptToHeight(19); //this.speed = wHeight/100/2;
     this.selectedBullet = 0;
     }
     shoot = (bullet) => {
@@ -571,22 +571,23 @@
     menus.style.display = 'none';
     document.getElementById('app').style.display = 'inline';
     space_key.style.fontSize = 60;
-    newCannon = {time: {needed: convertNumber*5, got: convertNumber*5 - 16}, counter: 0}
-    if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
-    if (differentSpeedCheck.checked && gerät == "Handy") newCannon.time.needed = convertNumber*4;
-    speed = {bullet: 3, cannon: 1777, minTime: 1777};
+    newCannon = {time: {needed: convertNumber*3, got: convertNumber*3 - 16}, counter: 0}
+    // if (enhancedModeCheck.checked) newCannon.time.needed = convertNumber*3;
+    speed = {bullet: adaptBulletSpeed(3), cannon: 1777, minTime: 1777};
     lives = {beginning: 133, now: 133, shield: true, shieldDamageAnimationY: {boolean: false, number: 0}, damageAnimation: {}};
     phase = {name: "normal"};
     adaptToScreen();
     player = new Player();
     if (ammoTacticModeCheck.checked) {
+      // newCannon.time.needed =  convertNumber*3;//(((window.innerWidth - 110)/(speed.bullet))*3)*4;
       phase = {counter: 2, name: "collectAmmo"};
       player.bullets.max = 2;
       if (gerät == "Handy") {
         player.bullets.max = 3;
-        newCannon.time = {needed: convertNumber*2.2, got: convertNumber*2.2 - 16};
+        // newCannon.time = {needed: convertNumber*2.2, got: convertNumber*2.2 - 16};
       }
     }
+    if (enhancedModeCheck.checked && gerät == "Handy") player.speed = adaptToHeight(30);
     cannons = [];
     bullets = [];
     tutorial = {status: 'no'};
@@ -630,7 +631,7 @@
     // speed.bullet = 11;
 
     // max ammo tactic
-    // newCannon.time.needed = convertNumber *3.5;
+    // newCannon.time.needed = convertNumber *2;
     // player.speed = adaptToHeight(33);
     // speed.bullet = 5;
     // // Handy:
@@ -801,7 +802,32 @@
         else playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/phase_change_loud.wav');
         space_key.style.display = "inline";
         space_key.innerHTML = "new phase coming up:<br>shoot your ammo!";
-      }, ((window.innerWidth - 110)/(speed.bullet))*16 - 777);
+        // stuff afterwards
+        setTimeout(function () {
+          space_key.style.display = "none";
+        // speed.bullet = 11;
+        // newCannon.time.needed = convertNumber *1.4//3;
+        if (gerät == "PC") newCannon.time.needed -= convertNumber *2.1;
+        else newCannon.time.needed -= convertNumber *0.9;
+        player.speed += 12;
+        if (gerät == "Handy") {
+          player.speed -= 3;
+          speed.bullet -= 3;
+        }
+        phase.name = "useAmmo";
+        newCannon.time.got = newCannon.time.needed;
+        adaptToScreen();
+        // player.speed = 45;
+        // if (gerät == "Handy") player.speed = adaptToHeight(90);
+        phase.counter = player.bullets.max; //4;
+        if (gerät == "Handy") phase.counter--;
+        bullets = [];
+        cannons = [];
+        console.log(phase.name);
+        speed.bullet += 6;
+        player.bullets.max++;
+      }, 3333);
+    }, ((window.innerWidth - 110)/(speed.bullet))*16 - 3333);
       }
       if (ammoTacticModeCheck.checked && phase.counter == 0) {
           // TODO: phases etc: extra mode instead of settings for normal mode (useMultAmmo check)
@@ -844,45 +870,29 @@
          }
          newCannon.time.got = newCannon.time.needed;
         }
-        else if (phase.name == "collectAmmo") {
-            space_key.style.display = "none";
-          // speed.bullet = 11;
-          // newCannon.time.needed = convertNumber *1.4//3;
-          if (gerät == "PC") newCannon.time.needed -= convertNumber *2.1;
-          else newCannon.time.needed -= convertNumber *0.9;
-          player.speed += 12;
-          if (gerät == "Handy") {
-            player.speed -= 3;
-            speed.bullet -= 3;
-          }
-          phase.name = "useAmmo";
-          newCannon.time.got = newCannon.time.needed;
-          adaptToScreen();
-          // player.speed = 45;
-          // if (gerät == "Handy") player.speed = adaptToHeight(90);
-          phase.counter = player.bullets.max; //4;
-          if (gerät == "Handy") phase.counter--;
-          bullets = [];
-          cannons = [];
-          console.log(phase.name);
-          speed.bullet += 6;
-          player.bullets.max++;
-        }
       }
       if (!(space_key.innerHTML == "new phase coming up:<br>collect the ammo!" && space_key.style.display == "inline")) {
         if (phase.counter) phase.counter--;
       console.log("new cannon! Interval: " + newCannon.time.needed);
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
       else var size = (Math.round(Math.random()*(140 - player.speed)) + player.speed)/1.7;
+      size = size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7;
+      if (size < 5) size = 5;
+      if (gerät == "Handy" && size < 22) {
+        size = 22;
+        if (ammoTacticModeCheck.checked) size = 33;
+      }
+      console.log("bullet size: " + size);
       var bulletSpeed = speed.bullet;
       if (enhancedModeCheck.checked || differentSpeedCheck.checked) {
-        bulletSpeed = Math.round(Math.random()*(bulletSpeed - 2)) + 2;
-        if (gerät == "Handy") bulletSpeed = Math.round(Math.random()*(speed.bullet - 0.5)) + 0.5;
+        var min = 0.5 + (1069 - wHeight)/1000;
+        /*bulletSpeed = Math.round(Math.random()*(bulletSpeed - 1)) + 1;
+        if (gerät == "Handy") */bulletSpeed = Math.round(Math.random()*(speed.bullet - min)) + min;
       }
       console.log("bullet speed: " + bulletSpeed);
       // size = size*((window.innerWidth*wHeight)/(1600*1069));
-      var yPos = Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7)));
-      var builtCannon = {x: 33, y: yPos, width: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, height: size*(((window.innerWidth*wHeight)/(1600*1069)))*1.7, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: bulletSpeed, timeGone: 0, direction: {x: 1, y: 0}, points: 3000};
+      var yPos = Math.round(Math.random()*(textur.getBoundingClientRect().height - 3 - (size)));
+      var builtCannon = {x: 33, y: yPos, width: size, height: size, speed: /*Math.round(Math.random()**/speed.cannon/*)*/, bulletSpeed: bulletSpeed, timeGone: 0, direction: {x: 1, y: 0}, points: 3000};
       cannons.map(data => {
         if (isCollide(data, builtCannon)) {
           // reduce returns biggest
@@ -973,7 +983,7 @@
       if (!ammoTacticModeCheck.checked) {
         // not ammo tactic
       if (progressObj.notEnhanced.playerSpeed.PC) player.speed += 0.2;
-      else if (progressObj.notEnhanced.playerSpeed.Handy) player.speed += 0.3;
+      else if (progressObj.notEnhanced.playerSpeed.Handy) player.speed += adaptToHeight(99)/(13/0.2);//0.2;
       if (progressObj.notEnhanced.bulletSpeed.PC) speed.bullet += 0.1;
       else if (progressObj.notEnhanced.bulletSpeed.Handy) speed.bullet += 0.2;
     }
@@ -1192,7 +1202,7 @@ if (tutorial.status == "shoot") {
           normalModeCheck.checked = JSON.parse(settingsStr.split(',')[3]);
         }
         }
-        if (notReactivateGame || (tutorial.status == "no" && (!newCannon || !newCannon.counter || lives.now <= 0))) startGame(tutorialCheck.checked);
+        if (notReactivateGame || (tutorial.status == "no" && (!newCannon || !newCannon.counter || (lives.now <= 0 && !lives.shield)))) startGame(tutorialCheck.checked);
         else if (!notReactivateGame) animateBullet();
       }, 500);
     }
@@ -1381,11 +1391,35 @@ function adaptToScreen() {
   if (convertNumber/1069/1600 < 1) convertNumber *= (convertNumber/1069/1600)*(1.29 + handyPlus) + 1;
   else if (convertNumber/1069/1600 > 1) convertNumber *= (convertNumber/1069/1600)*1.7;
   convertNumber /= window.innerWidth;
+  // try
+  // convertNumber = Math.abs((1069*1600) - (wHeight*window.innerHeight))/990;
+  // convertNumber = (Math.abs((1600) - (wHeight))/window.innerWidth)*1.7;
+  // convertNumber = 1000*(1069*1600/wHeight*window.innerWidth);
+  // convertNumber = 1000*((1069/wHeight) + (1 - (1069/wHeight))/2);
+  // convertNumber = 1000*((1600/window.innerWidth) + (1 - (1600/window.innerWidth))/1.9);
+  // if (ammoTacticModeCheck.checked) convertNumber = (((window.innerWidth - 110)/(speed.bullet))*16)*3.9
+  if (!speed) convertNumber = 1777;
+  else convertNumber = speed.cannon;
+}
+function adaptBulletSpeed(speed) {
+  return speed*(window.innerWidth/1600);
 }
 function adaptToHeight(original) {
   // original*(wHeight/1069)*1.4;
   for (var i = 1.3; gerät == "Handy" && i >= 1; i -= 0.1) {
     if (original*(wHeight/1069)*i < original && wHeight < 1069) original *= (wHeight/1069)*i;
+  }
+  // if (ammoTacticModeCheck.checked && gerät == "Handy") original*= 1.25;
+  if (gerät == "Handy") {
+    if (ammoTacticModeCheck.checked) original*= 5;
+    if (normalModeCheck.checked) original *= 1.5;
+  }
+  return original;
+}
+function adaptToWidth(original) {
+  // original*(wHeight/1069)*1.4;
+  for (var i = 1.3; gerät == "Handy" && i >= 1; i -= 0.1) {
+    if (original*(window.innerWidth/1069)*i < original && window.innerWidth < 1069) original *= (window.innerWidth/1069)*i;
   }
   return original;
 }
