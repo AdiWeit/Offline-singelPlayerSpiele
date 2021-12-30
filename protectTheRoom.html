@@ -1,5 +1,5 @@
 <meta charset="utf-8">
-<meta name="viewport" content="user-scalable=no">
+<meta id="viewportId" name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <title>protect the room</title>
@@ -62,11 +62,11 @@
       <div class="scoreText" id="flaticonCredits">Icon made by <a href="https://www.flaticon.com/authors/mynamepong" title="mynamepong">mynamepong</a> from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a></div>
         <img class="ScoreText button" id="highscoreListButtonCredit" title="click to open on website" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; window.open('https://www.flaticon.com/free-icon/winner_809526?term=winner&page=1&position=2&page=1&position=2&related_id=809526&origin=style', '_blank');" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png">
     </div>
-    <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; pauseF(false);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
-    <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; restartTutorial(true);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
-    <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vw';" onmouseup="style.width = '3.5vw'; pauseF(false, true);" onmouseout="style.width = '3.5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
+    <img class="ScoreText button" id="playButton" title="play (continue current round)" draggable="false" onmousedown="style.width = '4.8vh';" onmouseup="style.width = '5vh'; pauseF(false);" onmouseout="style.width = '5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/play_button.png">
+    <img class="ScoreText button" id="tutorialButton" title="how to play" draggable="false" onmousedown="style.width = '4.8vh';" onmouseup="style.width = '5vh'; restartTutorial(true);" onmouseout="style.width = '5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/tutorial_icon.png">
+    <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vh';" onmouseup="style.width = '3.5vh'; pauseF(false, true);" onmouseout="style.width = '3.5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
     <!-- <button class="ScoreText button" id="retryButton" onclick="pauseF(false, true);" name="button">⟲</button> -->
-    <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vw';" onmouseup="style.width = '5vw'; menuChangeAnimation(window.innerWidth/2, false, false, true, changeSettingsVis, src);" onmouseout="style.width = '5vw';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
+    <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vh';" onmouseup="style.width = '5vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, changeSettingsVis, src);" onmouseout="style.width = '5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
     <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, showCredits);" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; if (!pause.boolean) pauseF(true); else pauseF(false);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
@@ -182,13 +182,13 @@
   height: 20px;
 }
 #playButton {
-  width: 5vw;
+  width: 5vh;
   /* bottom: 6.9vh; */
   bottom: 1.3vh;
-  font-size: 1vw;
+  font-size: 1vh;
 }
 #playButtonCredit {
-  width: 5vw;
+  width: 5vh;
   /* bottom: 6.9vh; */
   top: 29vh;
   font-size: 1vw;
@@ -197,8 +197,9 @@
 #retryButton {
   /* bottom: 2.25vh; */
   /* bottom: 14.5vh; */
-  width: 3.5vw;
-  bottom: 7.3vw;
+  width: 3.5vh;
+  /* bottom: 5.25vw; */
+  bottom: 7.75vh;
   /* width: 3.5vw;
   bottom: 20%; */
   /* font-size: 5vw; */
@@ -208,8 +209,8 @@
 }
 #settingsButton {
   bottom: 1.3vh;
-  width: 5vw;
-  left: 66%;
+  width: 5vh;
+  left: 58.5%;
 }
 #settingsButtonCredit {
   width: 5vw;
@@ -219,9 +220,10 @@
   left: 26vw;
 }
 #tutorialButton {
-  bottom: 1.3vh;
-  width: 5vw;
-  left: 34%;
+  bottom: 1.6vh;
+  width: 5vh;
+  /* left:  43%; */
+  left: 41.5%;
 }
 #tutorialButtonCredit {
   width: 5vw;
@@ -238,8 +240,8 @@
 }
 #creditsButton {
   /* bottom: -3vh; */
-  bottom: -2vh;
-  height: 4vh;
+  bottom: -1.7vh;
+  height: 3.5vh;
 }
 #creditsButtonCredit {
   height: 4vh;
@@ -287,9 +289,9 @@
 #customMusicA {
   top: 35.5vh;
   font-size: 2vw;
-  left: 10vw;
+  left: 8vw;
   text-size.adjust: auto;
-  text-size-adjust: 80%;
+  text-size-adjust: 50%;
 }
 .Input {
   background: gray;
@@ -328,7 +330,7 @@
   accent-color: red;
 }
 #volControlCustomMusic {
-  left: 10vw;
+  left: 8vw;
   top: 38.5vh;
   accent-color: red;
 }
@@ -344,12 +346,16 @@
   /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
+  text-size.adjust: auto;
+  text-size-adjust: 80%;
 }
 #normalA {
   left: 5vw;
   font-size: 2vw;
   top: 44.5vh;
   accent-color: green;
+  text-size.adjust: auto;
+  text-size-adjust: 80%;
 }
 #enhancedModeA {
   /* left: 9vw; */
@@ -358,6 +364,8 @@
   /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
+  text-size.adjust: auto;
+  text-size-adjust: 50%;
 }
 #ammoTacticModeA {
   /* left: 9vw; */
@@ -366,6 +374,8 @@
   /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
+  text-size.adjust: auto;
+  text-size-adjust: 80%;
 }
 /* custom scrollbars */
 ::-webkit-scrollbar {
@@ -390,6 +400,11 @@
 </style>
 <br>
 <script>
+  var animation = true;
+  if (localStorage.getItem('protectTheRoomAnimation') == "false") {
+    viewportId.content = "";
+    animation = false;
+  }
   window.onbeforeunload = function(){
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
@@ -440,16 +455,6 @@
       }
     });
   }
-  setTimeout(function () {
-    // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().top + menus.getBoundingClientRect().top)/2 + "px";
-    // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2 + menus.getBoundingClientRect().top + "px";
-    highscoreList.style.top = (highscoreText.getBoundingClientRect().top + (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2) - menus.getBoundingClientRect().top + 18 + "px";
-    // for (var i = highscoreText.getBoundingClientRect().bottom; highscoreList.getBoundingClientRect().bottom < retryButton.getBoundingClientRect().top - 7; i++) {
-    //   highscoreList.style.top = i + 'px';
-    // }
-    // highscoreList.style.top = i/2 + menus.getBoundingClientRect().top;
-    highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
-  }, 100);
   function musicSelected(id, checked, doNotStore) {
     if (!doNotStore) changeSettings(id, ["checked"], [checked]);
     if (checked) {
@@ -522,6 +527,7 @@
     }
     shoot = (bullet) => {
       console.log("shoot!");
+      disableScroll();
       try {
       bullet = JSON.parse(JSON.stringify(player.bullets.got[player.selectedBullet]));
         if (tutorial.status == "no" || tutorial.status.includes("shoot") || tutorial.status.includes('waiting for bullet')) {
@@ -1156,6 +1162,19 @@ if (tutorial.status == "shoot") {
   }
   // menu interactions
   function showMenu(gameEnded) {
+    enableScroll();
+    if (menus.style.display != "" && highscoreList.style.top == "") {
+    setTimeout(function () {
+      // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().top + menus.getBoundingClientRect().top)/2 + "px";
+      // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2 + menus.getBoundingClientRect().top + "px";
+      highscoreList.style.top = (highscoreText.getBoundingClientRect().top + (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2) - menus.getBoundingClientRect().top + 18 + "px";
+      // for (var i = highscoreText.getBoundingClientRect().bottom; highscoreList.getBoundingClientRect().bottom < retryButton.getBoundingClientRect().top - 7; i++) {
+      //   highscoreList.style.top = i + 'px';
+      // }
+      // highscoreList.style.top = i/2 + menus.getBoundingClientRect().top;
+      highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
+    }, 100);
+  }
     if (!gameEnded) showHighscores();
     menus.style.top = 0 - (menus.style.height.replace('px', ''))/2 + "px";
     menus.style.display = "inline";
@@ -1215,6 +1234,7 @@ if (tutorial.status == "shoot") {
     }, 499);
   }
   function hideMenu(y) {
+    disableScroll();
     menus.style.top = y;
       setTimeout(function () {
         if (convertCss(menus.style.top) > -wHeight/2) hideMenu(convertCss(menus.style.top) - 15);
@@ -1225,6 +1245,13 @@ if (tutorial.status == "shoot") {
       settingsButton.src = 'https://adi.nicolaiweitkemper.de/Bilder/winner_steps.png'
       settings.style.display = 'inline';
       document.getElementById('app').style.display = 'none';
+      setTimeout(function () {
+        if (normalA.getBoundingClientRect().right - 22 > ammoTacticModeA.getBoundingClientRect().left && gerät == "Handy" && animation) {
+          animation = false;
+          localStorage.setItem('protectTheRoomAnimation', false);
+          alert("For an layout adaption to this device reload the page, please! If you need to zoom out, please move two fingers on the screen (swipe in any direction) to enable scrolling! When you shoot the next time, it will be disabled again!");
+        }
+      }, 500);
     }
     else {
       showHighscores();
@@ -1278,6 +1305,7 @@ if (tutorial.status == "shoot") {
   var direcitonIfs;
   // menuChangeAnimation(window.innerWidth/2);
   function menuChangeAnimation(x, wasOnLeft, bounce, direction, newMenuFunc, src) {
+    if (animation) {
     if (direction === true) {
       direction = 1;
       if (!src || (src.includes('winner_steps') && credits.style.display != "inline")) direction = -1;
@@ -1300,6 +1328,8 @@ if (tutorial.status == "shoot") {
         }
       }
     }, 1);
+  }
+  else newMenuFunc(src);
   }
   function looseAnimation(x, y, width, height, firstCall, pTop) {
     if (height > 50) height = 50;
@@ -1550,6 +1580,7 @@ function touch(ev) {
     swipe = {beginning: {x: firstTouch.clientX, y: firstTouch.clientY}, counter: -5};
   }
   if (ev.type == "touchmove") {
+    if (ev.touches.length > 1) enableScroll();
     swipe.counter++;
     var xDiff = swipe.beginning.x - ev.touches[0].clientX;
     var yDiff = yDown - ev.touches[0].clientY;
