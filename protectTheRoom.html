@@ -2,6 +2,7 @@
 <meta id="viewportId" name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<script src="https://www.youtube.com/player_api"></script>
 <title>protect the room</title>
 <div onclick="player.shoot();" class="menuContent" id="space_key">space key/<br>(left) click</div>
 <canvas onclick="player.shoot();" id="textur" width="300" height="300"></canvas>
@@ -67,12 +68,10 @@
     <img class="ScoreText button" id="retryButton" title="begin a new round" draggable="false" onmousedown="style.width = '3.3vh';" onmouseup="style.width = '3.5vh'; pauseF(false, true);" onmouseout="style.width = '3.5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/retry_icon.png">
     <!-- <button class="ScoreText button" id="retryButton" onclick="pauseF(false, true);" name="button">⟲</button> -->
     <img class="ScoreText button" id="settingsButton" title="change between settings (sound and gamplay/gamemodes) and highscore list" draggable="false" onmousedown="style.width = '4.8vh';" onmouseup="style.width = '5vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, changeSettingsVis, src);" onmouseout="style.width = '5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/settings.png">
-    <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.8vh';" onmouseup="style.height = '4vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, showCredits);" onmouseout="style.height = '4vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
+    <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.3vh';" onmouseup="style.height = '3.5vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, showCredits);" onmouseout="style.height = '3.5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; if (!pause.boolean) pauseF(true); else pauseF(false);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
 <body>
-<script src="https://www.youtube.com/player_api"></script>
-<!-- <p style="font-size: 0.9rem;font-style: italic;"><img style="display: block;" src="https://live.staticflickr.com/8457/8058234718_6172eb6e24_b.jpg" alt="Top of Enterprise Refit"><a href="https://www.flickr.com/photos/93857621@N00/8058234718">"Top of Enterprise Refit"</a><span> by <a href="https://www.flickr.com/photos/93857621@N00">Matt_A</a></span> is licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/2.0/?ref=ccsearch&atype=html" style="margin-right: 5px;">CC BY-NC-ND 2.0</a><a href="https://creativecommons.org/licenses/by-nc-nd/2.0/?ref=ccsearch&atype=html" target="_blank" rel="noopener noreferrer" style="display: inline-block;white-space: none;margin-top: 2px;margin-left: 3px;height: 22px !important;"><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc_icon.svg?image_id=50946b83-16ac-4f76-920a-8923c6bb32f4" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-by_icon.svg" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-nc_icon.svg" /><img style="height: inherit;margin-right: 3px;display: inline-block;" src="https://search.creativecommons.org/static/img/cc-nd_icon.svg" /></a></p> -->
 <style>
   /* big menuContent and classes: */
   #space_key {
@@ -166,7 +165,6 @@
   font-size: 3.5vw;
   overflow: scroll;
   max-height: 27vh;
-  /* max-height: 30vh; */
   /* left: 7vw; */
   padding-left: 80px;
    /* list-style-type: none; */
@@ -183,7 +181,6 @@
 }
 #playButton {
   width: 5vh;
-  /* bottom: 6.9vh; */
   bottom: 1.3vh;
   font-size: 1vh;
 }
@@ -195,8 +192,6 @@
   left: 19vw;
 }
 #retryButton {
-  /* bottom: 2.25vh; */
-  /* bottom: 14.5vh; */
   width: 3.5vh;
   /* bottom: 5.25vw; */
   bottom: 7.75vh;
@@ -222,7 +217,6 @@
 #tutorialButton {
   bottom: 1.6vh;
   width: 5vh;
-  /* left:  43%; */
   left: 41.5%;
 }
 #tutorialButtonCredit {
@@ -239,7 +233,6 @@
   width: 22px;
 }
 #creditsButton {
-  /* bottom: -3vh; */
   bottom: -1.7vh;
   height: 3.5vh;
 }
@@ -343,7 +336,6 @@
 #differentSpeedA {
   left: 28.5vw;
   font-size: 2vw;
-  /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
   text-size.adjust: auto;
@@ -358,20 +350,16 @@
   text-size-adjust: 80%;
 }
 #enhancedModeA {
-  /* left: 9vw; */
   left: 40.4vw;
   font-size: 2vw;
-  /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
   text-size.adjust: auto;
   text-size-adjust: 50%;
 }
 #ammoTacticModeA {
-  /* left: 9vw; */
   left: 15.1vw;
   font-size: 2vw;
-  /* top: 50vh; */
   top: 44.5vh;
   accent-color: green;
   text-size.adjust: auto;
@@ -396,7 +384,6 @@
 ::-webkit-scrollbar-corner {
   background: rgba(0,0,0,0);
 }
-
 </style>
 <br>
 <script>
@@ -468,13 +455,11 @@
       else ingameSounds = false;
       document.getElementById('volControl' + id.replace('Check', '').replace(/^\w/, c => c.toUpperCase())).style.accentColor = 'red';
     }
-    // localStorage.setItem('protectTheRoomSpaceMusic', checked);
   }
   var ingameSounds;
   menus.style.width = window.innerWidth/2;
   menus.style.height = window.innerHeight/1.4;
   var swipeStr = "";
-  // if (localStorage.getItem('protectTheRoomSpaceMusic') == "false") spaceMusicCheck.checked = false;
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -489,7 +474,6 @@
   else var gerät = "PC";
   console.log(gerät);
   var wHeight = window.innerHeight;
-  // var ingameSound = {boolean: true, volume: 100};
   var settingsObj = {spaceMusicCheck: {checked: true}, fightMusicCheck: {checked: false}, ingameSoundEffectsCheck: {checked: true}, customMusicCheck: {checked: false}, musicURL: {value: ''}, musicTime: {value: ''}, volControlFightMusic: {value: '100'}, volControlSpaceMusic: {value: '100'}, volControlCustomMusic: {value: '100'}, volControlIngameSoundEffects: {value: '100'}, normalModeCheck: {checked: true}, differentSpeedCheck: {checked: false}, enhancedModeCheck: {checked: false}, ammoTacticModeCheck: {checked: false}};
   var audio = new Audio();
   var newCannon;
@@ -535,7 +519,6 @@
           space_key.style.fontSize = "120px";
           space_key.style.display = 'inline';
           space_key.innerHTML = 'collect 2';
-          // space_key.style.display = "none";
           setTimeout(function () {
             tutorial.status = "collectAmmo";
             tutorial.counter = 0;
@@ -840,7 +823,6 @@
     }, ((window.innerWidth - 110)/(speed.bullet))*16 - 3333);
       }
       if (ammoTacticModeCheck.checked && phase.counter == 0) {
-          // TODO: phases etc: extra mode instead of settings for normal mode (useMultAmmo check)
        if ((phase.name == "normal" || phase.name == "useAmmo")) {
          // playSoundEffect('https://adi.nicolaiweitkemper.de/Sounds/protectTheRoom/phase_change.wav');
          space_key.style.display = "inline";
@@ -910,25 +892,9 @@
           // reduce returns biggest
           if (builtCannon.y > wHeight/2) builtCannon.y = data.y - builtCannon.height - 23;//data.height;
           else builtCannon.y = data.y + data.height + 23;
-          // var biggestHeight = [data.height, builtCannon.height].reduce((x, y) => y > x ? y : x);
-          // if (builtCannon.y > wHeight/2) builtCannon.y -= biggestHeight + 5;//data.height;
-          // else builtCannon.y += biggestHeight + 5;
-          // if (data.y > builtCannon.y) builtCannon.y -= data.height;
-          // else if (builtCannon.y + builtCannon.height*2 < wHeight) builtCannon.y += builtCannon.height;
-          // else builtCannon.y = data.y - builtCannon.height - 5;
         }
       });
       cannons.push(builtCannon);
-      // if (cannons[cannons.length - 1].speed < speed.minTime) cannons[cannons.length - 1].speed = 999;
-      // do {
-      // var cannonCollsion = false;
-      // for (var cannon of cannons) {
-      //   if (cannons[cannons.length - 1] && isCollide(cannon, cannons[cannons.length - 1]) && JSON.stringify(cannon) != JSON.stringify(cannons[cannons.length - 1])) {
-      //     cannons[cannons.length - 1].y = Math.round(Math.random()*wHeight - size);
-      //     cannonCollsion = true;
-      //   }
-      // }
-      // } while (cannonCollsion);
       if (cannons[cannons.length - 1].y < size) cannons[cannons.length - 1].y = size;
       newCannon.counter++;
       var original = wHeight;
@@ -946,34 +912,23 @@
         playerSpeed: {
           PC: player.speed < adaptToHeight(99, true) && gerät == "PC",
           Handy: player.speed < adaptToHeight(99, true) && gerät == "Handy",
-          ammoTacticPC: player.speed < adaptToHeight(33, true) && gerät == "PC",
-          ammoTacticHandy: player.speed < adaptToHeight(33, true) && gerät == "Handy"
+          ammoTactic: player.speed < adaptToHeight(33, true),
         },
         bulletSpeed: {
           PC: speed.bullet < adaptBulletSpeed(13) && gerät == "PC",
           Handy: speed.bullet < adaptBulletSpeed(13) && gerät == "Handy",
-          ammoTacticPC: speed.bullet < adaptBulletSpeed(5) && gerät == "PC",
-          ammoTacticHandy: speed.bullet < adaptBulletSpeed(5) && gerät == "Handy"
+          ammoTactic: speed.bullet < adaptBulletSpeed(5),
         }
       },
       enhanced: {
-          cannonInterval: {
-            Handy: newCannon.time.needed > convertNumber*1.5 && gerät == "Handy",
-            PC: newCannon.time.needed > convertNumber *1.5 && gerät == "PC",
-          },
+          cannonInterval: newCannon.time.needed > convertNumber*1.5,
           playerSpeed: player.speed < 33,
           bulletSpeed: speed.bullets < adaptBulletSpeed(9)
         },
         differentSpeed: {
           playerSpeed: player.speed < adaptToHeight(59, true),
-          bulletSpeed: {
-            PC: speed.bullet < adaptBulletSpeed(11) && gerät == "PC",
-            Handy: speed.bullet < adaptBulletSpeed(11) && gerät == "Handy"
-          },
-          cannonInterval: {
-            PC: convertNumber *1.5 && gerät == "PC",
-            Handy: convertNumber *1.5/*77*/ && gerät == "Handy"
-          }
+          bulletSpeed: speed.bullet < adaptBulletSpeed(11),
+          cannonInterval: newCannon.time.needed > convertNumber *1.5
         }
       };
       if (!enhancedModeCheck.checked) {
@@ -985,8 +940,8 @@
       if (phase.name != "useAmmo" && !(space_key.innerHTML == "new phase coming up:<br>collect the ammo!" && space_key.style.display == "inline")) {
       if (differentSpeedCheck.checked) {
         if (progressObj.differentSpeed.playerSpeed) player.speed += 0.1;
-        if (progressObj.differentSpeed.bulletSpeed.PC || progressObj.differentSpeed.bulletSpeed.Handy) speed.bullet += 0.1;
-        if (progressObj.differentSpeed.cannonInterval.PC || progressObj.differentSpeed.cannonInterval.Handy) newCannon.time.needed -= 16;
+        if (progressObj.differentSpeed.bulletSpeed) speed.bullet += 0.1;
+        if (progressObj.differentSpeed.cannonInterval) newCannon.time.needed -= 16;
       }
       else {
       // not enhanced mode
@@ -998,8 +953,8 @@
       else if (progressObj.notEnhanced.bulletSpeed.Handy) speed.bullet += 0.2;
     }
     else if (!(space_key.innerHTML == "new phase coming up:<br>collect the ammo!" && space_key.style.display == "inline")) {
-      if (progressObj.notEnhanced.playerSpeed.ammoTacticPC || progressObj.notEnhanced.playerSpeed.ammoTacticHandy) player.speed += 0.2;
-      if (progressObj.notEnhanced.bulletSpeed.ammoTacticPC || progressObj.notEnhanced.bulletSpeed.ammoTacticHandy) speed.bullet += 0.1;
+      if (progressObj.notEnhanced.playerSpeed.ammoTactic) player.speed += 0.2;
+      if (progressObj.notEnhanced.bulletSpeed.ammoTactic) speed.bullet += 0.1;
     }
     }
     if (progressObj.notEnhanced.maxBullets) player.bullets.max++;
@@ -1007,7 +962,7 @@
     }
     // enhanced mode
     else {
-      if (progressObj.enhanced.cannonInterval.Handy || progressObj.enhanced.cannonInterval.PC) newCannon.time.needed -= 16;
+      if (progressObj.enhanced.cannonInterval) newCannon.time.needed -= 16;
       if (progressObj.enhanced.playerSpeed.all) player.speed += 0.3;
       if (progressObj.enhanced.bulletSpeed.all) speed.bullet += 0.1;
     }
@@ -1165,13 +1120,7 @@ if (tutorial.status == "shoot") {
     enableScroll();
     if (menus.style.display != "" && highscoreList.style.top == "") {
     setTimeout(function () {
-      // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().top + menus.getBoundingClientRect().top)/2 + "px";
-      // highscoreList.style.top = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2 + menus.getBoundingClientRect().top + "px";
       highscoreList.style.top = (highscoreText.getBoundingClientRect().top + (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom/* + (highscoreText.getBoundingClientRect().bottom - highscoreText.getBoundingClientRect().top)/2*/)/2) - menus.getBoundingClientRect().top + 18 + "px";
-      // for (var i = highscoreText.getBoundingClientRect().bottom; highscoreList.getBoundingClientRect().bottom < retryButton.getBoundingClientRect().top - 7; i++) {
-      //   highscoreList.style.top = i + 'px';
-      // }
-      // highscoreList.style.top = i/2 + menus.getBoundingClientRect().top;
       highscoreList.style.maxHeight = (retryButton.getBoundingClientRect().top - highscoreText.getBoundingClientRect().bottom)/2 + menus.getBoundingClientRect().top - 13 + "px";
     }, 100);
   }
@@ -1303,7 +1252,6 @@ if (tutorial.status == "shoot") {
     }
   }
   var direcitonIfs;
-  // menuChangeAnimation(window.innerWidth/2);
   function menuChangeAnimation(x, wasOnLeft, bounce, direction, newMenuFunc, src) {
     if (animation) {
     if (direction === true) {
@@ -1335,8 +1283,6 @@ if (tutorial.status == "shoot") {
     if (height > 50) height = 50;
     canvas.fillStyle = 'black';
     for (var i = x + 1; firstCall && i < x + width - (height/3 + 5); i += height/3 + 5) {
-      // canvas.fillRect(i, y + 1, height/3, height/3);
-      // canvas.fillRect(i, y + height - height/3 - 1, height/3, height/3);
       if (height >= 50) {
       if (i == x + 1) {
         looseAnimation(i + height/3/2, y + height/3/2 + 1, width, height, false, -3);
@@ -1363,24 +1309,6 @@ if (tutorial.status == "shoot") {
       else if (y + pTop > 0 && y + pTop < wHeight) looseAnimation(x, y + pTop, width, height, null, pTop);
     }, 1);
   }
-    // canvas.fillStyle = 'black';
-    // for (var i = x + 1; i < x + width - (height/3 + 5); i += height/3 + 5) {
-    //   // canvas.fillRect(i, y + 1, height/3, height/3);
-    //   // canvas.fillRect(i, y + height - height/3 - 1, height/3, height/3);
-    //     canvas.beginPath();
-    //     canvas.arc(i + height/3/2, y + height/3/2 + 1, height/3/2, 0, Math.PI*2, false);
-    //     canvas.fill();
-    //     canvas.beginPath();
-    //     canvas.arc(i + height/3/2, y + height - height/3/2 - 1, height/3/2, 0, Math.PI*2, false);
-    //     canvas.fill();
-    // }
-    // setTimeout(function () {
-    //   if (x < window.innerWidth - 49) {
-    //     canvas.fillStyle = "white";
-    //     canvas.fillRect(x, y, width  + 50, height);
-    //     looseAnimation(x + 1, y, width, height);
-    //   }
-    // }, 1);
   }
   function loadDirectionIfs(x) {
     return {
@@ -1418,20 +1346,6 @@ if (tutorial.status == "shoot") {
 var convertNumber;
 adaptToScreen();
 function adaptToScreen() {
-  convertNumber = ((wHeight*window.innerWidth));
-  var handyPlus = 0;
-  if (gerät == "Handy"/* && phase.name != "collectAmmo"*/ && !phase.counter) handyPlus = 9.5;
-  else if (gerät == "Handy") handyPlus = -0.5;
-  if (convertNumber/1069/1600 < 1) convertNumber *= (convertNumber/1069/1600)*(1.29 + handyPlus) + 1;
-  else if (convertNumber/1069/1600 > 1) convertNumber *= (convertNumber/1069/1600)*1.7;
-  convertNumber /= window.innerWidth;
-  // try
-  // convertNumber = Math.abs((1069*1600) - (wHeight*window.innerHeight))/990;
-  // convertNumber = (Math.abs((1600) - (wHeight))/window.innerWidth)*1.7;
-  // convertNumber = 1000*(1069*1600/wHeight*window.innerWidth);
-  // convertNumber = 1000*((1069/wHeight) + (1 - (1069/wHeight))/2);
-  // convertNumber = 1000*((1600/window.innerWidth) + (1 - (1600/window.innerWidth))/1.9);
-  // if (ammoTacticModeCheck.checked) convertNumber = (((window.innerWidth - 110)/(speed.bullet))*16)*3.9
   if (!speed) convertNumber = 1777;
   else convertNumber = speed.cannon;
 }
@@ -1469,7 +1383,6 @@ function isCollide(a, b) {
    a.y + a.height > b.y)
 }
 // control
-// enableand disable scrolling
 // left: 37, up: 38, right: 39, down: 40,
 // spacebar: 32, pageup: 33, pagedown: 34, end: 35, home: 36
 var keys = {37: 1, 38: 1, 39: 1, 40: 1};
@@ -1516,7 +1429,6 @@ function enableScroll() {
 document.addEventListener('touchmove', touch);
 document.addEventListener('touchstart', touch);
 document.addEventListener('touchend', touch);
-// document.getElementById('textur').style = "touch-action: none";
 var swipe = {};
 document.onkeydown = function(event) {
   if (event.key.toLowerCase().includes("up")) {
@@ -1625,8 +1537,6 @@ function onYouTubePlayerAPIReady() {
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
-              // if (localStorage.getItem('protectTheRoomSpaceMusic') == "true" || localStorage.getItem('protectTheRoomSpaceMusic') == null) musicSelected('spaceMusicCheck', true);// e.target.playVideo();
-              // else musicSelected('spaceMusicCheck', false);
             },
       }
   });
@@ -1641,7 +1551,6 @@ function onYouTubePlayerAPIReady() {
             },
       }
   });
-  // you can do more stuff with the player variable
 }
 var mouseUp = "ignore";
 for (var button of document.getElementsByClassName("button")) {
