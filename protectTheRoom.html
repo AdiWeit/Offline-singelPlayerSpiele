@@ -71,6 +71,7 @@
     <img class="ScoreText button" id="creditsButton" title="show credits" draggable="false" onmousedown="style.height = '3.3vh';" onmouseup="style.height = '3.5vh'; menuChangeAnimation(window.innerWidth/2, false, false, true, showCredits);" onmouseout="style.height = '3.5vh';" src="https://adi.nicolaiweitkemper.de/Bilder/credits_icon.png">
 </div>
 <img draggable="false" id="pauseButton" class="button" onmousedown="style.width = '25px';" onmouseup="style.width = '22px'; if (!pause.boolean) pauseF(true); else pauseF(false);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/pause_button.png">
+<img draggable="false" id="fullscreenButton" class="button" onmousedown="style.width = '19px';" onmouseup="style.width = '22px'; toggleFullscreen(document.body);" onmouseout="style.width = '22px';" src="https://adi.nicolaiweitkemper.de/Bilder/fullscreenIcon.png">
 <body>
 <style>
   /* big menuContent and classes: */
@@ -229,6 +230,12 @@
 #pauseButton {
   position: absolute;
   top: 15px;
+  right: 49px;
+  width: 22px;
+}
+#fullscreenButton {
+  position: absolute;
+  top: 57px;
   right: 49px;
   width: 22px;
 }
@@ -1521,6 +1528,34 @@ function touch(ev) {
   }
   // toggleFullscreen(document.body);
 }
+function toggleFullscreen (el) {
+		if(document.fullscreenElement || document.mozFullScreenElement || document.webkitFullscreenElement || document.msFullscreenElement){
+    if(document.exitFullscreen){
+    	document.exitFullscreen();
+    }else if(document.mozCancelFullScreen){
+  		document.mozCancelFullScreen();
+    }else if(document.webkitExitFullscreen){
+  		document.webkitExitFullscreen();
+    }else if(document.msExitFullscreen){
+  		document.msExitFullscreen();
+    }
+  }else{
+    if(document.documentElement.requestFullscreen){
+      el.requestFullscreen();
+    }else if(document.documentElement.mozRequestFullScreen){
+      el.mozRequestFullScreen();
+    }else if(document.documentElement.webkitRequestFullscreen){
+      el.webkitRequestFullscreen();
+    }else if(document.documentElement.msRequestFullscreen){
+      el.msRequestFullscreen();
+    }
+	}
+  wHeight = window.innerHeight;
+  setTimeout(function () {
+    player.position.x = window.innerWidth - 110;
+    animateBullet();
+  }, 50);
+};
 var xDown;
 var yDown;
 function getTouches(ev) {
