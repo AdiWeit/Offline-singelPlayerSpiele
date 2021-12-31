@@ -284,7 +284,7 @@
   font-size: 2vw;
   left: 44vw;
   text-size.adjust: auto;
-  text-size-adjust: 80%;
+  text-size-adjust: 50%;
 }
 #customMusicA {
   top: 35.5vh;
@@ -451,6 +451,10 @@
   }
   function musicSelected(id, checked, doNotStore) {
     if (!doNotStore) changeSettings(id, ["checked"], [checked]);
+    if ((playerObj[id.split('Music')[0]] || id.includes('ingame')) || !checked) selectedMusicParams(id, checked, doNotStore);
+    else onYouTubePlayerAPIReady();
+  }
+  function selectedMusicParams(id, checked, doNotStore) {
     if (checked) {
       if (id.includes('fight')) playerObj.fight.seekTo(Math.round(Math.random()*36048));
       if (id.includes('custom') && musicTime.value.includes(':')) playerObj.custom.seekTo(musicTime.value.split(':')[0]*60 + JSON.parse(musicTime.value.split(':')[1]));
@@ -873,6 +877,7 @@
       if (!(space_key.innerHTML == "new phase coming up:<br>collect the ammo!" && space_key.style.display == "inline")) {
         if (phase.counter) phase.counter--;
       console.log("new cannon! Interval: " + newCannon.time.needed);
+      // TODO: size adaption
       // var size = (Math.round(Math.random()*(window.innerHeight/6 - player.speed)) + (player.speed));
       var size = (Math.round(Math.random()*(window.innerWidth/5 - player.speed*2)) + (player.speed*2));
       if (gerät == "Handy") var size = (Math.round(Math.random()*(140 - player.speed*2)) + (player.speed*2))/1.7;
@@ -1057,7 +1062,6 @@ if (tutorial.status == "shoot") {
   function convertProgress(name) {
     var data;
     if (name == "timeNeeded") {
-      // TODO: JSON needed
       data = JSON.parse(JSON.stringify(newCannon.time.needed));
       if (phase.name == "useAmmo") data += convertNumber *2.1;
     }
@@ -1221,17 +1225,19 @@ if (tutorial.status == "shoot") {
   }
   function customPlayerF(URL, id, doNotStore) {
     document.getElementById(id).value = URL;
-    var playerOby = new YT.Player('customPlayer', {
+    if (customMusicCheck.checked) {
+    var playerObjY = new YT.Player('customPlayer', {
         videoId: URL.split('?v=')[1], // this is the id of the video at youtube (the stuff after "?v=")
         loop: true,
         events: {
             onReady: function (e) {
                 playerObj.custom = e.target;
-                getSettings(true);
+                selectedMusicParams("customMusicCheck", true);
               },
         }
     });
     if (!doNotStore) changeSettings(id, ['value'], [URL]);
+  }
   }
   function changeSettings(id, params, values) {
     if (id.includes('differentSpeed') || id.includes('Mode')) {
@@ -1564,28 +1570,33 @@ return ev.touches ||             // browser API
 }
 
 // audio:
-var playerObj = {space: null, fight: null};
+var playerObj = {};
 function onYouTubePlayerAPIReady() {
-  var playerOby = new YT.Player('spacePlayer', {
+  if (spaceMusicCheck.checked) {
+  var playerObjY = new YT.Player('spacePlayer', {
       videoId: 'tNkZsRW7h2c', // this is the id of the video at youtube (the stuff after "?v=")
       loop: true,
       events: {
           onReady: function (e) {
               playerObj.space = e.target;
+              selectedMusicParams('spaceMusicCheck', true);
             },
       }
   });
-  var playerOby = new YT.Player('fightPlayer', {
+}
+  if (fightMusicCheck.checked) {
+  var playerObjY = new YT.Player('fightPlayer', {
       videoId: 'abg4hqQs5b8', // this is the id of the video at youtube (the stuff after "?v=")
       loop: true,
       events: {
           onReady: function (e) {
               playerObj.fight = e.target;
-              // getSettings
-              customPlayerF(settingsObj.musicURL.value, 'musicURL', true);
+              selectedMusicParams('fightMusicCheck', true);
             },
       }
   });
+  }
+  customPlayerF(musicURL.value, 'musicURL', true);
 }
 var mouseUp = "ignore";
 for (var button of document.getElementsByClassName("button")) {
