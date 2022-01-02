@@ -1439,6 +1439,9 @@ function enableScroll() {
   window.removeEventListener('keydown', preventDefaultForScrollKeys, false);
   textur.style.touchAction = '';
 }
+document.addEventListener("visibilitychange", () => {
+  /*if (document.hidden) */pauseF(true);
+});
 document.addEventListener('touchmove', touch);
 document.addEventListener('touchstart', touch);
 document.addEventListener('touchend', touch);
