@@ -250,7 +250,6 @@
     var RotatingWall;
     var RotatingDreieck;
     var BlinkWall;
-    var bulletInterval = [];
     var mins = 0;
     var secs = 0;
     var tenths = 0;
@@ -474,29 +473,28 @@
             x: 10,
             y: 255
           }
-        }/*,
+        },
         12: {
           sensibility: 5,
           spawnPoint: {
             x: 10,
             y: 255
           },
-          bullet: [
-            {
-              startPointInSec: 0,
-              pxPerMiliSec: 33,
-              startPosition: {
-                x: window.innerWidth + 100,
-                y: 50
-              },
-              // endPosition:
-              repeatIntervalIn_Secs: 7,
-              repetitions: {need: "endless"},
-              direction: "left",
-              radius: 50
-            }
-          ]
-        },*/
+          cannons: [
+            {x: window.innerWidth + 100, y: 45, width: 100, height: 100, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
+          ],
+        },
+        13: {
+          sensibility: 7,
+          spawnPoint: {
+            x: 10,
+            y: 255
+          },
+          cannons: [
+            {x: window.innerWidth + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
+            {x: window.innerWidth + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
+          ],
+        },
       },
       editLevel: {
         selectedLevel: 1
@@ -631,9 +629,6 @@
     AblageListe[5] = window.innerHeight;
     if (!localStorage.getItem("storedName")) {
       var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-      while (Object.keys(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
-        var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
-      }
     }
     else var name = localStorage.getItem("storedName");
     changeName(true);
@@ -682,14 +677,15 @@
         // }
       AblageListe[0] = 0;
       for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
-      highscores[Object.keys(highscores)[i1]].allMaps = [];
+      highscores[Object.keys(highscores)[i1]] = {true: {allMaps: []}, false: {allMaps: []}};
       for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
-        highscores[Object.keys(highscores)[i1]].allMaps.push("allMaps");
+        highscores[Object.keys(highscores)[i1]][true].allMaps.push("allMaps");
+        highscores[Object.keys(highscores)[i1]][false].allMaps.push("allMaps");
       }
     }
-        if (highscores[level.mode][false] && highscores[level.mode][false][name] != undefined && Object.keys(highscores[level.mode][false][name]).length > 0 && (!highscores[level.mode][true] || !highscores[level.mode][true][name] || Object.keys(highscores[level.mode][false][name]).length >= Object.keys(highscores[level.mode][true][name]).length)) {
+        if (highscores[level.mode][false] && highscores[level.mode][false][name] != undefined && highscores[level.mode][false][name].length > 0 && (!highscores[level.mode][true] || !highscores[level.mode][true][name] || highscores[level.mode][false][name].length >= highscores[level.mode][true][name].length)) {
         for (var i = 0;
-          (i < Object.keys(highscores[level.mode][false][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
+          (i < highscores[level.mode][false][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
           opt = document.createElement("option");
           document.getElementById("courceSelection").options.add(opt);
           opt.setAttribute("id", i);
@@ -705,9 +701,9 @@
         opt.setAttribute("id", i + 1);
         opt.text = "show Scores";
       }
-      else if (highscores[level.mode][true] && highscores[level.mode][true][name] != undefined && Object.keys(highscores[level.mode][true][name]).length > 0 && (!highscores[level.mode][false] || !highscores[level.mode][false][name] || Object.keys(highscores[level.mode][true][name]).length >= Object.keys(highscores[level.mode][false][name]).length)) {
+      else if (highscores[level.mode][true] && highscores[level.mode][true][name] != undefined && Object.keys(highscores[level.mode][true][name]).length > 0 && (!highscores[level.mode][false] || !highscores[level.mode][false][name] || highscores[level.mode][true][name].length >= highscores[level.mode][false][name].length)) {
       for (var i = 0;
-        (i < Object.keys(highscores[level.mode][true][name]).length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
+        (i < highscores[level.mode][true][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
@@ -732,38 +728,38 @@
         opt.text = (1) + ". map"
         courceSelection.value = "1. map";
       }
-      if (!highscores[level.mode][joyStickPlay.checked][name] || highscores[level.mode][joyStickPlay.checked][name].length == 0) courceSelected();
+      if (!highscores[level.mode][joyStickPlay.checked] || !highscores[level.mode][joyStickPlay.checked][name] || highscores[level.mode][joyStickPlay.checked][name].length == 0) courceSelected();
       else document.getElementById('textur').style.display = "none";
       document.getElementById('courceSelection').value = "select map!";
-      if (highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0 && offline == false) {
-      dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-        folgenDbGetLevelAroundTheWorld(result, false);
-      }).catch(function(e) {
-        console.error(e);
-      });
-      dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-        folgenDbGetLevelBy(result, false);
-        if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
-          for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
-            level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
-            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel];
-            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
-            level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
-          }
-          localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-          dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
-          localStorage.setItem("uploadCources", []);
-        }
-      }).catch(function(e) {
-        console.error(e);
-        app._data.db = [];
-        app._data.db.push("create new level");
-      });
-    }
-    else if (localStorage.getItem("profileName") == name && highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0) {
-      folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
-      folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
-    }
+    //   if (highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0 && offline == false) {
+    //   dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
+    //     folgenDbGetLevelAroundTheWorld(result, false);
+    //   }).catch(function(e) {
+    //     console.error(e);
+    //   });
+    //   dbGet("Gelduldspiel", "levelBy " + name).then(result => {
+    //     folgenDbGetLevelBy(result, false);
+    //     if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
+    //       for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
+    //         level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
+    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel];
+    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
+    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
+    //       }
+    //       localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
+    //       dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
+    //       localStorage.setItem("uploadCources", []);
+    //     }
+    //   }).catch(function(e) {
+    //     console.error(e);
+    //     app._data.db = [];
+    //     app._data.db.push("create new level");
+    //   });
+    // }
+    // else if (localStorage.getItem("profileName") == name && highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0) {
+    //   folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
+    //   folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
+    // }
     }
     function folgenDbGetLevelAroundTheWorld(result, offline) {
       level[level.mode].worldWideLevel = result;
@@ -1056,7 +1052,6 @@
         clearInterval(RotatingDreieck);
         clearInterval(BlinkWall);
       } else {
-        activateBullets();
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
         clearInterval(BlinkWall);
@@ -1203,7 +1198,7 @@
           green = data.data[1];
           blue = data.data[2];
           alpha = data.data[3];
-          if ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177)) {
+          if ((joyStick != "place" || !joyStickPlay.checked) && ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177))) {
             console.log("Fail!");
             if (level.mode == "growing") {
               modeSelected("growing");
@@ -1554,6 +1549,27 @@
 
       canvas.setTransform(1, 0, 0, 1, 0, 0);
       //  requestAnimationFrame(renderLoop);
+      // bullets animation
+      for (var cannon of level[level.mode][level[level.mode].levelType][level[level.mode].number].cannons) {
+        canvas.fillStyle = "black";
+        canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
+        cannon.timeGone += 16;
+        if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
+          cannon.timeGone = 1;
+          bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+        }
+      }
+      for (var bullet of bullets) {
+        canvas.fillStyle = "hsl(20, 4%, 50%)";
+        canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        canvas.fillStyle = "black";
+        bullet.x += bullet.speed*bullet.direction.x;
+        bullet.y += bullet.speed*bullet.direction.y;
+        canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+      }
+      bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
+      // for development:
+      requestAnimationFrame(renderLoop);
     }
 
     function createPath(...points) {
@@ -1663,9 +1679,6 @@
       //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
       //    größeAnpassen();
       //}
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
-        if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position != undefined && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x != undefined) drawBullet(level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i]);
-      }
       if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
       if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
       if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
@@ -1800,44 +1813,6 @@
       }, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].timeInvisible);
     }
 
-    function activateBullets() {
-      for (var i = 0; level[level.mode].levelType != "showScores" && level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet.length; i++) {
-        level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done = 0;
-        bulletInterval[i] = true;
-        bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPointInSec, level[level.mode].levelType, level[level.mode].number);
-      }
-    }
-    function bullet(i, levelAktuell, waitingTimeInSec, type, number) {
-      level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position = {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPosition.x, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].startPosition.y};
-      setTimeout(function () {
-        bulletInterval[i] = true;
-        setTimeout(function () {
-          bulletInterval[i] = false;
-          level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done++;
-          if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.need == "endless" && level[level.mode].levelType == type && level[level.mode].number == number)  bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], 0, type, number);
-          else if (level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done < level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.need) bullet(i, level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i], levelAktuell.repetitions.beginningtimes[level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].repetitions.done - 1], type, number);
-        }, levelAktuell.repeatIntervalIn_Secs*1000);
-        movingBullet(levelAktuell, i);
-        //   bulletInterval = setInterval(function () {
-        // }, levelAktuell.pxPerMiliSec);
-      }, waitingTimeInSec*1000);
-    }
-    function movingBullet(levelAktuell, i) {
-      if (levelAktuell.direction == "right") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x += levelAktuell.pxPerMiliSec;
-      if (levelAktuell.direction == "left") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.x += levelAktuell.pxPerMiliSec;
-      if (levelAktuell.direction == "down") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.y += levelAktuell.pxPerMiliSec;
-      if (levelAktuell.direction == "up") level[level.mode][level[level.mode].levelType][level[level.mode].number].bullet[i].position.y += levelAktuell.pxPerMiliSec;
-      Layout();
-      setTimeout(function () {
-        if (bulletInterval[i] == true) movingBullet(levelAktuell, i);
-      }, 1);
-    }
-    function drawBullet(levelAktuell) {
-      canvas.fillStyle = "black";
-      canvas.beginPath();
-      canvas.arc(levelAktuell.position.x,levelAktuell.position.y,levelAktuell.radius,100,Math.PI*2, true);
-      canvas.fill();
-    }
     if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
     function canvasClicked() {
       if (joyStick == "place" && gerät == "PC") {
@@ -2131,6 +2106,9 @@
   function cssToNumber(string) {
     return JSON.parse(string.toString().split("px")[0]);
   }
+  // cannon
+var bullets = [];
+
   </script>
 </body>
 
