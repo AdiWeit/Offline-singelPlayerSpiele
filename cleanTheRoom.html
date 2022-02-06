@@ -396,15 +396,15 @@ function CameraManuallychanged() {
       selected = JSON.parse('{"objects":{"teppich":[{"x":100,"y":79,"width":244,"height":339}],"staub":[{"x":423,"y":111,"radius":24,"collected":false},{"x":396,"y":369,"radius":24,"collected":false},{"x":421,"y":217,"radius":24,"collected":true},{"x":221,"y":244,"radius":24,"collected":true},{"x":38,"y":239,"radius":24,"collected":true},{"x":421,"y":161,"radius":7,"collected":false},{"x":421,"y":281,"radius":7,"collected":true},{"x":417,"y":325,"radius":7,"collected":true}],"schmuck":[{"x":219,"y":133,"radius":24,"collected":false}],"spielzeug":[{"x":215,"y":341,"radius":24,"collected":false}],"moebel":[{"x":200,"y":12,"width":80,"height":53},{"x":147,"y":426,"width":144,"height":66}],"vertiefung":[{"x":320,"y":13,"width":132,"height":62}],"ladestation":[{"x":67,"y":12,"width":66,"height":25}],"leererStation":[{"x":12,"y":426,"width":44,"height":69}],"multiSelector":[],"steckdose":[]},"pixelRate":"1357 x 732","element":"vertiefung","gegenstaende":"loecher: 1, Moebel: 2, Teppich: 1, Ladestationen: 1, Entleerer: 1, Spielzeug: 1, schmuck: 1, Staub: 8, Steckdose: 0","maxVerfallsdaten":{"ladung":3111,"füllungLeft":200}}');
       if (gerät == "Handy" && confirm("Wollen sie mit Joy-Stick spielen?")) joyStickPlay.checked = true;
       resetLevel();
-      alert("Bewegen Sie den Staubsauger durch Bewegen der Maus, wenn sie einen Joy-Stick plaziert haben, oder durch Neigen des Gerätes, falls sie mit Bewegungssteuerung spielen. Erforschen Sie die Elemente dieses Spiels!");
+      alert("Bewegen Sie den Staubsauger durch Bewegen der Maus, wenn Sie einen Joy-Stick plaziert haben, oder durch Neigen des Gerätes, falls sie mit Bewegungssteuerung spielen. Erforschen Sie die Elemente dieses Spiels!");
       explained = {
         level: 1,
         texts: {
           staub: 'Ziel des Spiels ist es, den gesamten Staub weg zu saugen. Das erste Flöckchen haben sie bereits!',
-          spielzeug: 'Oh nein! Sie haben soeben Spielzeug der Kinder des Arbeitgebers aufgesaugt! Gott sei dank kann man das Spielzeugt wieder aus dem Müllbäutel rausfischen! Doch das dauert ein paar Sekunden. \nJe nach Einstellung kann Spielzeug auch ausschließlich den Sauger verlangsamen. Wenn der Staubsauger eines Levels zu schlecht ist (vom Arbeit und seiner Ausstattung abhängig), kann sogar der Bäutel von dem ganzen Spielzeug kaputt gehen und man muss von vorne aunfangen!',
+          spielzeug: 'Oh nein! Sie haben soeben Spielzeug der Kinder des Arbeitgebers aufgesaugt! Gott sei dank kann man das Spielzeugt wieder aus dem Müllbäutel rausfischen! Doch das dauert ein paar Sekunden. \nJe nach Einstellung kann Spielzeug auch ausschließlich den Sauger verlangsamen. Wenn der Staubsauger eines Levels zu schlecht ist (vom Arbeitgeber und seiner Ausstattung abhängig), kann sogar der Bäutel von dem ganzen Spielzeug kaputt gehen und man muss von vorne aunfangen!',
           schmuck: 'Sie haben soeben Schmuck aufgesaugt! Ihr Arbeitgeber ist so wütend auf sie, dass er sie feuert und Sie es bei einem anderen erneut probieren müssen. ',
           moebel: 'Das sind Möbel! Sie müssen sie umfahren, aber immerhin schaden sie Ihnen nicht. ',
-          vertiefung: 'Oh nein! Sie haben den Staubsauger geschrottet! Er ist soeben die treppen rutergefallen! Sie kriegen zwar einen neuen Staubsauger, den müssen Sie jedoch größtenteils selber bezahlen. Zusätzlich müssen Sie zur Strafe von vorne anfangen. ',
+          vertiefung: 'Oh nein! Sie haben den Staubsauger geschrottet! Er ist soeben die Treppen rutergefallen! Sie kriegen zwar einen neuen Staubsauger, den müssen Sie jedoch größtenteils selber bezahlen. Zusätzlich müssen Sie zur Strafe von vorne anfangen. ',
           teppich: 'Sie betreten einen Teppich! Auf der Kante fahren Sie wegen dem Höhenunterschied mit dem selben Drehmoment langsamer. Sie können zwar beschleunigen, doch passen Sie auf, dass Sie, sobald Sie auf dem Teppich sind, nicht mehr so schnell sind!',
           batteryLow: 'Der Akku ist fast leer! Suchen sie die Ladestation oben links auf, um ihn in windeseile wieder zu füllen! Der grüne Balken auf dem Sauger zeigt den Akkufüllstand an. Sie können sich den Weg zur Ladestation immer oder nur bei kritisch niedrigem Füllstand anzeigen lassen (Einstellung bei Scrollen nach unten auffindbar. zum Scrollen auf dem Tablet mit Joy-Stick müssen sie zuvor mit zwei Fingern scrollen.',
           entleerer: 'Sie haben schon so viel Staub weggesaugt, dass der Sauger fast voll ist! Die Restkapazität wird mit dem grauen Balken auf dem Staubsauger angezeigt. Der staub, der zu groß zum Einsaugen ist, wird nun durchlässig angezeigt.\nUm den Sauger zu entleeren, fahren Sie ihn bitte zu dem automatischen Entleerer links unten. Sie können sich den Weg zum Entleerer immer oder nur bei kritisch hohem Füllstand anzeigen lassen (Einstellung bei Scrollen nach unten auffindbar. zum Scrollen auf dem Tablet mit Joy-Stick müssen sie zuvor mit zwei Fingern scrollen.',
@@ -1411,12 +1411,9 @@ localStorage.setItem("storedName", name);
         selected.objects.schmuck[i].collected = true;
         explain('schmuck');
         try {
-          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/vacuuming-up-random-stuff-floor-tool-vacuum-cleaner-sound-asmr-youtubemp3free.org.mp3");
-          audio.currentTime = 60*1 + 29.5;
-          audio.play();
+          audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/cleanTheRoom/schmuck.wav").play();
           setTimeout(function () {
-            audio.pause();
-            audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
+            if (audio.src != "https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3") audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/you%20are%20fired!.mp3").play();
             resetLevel(/*"Schmuck eingesammelt!"*/);
           }, 500);
         } catch (e) {
