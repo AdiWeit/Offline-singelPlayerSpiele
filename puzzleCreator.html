@@ -34,7 +34,7 @@
     <br>
     <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
     <br>
-    <input type="checkbox" onchange="if (checked) {anzahlRichtige.style.display = 'inline'; anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (!difficultSchieben.checked || zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlRichtige.style.display = 'none'; anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis__<input type="text" id="anzahlRichtige" value="10" placeholder="Wert"> nicht mehr an origineller Stelle
+    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (!difficultSchieben.checked || zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
     <br>
     <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
     <br>
@@ -53,7 +53,6 @@
   anzahlVerschieben.value = anzahl.value*anzahl.value;
   settings.style.display = "none";
   aufgebenId.style.display = "none";
-  anzahlRichtige.style.display = "none";
   // schiebenSettings.style.display  = "inline"
   randSettings.style.display = "none";
   schiebenSettings.style.display = "none";
@@ -261,7 +260,8 @@
     for (var i = 0; i < positions.wrong.length; i++) {
       workingNumbers.push(i);
     }
-    for (var i = 0; i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value); i++) {
+    var counter = 0;
+    for (var i = 0; i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value) && (counter < 99999 || confirm('mixing the cards takes longer than expected and might crash this website. Still continue?')); i++) {
       var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
       try {
       if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((missing.data.edit.x == positions.wrong[side].edit.x + lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y) /*right*/ || (missing.data.edit.x ==
@@ -280,8 +280,8 @@
       layout(true);
       for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
         if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
-          positions = JSON.parse(JSON.stringify(movement.positions[/*1*/0]));
-          missing = JSON.parse(JSON.stringify(movement.missing[/*1*/0]));
+          positions = JSON.parse(JSON.stringify(movement.positions[1]));
+          missing = JSON.parse(JSON.stringify(movement.missing[1]));
           movement.positions.splice(0, 1);
           movement.missing.splice(0, 1);
           maleZurrück.number++;
@@ -310,6 +310,7 @@
       //console.log("ein Error bei der if Abfrage!!! + (" + e + ")");
       i = positions.wrong.length;
     }
+    counter++;
     }
     canvas.clearRect(0, 0, 10000, 10000);
     if (layout(undefined, true) != undefined) verschiebenPC();
