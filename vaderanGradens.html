@@ -48,13 +48,89 @@
   <font id="highscoresAsGoodAsYours" style="font-size:77"></font>
 </div>
 <canvas id="textur" width="1582" onclick="canvasClicked(true);" height="740"></canvas>
-<input type="text" id="playStyleSelection" onmouseover="this.select();" placeholder="Spielstyle(turns)" onchange="playStyleSelected(value);" list="datalist1"></input>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Poppins:400,500,600,700&display=swap');
+*{
+  margin: 0;
+  padding: 0;
+  outline: none;
+  /* box-sizing: border-box; */
+  font-family: 'Poppins', sans-serif;
+}
+.wrapper{
+  width: 450px;
+  padding: 30px;
+  /* box-shadow: 0px 0px 10px rgba(0,0,0,0.1); */
+  position: relative;
+  left: -27px;
+}
+.wrapper .input-data{
+  height: 40px;
+  width: 100%;
+  position: relative;
+}
+.wrapper .input-data input{
+  height: 100%;
+  width: 100%;
+  border: none;
+  font-size: 17px;
+  border-bottom: 2px solid silver;
+}
+.input-data input:focus ~ label,
+.input-data input:valid ~ label{
+  transform: translateY(-20px);
+  font-size: 15px;
+  color: #4158d0;
+}
+.wrapper .input-data label{
+  position: absolute;
+  bottom: 10px;
+  left: 0;
+  color: grey;
+  pointer-events: none;
+  transition: all 0.3s ease;
+}
+.input-data .underline{
+  position: absolute;
+  height: 2px;
+  width: 100%;
+  bottom: 0;
+}
+.input-data .underline:before{
+  position: absolute;
+  content: "";
+  height: 100%;
+  width: 100%;
+  background: #4158d0;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 0.3s ease;
+}
+.input-data input:focus ~ .underline:before,
+.input-data input:valid ~ .underline:before{
+  transform: scaleX(1);
+}
+</style>
+
+
+  <div class="wrapper">
+         <div class="input-data">
+            <input id="amountTurns" type="text" value="7" required>
+            <div class="underline"></div>
+            <label>turns</label>
+         </div>
+      </div>
+      <input type="checkbox" checked="true" id="turningAllowed"> turning/rotating allowed
+      <br>
+      <input type="checkbox" id="fieldLimitPerCard"> limit of same color on one card
+<br>
+<input type="text" id="playStyleSelection" style="display:none" onmouseover="this.select();" placeholder="Spielstyle(turns)" onchange="playStyleSelected(value);" list="datalist1"></input>
 <div id="app">
   <datalist id="datalist1">
     <option v-for="genre in genres" v-bind:value="genre">
   </datalist>
 </div>
-<button type="button" id="newRound" onclick="restart();" name="button">new round</button>
+<button type="button" id="newRound" onclick="restart();" name="button">start game</button>
 <div id="turnAllower" style="display: none;">
   <br>
   <h2 >allow turning cards (by 90°)</h2>
@@ -137,7 +213,8 @@ localStorage.setItem("storedName", name);
         field[i1][i] = {colour: "none", item: false};
       }
     }
-    playStyleSelected(playStyleSelection.value);
+    var allowedObj = {true: "allowed", false: "not allowed"}
+    playStyleSelected(`turns:${amountTurns.value}|turning: ${allowedObj[turningAllowed.checked]}|fieldLimitPerCard: ${fieldLimitPerCard.checked}`);
   }
   var offline = false;
   dbGet("vaderanGradens", "highscores").then(result => {
@@ -164,6 +241,7 @@ localStorage.setItem("storedName", name);
   });
 
   function playStyleSelected(value) {
+    playStyleSelection.value = value;
     if (!(value.includes("turning")) && !(isNaN(value))) {visible([["turnAllower", "inline"]]);allowTurning(document.getElementById('allowTurning').checked); addFieldLimit(fieldLimit.checked);}
     else if (isNaN(value) && !(value.includes("turns:") && value.includes("|turning: "))) alert("ungültige Eingabe! Bitte eins der bereits vorhandenen Parameter auswählen, oder ein neues durch Eingebe einer Rundenanzahl hinzufügen.");
     else beginnGame();
