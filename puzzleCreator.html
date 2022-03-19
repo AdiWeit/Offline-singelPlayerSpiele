@@ -34,13 +34,13 @@
     <br>
     <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
     <br>
-    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (!difficultSchieben.checked || zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
+    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
     <br>
     <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
     <br>
     <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
     <br>
-    <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird)
+    <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
   <br>
   <button type="button" id="aufgebenId" onclick="aufgeben(schieben.checked);" name="button">aufgeben</button>
@@ -278,20 +278,20 @@
       positions.wrong[side].edit = missing.data.edit;//.splice(side, 1);
       textur.width = textur.width;
       layout(true);
-      for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
-        if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
-          positions = JSON.parse(JSON.stringify(movement.positions[1]));
-          missing = JSON.parse(JSON.stringify(movement.missing[1]));
-          movement.positions.splice(0, 1);
-          movement.missing.splice(0, 1);
-          maleZurrück.number++;
-          i1 = movement.positions.length;
-          i--;
-          for (var i2 = 0; i2 < workingNumbers.length; i2++) {
-            if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
-          }
-        }
-      }
+      // for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
+      //   if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
+      //     positions = JSON.parse(JSON.stringify(movement.positions[1]));
+      //     missing = JSON.parse(JSON.stringify(movement.missing[1]));
+      //     movement.positions.splice(0, 1);
+      //     movement.missing.splice(0, 1);
+      //     maleZurrück.number++;
+      //     i1 = movement.positions.length;
+      //     i--;
+      //     for (var i2 = 0; i2 < workingNumbers.length; i2++) {
+      //       if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
+      //     }
+      //   }
+      // }
       if (i1 != movement.positions.length + 1) {
           missing.data = ablage
           var workingNumbers = [];
