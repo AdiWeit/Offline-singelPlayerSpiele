@@ -674,7 +674,7 @@ function checkpointSelected(value) {
     setInterval(function() {
       // joy-stick:
       var nextCoordinates = {x: 0, y: 0};
-      if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores") {
+      if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores"/* && !pause*/) {
         if (level.aktuell != "winnerScreen" && !level[level.mode][level.aktuell].rotating) Layout();
         if (joyStick && joyStick.coordinates) {
           if (JSON.parse(document.getElementById('sensibility').value) < 12) document.getElementById('sensibility').value = 12
@@ -683,6 +683,7 @@ function checkpointSelected(value) {
           nextCoordinates = {x: nextCoordinates.x - scrollX/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11), y: nextCoordinates.y - scrollY/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11)}
         }
       }
+      if (pause) newCoordinates = {x: ball.x, y: ball.y};
       // zoom: window.parent.document.body.style.zoom = 1.5;
       // scroll when at bootom
       if (level.aktuell == "winnerScreen") sphere.schieber.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
@@ -726,7 +727,7 @@ function checkpointSelected(value) {
       ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
       ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
       coordinatesBefore = {x1: x1, y1: y1}
-      if (!level[level.mode][level.aktuell] || !level[level.mode][level.aktuell].invisible || invisible.boolean == false) {
+      if ((!level[level.mode][level.aktuell] || !level[level.mode][level.aktuell].invisible || invisible.boolean == false)/* && !pause*/) {
       if (joyStickPlay.checked && joyStick.coordinates) {
         if (nextCoordinates.x < 0) nextCoordinates.x = 0;
         if (nextCoordinates.x > textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""))) nextCoordinates.x = textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""));
@@ -877,7 +878,7 @@ function checkpointSelected(value) {
     }, 25);
   }
   else if (gerät == "Handy") {
-    alert("Please call up this website as https (secure) to be able to use the required motion control (Chrome recommended)");
+    alert("Please enter this website as https (secure) to be able to use the required motion control (Chrome recommended)");
     // alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
     gerät = "unsaveHandyBrowser";
   }
@@ -951,8 +952,10 @@ function checkpointSelected(value) {
       if (y1 < 0) y1 = 0;
       if (y1 > textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""));
     }
+    if (!pause) {
     sphere.schieber.style.top = y1 + "px";
     sphere.schieber.style.left = x1 + "px";
+  }
   }
   window.onscroll = function (e) {
     if (!scrollingInterac.PC) {
@@ -1021,7 +1024,7 @@ function checkpointSelected(value) {
       } catch (e) {
         console.log("Das ist ein Fehler :( )");
       }
-      if (!goalReached && (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*onGreen*/ (joyStickPlay.checked && red == 34 && blue == 76 && green == 177) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4))) {
+      if (!pause && !goalReached && (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*onGreen*/ (joyStickPlay.checked && red == 34 && blue == 76 && green == 177) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4))) {
         console.log("Fail!");
         time = 0;
         if (checkpoint.length > 1) time = checkpoint[checkpoint.length - 1].timeNeededToReach;
@@ -1717,5 +1720,10 @@ document.onmousemove = readMouseMove
 function cssToNumber(string) {
 return JSON.parse(string.toString().split("px")[0]);
 }
-
+var pause = false;
+document.onkeydown = function(event) {
+  if (event.key == "p") {
+    pause = !pause;
+  }
+}
 </script>
