@@ -41,8 +41,20 @@
 </html>
 <title>snake game</title>
 <h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"'></h1>
+<h1 id="stopWatch"></h1>
+<style>
+  #stopWatch {
+    position: absolute;
+    top: -3;
+    color: red;
+  }
+</style>
 <script>
-
+  var alertWhenFinishedSaving = false;
+  window.onbeforeunload = function(){
+  console.log("Leave Website");
+    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+};
     // debug:
   // setTimeout(function () {
   //   document.getElementById('spielmodi').value = "play hunter";
@@ -66,7 +78,7 @@ function benachrichtigungAusschalten() {
     localStorage.setItem("benachrichtigungAusschalten", false);
   }
 }
-
+var scl=20;
 var time = [0, 174];
 var running = [0, 0];
 var mins = [];
@@ -75,7 +87,7 @@ var tenths = [];
 var opositeDirection = {"UP_ARROW": "DOWN_ARROW", "RIGHT_ARROW": "LEFT_ARROW", "DOWN_ARROW": "UP_ARROW", "LEFT_ARROW": "RIGHT_ARROW"}
 var directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LEFT_ARROW"};
 // var Bild = new Image();
-// Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+// Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
 
 if (!localStorage.getItem("storedName")) var name = prompt('Wie heißen sie? Diese Information ist nötig, um ihre Highscores speichern zu können. Wenn sie damit nicht einverstanden sind, klicken sie bitte auf "abbrechen". ');
 else var name = localStorage.getItem("storedName");
@@ -122,7 +134,7 @@ if ((running[0] == 1/* || !running[0]*/)) {
     if (secs[0] < 10) {
       secs[0] = "0" + secs[0];
     }
-  //  document.getElementById('stopWatch').innerHTML = mins[0] + ":" + secs[0] + ":" + "0" + tenths[0];
+   // document.getElementById('stopWatch').innerHTML = mins[0] + ":" + secs[0] + ":" + "0" + tenths[0];
     increment();
   }, 100);
 }
@@ -141,7 +153,7 @@ if ((running[1] == 1/* || !running[0]*/)) {
     if (secs[1] < 10) {
       secs[1] = "0" + secs[1];
     }
-  //  document.getElementById('stopWatch').innerHTML = mins[1] + ":" + secs[1] + ":" + "0" + tenths[1];
+   // document.getElementById('stopWatch').innerHTML = mins[1] + ":" + secs[1] + ":" + "0" + tenths[1];
   if (mins[1] + ":" + secs[1] + ":" + "0" + tenths[1] == "00:00:00") {
     startPause1();
     soundsRoundFinished();
@@ -178,13 +190,15 @@ function modusSelected() {
   for (var i = 0; i < app._data.db.length; i++) {
     AblageListe[0].push(app._data.db[i]);
   }
-  for (var i = 0; i < app._data.db.length - 1; i++) {
+  for (var i = 0; i < app._data.db.length; i++) {
  //   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
     if (pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value]) AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
-    else AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (nobody played)";
+    else if (app._data.db[i] != "create own pixel rate") AblageListe[0][i] = app._data.db[i].toString().split(' (')[0] + " (nobody played)";
   //  app._data.db[i] = app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
     if (pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value]) console.log(app._data.db[i] + " to " + app._data.db[i].toString().split(' (')[0] + " (" + Object.keys(pixelSpielfelder[app._data.db[i].toString().split(' (')[0]][document.getElementById('spielmodi').value].highscores).length + " player played!)");
  //   }
+ if (!pixelSpielfelder[app._data.db[i].toString().split(' (')[0]].bestScale) AblageListe[0][i] += " (verkleinert wegen Spielfeldgröße)";
+ // TODO: for (var i = 0; i < food.x.length; i++) {food.x[i] /= 2; food.y[i] /= 2} (scale und food koordinaten verändern, weil nicht automatisch verkleinert wird)
   }
   app._data.db = AblageListe[0];
   setTimeout(function () {
@@ -201,19 +215,32 @@ dbGet("snakeGame", "pixelSpielfelder").then(result => {
 //if (!(dbGet("snakeGame", "pixelSpielfelder").promiseValue == undefined)) {
  pixelSpielfelder = JSON.parse(result);
  AblageListe[0] = [];
- for (var i = 0; i < Object.keys(pixelSpielfelder).length; i++) {
-   if (Object.keys(pixelSpielfelder)[i].toString().split(' x ')[0] <= x && Object.keys(pixelSpielfelder)[i].toString().split(' x ')[1] <= y) {
+ for (var i = 1; i < Object.keys(pixelSpielfelder).length; i++) {
+   pixelSpielfelder[Object.keys(pixelSpielfelder)[i]].bestScale = true;
+   // if (Object.keys(pixelSpielfelder)[i].toString().split(' x ')[0] <= x && Object.keys(pixelSpielfelder)[i].toString().split(' x ')[1] <= y) {
      AblageListe[0][AblageListe[0].length] = Object.keys(pixelSpielfelder)[i];
-   }
+   // }
+   /*else*/ if (!(Object.keys(pixelSpielfelder)[i].toString().split(' x ')[0] <= x && Object.keys(pixelSpielfelder)[i].toString().split(' x ')[1] <= y))  pixelSpielfelder[Object.keys(pixelSpielfelder)[i]].bestScale = false;
+  /* else {
+     var fields = {x: Object.keys(pixelSpielfelder)[i].toString().split(' x ')[0]/20, y: Object.keys(pixelSpielfelder)[i].toString().split(' x ')[1]/20}
+     for (var testScale = 20; testScale > 1 && !pixelSpielfelder[Object.keys(pixelSpielfelder)[i]].bestScale; testScale--) {
+       if (fields.x <= JSON.parse((x/testScale).toString().split('.')[0]) && fields.y <= JSON.parse((y/testScale).toString().split('.')[0])) {
+         console.log("optimal test scale: " + testScale);
+         pixelSpielfelder[Object.keys(pixelSpielfelder)[i]].bestScale = testScale;
+         AblageListe[0][AblageListe[0].length] = Object.keys(pixelSpielfelder)[i];
+       }
+     }
+   }*/
  }
  AblageListe[0].push("create own pixel rate");
  app._data.db = AblageListe[0];
- for (var i = 0; i < Object.keys(pixelSpielfelder).length - 1; i++) {
-//   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
-   app._data.db[i] += " (" + Object.keys(pixelSpielfelder[app._data.db[i]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
-//   }
- }
+//  for (var i = 0; i < Object.keys(pixelSpielfelder).length - 1; i++) {
+// //   if (!(app._data.db[i] == "create own pixel" || app._data.db[i] == undefined)) {
+//    app._data.db[i] += " (" + Object.keys(pixelSpielfelder[app._data.db[i]][document.getElementById('spielmodi').value].highscores).length + " player played!)";
+// //   }
+//  }
 //}
+modusSelected("normal");
 }).catch(function(e) {
 //  console.log("Data not found");
   console.log(e);
@@ -257,8 +284,8 @@ setTimeout(function () {
                    pixelSpielfelder[selected][spielmodi.value].spawnPoint = {x: Math.floor(Math.random() * (y - scl)), y: Math.floor(Math.random() * (y - scl)),}
                    for (var i = 0; i < Math.floor((selected.toString().split(' x ')[0]*selected.toString().split(' x ')[1])/17400); i++) {
                      AblageListe[0] = Math.floor(Math.random() * (x - scl))
-                       while ((AblageListe[0]/20 + "").includes(".")) {
-                         if (AblageListe[0] >= x-20) {
+                       while ((AblageListe[0]/scl + "").includes(".")) {
+                         if (AblageListe[0] >= x-scl) {
                          AblageListe[0]--;
                        }
                        else {
@@ -266,8 +293,8 @@ setTimeout(function () {
                        }
                        }
                        AblageListe[1] = Math.floor(Math.random() * (y - scl))
-                         while ((AblageListe[1]/20 + "").includes(".")) {
-                           if (AblageListe[1] >= x-20) {
+                         while ((AblageListe[1]/scl + "").includes(".")) {
+                           if (AblageListe[1] >= x-scl) {
                            AblageListe[1]--;
                          }
                          else {
@@ -280,14 +307,19 @@ setTimeout(function () {
                    // pixelSpielfelder[selected][document.getElementById('spielmodi').value].highscores[name] = "not played yet!";
                    AblageListe[0] = JSON.stringify(pixelSpielfelder)
                    dbSetWarteschlange.push({tag: "pixelSpielfelder", data: AblageListe[0]});//dbSet("snakeGame", "pixelSpielfelder", AblageListe[0]);
-                   localStorage.setItem("pixelSpielfelder", JSON.stringify([AblageListe[0], name]));
+                   if (name == "Adi" || name == "Adron") localStorage.setItem("pixelSpielfelder", JSON.stringify([AblageListe[0], name]));
+                   rundeStarten();
                  }
                  else if (!(this.innerHTML.includes("create own pixel rate"))) {
                    selected = app._data.db[liIndex].toString().split(" (")[0];
                    x = selected.toString().split(" x ")[0]
                    y = selected.toString().split(" x ")[1]
+                   stopWatch.style.left = x - 130;
                    createCanvas(x, y);
+                   fill(128, 128, 128);
+                   rect(0, 0, x, y);
                    console.log(selected + " selected!");
+                   // if (pixelSpielfelder[selected].bestScale) scl = pixelSpielfelder[selected].bestScale;
                  }
          };
        }
@@ -363,6 +395,8 @@ function rundeStarten() {
   s.total = 1;
   s.xspeed = 1;
   s.yspeed = 0;
+  fill(128, 128, 128);
+  rect(0, 0, x, y);
   goneFields = [];
  if (gerät == "Handy") {
  viewPage();
@@ -394,10 +428,10 @@ if (spielerIch == 0 && pixelSpielfelder[selected].spawnPoint) {
 if (spielerIch > 1) {
   ins.x = x/2 - 40;
   ins.y = y/2;
-  while ((ins.x/20 + "").includes(".")) {
+  while ((ins.x/scl + "").includes(".")) {
     ins.x--;
   }
-  while ((ins.y/20 + "").includes(".")) {
+  while ((ins.y/scl + "").includes(".")) {
     ins.y--;
   }
 }
@@ -409,10 +443,10 @@ if (spielerIch > 1) {
      g = d.getElementsByTagName('body')[0],
      x = w.innerWidth || e.clientWidth || g.clientWidth,
      y = w.innerHeight|| e.clientHeight|| g.clientHeight;
-     while ((x/20 + "").length > 2 && x > 0) {
+     while ((x/scl + "").length > 2 && x > 0) {
        x--;
      }
-     while ((y/20 + "").length > 2 && y > 0) {
+     while ((y/scl + "").length > 2 && y > 0) {
        y--;
      }
 console.log(x + ' × ' + y);
@@ -453,7 +487,6 @@ console.log(x + ' × ' + y);
 
 // sketch.js
 var s;
-var scl=20;
 var food = {};
 
 function setup() {
@@ -477,12 +510,20 @@ function pickLocation(setup)
    if (pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates.length > 0) {
      food.x[i] = pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates[i][0];
      food.y[i] = pixelSpielfelderTemporär[selected][document.getElementById('spielmodi').value].coordinates[i][1];
+     while ((food.x[i]/scl + "").includes('.')) {
+       food.x[i]--;
+     }
+     while ((food.y[i]/scl + "").includes('.')) {
+       food.y[i]--;
+     }
    }
  }
 }
 
 function draw(inGame) {
-  background(51);
+  // fill('black');
+  // rect(300, x - 333, 10)
+  if (spielerIch != 4) background(51);
   fill(255, 0, 0);
  if (inGame == undefined && (running[0] == 1)) {
    coordinates[0] = 30;
@@ -493,8 +534,9 @@ function draw(inGame) {
  //   console.log("Animation");
  // }
  textSize(coordinates[0]);
- text(mins[0] + ":" + secs[0] + ":" + "0" + tenths[0], coordinates[1], coordinates[2])
- if (spielerIch == 1) {
+ if (spielerIch == 4) document.getElementById('stopWatch').innerHTML = mins[0] + ":" + secs[0] + ":" + "0" + tenths[0];
+ else text(mins[0] + ":" + secs[0] + ":" + "0" + tenths[0], coordinates[1], coordinates[2])
+ if (spielerIch == 1/* && inGame*/) {
    textSize(30);
    text(mins[1] + ":" + secs[1] + ":" + "0" + tenths[1], x - 133, 30 + 37);
  }
@@ -521,13 +563,15 @@ function draw(inGame) {
  }
  if (spielerIch < 2) s.show();
 }
+fill(255,0,100);
  for (var i = 0; food.x && i < food.x.length; i++) {
-   fill(255,0,100);
    rect(food.x[i],food.y[i],scl,scl);
  }
- for (var i = 0; spielerIch > 2 && spielerIch < 5 && i < goneFields.length; i++) {
-   fill(177, 0, 0);
-   rect(goneFields[i].toString().split(' - ')[0], goneFields[i].toString().split(' - ')[1], scl, scl);
+ fill(177, 0, 0);
+ for (var i = 0; i < goneFields.length; i++) {
+   for (var i1 = 0; goneFields[i] && i1 < goneFields[i].length; i1++) {
+     if (goneFields[i][i1]) rect(i*scl, i1*scl, scl, scl);
+   }
  }
  if (spielerIch > 1 && spielerIch < 5) {
    fill(110, 100, 110)
@@ -577,7 +621,7 @@ function keyPressed()
 {
  AblageListe[0] = keyCode;
  if (!(spielerIch == 1 && !(keyCode == 32))) {
-   folgenKeyPressed();
+   folgenKeyPressed(key);
  }
 }
 window.addEventListener('mousedown', function() {
@@ -586,8 +630,8 @@ window.addEventListener('mousedown', function() {
    folgenKeyPressed();
  }
 });
-function folgenKeyPressed() {
- if (gerät == "PC") {
+function folgenKeyPressed(key) {
+ if (gerät == "PC" && (spielerIch == 4 && !key.includes('Arrow') && key != "Escape" && key != "F11") || spielerIch != 4) {
    viewImage();
  }
  if ((AblageListe[0] == 82) && running[0]) {
@@ -612,7 +656,7 @@ function folgenKeyPressed() {
  {
     s.dir(-1,0);
  }
- else if (AblageListe[0] == 32 && h.bullet.y == - 20 && spielerIch == 1) {
+ else if (AblageListe[0] == 32 && h.bullet.y == - scl && spielerIch == 1) {
    setTimeout(function () {
      h.bullet.y = y - scl;
      h.bullet.x = h.x;
@@ -718,9 +762,12 @@ function folgenKeyPressed() {
 
 var goneFields = [];
 function moveI() {
-if (spielerIch > 2 && spielerIch < 5 && !(goneFields.includes(ins.x + " - " + ins.y)) && ins.x >= 0 && ins.x <= x - 20 && ins.y >= 0 && ins.y <= y - 20) {
-  goneFields.push(ins.x + " - " + ins.y);
-  if (goneFields.length == x*y/(20*20)) soundsRoundFinished();
+if (spielerIch > 2 && spielerIch < 5 && !(goneFields[ins.x/scl] && goneFields[ins.x/scl][ins.y/scl]) && ins.x >= 0 && ins.x <= x - scl && ins.y >= 0 && ins.y <= y - scl) {
+  if (!goneFields[ins.x/scl]) goneFields[ins.x/scl] = [];
+  goneFields[ins.x/scl][ins.y/scl] = true;
+  fill(177, 0, 0);
+  rect(ins.x, ins.y, scl, scl);
+  if (!goneFields.map(x => x.includes(undefined)).includes(true) && goneFields.reduce((acc, val) => acc + val.length, 0) ==  x*y/(scl*scl)) soundsRoundFinished();
 }
 else if (spielerIch == 3) {
   clearInterval(iDirectionInterval);
@@ -731,15 +778,24 @@ else if (spielerIch == 3) {
 //     if (goneFields[i] == ins.x + " - " + ins.y) goneFields.splice(i, 1);
 //   }
 // }
+
+if (goneFields[ins.x/scl] && goneFields[ins.x/scl][ins.y/scl]) {
+  fill(177, 0, 0);
+  rect(ins.x, ins.y, scl, scl);
+}
 if (ins.direction == "UP_ARROW") ins.y -= scl;
 else if (ins.direction == "DOWN_ARROW") ins.y += scl;
 else if (ins.direction == "RIGHT_ARROW") ins.x += scl;
 else ins.x -= scl;
+if (spielerIch > 1 && spielerIch < 5) {
+  fill(110, 100, 110)
+  rect(ins.x, ins.y,scl,scl);
+}
 for (var i = 0; food.x && i < food.x.length; i++) {
   // if (dist(this.x, this.y, food.x[i], food.y[i]) == 0) {
   if (ins.x == food.x[i] && ins.y == food.y[i]) {
     console.log("insectEatFood");
-    var audio = new Audio('http://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
+    var audio = new Audio('https://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
       audio.play();
       audio.currentTime = 0.5;
       setTimeout(function () {
@@ -779,15 +835,15 @@ draw(true);
 // }
 function insect() {
   AblageListe[0] = 0;
-  while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+  while (AblageListe[0]*scl < x/2 && AblageListe[0]*scl < x) {
     AblageListe[0]++;
   }
-  this.x = ((floor(AblageListe[0]))*20) - 60;
+  this.x = ((floor(AblageListe[0]))*scl) - 60;
   AblageListe[0] = 0;
-  while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+  while (AblageListe[0]*scl < y/2 && AblageListe[0]*scl < y) {
     AblageListe[0]++;
   }
-  this.y = ((floor(AblageListe[0]))*20)-60;
+  this.y = ((floor(AblageListe[0]))*scl)-60;
   this.direction = "RIGHT_ARROW";
   this.opositeDirection = {"UP_ARROW": "DOWN_ARROW", "RIGHT_ARROW": "LEFT_ARROW", "DOWN_ARROW": "UP_ARROW", "LEFT_ARROW": "RIGHT_ARROW"}
   this.directionObj = {38: "UP_ARROW", 40: "DOWN_ARROW", 39: "RIGHT_ARROW", 37: "LEFT_ARROW"};
@@ -796,11 +852,11 @@ function insect() {
   this.collision= function() {
     if (this.x > x - scl) {
       if (spielerIch != 4) this.isDead[1] = "LEFT_ARROW";
-      else this.x = -20;
+      else this.x = -scl;
     }
-    else if (this.y > y - 20) {
+    else if (this.y > y - scl) {
       if (spielerIch != 4) this.isDead[1] = "UP_ARROW";
-      else this.y = -20;
+      else this.y = -scl;
     }
     else if (this.y < 0) {
       if (spielerIch != 4) this.isDead[1] = "DOWN_ARROW";
@@ -814,7 +870,7 @@ function insect() {
   /*  if (s.tail.some(x => x.includes(this.x) ) && s.tail.some(x => x.includes(this.y) )) {
       console.log("collisionSnake");
     } */
-    if ((this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) && spielerIch != 4) {
+    if ((this.x > x - scl || this.y > y - scl || this.y < 0 || this.x < 0) && spielerIch != 4) {
       console.log("deathInsect (Rand)");
       if (spielerIch != 4) this.isDead[0] = true;
       else this.direction = this.opositeDirection[this.direction];
@@ -834,16 +890,16 @@ function insect() {
         iDirectionInterval = setInterval(moveI, /*sameSpeed: 100*/17 + ((1580 - x))/93);
       }, 3700);
       // if (this.isDead[1] == "LEFT_ARROW") {
-      //   this.x -= 20
+      //   this.x -= scl
       // }
       // else if (this.isDead[1] == "RIGHT_ARROW") {
-      //   this.x = 0;//+= 20
+      //   this.x = 0;//+= scl
       // }
       // else if (this.isDead[1] == "UP_ARROW") {
-      //   this.y -= 20
+      //   this.y -= scl
       // }
       // else {
-      //   this.y = 0;//+= 20;
+      //   this.y = 0;//+= scl;
       // }
 
       // if (this.isDead[1] == "RIGHT_ARROW" || this.isDead[1] == "LEFT_ARROW" || this.isDead[1] == "UP_ARROW" || this.isDead[1] == "DOWN_ARROW") {
@@ -852,7 +908,7 @@ function insect() {
       // }
       var ablage = JSON.parse(JSON.stringify(this.direction));
       this.direction = this.isDead[1];
-      for (var i = 0; (this.x > x - scl || this.y > y - 20 || this.y < 0 || this.x < 0) && i < 1000; i++) {
+      for (var i = 0; (this.x > x - scl || this.y > y - scl || this.y < 0 || this.x < 0) && i < 1000; i++) {
         moveI();
       }
       this.direction = this.opositeDirection[ablage];
@@ -862,8 +918,8 @@ function insect() {
 }
 var iDirectionInterval;
 function hunter() {
-this.x = 20;
-this.bullet = {"x": this.x, "y": - 20}
+this.x = scl;
+this.bullet = {"x": this.x, "y": - scl}
 this.image = new Image();
 this.image.src = "https://adi.nicolaiweitkemper.de/Bilder/Tarnfarbe.jpeg";
 this.direction = "RIGHT_ARROW";
@@ -1014,7 +1070,7 @@ if (h.bullet.x == s.x && h.bullet.y == s.y && h.hit == false) {
  // s.tail.pop();
  time[1] += 68;
 }
-if (!(h.bullet.y == - 20)) {
+if (!(h.bullet.y == - scl)) {
  h.bullet.y -= scl;
 }
 else {
@@ -1046,7 +1102,7 @@ this.eat=function(pos)
 
  }
  if(d.includes(0)){
-  var audio = new Audio('http://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
+  var audio = new Audio('https://soundbible.com/mp3/Eat%20Chips-SoundBible.com-1842806405.mp3');
     audio.play();
     audio.currentTime = 0.5;
     setTimeout(function () {
@@ -1088,16 +1144,16 @@ this.death=function(){
      //  checkGewinner();
      }
      AblageListe[0] = 0;
-     while (AblageListe[0]*20 < x/2 && AblageListe[0]*20 < x) {
+     while (AblageListe[0]*scl < x/2 && AblageListe[0]*scl < x) {
        AblageListe[0]++;
      }
-     this.x = (floor(AblageListe[0]))*20;
+     this.x = (floor(AblageListe[0]))*scl;
      AblageListe[0] = 0;
-     while (AblageListe[0]*20 < y/2 && AblageListe[0]*20 < y) {
+     while (AblageListe[0]*scl < y/2 && AblageListe[0]*scl < y) {
        AblageListe[0]++;
      }
-     this.y = (floor(AblageListe[0]))*20;
-     this.x -= 20*this.total;
+     this.y = (floor(AblageListe[0]))*scl;
+     this.x -= scl*this.total;
      this.dir(1,0);
    }
  }
@@ -1192,7 +1248,7 @@ function soundsRoundFinished() {
   showTimeInterval = setInterval(showTime, 80);
   setTimeout(function () {
  // clearInterval(showTime);
-  audio = new Audio("http://adi.nicolaiweitkemper.de/Sounds/epic-win-sound-effects-youtubemp3free.org.mp3");
+  audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/epic-win-sound-effects-youtubemp3free.org.mp3");
   audio.currentTime = 10.5;
   audio.play();
 setTimeout(function () {
@@ -1203,11 +1259,11 @@ setTimeout(function () {
     document.getElementById('highscores').style.color = "green";
     audio = new Audio(/*"https://soundbible.com/mp3/Ta Da-SoundBible.com-1884170640.mp3"*/"https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3").play();
     setTimeout(function () {
-      audio = new Audio("http://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
+      audio = new Audio("https://soundbible.com/mp3/Crowding%20Cheering%20Charge-SoundBible.com-284606164.mp3");
       audio.currentTime = 9.7;
       audio.play();
     }, 2000);
-    // Bild.src = "http://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
+    // Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/New%20best.png";
     // canvas.getContext('2d').drawImage(Bild, 277, 20, 437, 437);
     dbSetWarteschlange.push({tag: "pixelSpielfelder", data: JSON.stringify(pixelSpielfelder)});//dbSet("snakeGame", "pixelSpielfelder", JSON.stringify(pixelSpielfelder));
     localStorage.setItem("pixelSpielfelder", JSON.stringify([pixelSpielfelder, name]));
@@ -1272,8 +1328,12 @@ function deleteDataServer() {
 var dbSetWarteschlange = [];
 setInterval(function () {
   if (dbSetWarteschlange.length > 0) {
-    dbSet("snakeGame", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+    // dbSet("snakeGame", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
     dbSetWarteschlange.shift();
   }
+  else if (alertWhenFinishedSaving) {
+  alert("Saving finished! You can now leave the website!");
+  alertWhenFinishedSaving = false;
+}
 }, 2222);
 </script>
