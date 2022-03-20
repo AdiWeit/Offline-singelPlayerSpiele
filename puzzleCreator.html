@@ -29,8 +29,15 @@
     <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
   </p>
   <br>
-  <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font>
+  <!-- <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
+  <select onchange="if (value == 'schieben') {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="modeSelection">
+    <option value="traditional">traditionell</option>
+    <option value="exchange">austauschen</option>
+    <option value="schieben">nur schieben</option>
+  </select>
   <p id="schiebenSettings">
+    <br>
+    <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
     <br>
     <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
     <br>
@@ -43,7 +50,7 @@
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
   <br>
-  <button type="button" id="aufgebenId" onclick="aufgeben(schieben.checked);" name="button">aufgeben</button>
+  <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">aufgeben</button>
 </div>
 <br>
 <canvas id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
@@ -59,8 +66,8 @@
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
-  function aufgeben(schieben) {
-    // if (schieben) {
+  function aufgeben(mode) {
+    // if (mode == "schieben") {
       alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + höchstRichtige + " von " + (anzahl.value*anzahl.value - 1) + " Teilen");
       // }
   }
@@ -124,7 +131,7 @@
       }
     }
     positions.wrong = JSON.parse(JSON.stringify(positions.right));
-    for (i = positions.wrong.length - 1; !schieben.checked && i > 0; i--) {
+    for (i = positions.wrong.length - 1; modeSelected.value != "schieben" && i > 0; i--) {
       j = Math.floor(Math.random() * (i + 1));
       x = positions.wrong[i].edit;
       positions.wrong[i].edit = positions.wrong[j].edit;
@@ -132,7 +139,7 @@
     }
     //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
     window.scroll(0, /*96 50*/32);
-    if (schieben.checked) {
+    if (modeSelected.value == "schieben") {
       alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil de Bildes!");
       layout(true);
     }
@@ -174,7 +181,7 @@
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (schieben.checked) alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (modeSelected.value == "schieben") alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -201,7 +208,7 @@
   var selected = {boolean: false, position: {x: 0, y: 0}}
   function canvasClicked() {
     if (checkSelected() && settings.style.display == "inline") settings.style.display = "none";
-    if (checkSelected() && selected.boolean && !schieben.checked) {
+    if (checkSelected() && selected.boolean && modeSelected.value != "schieben") {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
@@ -217,7 +224,7 @@
       }
       selected.boolean = false;
     }
-    else if (schieben.checked && checkSelected()/* && selected.boolean*/ && missing) {
+    else if (modeSelected.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing) {
         if ((missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x + lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x - lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y + lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*down*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y - lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*up*/) {
           for (var i = 0; i < positions.wrong.length; i++) {
             if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
@@ -234,11 +241,11 @@
         // canvas.clearRect(0, 0, 10000, 10000);
         // layout();
     }
-    else if (checkSelected() && (!schieben.checked/* || missing*/)) {
+    else if (checkSelected() && (modeSelected.value != "schieben"/* || missing*/)) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && schieben.checked && !missing) {
+    if (checkSelected() && modeSelected.value == "schieben" && !missing) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
           missing = {data: JSON.parse(JSON.stringify(positions.wrong[i]))};
@@ -335,15 +342,15 @@
     if (!ev.touches[0]) {
       console.log(":((()))");
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && !schieben.checked && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
+    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelected.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
       // textur.style.touchAction = '';
       canvasClicked();
     }
-    else if (swipeSteuerung.checked && !schieben.checked && ev.touches[0]) {
+    else if (swipeSteuerung.checked && modeSelected.value != "schieben" && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
       mausy = ev.touches[0]["pageY"]// + scrollY;
     }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && !schieben.checked && checkSelected() && ev.touches[0]) {
+      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelected.value != "schieben" && checkSelected() && ev.touches[0]) {
         if (textur.style.touchAction != 'none') {
         setTimeout(function () {
           window.scroll(0, /*96 50*/32);
