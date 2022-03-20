@@ -53,7 +53,7 @@
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">aufgeben</button>
 </div>
 <br>
-<canvas id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
+<canvas onmousedown="mouseDown();" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
 <p><img id="preview"></p>
 <script>
   reloadWhenFinished.checked = localStorage.getItem("reloadWhenFinished");
@@ -187,6 +187,10 @@
     richtige = 0;
     for (var i = 0; i < positions.wrong.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
+    }
+    for (var tile of selected.tiles) {
+      canvas.fillStyle = "rgba(255, 0, 0, 0.2)";
+      canvas.fillRect(positions.wrong[tile].edit.x - 5, positions.wrong[tile].edit.y - 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
     }
     if (höchstRichtige < richtige && !withoutAlert) {
       höchstRichtige = JSON.parse(JSON.stringify(richtige));
@@ -349,6 +353,64 @@
     mausx = e.clientX + scrollX;
     mausy = e.clientY + scrollY - /*96*/32// - 43;
     if (scrollY > 32) mausy += 32;
+    folgenMouseMove();
+  }
+  var selected = {tiles: []};
+  var mouseState = "up";
+  function mouseDown() {
+    if (modeSelection.value == "traditional") {
+      // TODO: shift for single multi selection
+      // selected.tiles = [];
+      selected.position = {x: mausx, y: mausy};
+      mouseState = "down";
+      folgenMouseMove();
+    }
+  }
+  function folgenMouseMove() {
+    if (mouseState == "down") {
+      for (var i = positions.wrong.length - 1; !selected.tiles.length && i >= 0; i--) {
+        var coord = positions.wrong[i].edit;
+        if (mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y && !selectedCollides(i)) {
+          selected.tiles.push(i);
+          layout(true);
+        }
+      }
+      if (selected.tiles.length) {
+        positions.wrong.forEach((pos, i) => {
+          if (selected.tiles.includes(i)) {
+            pos.edit.x += mausx - selected.position.x;
+            pos.edit.y += mausy - selected.position.y;
+          }
+        });
+        canvas.clearRect(0, 0, 10000, 10000);
+        layout(true);
+        selected.position = {x: mausx, y: mausy};
+      }
+    }
+  }
+  function mouseUp() {
+    if (modeSelection.value == "traditional") {
+      mouseState = "up";
+      if (selected.tiles.length) selected.tiles = [];
+    }
+  }
+  function collides(a, b) {
+    return !(
+      ((a.y + a.height) < (b.y)) ||
+      (a.y > (b.y + b.height)) ||
+      ((a.x + a.width) < b.x) ||
+      (a.x > (b.x + b.width))
+    );
+  }
+  function selectedCollides(potentiallySelected) {
+    for (var tile of selected.tiles) {
+      // if (collides({x: positions.wrong[tile].edit.x, y: positions.wrong[tile].edit.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y}, potentiallySelected)
+      if (collides(transformToObj(tile), transformToObj(potentiallySelected))) return true;
+    }
+  }
+  function transformToObj(i) {
+    var obj =  positions.wrong[i].edit;
+    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
   }
   // if (gerät == "Handy") {
     document.addEventListener('touchmove', touch);
