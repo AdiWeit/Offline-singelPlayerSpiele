@@ -106,7 +106,7 @@
     aufgebenId.style.display = "inline";
     showSettings.innerHTML = "settings und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
-    schieben.style.display = "none";
+    modeSelection.style.display = "none";
     schiebenSettings.style.display = "none";
     missing = undefined;
     settings.style.display = 'none';
@@ -116,22 +116,39 @@
     preview.height = größeAnpassenY.value;
     textur.width = preview.width// + 111;
     textur.height = preview.height// + 111;
-    lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
+    var anzahl = document.getElementById('anzahl').value;
+    lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
     breiterRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
     randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiterRand.value;
     positions = {right: []};
-    for (var i = 0; i < anzahl.value; i++) {
-      for (var i1 = 0; i1 < anzahl.value; i1++) {
-        positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
+    for (var i = 0; i < anzahl; i++) {
+      for (var i1 = 0; i1 < anzahl; i1++) {
+        if (modeSelection.value == "traditional") {
+          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, left: {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y}}};
+          if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
+          positions.right.push(newTile);
+          if (positions.right[i*anzahl + i1 - 1]) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+          if (positions.right[i*anzahl + i1 - anzahl]) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
+        }
+        else {
+          positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
+        }
         positions.right[positions.right.length - 1].border = [];
         if (i == 0) positions.right[positions.right.length - 1].border.push("left");
-        if (i == anzahl.value - 1) positions.right[positions.right.length - 1].border.push("right");
+        if (i == anzahl - 1) positions.right[positions.right.length - 1].border.push("right");
         if (i1 == 0) positions.right[positions.right.length - 1].border.push("up");
-        if (i1 == anzahl.value - 1) positions.right[positions.right.length - 1].border.push("down");
+        if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("down");
       }
     }
     positions.wrong = JSON.parse(JSON.stringify(positions.right));
-    for (i = positions.wrong.length - 1; modeSelected.value != "schieben" && i > 0; i--) {
+    if (modeSelection.value == "traditional") {
+      textur.width += 500;
+      textur.height += 500;
+    for (var position of positions.wrong) {
+      position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+    }
+  }
+    for (i = positions.wrong.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
       j = Math.floor(Math.random() * (i + 1));
       x = positions.wrong[i].edit;
       positions.wrong[i].edit = positions.wrong[j].edit;
@@ -139,7 +156,7 @@
     }
     //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
     window.scroll(0, /*96 50*/32);
-    if (modeSelected.value == "schieben") {
+    if (modeSelection.value == "schieben") {
       alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil de Bildes!");
       layout(true);
     }
@@ -181,7 +198,7 @@
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (modeSelected.value == "schieben") alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (modeSelection.value == "schieben") alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -194,7 +211,7 @@
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition) {
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
-    if (position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y && !finished) {
+    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y)/* TODO: || (modeSelection.value == "traditional" && )*/) && !finished) {
       canvas.fillStyle = "rgba(0, 255, 0, 0.3)";
       if (richtigPlazierte.checked) canvas.fillRect(position.edit.x, position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
       richtige++;
@@ -208,7 +225,7 @@
   var selected = {boolean: false, position: {x: 0, y: 0}}
   function canvasClicked() {
     if (checkSelected() && settings.style.display == "inline") settings.style.display = "none";
-    if (checkSelected() && selected.boolean && modeSelected.value != "schieben") {
+    if (checkSelected() && selected.boolean && modeSelection.value != "schieben") {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
@@ -224,7 +241,7 @@
       }
       selected.boolean = false;
     }
-    else if (modeSelected.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing) {
+    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing) {
         if ((missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x + lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x - lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y + lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*down*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y - lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*up*/) {
           for (var i = 0; i < positions.wrong.length; i++) {
             if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
@@ -241,11 +258,11 @@
         // canvas.clearRect(0, 0, 10000, 10000);
         // layout();
     }
-    else if (checkSelected() && (modeSelected.value != "schieben"/* || missing*/)) {
+    else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && modeSelected.value == "schieben" && !missing) {
+    if (checkSelected() && modeSelection.value == "schieben" && !missing) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
           missing = {data: JSON.parse(JSON.stringify(positions.wrong[i]))};
@@ -342,15 +359,15 @@
     if (!ev.touches[0]) {
       console.log(":((()))");
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelected.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
+    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
       // textur.style.touchAction = '';
       canvasClicked();
     }
-    else if (swipeSteuerung.checked && modeSelected.value != "schieben" && ev.touches[0]) {
+    else if (swipeSteuerung.checked && modeSelection.value != "schieben" && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
       mausy = ev.touches[0]["pageY"]// + scrollY;
     }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelected.value != "schieben" && checkSelected() && ev.touches[0]) {
+      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
         if (textur.style.touchAction != 'none') {
         setTimeout(function () {
           window.scroll(0, /*96 50*/32);
