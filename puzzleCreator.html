@@ -404,21 +404,23 @@
             // canvas.fillRect(obj.all.x + lengthPerTeil.edit.x, obj.all.y, 10, lengthPerTeil.edit.y);
             // canvas.fillStyle = "orange";
             // canvas.fillRect(obj.slc.x - 10, obj.slc.y, 10, lengthPerTeil.edit.y);
-            if (collides({x: obj.slc.x - 10, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
-              selected.clip = {i: i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}};
-              clipFound = true;
-            }
-            if (collides({x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
-              selected.clip = {i: i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}};
-              clipFound = true;
-            }
-            if (collides({x: obj.slc.x, y: obj.slc.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10})) {
-              selected.clip = {i: i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}};
-              clipFound = true;
-            }
-            if (collides({x: obj.slc.x, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10})) {
-              selected.clip = {i: i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}};
-              clipFound = true;
+            if (!clipped.includes(i + ' - ' + tile)) {
+              if (collides({x: obj.slc.x - 10, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
+                selected.clip = {i: i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}};
+                clipFound = true;
+              }
+              if (collides({x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
+                selected.clip = {i: i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}};
+                clipFound = true;
+              }
+              if (collides({x: obj.slc.x, y: obj.slc.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10})) {
+                selected.clip = {i: i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}};
+                clipFound = true;
+              }
+              if (collides({x: obj.slc.x, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10})) {
+                selected.clip = {i: i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}};
+                clipFound = true;
+              }
             }
           }
           if (!clipFound) selected.clip = undefined;
@@ -428,13 +430,18 @@
       }
     }
   }
+  var clipped = [];
   function mouseUp() {
     if (modeSelection.value == "traditional") {
       mouseState = "up";
       if (selected.clip) {
+        var directionOpposite = {left: 'right', top: 'bottom', right: 'left', bottom: 'top'};
         positions.wrong[selected.clip.i].original[selected.clip.direction] = {x: positions.right[selected.clip.sI].original.x, y: positions.right[selected.clip.sI].original.y};
+        positions.wrong[selected.clip.sI].original[directionOpposite[selected.clip.direction]] = {x: positions.right[selected.clip.i].original.x, y: positions.right[selected.clip.i].original.y};
         positions.wrong[selected.clip.sI].edit.x = selected.clip.selected.x;
         positions.wrong[selected.clip.sI].edit.y = selected.clip.selected.y;
+        clipped.push(selected.clip.i + ' - ' + selected.clip.sI);
+        clipped.push(selected.clip.sI + ' - ' + selected.clip.i);
       }
       if (selected.tiles.length) selected.tiles = [];
     }
