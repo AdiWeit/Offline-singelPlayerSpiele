@@ -146,6 +146,7 @@
       textur.height += 500;
     for (var position of positions.wrong) {
       position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+      position.original = {x: position.original.x, y: position.original.y};
     }
   }
     for (i = positions.wrong.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
@@ -188,6 +189,8 @@
     for (var i = 0; i < positions.wrong.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
     }
+    canvas.fillStyle = "rgba(6, 143, 255, 0.2)";
+    if (selected.clip) canvas.fillRect(selected.clip.x, selected.clip.y, selected.clip.width, selected.clip.height);
     for (var tile of selected.tiles) {
       canvas.fillStyle = "rgba(255, 0, 0, 0.2)";
       canvas.fillRect(positions.wrong[tile].edit.x - 5, positions.wrong[tile].edit.y - 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
@@ -370,10 +373,18 @@
     if (mouseState == "down") {
       for (var i = positions.wrong.length - 1; !selected.tiles.length && i >= 0; i--) {
         var coord = positions.wrong[i].edit;
-        if (mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y && !selectedCollides(i)) {
+        if (mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y && selectedCollides(i) == undefined) {
           selected.tiles.push(i);
           layout(true);
         }
+      }
+      // select clipped
+      for (var tile of selected.tiles) {
+        positions.wrong.forEach((position, i) => {
+          if (((positions.wrong[tile].original?.left?.x == position.original?.x && positions.wrong[tile].original?.left?.x != undefined && positions.wrong[tile].original?.left?.y == position.original?.y) || (positions.wrong[tile].original?.top?.x == position.original?.x && positions.wrong[tile].original?.top?.x != undefined && positions.wrong[tile].original?.top?.y == position.original?.y) || (positions.wrong[tile].original?.wrong?.x == position.original?.x && positions.wrong[tile].original?.wrong?.x != undefined && positions.wrong[tile].original?.wrong?.y == position.original?.y) || (positions.wrong[tile].original?.bottom?.x == position.original?.x && positions.wrong[tile].original?.bottom?.x != undefined && positions.wrong[tile].original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
+            selected.tiles.push(i);
+          }
+        });
       }
       if (selected.tiles.length) {
         positions.wrong.forEach((pos, i) => {
@@ -382,8 +393,37 @@
             pos.edit.y += mausy - selected.position.y;
           }
         });
+        // check clicking
         canvas.clearRect(0, 0, 10000, 10000);
         layout(true);
+        var clipFound = false;
+        positions.wrong.forEach((pos, i) => {
+          for (var tile of selected.tiles) {
+            var obj =  {all: pos.edit, slc: positions.wrong[tile].edit};
+            // canvas.fillStyle = "yellow";
+            // canvas.fillRect(obj.all.x + lengthPerTeil.edit.x, obj.all.y, 10, lengthPerTeil.edit.y);
+            // canvas.fillStyle = "orange";
+            // canvas.fillRect(obj.slc.x - 10, obj.slc.y, 10, lengthPerTeil.edit.y);
+            if (collides({x: obj.slc.x - 10, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
+              selected.clip = {i: i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}};
+              clipFound = true;
+            }
+            if (collides({x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y, width: 10, height: lengthPerTeil.edit.y}, {x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y})) {
+              selected.clip = {i: i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}};
+              clipFound = true;
+            }
+            if (collides({x: obj.slc.x, y: obj.slc.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10})) {
+              selected.clip = {i: i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}};
+              clipFound = true;
+            }
+            if (collides({x: obj.slc.x, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10}, {x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10})) {
+              selected.clip = {i: i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}};
+              clipFound = true;
+            }
+          }
+          if (!clipFound) selected.clip = undefined;
+        });
+
         selected.position = {x: mausx, y: mausy};
       }
     }
@@ -391,6 +431,11 @@
   function mouseUp() {
     if (modeSelection.value == "traditional") {
       mouseState = "up";
+      if (selected.clip) {
+        positions.wrong[selected.clip.i].original[selected.clip.direction] = {x: positions.right[selected.clip.sI].original.x, y: positions.right[selected.clip.sI].original.y};
+        positions.wrong[selected.clip.sI].edit.x = selected.clip.selected.x;
+        positions.wrong[selected.clip.sI].edit.y = selected.clip.selected.y;
+      }
       if (selected.tiles.length) selected.tiles = [];
     }
   }
@@ -405,12 +450,13 @@
   function selectedCollides(potentiallySelected) {
     for (var tile of selected.tiles) {
       // if (collides({x: positions.wrong[tile].edit.x, y: positions.wrong[tile].edit.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y}, potentiallySelected)
-      if (collides(transformToObj(tile), transformToObj(potentiallySelected))) return true;
+      if (collides(transformToObj(tile), transformToObj(potentiallySelected))) return tile;
     }
   }
-  function transformToObj(i) {
+  function transformToObj(i, devide, partX, partY) {
     var obj =  positions.wrong[i].edit;
-    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
+    if (!devide) devide = 1;
+    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x/devide, height: lengthPerTeil.edit.y/devide};
   }
   // if (gerät == "Handy") {
     document.addEventListener('touchmove', touch);
