@@ -190,7 +190,7 @@
     for (var i = 0; i < positions.wrong.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
     }
-    canvas.fillStyle = "rgba(6, 143, 255, 0.2)";
+    canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
     for (var clip of selected.clip) {
       canvas.fillRect(clip.x, clip.y, clip.width, clip.height);
     }
@@ -455,9 +455,9 @@
       }
     }
   }
-  function selectedCollidesOthers(selected) {
+  function selectedCollidesOthers(pSelected) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), transformToObj(selected)).boolean && i != selected) return true;
+      if (collides(transformToObj(i), transformToObj(pSelected)).boolean && !selected.tiles.includes(i)) return true;
     }
   }
   var clipped = [];
