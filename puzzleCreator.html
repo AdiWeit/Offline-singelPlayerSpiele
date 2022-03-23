@@ -457,7 +457,7 @@
   }
   function selectedCollidesOthers(pSelected) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), transformToObj(pSelected)).boolean && !selected.tiles.includes(i)) return true;
+      if (collides(transformToObj(i), transformToObj(pSelected, 3)).boolean && !selected.tiles.includes(i)) return true;
     }
   }
   var clipped = [];
@@ -490,9 +490,10 @@
       if (collides(transformToObj(tile), transformToObj(potentiallySelected)).boolean) return tile;
     }
   }
-  function transformToObj(i) {
+  function transformToObj(i, tolerance) {
     var obj =  positions.wrong[i].edit;
-    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
+    if (!tolerance) tolerance = 0;
+    return {x: obj.x + tolerance, y: obj.y + tolerance, width: lengthPerTeil.edit.x - tolerance*2, height: lengthPerTeil.edit.y - tolerance*2};
   }
   // if (gerät == "Handy") {
     document.addEventListener('touchmove', touch);
