@@ -124,11 +124,12 @@
     for (var i = 0; i < anzahl; i++) {
       for (var i1 = 0; i1 < anzahl; i1++) {
         if (modeSelection.value == "traditional") {
-          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, left: {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y}}};
+          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}};
+          if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
           if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
           positions.right.push(newTile);
-          if (positions.right[i*anzahl + i1 - 1]) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
-          if (positions.right[i*anzahl + i1 - anzahl]) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
+          if (i1) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+          if (i) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
         }
         else {
           positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
@@ -220,7 +221,7 @@
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition) {
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
-    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y)/* TODO: || (modeSelection.value == "traditional" && )*/) && !finished) {
+    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !finished) {
       canvas.fillStyle = "rgba(0, 255, 0, 0.3)";
       if (richtigPlazierte.checked) canvas.fillRect(position.edit.x, position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
       richtige++;
@@ -383,7 +384,7 @@
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
-          if (clipp.includes(tile) && newTile) selected.tiles.push(JSON.parse(newTile));
+          if (clipp.split(' - ').includes(tile + "") && newTile) selected.tiles.push(JSON.parse(newTile));
         }
         // positions.wrong.forEach((position, i) => {
         //   if (((positions.wrong[tile].original?.left?.x == position.original?.x && positions.wrong[tile].original?.left?.x != undefined && positions.wrong[tile].original?.left?.y == position.original?.y) || (positions.wrong[tile].original?.top?.x == position.original?.x && positions.wrong[tile].original?.top?.x != undefined && positions.wrong[tile].original?.top?.y == position.original?.y) || (positions.wrong[tile].original?.wrong?.x == position.original?.x && positions.wrong[tile].original?.wrong?.x != undefined && positions.wrong[tile].original?.wrong?.y == position.original?.y) || (positions.wrong[tile].original?.bottom?.x == position.original?.x && positions.wrong[tile].original?.bottom?.x != undefined && positions.wrong[tile].original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
@@ -402,7 +403,7 @@
         selected.clip = [];
         var clipFound = false;
         for (var tile of selected.tiles) {
-          var nearest = {side: -1, area: 1000};
+          var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}};
           positions.wrong.forEach((pos, i) => {
             var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
             // canvas.fillStyle = "yellow";
@@ -413,39 +414,50 @@
               var nearTile = {
                 right: collides({x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
                 left: collides({x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
-                bottom: collides({x: obj.slc.x + 1, y: obj.slc.y, width: lengthPerTeil.edit.x - 2, height: 10}, {x: obj.all.x + 1, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}),
+                bottom: collides({x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10}, {x: obj.all.x + 1, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}),
                 top: collides({x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}, {x: obj.all.x + 1, y: obj.all.y - 10, width: lengthPerTeil.edit.x - 2, height: 10})
               };
-              for (var near of Object.keys(nearTile)) {
-                if (nearTile[near].boolean && nearTile[near].area < nearest.area) {
-                  nearest = {side: near, area: nearTile[near].area, i: i};
+              for (var side of Object.keys(nearTile)) {
+                if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
+                  nearest[side] = {area: nearTile[side].area, i: i};
                 }
               }
             }
           });
-          var obj = {all: positions.wrong[nearest.i]?.edit, slc: positions.wrong[tile].edit};
-          if (nearest.side == "right") {
-            selected.clip.push({i: nearest.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
+          var screenObj = {x: scrollX, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
+          if (!selectedCollidesOthers(tile)) {
+          var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
+          if (obj.all && collides(transformToObj(nearest?.right.i), screenObj).boolean) {
+            selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
             clipFound = true;
           }
-          if (nearest.side == "left") {
-            selected.clip.push({i: nearest.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
+          obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
+          if (obj.all && collides(transformToObj(nearest?.left.i), screenObj).boolean) {
+            selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
             clipFound = true;
           }
-          if (nearest.side == "bottom") {
-            selected.clip.push({i: nearest.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
+          obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
+          if (obj.all && collides(transformToObj(nearest?.bottom.i), screenObj).boolean) {
+            selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
             clipFound = true;
           }
-          if (nearest.side == "top") {
-            selected.clip.push({i: nearest.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
+          obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
+          if (obj.all && collides(transformToObj(nearest?.top.i), screenObj).boolean) {
+            selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
             clipFound = true;
           }
+        }
           if (!clipFound) selected.clip = [];
         }
         selected.position = {x: mausx, y: mausy};
         canvas.clearRect(0, 0, 10000, 10000);
         layout(true);
       }
+    }
+  }
+  function selectedCollidesOthers(selected) {
+    for (var i = 0; i < positions.wrong.length; i++) {
+      if (collides(transformToObj(i), transformToObj(selected)).boolean && i != selected) return true;
     }
   }
   var clipped = [];
@@ -478,10 +490,9 @@
       if (collides(transformToObj(tile), transformToObj(potentiallySelected)).boolean) return tile;
     }
   }
-  function transformToObj(i, devide, partX, partY) {
+  function transformToObj(i) {
     var obj =  positions.wrong[i].edit;
-    if (!devide) devide = 1;
-    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x/devide, height: lengthPerTeil.edit.y/devide};
+    return {x: obj.x, y: obj.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
   }
   // if (gerät == "Handy") {
     document.addEventListener('touchmove', touch);
@@ -538,14 +549,14 @@
   }
   function scrollDownFunction() {
   if (mausy - scrollY > window.innerHeight - 10)  {
-  window.scroll(0, scrollY + 3);
+  window.scroll(scrollX, scrollY + 3);
   mausy += 3;
 }
 }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
   if ((mausy - scrollY < 50/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
-    window.scroll(0, scrollY - 3);
+    window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
 }, 10);
