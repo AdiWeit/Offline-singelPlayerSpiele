@@ -587,14 +587,14 @@
   }
   }
   function scrollDownFunction() {
-  if (mausy - scrollY > window.innerHeight - 10)  {
+  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || mouseState == "down"))  {
   window.scroll(scrollX, scrollY + 3);
   mausy += 3;
 }
 }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
-  if ((mausy - scrollY < 50/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((mausy - scrollY < 50 && (modeSelection.value != "traditional" || mouseState == "down")/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
