@@ -377,7 +377,7 @@
     if (state.mouse == "down") {
       for (var i = positions.wrong.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
-        if (!state.newTileSelected && mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y/* && selectedCollides(i) == undefined*/) {
+        if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
           layout(true);
           state.newTileSelected = true;
@@ -412,9 +412,8 @@
         });
         // check clicking
         selected.clip = [];
-        // var clipFound = false;
         for (var tile of selected.tiles) {
-          checkPossibleClipping(tile, false);
+          checkPossibleClipping(tile);
         }
         selected.position = {x: mausx, y: mausy};
         canvas.clearRect(0, 0, 10000, 10000);
@@ -422,7 +421,7 @@
       }
     }
   }
-  function checkPossibleClipping(tile, clipFound) {
+  function checkPossibleClipping(tile) {
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}};
     positions.wrong.forEach((pos, i) => {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
@@ -461,7 +460,6 @@
     };
     if (obj.all && !positions.wrong[tile].original.left && collides(transformToObj(nearest?.right.i), screenObj).boolean) {
       selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
-      clipFound = true;
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
     selectedObj = {
@@ -472,7 +470,6 @@
     };
     if (obj.all && !positions.wrong[tile].original.right && collides(transformToObj(nearest?.left.i), screenObj).boolean) {
       selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
-      clipFound = true;
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
     selectedObj = {
@@ -483,7 +480,6 @@
     };
     if (obj.all && !positions.wrong[tile].original.top && collides(transformToObj(nearest?.bottom.i), screenObj).boolean) {
       selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
-      clipFound = true;
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
     selectedObj = {
@@ -494,15 +490,12 @@
     };
     if (obj.all && !positions.wrong[tile].original.bottom && collides(transformToObj(nearest?.top.i), screenObj).boolean) {
       selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
-      clipFound = true;
     }
   }
-    if (!clipFound) selected.clip = [];
-    return clipFound;
   }
   function selectedCollidesOthers(pSelected) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), transformToObj(pSelected, 3)).boolean && !selected.tiles.includes(i)) return true;
+      if (collides(transformToObj(i), transformToObj(pSelected, 3)).boolean && !selected.tiles.includes(i) && pSelected != i) return true;
     }
   }
   var clipped = [];
@@ -515,11 +508,14 @@
         var directionOpposite = {left: 'right', top: 'bottom', right: 'left', bottom: 'top'};
         positions.wrong[clip.i].original[clip.direction] = {x: positions.right[clip.sI].original.x, y: positions.right[clip.sI].original.y};
         positions.wrong[clip.sI].original[directionOpposite[clip.direction]] = {x: positions.right[clip.i].original.x, y: positions.right[clip.i].original.y};
-        positions.wrong[clip.sI].edit.x = clip.selected.x;
-        positions.wrong[clip.sI].edit.y = clip.selected.y;
+        var differ = {x: (clip.selected.x - positions.wrong[clip.sI].edit.x), y: (clip.selected.y - positions.wrong[clip.sI].edit.y)};
+        for (var tile of selected.tiles) {
+          positions.wrong[tile].edit.x += differ.x;
+          positions.wrong[tile].edit.y += differ.y;
+        }
         clipped.push(clip.i + ' - ' + clip.sI);
         // do more clipping if needed
-        checkPossibleClipping(clip.sI, false);
+        checkPossibleClipping(clip.i);
     }
     selected.clip = [];
     if (selected.tiles.length && !state.shift) selected.tiles = [];
