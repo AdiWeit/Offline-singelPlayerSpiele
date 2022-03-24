@@ -21,6 +21,8 @@
   <br>
   <input type="checkbox" onchange="layout();" id="richtigPlazierte" checked="true"> markiere richtig plazierte
   <br>
+  <input type="range" step="0.01" value="1" oninput="layout();" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
+  <br>
   <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout();"> <font size="5"> zeige Ränder</font>
   <p id="randSettings">
     <br>
@@ -222,8 +224,8 @@
   function drawPictureSegment(position, segmentPosition) {
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !finished) {
-      canvas.fillStyle = "rgba(0, 255, 0, 0.3)";
-      if (richtigPlazierte.checked) canvas.fillRect(position.edit.x, position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+      canvas.fillStyle = "rgba(0, 255, 0, 0.1)";
+      if (richtigPlazierte.checked) canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
       richtige++;
     }
     canvas.fillStyle = "rgba(0, 0, 255, 0.35)";
