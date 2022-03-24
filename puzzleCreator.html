@@ -363,30 +363,38 @@
     if (scrollY > 32) mausy += 32;
     folgenMouseMove();
   }
-  var mouseState = "up";
+  var state = {mouse: "up", shift: false, newTileSelected: false};
   function mouseDown() {
     if (modeSelection.value == "traditional") {
       // TODO: shift for single multi selection
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
-      mouseState = "down";
+      state.mouse = "down";
       folgenMouseMove();
     }
   }
   function folgenMouseMove() {
-    if (mouseState == "down") {
-      for (var i = positions.wrong.length - 1; !selected.tiles.length && i >= 0; i--) {
+    if (state.mouse == "down") {
+      for (var i = positions.wrong.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
-        if (mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y && selectedCollides(i) == undefined) {
+        if (!state.newTileSelected && mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
           layout(true);
+          state.newTileSelected = true;
         }
       }
       // select clipped
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
-          if (clipp.split(' - ').includes(tile + "") && newTile) selected.tiles.push(JSON.parse(newTile));
+          if (!state.shift && clipp.split(' - ').includes(tile + "") && newTile) selected.tiles.push(JSON.parse(newTile));
+        }
+        // unclipp
+        if (state.shift) {
+          positions.wrong[tile].original = {x: positions.wrong[tile].original.x, y: positions.wrong[tile].original.y};
+          clipped.forEach((clipp, i) => {
+            if (clipp.split(' - ').includes(tile + "")) clipped.splice(i, 1);
+          });
         }
         // positions.wrong.forEach((position, i) => {
         //   if (((positions.wrong[tile].original?.left?.x == position.original?.x && positions.wrong[tile].original?.left?.x != undefined && positions.wrong[tile].original?.left?.y == position.original?.y) || (positions.wrong[tile].original?.top?.x == position.original?.x && positions.wrong[tile].original?.top?.x != undefined && positions.wrong[tile].original?.top?.y == position.original?.y) || (positions.wrong[tile].original?.wrong?.x == position.original?.x && positions.wrong[tile].original?.wrong?.x != undefined && positions.wrong[tile].original?.wrong?.y == position.original?.y) || (positions.wrong[tile].original?.bottom?.x == position.original?.x && positions.wrong[tile].original?.bottom?.x != undefined && positions.wrong[tile].original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
@@ -394,6 +402,7 @@
         //   }
         // });
       }
+
       if (selected.tiles.length) {
         positions.wrong.forEach((pos, i) => {
           if (selected.tiles.includes(i)) {
@@ -499,7 +508,9 @@
   var clipped = [];
   function mouseUp() {
     if (modeSelection.value == "traditional") {
-      mouseState = "up";
+      state.mouse = "up";
+      state.newTileSelected = false;
+      if (selected.clip.length > 0) new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
       for (var clip of selected.clip) {
         var directionOpposite = {left: 'right', top: 'bottom', right: 'left', bottom: 'top'};
         positions.wrong[clip.i].original[clip.direction] = {x: positions.right[clip.sI].original.x, y: positions.right[clip.sI].original.y};
@@ -511,7 +522,7 @@
         checkPossibleClipping(clip.sI, false);
     }
     selected.clip = [];
-    if (selected.tiles.length) selected.tiles = [];
+    if (selected.tiles.length && !state.shift) selected.tiles = [];
     }
   }
   function collides(a, b) {
@@ -538,6 +549,17 @@
     document.addEventListener('touchstart', touch);
     document.addEventListener('touchend', touch);
   // }
+  document.onkeydown = function(event) {
+    if (event.shiftKey) {
+      state.shift = true;
+    }
+  }
+  document.onkeyup = function(event) {
+    if (!event.shiftKey) {
+      state.shift = false;
+      selected.tiles = [];
+    }
+  }
   function touch(ev) {
     if (!ev.touches[0]) {
       console.log(":((()))");
@@ -587,14 +609,14 @@
   }
   }
   function scrollDownFunction() {
-  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || mouseState == "down"))  {
+  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || state.mouse == "down"))  {
   window.scroll(scrollX, scrollY + 3);
   mausy += 3;
 }
 }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
-  if ((mausy - scrollY < 50 && (modeSelection.value != "traditional" || mouseState == "down")/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((mausy - scrollY < 50 && (modeSelection.value != "traditional" || state.mouse == "down")/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
