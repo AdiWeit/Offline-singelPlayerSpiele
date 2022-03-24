@@ -450,7 +450,7 @@
       bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
       top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
     };
-    if (obj.all && !bothSelected(tile, selectedObj.right) && collides(transformToObj(nearest?.right.i), screenObj).boolean) {
+    if (obj.all && !positions.wrong[tile].original.left && collides(transformToObj(nearest?.right.i), screenObj).boolean) {
       selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
       clipFound = true;
     }
@@ -461,7 +461,7 @@
       bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
       top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
     };
-    if (obj.all && !bothSelected(tile, selectedObj.left) && collides(transformToObj(nearest?.left.i), screenObj).boolean) {
+    if (obj.all && !positions.wrong[tile].original.right && collides(transformToObj(nearest?.left.i), screenObj).boolean) {
       selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
       clipFound = true;
     }
@@ -472,7 +472,7 @@
       bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
       top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
     };
-    if (obj.all && !bothSelected(tile, selectedObj.bottom) && collides(transformToObj(nearest?.bottom.i), screenObj).boolean) {
+    if (obj.all && !positions.wrong[tile].original.top && collides(transformToObj(nearest?.bottom.i), screenObj).boolean) {
       selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
       clipFound = true;
     }
@@ -483,7 +483,7 @@
       bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
       top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
     };
-    if (obj.all && !bothSelected(tile, selectedObj.top) && collides(transformToObj(nearest?.top.i), screenObj).boolean) {
+    if (obj.all && !positions.wrong[tile].original.bottom && collides(transformToObj(nearest?.top.i), screenObj).boolean) {
       selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
       clipFound = true;
     }
@@ -512,11 +512,6 @@
     }
     selected.clip = [];
     if (selected.tiles.length) selected.tiles = [];
-    }
-  }
-  function bothSelected(tile, obj) {
-    for (var pTile of selected.tiles) {
-      if (pTile != tile && collides(transformToObj(pTile), obj)) return true;
     }
   }
   function collides(a, b) {
