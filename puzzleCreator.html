@@ -19,6 +19,8 @@
   <br>
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   <br>
+  <input id="markWrong" type="checkbox" > markiere nicht passende
+  <br>
   <input type="checkbox" onchange="layout(true); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none';" id="richtigPlazierte" checked="true"> markiere richtig plazierte
   <br>
   <p id="rightMarkerSettings">
@@ -199,6 +201,7 @@
     }
     canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
     for (var clip of selected.clip) {
+      if (markWrong.checked && JSON.stringify(positions.right[clip.i].original[clip.direction]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y})) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
       canvas.fillRect(clip.x, clip.y, clip.width, clip.height);
     }
     for (var tile of selected.tiles) {
@@ -387,7 +390,6 @@
         }
       }
       // select clipped
-      console.log(state.shift);
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
@@ -406,7 +408,6 @@
         //   }
         // });
       }
-
       if (selected.tiles.length) {
         positions.wrong.forEach((pos, i) => {
           if (selected.tiles.includes(i)) {
@@ -569,7 +570,6 @@
       selected.tiles = [];
     }
     else if (ev.type == "touchmove") state.shift = false;
-    console.log(textur.style.touchAction);
     if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
       // textur.style.touchAction = '';
       canvasClicked();
