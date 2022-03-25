@@ -19,9 +19,13 @@
   <br>
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   <br>
-  <input type="checkbox" onchange="layout();" id="richtigPlazierte" checked="true"> markiere richtig plazierte
+  <input type="checkbox" onchange="layout(true); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none';" id="richtigPlazierte" checked="true"> markiere richtig plazierte
   <br>
-  <input type="range" step="0.01" value="1" oninput="layout();" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
+  <p id="rightMarkerSettings">
+  <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
+  <br>
+  <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
+</p>
   <br>
   <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout();"> <font size="5"> zeige Ränder</font>
   <p id="randSettings">
@@ -187,9 +191,10 @@
   var positions = {right: []};
   var finished = false;
   var missing;
-  function layout(withoutAlert, pReturn) {
+  function layout(withoutAlert, clear, pReturn) {
+    if (clear) canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
-    for (var i = 0; i < positions.wrong.length; i++) {
+    for (var i = 0; i < positions.wrong?.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
     }
     canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
@@ -203,7 +208,7 @@
     if (höchstRichtige < richtige && !withoutAlert) {
       höchstRichtige = JSON.parse(JSON.stringify(richtige));
     }
-    if (richtige == positions.wrong.length) {
+    if (richtige == positions.wrong?.length) {
       richtige = 0;
       finished = true;
       layout(true);
@@ -224,7 +229,7 @@
   function drawPictureSegment(position, segmentPosition) {
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !finished) {
-      canvas.fillStyle = "rgba(0, 255, 0, 0.1)";
+      canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
       if (richtigPlazierte.checked) canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
       richtige++;
     }
@@ -285,8 +290,7 @@
       verschiebenPC();
       }
       else {
-        canvas.clearRect(0, 0, 10000, 10000);
-        layout();
+        layout(true, true);
       }
   }
   function verschiebenPC() {
@@ -348,8 +352,7 @@
     }
     counter++;
     }
-    canvas.clearRect(0, 0, 10000, 10000);
-    if (layout(undefined, true) != undefined) verschiebenPC();
+    if (layout(undefined, true, true) != undefined) verschiebenPC();
   }
   var movement = {missing: [], positions: []};
   var mausx;
@@ -375,7 +378,7 @@
   }
   function folgenMouseMove() {
     if (state.mouse == "down") {
-      for (var i = positions.wrong.length - 1; i >= 0; i--) {
+      for (var i = positions.wrong?.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
         if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
@@ -384,6 +387,7 @@
         }
       }
       // select clipped
+      console.log(state.shift);
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
@@ -416,8 +420,7 @@
           checkPossibleClipping(tile);
         }
         selected.position = {x: mausx, y: mausy};
-        canvas.clearRect(0, 0, 10000, 10000);
-        layout(true);
+        layout(true, true);
       }
     }
   }
@@ -557,16 +560,36 @@
     }
   }
   function touch(ev) {
-    if (!ev.touches[0]) {
-      console.log(":((()))");
+    if (ev.touches[2]) {
+      textur.style.touchAction = '';
     }
+    else if (ev.type == "touchmove") textur.style.touchAction = 'none';
+    if (ev.touches[1]) {
+      state.shift = true;
+      selected.tiles = [];
+    }
+    else if (ev.type == "touchmove") state.shift = false;
+    console.log(textur.style.touchAction);
     if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
       // textur.style.touchAction = '';
       canvasClicked();
     }
-    else if (swipeSteuerung.checked && modeSelection.value != "schieben" && ev.touches[0]) {
+    else if ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben" && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
       mausy = ev.touches[0]["pageY"]// + scrollY;
+    }
+    if (ev.type == "touchstart") {
+      mouseDown();
+    }
+    if (ev.type == "touchend") {
+      mouseUp();
+      layout(true, true);
+    }
+    if (ev.type == "touchmove" && modeSelection.value == "traditional") {
+      folgenMouseMove();
+    }
+    if (!ev.touches[0]) {
+      console.log(":((()))");
     }
       if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
         if (textur.style.touchAction != 'none') {
@@ -583,9 +606,6 @@
       }
 
       }
-      // if (ev.type == "touchmove") {
-      //   mousemoveFolgen();
-      // }
   }
   function vertauscheZwei(i, i1) {
     var ablage = JSON.parse(JSON.stringify(positions.wrong[i].edit));
