@@ -9,6 +9,7 @@
 <input type="range" width="window.innerHeight"  max="window.innerHeight" onInput="zeigeGröße();" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
+<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnisse angleichen</button>
 <br>
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
@@ -32,7 +33,7 @@
   <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout();"> <font size="5"> zeige Ränder</font>
   <p id="randSettings">
     <br>
-    <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiterRand"> Breite des Randes
+    <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
     <br>
     <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
   </p>
@@ -56,6 +57,9 @@
     <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
     <br>
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
+  </p>
+  <p id="traditionalSettings">
+    <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
   </p>
   <br>
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">aufgeben</button>
@@ -84,6 +88,11 @@
     größeAnpassenY.value = window.innerHeight;
     zeigeGröße();
   }
+  function zuAngepassterBildschirmgröße(noShowing) {
+    größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
+    größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
+    if (!noShowing) zeigeGröße();
+  }
   function zeigeGröße() {
     textur.width = größeAnpassenX.value;
     textur.height = größeAnpassenY.value
@@ -111,11 +120,13 @@
     else */create2();
   }
   function create2() {
+    if (modeSelection.value == "traditional" && rotateTiles.checked) zuAngepassterBildschirmgröße(true);
     aufgebenId.style.display = "inline";
     showSettings.innerHTML = "settings und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
     modeSelection.style.display = "none";
     schiebenSettings.style.display = "none";
+    rotateTiles.style.display = "none";
     missing = undefined;
     settings.style.display = 'none';
     originalSize.width = preview.width;
@@ -126,13 +137,13 @@
     textur.height = preview.height// + 111;
     var anzahl = document.getElementById('anzahl').value;
     lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
-    breiterRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
-    randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiterRand.value;
+    breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
+    randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
     positions = {right: []};
     for (var i = 0; i < anzahl; i++) {
       for (var i1 = 0; i1 < anzahl; i1++) {
         if (modeSelection.value == "traditional") {
-          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}};
+          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}};
           if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
           if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
           positions.right.push(newTile);
@@ -155,7 +166,8 @@
       textur.height += 500;
     for (var position of positions.wrong) {
       position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
-      position.original = {x: position.original.x, y: position.original.y};
+      position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
+      if (!rotateTiles.checked) position.original.degree = 0;
     }
   }
     for (i = positions.wrong.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
@@ -193,6 +205,16 @@
   var positions = {right: []};
   var finished = false;
   var missing;
+  function convertDirection(direc, degr) {
+    var directions = ['top', 'right', 'bottom', 'left'];
+    var direcObj = {top: 0, right: 1, bottom: 2, left: 3};
+    while (degr > 0) {
+      direc = directions[direcObj[direc] + 1];
+      if (!direc) direc = directions[0];
+      degr -= 90;
+    }
+    return direc;
+  }
   function layout(withoutAlert, clear, pReturn) {
     if (clear) canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
@@ -201,12 +223,20 @@
     }
     canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
     for (var clip of selected.clip) {
-      if (markWrong.checked && JSON.stringify(positions.right[clip.i].original[clip.direction]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y})) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
-      canvas.fillRect(clip.x, clip.y, clip.width, clip.height);
+      if (markWrong.checked && (JSON.stringify(positions.right[clip.i].original[convertDirection(clip.direction, positions.wrong[clip.sI].original.degree)]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y}) || positions.wrong[clip.sI].original.degree != positions.wrong[clip.i].original.degree)) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
+      canvas.save();
+      canvas.translate(clip.x, clip.y);
+      // canvas.rotate((positions.wrong[clip.sI].original.degree + 180)*Math.PI/180);
+      canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), clip.width, clip.height);
+      canvas.restore();
     }
     for (var tile of selected.tiles) {
       canvas.fillStyle = "rgba(255, 0, 0, 0.2)";
-      canvas.fillRect(positions.wrong[tile].edit.x - 5, positions.wrong[tile].edit.y - 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
+      canvas.save();
+      canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
+      canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
+      canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+      canvas.restore();
     }
     if (höchstRichtige < richtige && !withoutAlert) {
       höchstRichtige = JSON.parse(JSON.stringify(richtige));
@@ -230,20 +260,42 @@
 }
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition) {
-    canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/position.edit.x, /*yFromPlacement*/position.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.save();
+    canvas.translate(position.edit.x, position.edit.y);
+    canvas.rotate(position.original.degree*Math.PI/180);
+    canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    // canvas.restore();
     if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !finished) {
       canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
-      if (richtigPlazierte.checked) canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
+      if (richtigPlazierte.checked) {
+        // canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
+        // canvas.save();
+        // canvas.translate(position.edit.x, position.edit.y);
+        // canvas.rotate(position.original.degree*Math.PI/180);
+        canvas.fillRect(-(lengthPerTeil.edit.x*rightMarkerRadius.value)/2, -(lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
+      }
       richtige++;
     }
+    canvas.restore();
     canvas.fillStyle = "rgba(0, 0, 255, 0.35)";
-    if (raender.checked && segmentPosition.border.includes("right")) canvas.fillRect(position.edit.x - JSON.parse(breiterRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value), position.edit.y, JSON.parse(breiterRand.value), lengthPerTeil.edit.y);
-    if (raender.checked && segmentPosition.border.includes("left")) canvas.fillRect(position.edit.x + JSON.parse(randPosition.value), position.edit.y, JSON.parse(breiterRand.value), lengthPerTeil.edit.y);
-    if (raender.checked && segmentPosition.border.includes("up")) canvas.fillRect(position.edit.x, position.edit.y + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiterRand.value));
-    if (raender.checked && segmentPosition.border.includes("down")) canvas.fillRect(position.edit.x, position.edit.y - JSON.parse(breiterRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiterRand.value));
+    if (raender.checked) {
+      canvas.save();
+      canvas.translate(position.edit.x, position.edit.y);
+      canvas.rotate((position.original.degree)*Math.PI/180);
+      // if (position.borderincludes("right")) canvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
+      // if (position.borderincludes("left")) canvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
+      // if (position.borderincludes("up")) canvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      // if (position.borderincludes("down")) canvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      if (position.border.includes("right")) canvas.fillRect((lengthPerTeil.edit.x)/2 - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
+      if (position.border.includes("left")) canvas.fillRect(-((lengthPerTeil.edit.x)/2) + JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
+      if (position.border.includes("up")) canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      if (position.border.includes("down")) canvas.fillRect(-((lengthPerTeil.edit.x)/2), ((lengthPerTeil.edit.y)/2) - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      canvas.restore();
+    }
   }
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], clip: []}
   function canvasClicked() {
+    settings.style.display = "none"
     if (checkSelected() && settings.style.display == "inline") settings.style.display = "none";
     if (checkSelected() && selected.boolean && modeSelection.value != "schieben") {
       for (var i = 0; i < positions.wrong.length; i++) {
@@ -366,7 +418,7 @@
   function readMouseMove(e) {
     mausx = e.clientX + scrollX;
     mausy = e.clientY + scrollY - /*96*/32// - 43;
-    if (scrollY > 32) mausy += 32;
+    // if (scrollY > 32) mausy += 32;
     folgenMouseMove();
   }
   var state = {mouse: "up", shift: false, newTileSelected: false};
@@ -383,7 +435,9 @@
     if (state.mouse == "down") {
       for (var i = positions.wrong?.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
-        if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= coord.x && mausx <= coord.x + lengthPerTeil.edit.x && mausy >= coord.y && mausy <= coord.y + lengthPerTeil.edit.y/* && selectedCollides(i) == undefined*/) {
+        var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
+        if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
+        if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
           layout(true);
           state.newTileSelected = true;
@@ -397,7 +451,7 @@
         }
         // unclipp
         if (state.shift) {
-          positions.wrong[tile].original = {x: positions.wrong[tile].original.x, y: positions.wrong[tile].original.y};
+          positions.wrong[tile].original = {x: positions.wrong[tile].original.x, y: positions.wrong[tile].original.y, degree: positions.wrong[tile].original.degree};
           clipped.forEach((clipp, i) => {
             if (clipp.split(' - ').includes(tile + "")) clipped.splice(i, 1);
           });
@@ -421,7 +475,7 @@
           checkPossibleClipping(tile);
         }
         selected.position = {x: mausx, y: mausy};
-        layout(true, true);
+        layout(false, true);
       }
     }
   }
@@ -519,7 +573,7 @@
         }
         clipped.push(clip.i + ' - ' + clip.sI);
         // do more clipping if needed
-        checkPossibleClipping(clip.i);
+        checkPossibleClipping(clip.sI);
     }
     selected.clip = [];
     if (selected.tiles.length && !state.shift) selected.tiles = [];
@@ -553,9 +607,19 @@
     if (event.shiftKey) {
       state.shift = true;
     }
+    if (event.key == "ArrowRight") rotateSelected(90);
+    if (event.key == "ArrowLeft") rotateSelected(-90);
+    if (event.key.includes("Arrow")) layout(true);
+  }
+  function rotateSelected(direction) {
+    for (var tile of selected.tiles) {
+      positions.wrong[tile].original.degree += direction;
+      if (positions.wrong[tile].original.degree <= 0) positions.wrong[tile].original.degree = 360;
+      else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+    }
   }
   document.onkeyup = function(event) {
-    if (!event.shiftKey) {
+    if (!event.shiftKey && state.shift) {
       state.shift = false;
       selected.tiles = [];
     }
@@ -576,7 +640,7 @@
     }
     else if ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben" && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
-      mausy = ev.touches[0]["pageY"]// + scrollY;
+      mausy = ev.touches[0]["pageY"] - 32// + scrollY;
     }
     if (ev.type == "touchstart") {
       mouseDown();
