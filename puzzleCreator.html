@@ -9,7 +9,8 @@
 <input type="range" width="window.innerHeight"  max="window.innerHeight" onInput="zeigeGröße();" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
-<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnisse angleichen</button>
+<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
+<button type="button" onclick="zuOptimalerBildschirmgröße();" name="button">Größenverhältnis optimieren</button>
 <br>
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
@@ -92,6 +93,15 @@
     größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
     größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
     if (!noShowing) zeigeGröße();
+  }
+  function zuOptimalerBildschirmgröße() {
+    größeAnpassenX.value = preview.width;
+    größeAnpassenY.value = preview.height;
+    while (größeAnpassenX.value > window.innerWidth || größeAnpassenY.value > window.innerHeight) {
+      größeAnpassenX.value--;
+      größeAnpassenY.value--;
+    }
+    zeigeGröße();
   }
   function zeigeGröße() {
     textur.width = größeAnpassenX.value;
@@ -221,8 +231,8 @@
     for (var i = 0; i < positions.wrong?.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i]);
     }
-    canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
     for (var clip of selected.clip) {
+      canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
       if (markWrong.checked && (JSON.stringify(positions.right[clip.i].original[convertDirection(clip.direction, positions.wrong[clip.sI].original.degree)]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y}) || positions.wrong[clip.sI].original.degree != positions.wrong[clip.i].original.degree)) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
       canvas.save();
       canvas.translate(clip.x, clip.y);
@@ -261,7 +271,8 @@
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition) {
     canvas.save();
-    canvas.translate(position.edit.x, position.edit.y);
+    if (modeSelection.value == "traditional") canvas.translate(position.edit.x, position.edit.y);
+    else canvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
     canvas.rotate(position.original.degree*Math.PI/180);
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // canvas.restore();
@@ -370,7 +381,7 @@
       movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
       movement.missing.unshift(JSON.parse(JSON.stringify(missing)));
       var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
-      positions.wrong[side].edit = missing.data.edit;//.splice(side, 1);
+      positions.wrong[side].edit = JSON.parse(JSON.stringify(missing.data.edit));//.splice(side, 1);
       textur.width = textur.width;
       layout(true);
       // for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
@@ -387,13 +398,13 @@
       //     }
       //   }
       // }
-      if (i1 != movement.positions.length + 1) {
+      // if (i1 != movement.positions.length + 1) {
           missing.data = ablage
           var workingNumbers = [];
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
             workingNumbers.push(i1);
           }
-      }
+      // }
     }
       else {
         i--;
@@ -614,7 +625,7 @@
   function rotateSelected(direction) {
     for (var tile of selected.tiles) {
       positions.wrong[tile].original.degree += direction;
-      if (positions.wrong[tile].original.degree <= 0) positions.wrong[tile].original.degree = 360;
+      if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
       else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
     }
   }
