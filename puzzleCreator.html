@@ -14,17 +14,41 @@
 <br>
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
-<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">more settings</button>
+<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <div id="settings">
   <br>
-  <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">reload page automaticly when puzzle finished
   <br>
+  <select onchange="modeSelected(value);" id="modeSelection">
+    <option value="traditional">traditionell</option>
+    <option value="exchange">austauschen</option>
+    <option value="schieben">nur schieben</option>
+  </select>
+  <br>
+  <div id="traditionalSettings">
+    <p style="margin-bottom: 6px;" id="rotateTilesP"> <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile</p>
+    <input id="markWrong" type="checkbox" > markiere nicht passende
+  </div>
+  <div id="exchangeSettings">
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  </div>
+  <p id="schiebenSettings">
+    <br>
+    <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
+    <br>
+    <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
+    <br>
+    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
+    <br>
+    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
+    <br>
+    <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
+    <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
+  </p>
   <br>
-  <input id="markWrong" type="checkbox" > markiere nicht passende
+  <br>
   <br>
   <input type="checkbox" onchange="layout(true); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none';" id="richtigPlazierte" checked="true"> markiere richtig plazierte
-  <br>
+  <!-- <h3>general</h3> -->
   <p id="rightMarkerSettings">
   <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
   <br>
@@ -40,28 +64,9 @@
   </p>
   <br>
   <!-- <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
-  <select onchange="if (value == 'schieben') {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="modeSelection">
-    <option value="traditional">traditionell</option>
-    <option value="exchange">austauschen</option>
-    <option value="schieben">nur schieben</option>
-  </select>
-  <p id="schiebenSettings">
-    <br>
-    <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
-    <br>
-    <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
-    <br>
-    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); if (zurrückVermeiden.checked) alert('WARNUNG: die Seite könnte sich aufhängen, weil zufällig verschoben wird und eine Verschiebung immer rückgängig gemacht werden kann! Bitte aktivieren sie << niemals eine Verschiebung rükgängig machen >> um dies (bei einer niedrigen Zahl)) zu vermeiden. Auch << leeres Feld 2 Mal an selber Stelle verboten >> kann Aufhänger verursachen, da das verschieben dadurch sehr stark eingeschrenkt wird und wharscheinlich gar nicht mehr richtig geschoben werden kann!');} else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
-    <br>
-    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
-    <br>
-    <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
-    <br>
-    <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
-  </p>
-  <p id="traditionalSettings">
-    <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
-  </p>
+  <br>
+  <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
+  <br>
   <br>
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">aufgeben</button>
 </div>
@@ -69,6 +74,21 @@
 <canvas onmousedown="mouseDown();" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
 <p><img id="preview"></p>
 <script>
+  if (navigator.userAgent.match(/Android/i) ||
+    navigator.userAgent.match(/webOS/i) ||
+    navigator.userAgent.match(/iPhone/i) ||
+    navigator.userAgent.match(/iPad/i) ||
+    navigator.userAgent.match(/iPod/i) ||
+    navigator.userAgent.match(/BlackBerry/i) ||
+    navigator.userAgent.match(/Windows Phone/i)
+  ) {
+    var gerät = "Handy"
+    console.log("Handy");
+  } else {
+    var gerät = "PC"
+    console.log("PC");
+    swipeSteuerungP.style.display = "none";
+  }
   reloadWhenFinished.checked = localStorage.getItem("reloadWhenFinished");
   anzahlVerschieben.value = anzahl.value*anzahl.value;
   settings.style.display = "none";
@@ -115,6 +135,12 @@
     canvas.drawImage(document.getElementById('preview'), 0, 0, größeAnpassenX.value, größeAnpassenY.value);
   }
   }
+  function modeSelected(value) {
+    traditionalSettings.style.display = 'none';
+    exchangeSettings.style.display = 'none';
+    schiebenSettings.style.display = 'none';
+    document.getElementById(value + 'Settings').style.display = 'inline';
+  }
   var originalSize = {width: 0, height: 0};
   function create() {
     //finished = false;
@@ -132,11 +158,11 @@
   function create2() {
     if (modeSelection.value == "traditional" && rotateTiles.checked) zuAngepassterBildschirmgröße(true);
     aufgebenId.style.display = "inline";
-    showSettings.innerHTML = "settings und Möglichkeit Aufzugeben";
+    showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
     modeSelection.style.display = "none";
     schiebenSettings.style.display = "none";
-    rotateTiles.style.display = "none";
+    rotateTilesP.style.display = "none";
     missing = undefined;
     settings.style.display = 'none';
     originalSize.width = preview.width;
@@ -435,7 +461,6 @@
   var state = {mouse: "up", shift: false, newTileSelected: false};
   function mouseDown() {
     if (modeSelection.value == "traditional") {
-      // TODO: shift for single multi selection
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
       state.mouse = "down";
@@ -707,7 +732,7 @@
 }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
-  if ((mausy - scrollY < 50 && (modeSelection.value != "traditional" || state.mouse == "down")/* && gerät == "PC"*/)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((mausy - scrollY < 50 && (state.mouse == "down" || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
