@@ -544,52 +544,28 @@
       }
     });
     var screenObj = {x: scrollX, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
-    if (!selectedCollidesOthers(tile)) {
+    var clipLength = selected.clip.length;
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
-    var selectedObj = {
-      right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-      top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
-    };
     if (obj.all && !positions.wrong[tile].original.left && collides(transformToObj(nearest?.right.i), screenObj).boolean) {
       selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
-    selectedObj = {
-      right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-      top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
-    };
     if (obj.all && !positions.wrong[tile].original.right && collides(transformToObj(nearest?.left.i), screenObj).boolean) {
       selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
-    selectedObj = {
-      right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-      top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
-    };
     if (obj.all && !positions.wrong[tile].original.top && collides(transformToObj(nearest?.bottom.i), screenObj).boolean) {
       selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
-    selectedObj = {
-      right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-      bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-      top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
-    };
     if (obj.all && !positions.wrong[tile].original.bottom && collides(transformToObj(nearest?.top.i), screenObj).boolean) {
       selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
     }
+    if (selected.clip.length > clipLength && selectedCollidesOthers(selected.clip[selected.clip.length - 1], tile)) selected.clip.pop();
   }
-  }
-  function selectedCollidesOthers(pSelected) {
+  function selectedCollidesOthers(pClip, tile) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), transformToObj(pSelected, 3)).boolean && !selected.tiles.includes(i) && pSelected != i) return true;
+      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !selected.tiles.includes(i) && tile != i) return true;
     }
   }
   var clipped = [];
@@ -616,12 +592,17 @@
     }
   }
   function collides(a, b) {
-    return {boolean: !(
-      ((a.y + a.height) < (b.y)) ||
-      (a.y > (b.y + b.height)) ||
-      ((a.x + a.width) < b.x) ||
-      (a.x > (b.x + b.width))
-    ), area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)};
+    try {
+      return {boolean: !(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
+        ), area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)};
+
+    } catch (e) {
+      console.log('err: ' + e);
+    }
   }
   function selectedCollides(potentiallySelected) {
     for (var tile of selected.tiles) {
@@ -633,6 +614,9 @@
     var obj =  positions.wrong[i].edit;
     if (!tolerance) tolerance = 0;
     return {x: obj.x + tolerance, y: obj.y + tolerance, width: lengthPerTeil.edit.x - tolerance*2, height: lengthPerTeil.edit.y - tolerance*2};
+  }
+  function addTolerance(obj, tolerance) {
+    return {...obj, x: obj.x + tolerance, y: obj.y + tolerance, width: obj.width - tolerance*2, height: obj.height - tolerance*2};
   }
   // if (gerät == "Handy") {
     document.addEventListener('touchmove', touch);
