@@ -179,7 +179,7 @@
     for (var i = 0; i < anzahl; i++) {
       for (var i1 = 0; i1 < anzahl; i1++) {
         if (modeSelection.value == "traditional") {
-          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}};
+          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1, degree: 0}};
           if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
           if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
           positions.right.push(newTile);
@@ -197,6 +197,17 @@
       }
     }
     positions.wrong = JSON.parse(JSON.stringify(positions.right));
+    removeTile(true);
+    //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
+    window.scroll(0, /*96 50*/32);
+    if (modeSelection.value == "schieben") {
+      alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
+      layout(true);
+    }
+    // else layout();
+  }
+
+  function mixPuzzle() {
     if (modeSelection.value == "traditional") {
       textur.width += 500;
       textur.height += 500;
@@ -212,13 +223,7 @@
       positions.wrong[i].edit = positions.wrong[j].edit;
       positions.wrong[j].edit = x;
     }
-    //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
-    window.scroll(0, /*96 50*/32);
-    if (modeSelection.value == "schieben") {
-      alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil de Bildes!");
-      layout(true);
-    }
-    else layout();
+    layout();
   }
   function imageLoaded(input) {
     var reader = new FileReader();
@@ -370,19 +375,40 @@
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && modeSelection.value == "schieben" && !missing) {
-      for (var i = 0; i < positions.wrong.length; i++) {
-        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-          missing = {data: JSON.parse(JSON.stringify(positions.wrong[i]))};
-          positions.wrong.splice(i, 1);
-          positions.right.splice(i, 1);
-        }
-      }
-      verschiebenPC();
+    if (checkSelected() && (!missing || state.removeTile)) {
+      removeTile();
       }
       else {
         layout(true, true);
       }
+  }
+  function removeTile(first) {
+    positions.wrong.forEach((position, i) => {
+      if (!first && position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+        missing = {data: JSON.parse(JSON.stringify(position))};
+        positions.wrong.forEach((pPosition, i1) => {
+          for (var direc of ['top', 'right', 'bottom', 'left']) {
+            if (pPosition.original[direc]) {
+            pPosition.original[direc].degree = 0;// position.edit.degree;
+            if (angular.equals(pPosition.original[direc], {x: position.original.x, y: position.original.y, degree: 0})) {
+              delete pPosition.original[direc].degree;
+              delete positions.right[i1].original[direc]
+              // delete pPosition.original[direc];
+            }
+            else delete pPosition.original[direc].degree;
+          }
+          }
+        });
+        positions.wrong.splice(i, 1);
+        positions.right.splice(i, 1);
+      }
+    });
+    layout(true, true);
+    setTimeout(function () {
+      state.removeTile = confirm("Wollen Sie ein (weiteres) Teil entfernen?");
+      if (!state.removeTile && modeSelection.value == "schieben") verschiebenPC();
+      else if (!state.removeTile) mixPuzzle();
+    }, 100);
   }
   function verschiebenPC() {
     var missingArray = [];
@@ -467,7 +493,7 @@
     }
   }
   function folgenMouseMove() {
-    if (state.mouse == "down") {
+    if (state.mouse == "down" && !state.removeTile) {
       for (var i = positions.wrong?.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
