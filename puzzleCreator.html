@@ -163,7 +163,7 @@
     modeSelection.style.display = "none";
     schiebenSettings.style.display = "none";
     rotateTilesP.style.display = "none";
-    missing = undefined;
+    missing = [];
     settings.style.display = 'none';
     originalSize.width = preview.width;
     originalSize.height = preview.height;
@@ -207,7 +207,7 @@
     // else layout();
   }
 
-  function mixPuzzle() {
+  function shufflePuzzle() {
     if (modeSelection.value == "traditional") {
       textur.width += 500;
       textur.height += 500;
@@ -217,12 +217,29 @@
       if (!rotateTiles.checked) position.original.degree = 0;
     }
   }
+  // var possible = new Array(positions.wrong.length).fill(0)
+  // for (var i = 0; i < possible.length; i++) {
+  //   possible[i] += i;
+  //   if (doNotChange.includes(i)) possible.splice(i, 1);
+  // }
+  // possible = possible.filter(x => x);
+  // for (i = possible.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
+  //   j = possible[Math.floor(Math.random() * (i + 1))];
+  //   x = positions.wrong[possible[i]].edit;
+  //   positions.wrong[i].edit = positions.wrong[j].edit;
+  //   positions.wrong[j].edit = x;
+  // }
     for (i = positions.wrong.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
-      j = Math.floor(Math.random() * (i + 1));
+      do {
+        j = Math.floor(Math.random() * (i + 1));
+      } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
       x = positions.wrong[i].edit;
+      if (!doNotChange.includes(i)) {
       positions.wrong[i].edit = positions.wrong[j].edit;
       positions.wrong[j].edit = x;
     }
+    }
+    doNotChange = [];
     layout();
   }
   function imageLoaded(input) {
@@ -245,7 +262,7 @@
   var lengthPerTeil = {};
   var positions = {right: []};
   var finished = false;
-  var missing;
+  var missing = [];
   function convertDirection(direc, degr) {
     var directions = ['top', 'right', 'bottom', 'left'];
     var direcObj = {top: 0, right: 1, bottom: 2, left: 3};
@@ -261,7 +278,7 @@
     if (clear && aufgebenId.style.display == 'inline') canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
     for (var i = 0; i < positions.wrong?.length; i++) {
-      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen);
+      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
     for (var clip of selected.clip) {
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
@@ -301,16 +318,16 @@
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition, removeTilesScreen) {
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i) {
     canvas.save();
     if (modeSelection.value == "traditional" && !removeTilesScreen) canvas.translate(position.edit.x, position.edit.y);
     else canvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
     canvas.rotate(position.original.degree*Math.PI/180);
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // canvas.restore();
-    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished) {
+    if (doNotChange.includes(i) || (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
       canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
-      if (richtigPlazierte.checked) {
+      if (richtigPlazierte.checked || doNotChange.includes(i)) {
         // canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
         // canvas.save();
         // canvas.translate(position.edit.x, position.edit.y);
@@ -339,7 +356,7 @@
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], clip: []}
   function canvasClicked() {
     if (aufgebenId.style.display == "inline") settings.style.display = "none"
-    if (checkSelected() && selected.boolean && modeSelection.value != "schieben") {
+    if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
@@ -355,38 +372,43 @@
       }
       selected.boolean = false;
     }
-    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing) {
-        if ((missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x + lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x - lengthPerTeil.edit.x && missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y + lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*down*/ || (missing.data.edit.y == checkSelected().y*lengthPerTeil.edit.y - lengthPerTeil.edit.y && missing.data.edit.x == checkSelected().x*lengthPerTeil.edit.x)/*up*/) {
+    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing.length && !state.removeTile) {
+      for (var i1 = 0; i1 < missing.length; i1++) {
+        pMissing = missing[i1];
+        if ((pMissing.includes((checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)) /*right*/ || (pMissing.includes((checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y))/*left*/ || (pMissing.includes(checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y))/*down*/ || (pMissing.includes(checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y))/*up*/) {
           for (var i = 0; i < positions.wrong.length; i++) {
             if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
               console.log("schiebe...");
               playerMoved++;
               var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
-              positions.wrong[i].edit = JSON.parse(JSON.stringify(missing.data.edit));//.splice(side, 1);
-              missing.data = ablage;
+              positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
+              missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
               i = positions.wrong.length;
+              i1 = missing.length;
               selected.boolean = false;
             }
           }
         }
         // canvas.clearRect(0, 0, 10000, 10000);
         // layout();
-    }
+  };
+}
     else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && ((!missing && modeSelection.value == "schieben") || state.removeTile)) {
+    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile)) {
       removeTile();
       }
       else {
         layout(true, true);
       }
   }
+  var doNotChange = [];
   function removeTile(first) {
     positions.wrong.forEach((position, i) => {
       if (!first && position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-        missing = {data: JSON.parse(JSON.stringify(position))};
+        missing.push(JSON.parse(JSON.stringify(position.edit.x + ' - ' + position.edit.y)));
         positions.wrong.forEach((pPosition, i1) => {
           for (var direc of ['top', 'right', 'bottom', 'left']) {
             if (pPosition.original[direc]) {
@@ -400,15 +422,21 @@
           }
           }
         });
-        positions.wrong.splice(i, 1);
-        positions.right.splice(i, 1);
+        if (modeSelection.value == "exchange" && !doNotChange.includes(i)) {
+          doNotChange.push(i);
+        }
+        else if (modeSelection.value != "exchange") {
+          positions.wrong.splice(i, 1);
+          positions.right.splice(i, 1);
+        }
       }
     });
     layout(true, true, undefined, true);
     setTimeout(function () {
-      state.removeTile = confirm("Wollen Sie ein (weiteres) Teil entfernen?");
+      if (modeSelection.value == "exchange") state.removeTile = confirm("Wollen Sie Teile auswählen, die an der Ausgangsposition bleiben sollen?");
+      else state.removeTile = confirm("Wollen Sie ein (weiteres) Teil entfernen?");
       if (!state.removeTile && modeSelection.value == "schieben") verschiebenPC();
-      else if (!state.removeTile) mixPuzzle();
+      else if (!state.removeTile) shufflePuzzle();
     }, 100);
   }
   function verschiebenPC() {
@@ -421,19 +449,21 @@
     var counter = 0;
     for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlVerschieben.value); i++) {
       var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
+      if (!workingNumbers.length) break;
+      missing.forEach((pMissing, i1) => {
       try {
-      if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((missing.data.edit.x == positions.wrong[side].edit.x + lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y) /*right*/ || (missing.data.edit.x ==
-      positions.wrong[side].edit.x - lengthPerTeil.edit.x && missing.data.edit.y == positions.wrong[side].edit.y)/*left*/ || (missing.data.edit.y == positions.wrong[side].edit.y + lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*down*/ || (missing.data.edit.y == positions.wrong[side].edit.y - lengthPerTeil.edit.y && missing.data.edit.x == positions.wrong[side].edit.x)/*up*/)) {
-      if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + "-" + positions.wrong[side].edit.y))) {
+      if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
+      (positions.wrong[side].edit.x - lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y)/*left*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y + lengthPerTeil.edit.y))/*down*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y - lengthPerTeil.edit.y))/*up*/)) {
+      if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y))) {
         maleZurrück.number++;
       }
       else maleZurrück.normalSlide++;
-      missingArray.push(missing.data.edit.x + "-" + missing.data.edit.y);
+      missingArray.push(pMissing);
       //console.log(missingArray);
       movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
-      movement.missing.unshift(JSON.parse(JSON.stringify(missing)));
+      movement.missing.unshift(JSON.parse(JSON.stringify(pMissing)));
       var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
-      positions.wrong[side].edit = JSON.parse(JSON.stringify(missing.data.edit));//.splice(side, 1);
+      positions.wrong[side].edit = JSON.parse(JSON.stringify({x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])}));//.splice(side, 1);
       textur.width = textur.width;
       layout(true);
       // for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
@@ -451,8 +481,8 @@
       //   }
       // }
       // if (i1 != movement.positions.length + 1) {
-          missing.data = ablage
-          var workingNumbers = [];
+          missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
+          workingNumbers = [];
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
             workingNumbers.push(i1);
           }
@@ -468,6 +498,7 @@
       //console.log("ein Error bei der if Abfrage!!! + (" + e + ")");
       i = positions.wrong.length;
     }
+  });
     counter++;
     }
     if (layout(undefined, true, true) != undefined) verschiebenPC();
