@@ -197,13 +197,13 @@
       }
     }
     positions.wrong = JSON.parse(JSON.stringify(positions.right));
-    removeTile(true);
     //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
     window.scroll(0, /*96 50*/32);
     if (modeSelection.value == "schieben") {
       alert("Bitte wählen sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
       layout(true);
     }
+    else removeTile(true);
     // else layout();
   }
 
@@ -256,11 +256,12 @@
     }
     return direc;
   }
-  function layout(withoutAlert, clear, pReturn) {
+  function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
+    if (state.removeTile) removeTilesScreen = true;
     if (clear && aufgebenId.style.display == 'inline') canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
     for (var i = 0; i < positions.wrong?.length; i++) {
-      drawPictureSegment(positions.wrong[i], positions.right[i]);
+      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen);
     }
     for (var clip of selected.clip) {
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
@@ -282,7 +283,7 @@
     if (höchstRichtige < richtige && !withoutAlert) {
       höchstRichtige = JSON.parse(JSON.stringify(richtige));
     }
-    if (richtige == positions.wrong?.length) {
+    if (richtige == positions.wrong?.length && !removeTilesScreen) {
       richtige = 0;
       finished = true;
       layout(true);
@@ -300,14 +301,14 @@
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition) {
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen) {
     canvas.save();
-    if (modeSelection.value == "traditional") canvas.translate(position.edit.x, position.edit.y);
+    if (modeSelection.value == "traditional" && !removeTilesScreen) canvas.translate(position.edit.x, position.edit.y);
     else canvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
     canvas.rotate(position.original.degree*Math.PI/180);
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // canvas.restore();
-    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !finished) {
+    if (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished) {
       canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
       if (richtigPlazierte.checked) {
         // canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
@@ -375,7 +376,7 @@
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && (!missing || state.removeTile)) {
+    if (checkSelected() && ((!missing && modeSelection.value == "schieben") || state.removeTile)) {
       removeTile();
       }
       else {
@@ -403,7 +404,7 @@
         positions.right.splice(i, 1);
       }
     });
-    layout(true, true);
+    layout(true, true, undefined, true);
     setTimeout(function () {
       state.removeTile = confirm("Wollen Sie ein (weiteres) Teil entfernen?");
       if (!state.removeTile && modeSelection.value == "schieben") verschiebenPC();
