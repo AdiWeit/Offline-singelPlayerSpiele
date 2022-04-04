@@ -211,6 +211,35 @@
   }
 
   function shufflePuzzle() {
+    if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
+    else {
+    for (var i of selected.tiles) {
+      missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
+      positions.wrong.forEach((position, i1) => {
+        for (var direc of ['top', 'right', 'bottom', 'left']) {
+          if (position.original[direc]) {
+            position.original[direc].degree = 0;// position.edit.degree;
+            if (angular.equals(position.original[direc], {x: positions.wrong[i].original.x, y: positions.wrong[i].original.y, degree: 0})) {
+              delete position.original[direc].degree;
+              delete positions.right[i1].original[direc]
+              // delete position.original[direc];
+            }
+            else delete position.original[direc].degree;
+          }
+        }
+      });
+    }
+    if (modeSelection.value != "exchange") {
+      for (var i = 0; i < positions.wrong.length; i++) {
+        if (selected.objTiles.includes(JSON.stringify(positions.wrong[i].edit))) {
+          positions.wrong.splice(i, 1);
+          positions.right.splice(i, 1);
+          i--;
+        }
+      }
+    }
+    else doNotChange = selected.tiles;
+    selected.tiles = [];
     removeTilesFinishedB.style.display = 'none';
     state.removeTile = false;
     if (modeSelection.value == "schieben") verschiebenPC();
@@ -248,6 +277,7 @@
     }
     doNotChange = [];
     layout();
+  }
   }
   }
   function imageLoaded(input) {
@@ -298,9 +328,10 @@
       canvas.restore();
     }
     for (var tile of selected.tiles) {
-      canvas.fillStyle = "rgba(255, 0, 0, 0.2)";
+      canvas.fillStyle = "rgba(255, 0, 0, 0.3)";
       canvas.save();
-      canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
+      if (state.removeTile/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
+      else canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
       canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
       canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
       canvas.restore();
@@ -333,9 +364,9 @@
     canvas.rotate(position.original.degree*Math.PI/180);
     canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // canvas.restore();
-    if (doNotChange.includes(i) || (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
+    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
       canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
-      if (richtigPlazierte.checked || doNotChange.includes(i)) {
+      if (richtigPlazierte.checked) {
         // canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
         // canvas.save();
         // canvas.translate(position.edit.x, position.edit.y);
@@ -361,7 +392,7 @@
       canvas.restore();
     }
   }
-  var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], clip: []}
+  var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
   function canvasClicked() {
     if (aufgebenId.style.display == "inline") settings.style.display = "none"
@@ -416,36 +447,25 @@
   }
   var doNotChange = [];
   function removeTile(first) {
+    if (!first) {
     positions.wrong.forEach((position, i) => {
       if (position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-        missing.push(JSON.parse(JSON.stringify(position.edit.x + ' - ' + position.edit.y)));
-        positions.wrong.forEach((pPosition, i1) => {
-          for (var direc of ['top', 'right', 'bottom', 'left']) {
-            if (pPosition.original[direc]) {
-            pPosition.original[direc].degree = 0;// position.edit.degree;
-            if (angular.equals(pPosition.original[direc], {x: position.original.x, y: position.original.y, degree: 0})) {
-              delete pPosition.original[direc].degree;
-              delete positions.right[i1].original[direc]
-              // delete pPosition.original[direc];
+        if (!selected.tiles.includes(i)) {
+          selected.tiles.push(i);
+          selected.objTiles.push(JSON.stringify(position.edit));
+        }
+        else {
+          for (var i1 = 0; i1 < selected.tiles.length; i1++) {
+            if (selected.tiles[i1] == i) {
+              selected.tiles.splice(i1, 1);
+              selected.objTiles.splice(i1, 1);
             }
-            else delete pPosition.original[direc].degree;
           }
-          }
-        });
-        if (modeSelection.value == "exchange" && !doNotChange.includes(i)) {
-          doNotChange.push(i);
-        }
-        else if (modeSelection.value == "exchange") {
-          for (var i1 = 0; i1 < doNotChange.length; i1++) {
-            if (doNotChange[i1] == i) doNotChange.splice(i1, 1);
-          }
-        }
-        else if (modeSelection.value != "exchange") {
-          positions.wrong.splice(i, 1);
-          positions.right.splice(i, 1);
         }
       }
     });
+  }
+  else if (modeSelection.value != "schieben") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
@@ -656,7 +676,7 @@
         checkPossibleClipping(clip.sI);
     }
     selected.clip = [];
-    if (selected.tiles.length && !state.shift) selected.tiles = [];
+    if (selected.tiles.length && !state.shift && !state.removeTile) selected.tiles = [];
     }
   }
   function collides(a, b) {
