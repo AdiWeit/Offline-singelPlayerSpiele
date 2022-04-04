@@ -71,6 +71,8 @@
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">aufgeben</button>
 </div>
 <br>
+<button type="button" id="removeTilesFinishedB" style="display: none;" onclick="shufflePuzzle();" name="button">finished</button>
+<br>
 <canvas onmousedown="mouseDown();" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
 <p><img id="preview"></p>
 <script>
@@ -158,6 +160,7 @@
   function create2() {
     if (modeSelection.value == "traditional" && rotateTiles.checked) zuAngepassterBildschirmgröße(true);
     aufgebenId.style.display = "inline";
+    removeTilesFinishedB.style.display = 'inline';
     showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
     modeSelection.style.display = "none";
@@ -208,6 +211,10 @@
   }
 
   function shufflePuzzle() {
+    removeTilesFinishedB.style.display = 'none';
+    state.removeTile = false;
+    if (modeSelection.value == "schieben") verschiebenPC();
+    else {
     if (modeSelection.value == "traditional") {
       textur.width += 500;
       textur.height += 500;
@@ -241,6 +248,7 @@
     }
     doNotChange = [];
     layout();
+  }
   }
   function imageLoaded(input) {
     var reader = new FileReader();
@@ -354,6 +362,7 @@
     }
   }
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], clip: []}
+  var lastCoord;
   function canvasClicked() {
     if (aufgebenId.style.display == "inline") settings.style.display = "none"
     if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
@@ -397,17 +406,18 @@
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile)) {
+    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()))) {
       removeTile();
-      }
-      else {
-        layout(true, true);
-      }
+      lastCoord = checkSelected();
+    }
+    else {
+      layout(true, true);
+    }
   }
   var doNotChange = [];
   function removeTile(first) {
     positions.wrong.forEach((position, i) => {
-      if (!first && position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+      if (position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
         missing.push(JSON.parse(JSON.stringify(position.edit.x + ' - ' + position.edit.y)));
         positions.wrong.forEach((pPosition, i1) => {
           for (var direc of ['top', 'right', 'bottom', 'left']) {
@@ -425,6 +435,11 @@
         if (modeSelection.value == "exchange" && !doNotChange.includes(i)) {
           doNotChange.push(i);
         }
+        else if (modeSelection.value == "exchange") {
+          for (var i1 = 0; i1 < doNotChange.length; i1++) {
+            if (doNotChange[i1] == i) doNotChange.splice(i1, 1);
+          }
+        }
         else if (modeSelection.value != "exchange") {
           positions.wrong.splice(i, 1);
           positions.right.splice(i, 1);
@@ -432,12 +447,7 @@
       }
     });
     layout(true, true, undefined, true);
-    setTimeout(function () {
-      if (modeSelection.value == "exchange") state.removeTile = confirm("Wollen Sie Teile auswählen, die an der Ausgangsposition bleiben sollen?");
-      else state.removeTile = confirm("Wollen Sie ein (weiteres) Teil entfernen?");
-      if (!state.removeTile && modeSelection.value == "schieben") verschiebenPC();
-      else if (!state.removeTile) shufflePuzzle();
-    }, 100);
+    state.removeTile = true;
   }
   function verschiebenPC() {
     var missingArray = [];
@@ -517,15 +527,16 @@
   }
   var state = {mouse: "up", shift: false, newTileSelected: false};
   function mouseDown() {
+    state.mouse = "down";
     if (modeSelection.value == "traditional") {
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
-      state.mouse = "down";
       folgenMouseMove();
     }
   }
   function folgenMouseMove() {
-    if (state.mouse == "down" && !state.removeTile) {
+    if (state.mouse == "down" && state.removeTile) canvasClicked();
+    if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       for (var i = positions.wrong?.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
@@ -627,8 +638,8 @@
   }
   var clipped = [];
   function mouseUp() {
+    state.mouse = "up";
     if (modeSelection.value == "traditional") {
-      state.mouse = "up";
       state.newTileSelected = false;
       if (selected.clip.length > 0) new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
       for (var clip of selected.clip) {
@@ -766,14 +777,14 @@
   }
   }
   function scrollDownFunction() {
-  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || state.mouse == "down"))  {
+  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))  {
   window.scroll(scrollX, scrollY + 3);
   mausy += 3;
 }
 }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
-  if ((mausy - scrollY < 50 && (state.mouse == "down" || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
