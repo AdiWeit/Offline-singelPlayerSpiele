@@ -415,23 +415,22 @@
     else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing.length && !state.removeTile) {
       for (var i1 = 0; i1 < missing.length; i1++) {
         pMissing = missing[i1];
-        if ((pMissing.includes((checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)) /*right*/ || (pMissing.includes((checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y))/*left*/ || (pMissing.includes(checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y))/*down*/ || (pMissing.includes(checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y))/*up*/) {
+        if (possibleMissing.length && pMissing == (checkSelected().x)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) {
+          moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
+        }
+        else {
+        if ((pMissing == (checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (pMissing == checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y)/*up*/)) {
           for (var i = 0; i < positions.wrong.length; i++) {
             if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-              console.log("schiebe...");
-              playerMoved++;
-              var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
-              positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
-              missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
-              i = positions.wrong.length;
-              i1 = missing.length;
-              selected.boolean = false;
+              possibleMissing.push({i: i, i1: i1});
             }
           }
         }
         // canvas.clearRect(0, 0, 10000, 10000);
         // layout();
-  };
+      }
+  }
+  if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
     else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
@@ -445,7 +444,18 @@
       layout(true, true);
     }
   }
+  function moveTile(i, i1) {
+    console.log("schiebe...");
+    possibleMissing = [];
+    pMissing = missing[i1];
+    playerMoved++;
+    var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
+    positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
+    missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
+    selected.boolean = false;
+  }
   var doNotChange = [];
+  var possibleMissing = [];
   function removeTile(first) {
     if (!first) {
     positions.wrong.forEach((position, i) => {
