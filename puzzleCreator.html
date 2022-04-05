@@ -756,7 +756,7 @@
       // textur.style.touchAction = '';
       canvasClicked();
     }
-    else if ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben" && ev.touches[0]) {
+    else if (state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben") && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
       mausy = ev.touches[0]["pageY"] - 32// + scrollY;
     }
@@ -767,7 +767,7 @@
       mouseUp();
       layout(true, true);
     }
-    if (ev.type == "touchmove" && modeSelection.value == "traditional") {
+    if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
       folgenMouseMove();
     }
     if (!ev.touches[0]) {
