@@ -184,7 +184,14 @@
     else */create2();
   }
   function create2() {
-    if (modeSelection.value == "traditional" && rotateTiles.checked) zuAngepassterBildschirmgröße(true);
+    positions = {right: []};
+    if (modeSelection.value == "traditional" && rotateTiles.checked) {
+      zuAngepassterBildschirmgröße(true);
+      positions.layoutOrder = new Array(document.getElementById('anzahl').value*document.getElementById('anzahl').value);
+      for (var i = 0; i < positions.layoutOrder.length; i++) {
+        positions.layoutOrder[i] = i;
+      }
+    }
     removeTilesFinishedB.style.display = 'inline';
     showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
@@ -204,7 +211,6 @@
     else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
     breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
     randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
-    positions = {right: []};
     for (var i = 0; i < anzahl; i++) {
       for (var i1 = 0; i1 < anzahl; i1++) {
         if (modeSelection.value == "traditional") {
@@ -406,7 +412,9 @@ var originalSize = {};
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
-    for (var i = 0; i < positions.wrong?.length; i++) {
+    for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
+      var i = i1;
+      if (modeSelection.value == "traditional") i = positions.layoutOrder[i1];
       drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
     for (var clip of selected.clip) {
@@ -653,12 +661,15 @@ var originalSize = {};
     if (modeSelection.value == "traditional") {
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
-      for (var i = positions.wrong?.length - 1; i >= 0; i--) {
+      for (var i1 = positions.layoutOrder.length - 1; i1 >= 0; i1--) {
+        var i = positions.layoutOrder[i1];
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
         if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
+          positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
+          positions.layoutOrder.push(i);
           if (!elmCalled) {
             if (state.rotate.right) rotateSelected(90);
             if (state.rotate.left) rotateSelected(-90);
@@ -677,7 +688,11 @@ var originalSize = {};
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
-          if (!state.shift && clipp.split(' - ').includes(tile + "") && newTile) selected.tiles.push(JSON.parse(newTile));
+          if (!state.shift && clipp.split(' - ').includes(tile + "") && newTile) {
+            selected.tiles.push(JSON.parse(newTile));
+            positions.layoutOrder = positions.layoutOrder.filter(x => x != JSON.parse(newTile));
+            positions.layoutOrder.push(JSON.parse(newTile));
+          }
         }
         // unclipp
         if (state.shift) {
