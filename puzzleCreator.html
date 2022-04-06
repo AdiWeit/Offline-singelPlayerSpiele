@@ -22,6 +22,8 @@
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
 <button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
+<button type="button" onclick="rotateState('right')" id="rightRotationB" style="position: fixed; left:483px;" name="button">drehe rechts</button>
+<button type="button" onclick="rotateState('left');" id="leftRotationB" style="position: fixed;" name="button">drehe links</button>
 <div id="settings">
   <br>
   <br>
@@ -80,7 +82,7 @@
 <br>
 <button type="button" id="removeTilesFinishedB" style="display: none;" onclick="shufflePuzzle();" name="button">finished</button>
 <br>
-<canvas onmousedown="mouseDown();" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
 <p><img id="preview"></p>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
@@ -97,6 +99,8 @@
     var gerät = "PC"
     console.log("PC");
     swipeSteuerungP.style.display = "none";
+    rightRotationB.style.display = 'none';
+    leftRotationB.style.display = 'none';
   }
   reloadWhenFinished.checked = localStorage.getItem("reloadWhenFinished");
   anzahlVerschieben.value = anzahl.value*anzahl.value;
@@ -157,6 +161,13 @@
     exchangeSettings.style.display = 'none';
     schiebenSettings.style.display = 'none';
     document.getElementById(value + 'Settings').style.display = 'inline';
+  }
+  function rotateState(direc) {
+    if (!state.rotate[direc]) state.rotate = {right: false, left: false};
+    state.rotate[direc] = !state.rotate[direc];
+    rightRotationB.style.backgroundColor = '';
+    leftRotationB.style.backgroundColor = '';
+    if (state.rotate[direc]) document.getElementById(direc + 'RotationB').style.backgroundColor = 'rgb(100, 204, 210)';
   }
   var originalSize = {width: 0, height: 0};
   function create() {
@@ -223,7 +234,7 @@
     }
     else removeTile(true);
     // else layout();
-    canvas.clearRect(0, 0, textur.width, textur.height);
+    if (sourceIsVideo.checked) canvas.clearRect(0, 0, textur.width, textur.height);
   }
 
   function shufflePuzzle() {
@@ -359,12 +370,12 @@ function updateVideo(){
 }
 var originalSize = {};
   function loadImage(width, height) {
-    if (!width) {
-      width = preview.width;
-      height = preview.height;
-    }
-    originalSize = {width: width, height: height};
-    // setTimeout(function () {
+    setTimeout(function () {
+      if (!width) {
+        width = preview.width;
+        height = preview.height;
+      }
+      originalSize = {width: width, height: height};
        canvas.drawImage(document.getElementById('preview'), 0, 0);
        textur.width = width// + 111;
        textur.height = height// + 111;
@@ -375,7 +386,7 @@ var originalSize = {};
        größeAnpassenX.value = width;
        größeAnpassenY.value = height;
        zeigeGröße();
-    // }, 500);
+    }, 500);
   }
   var lengthPerTeil = {};
   var positions = {right: []};
@@ -636,28 +647,32 @@ var originalSize = {};
     // if (scrollY > 32) mausy += 32;
     folgenMouseMove();
   }
-  var state = {mouse: "up", shift: false, newTileSelected: false};
-  function mouseDown() {
+  var state = {mouse: "up", shift: false, newTileSelected: false, rotate: {}};
+  function mouseDown(elmCalled) {
     state.mouse = "down";
     if (modeSelection.value == "traditional") {
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
-      folgenMouseMove();
-    }
-  }
-  function folgenMouseMove() {
-    if (state.mouse == "down" && state.removeTile) canvasClicked();
-    if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       for (var i = positions.wrong?.length - 1; i >= 0; i--) {
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
         if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
+          if (!elmCalled) {
+            if (state.rotate.right) rotateSelected(90);
+            if (state.rotate.left) rotateSelected(-90);
+          }
           layout(true);
           state.newTileSelected = true;
         }
       }
+      folgenMouseMove();
+    }
+  }
+  function folgenMouseMove() {
+    if (state.mouse == "down" && state.removeTile) canvasClicked();
+    if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       // select clipped
       for (var tile of selected.tiles) {
         for (var clipp of clipped) {
