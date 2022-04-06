@@ -2,7 +2,14 @@
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <p id="imageSettings">
 <input type="text" value="4" id="anzahl" onchange="anzahlVerschieben.value = value*value" placeholder="Puzzle Teile je x und y achse">
-<input type="file" onchange="imageLoaded(this);">
+<br>
+<input type="file" onchange="readImg(this);">
+<br>
+<input type="text" placeholder="URL" id="sourceURL">
+<button type="button" onclick="useURL();" name="button">use</button>
+<br>
+<input id="sourceIsPicture" checked="true" name="mediaType" type="radio">picture
+<input id="sourceIsVideo" name="mediaType" type="radio">video
 <br>
 <input type="range" width="window.innerWidth" oninput="zeigeGröße();" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
@@ -112,8 +119,16 @@
     zeigeGröße();
   }
   function zuAngepassterBildschirmgröße(noShowing) {
-    größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
-    größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
+    var referenceSize = originalSize;
+    if (noShowing) referenceSize = {width: größeAnpassenX.value, height: größeAnpassenX.value};
+    if (window.innerWidth < referenceSize.width && window.innerHeight < referenceSize.height) {
+      größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
+      größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
+    }
+    else {
+      größeAnpassenX.value = [referenceSize.width, referenceSize.height].sort()[0];
+      größeAnpassenY.value = [referenceSize.width, referenceSize.height].sort()[0];
+    }
     if (!noShowing) zeigeGröße();
   }
   function zuOptimalerBildschirmgröße() {
@@ -159,7 +174,6 @@
   }
   function create2() {
     if (modeSelection.value == "traditional" && rotateTiles.checked) zuAngepassterBildschirmgröße(true);
-    aufgebenId.style.display = "inline";
     removeTilesFinishedB.style.display = 'inline';
     showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit Aufzugeben";
     imageSettings.style.display = "none";
@@ -175,7 +189,8 @@
     textur.width = preview.width// + 111;
     textur.height = preview.height// + 111;
     var anzahl = document.getElementById('anzahl').value;
-    lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
+    if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
+    else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
     breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
     randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
     positions = {right: []};
@@ -208,6 +223,7 @@
     }
     else removeTile(true);
     // else layout();
+    canvas.clearRect(0, 0, textur.width, textur.height);
   }
 
   function shufflePuzzle() {
@@ -279,23 +295,87 @@
     layout();
   }
   }
+  aufgebenId.style.display = "inline";
   }
-  function imageLoaded(input) {
+  function readImg(input) {
     var reader = new FileReader();
     reader.onload = function (e) {
-      document.getElementById('preview').setAttribute("src", e.target.result)
+      if (sourceIsPicture.checked) document.getElementById('preview').setAttribute("src", e.target.result);
+      else {
+        video.setAttribute("src", e.target.result);
+        startVideo();
+        setTimeout(function () {
+          loadImage(video.videoWidth, video.videoHeight);
+        }, 1000);
+      }
     };
-    reader.readAsDataURL(input.files[0])
+    reader.readAsDataURL(input.files[0]);
+    if (input.files[0].type.includes('video')) sourceIsVideo.checked = true;
+    else sourceIsPicture.checked = true;
+    loadImage();
+  }
+  var video = document.createElement("video");
+  function useURL() {
+    if (sourceURL.value.includes('.mp4') || sourceURL.value.includes('.move')) sourceIsVideo.checked = true;
+    if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
+    if (sourceIsPicture.checked) {
+    preview.src = sourceURL.value;
+    loadImage();
+  }
+  else {
+    video.src = sourceURL.value;
     setTimeout(function () {
+    loadImage(video.videoWidth, video.videoHeight);
+  }, 100);
+    startVideo();
+  }
+  }
+
+function startVideo() {
+  video.play();  // start playing
+  updateVideo(); //Start rendering
+}
+
+function updateVideo(){
+  canvas.clearRect(0, 0, textur.width, textur.height);
+  for (var i = 0; aufgebenId.style.display == "inline" && i < positions.wrong?.length; i++) {
+    drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
+  }
+  if (aufgebenId.style.display != "inline") canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
+  for (var tile of selected.tiles) {
+    canvas.fillStyle = "rgba(255, 0, 0, 0.3)";
+    canvas.save();
+    if (state.removeTile/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
+    else canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
+    canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
+    canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.restore();
+  }
+  if (video.ended) {
+    video.currentTime = 0;
+    video.play();
+  }
+  requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
+}
+var originalSize = {};
+  function loadImage(width, height) {
+    if (!width) {
+      width = preview.width;
+      height = preview.height;
+    }
+    originalSize = {width: width, height: height};
+    // setTimeout(function () {
        canvas.drawImage(document.getElementById('preview'), 0, 0);
-       textur.width = preview.width// + 111;
-       textur.height = preview.height// + 111;
-       größeAnpassenX.max = preview.width;
-       größeAnpassenY.max = preview.width;
-       größeAnpassenX.value = preview.width;
-       größeAnpassenY.value = preview.height;
+       textur.width = width// + 111;
+       textur.height = height// + 111;
+       if (window.innerWidth > width) größeAnpassenX.max = window.innerWidth;
+       else größeAnpassenX.max = width;
+       if (window.innerHeight > height) größeAnpassenY.max = window.innerHeight;
+       else größeAnpassenY.max = height;
+       größeAnpassenX.value = width;
+       größeAnpassenY.value = height;
        zeigeGröße();
-    }, 500);
+    // }, 500);
   }
   var lengthPerTeil = {};
   var positions = {right: []};
@@ -313,7 +393,7 @@
   }
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
-    if (clear && aufgebenId.style.display == 'inline') canvas.clearRect(0, 0, 10000, 10000);
+    if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     richtige = 0;
     for (var i = 0; i < positions.wrong?.length; i++) {
       drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
@@ -362,7 +442,8 @@
     if (modeSelection.value == "traditional" && !removeTilesScreen) canvas.translate(position.edit.x, position.edit.y);
     else canvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
     canvas.rotate(position.original.degree*Math.PI/180);
-    canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    if (sourceIsPicture.checked) canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    else canvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // canvas.restore();
     if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
       canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
