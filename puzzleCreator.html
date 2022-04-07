@@ -34,7 +34,9 @@
   </select>
   <br>
   <div id="traditionalSettings">
-    <p style="margin-bottom: 6px;" id="rotateTilesP"> <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile</p>
+    <p style="margin-bottom: 6px;" onchange="if (checked) screenIsMax.style.display = 'inline'; else screenIsMax.style.display = 'none';" id="rotateTilesP"> <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile</p>
+    <input id="screenIsMax" checked="true" type="checkbox"> maximum size of picture: screen size
+    <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
   </div>
   <div id="exchangeSettings">
@@ -124,7 +126,10 @@
   }
   function zuAngepassterBildschirmgröße(noShowing) {
     var referenceSize = originalSize;
-    if (noShowing) referenceSize = {width: größeAnpassenX.value, height: größeAnpassenX.value};
+    if (noShowing) {
+      referenceSize = {width: window.innerWidth + 1, height: window.innerHeight + 1};
+      if (!screenIsMax.checked) referenceSize = {width: größeAnpassenX.value, height: größeAnpassenX.value};
+    }
     if (window.innerWidth < referenceSize.width && window.innerHeight < referenceSize.height) {
       größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
       größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
@@ -267,6 +272,12 @@
         if (selected.objTiles.includes(JSON.stringify(positions.wrong[i].edit))) {
           positions.wrong.splice(i, 1);
           positions.right.splice(i, 1);
+          if (modeSelection.value == "traditional") {
+            positions.layoutOrder.splice(i, 1);
+            for (var i1 = i; i1 < positions.layoutOrder.length; i1++) {
+              positions.layoutOrder[i1]--;
+            }
+          }
           i--;
         }
       }
@@ -414,7 +425,7 @@ var originalSize = {};
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
-      if (modeSelection.value == "traditional") i = positions.layoutOrder[i1];
+      if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
     for (var clip of selected.clip) {
@@ -662,7 +673,7 @@ var originalSize = {};
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
       for (var i1 = positions.layoutOrder.length - 1; i1 >= 0; i1--) {
-        var i = positions.layoutOrder[i1];
+        if (!state.removeTile) var i = positions.layoutOrder[i1];
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
@@ -686,6 +697,11 @@ var originalSize = {};
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       // select clipped
       for (var tile of selected.tiles) {
+        var objTile = positions.wrong[tile];
+        if (gerät == "PC") {
+        if (objTile.edit.x + lengthPerTeil.edit.x > textur.width) textur.width += lengthPerTeil.edit.x;
+        if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) textur.height += lengthPerTeil.edit.y;
+      }
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
           if (!state.shift && clipp.split(' - ').includes(tile + "") && newTile) {
@@ -696,13 +712,13 @@ var originalSize = {};
         }
         // unclipp
         if (state.shift) {
-          positions.wrong[tile].original = {x: positions.wrong[tile].original.x, y: positions.wrong[tile].original.y, degree: positions.wrong[tile].original.degree};
+          objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
           clipped.forEach((clipp, i) => {
             if (clipp.split(' - ').includes(tile + "")) clipped.splice(i, 1);
           });
         }
         // positions.wrong.forEach((position, i) => {
-        //   if (((positions.wrong[tile].original?.left?.x == position.original?.x && positions.wrong[tile].original?.left?.x != undefined && positions.wrong[tile].original?.left?.y == position.original?.y) || (positions.wrong[tile].original?.top?.x == position.original?.x && positions.wrong[tile].original?.top?.x != undefined && positions.wrong[tile].original?.top?.y == position.original?.y) || (positions.wrong[tile].original?.wrong?.x == position.original?.x && positions.wrong[tile].original?.wrong?.x != undefined && positions.wrong[tile].original?.wrong?.y == position.original?.y) || (positions.wrong[tile].original?.bottom?.x == position.original?.x && positions.wrong[tile].original?.bottom?.x != undefined && positions.wrong[tile].original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
+        //   if (((objTile.original?.left?.x == position.original?.x && objTile.original?.left?.x != undefined && objTile.original?.left?.y == position.original?.y) || (objTile.original?.top?.x == position.original?.x && objTile.original?.top?.x != undefined && objTile.original?.top?.y == position.original?.y) || (objTile.original?.wrong?.x == position.original?.x && objTile.original?.wrong?.x != undefined && objTile.original?.wrong?.y == position.original?.y) || (objTile.original?.bottom?.x == position.original?.x && objTile.original?.bottom?.x != undefined && objTile.original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
         //     selected.tiles.push(i);
         //   }
         // });
@@ -839,12 +855,15 @@ var originalSize = {};
     if (event.key == "ArrowRight") rotateSelected(90);
     if (event.key == "ArrowLeft") rotateSelected(-90);
     if (event.key.includes("Arrow")) layout(true);
+    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && tiles.selected.length && rotateTiles.checked) return false;
   }
   function rotateSelected(direction) {
-    for (var tile of selected.tiles) {
-      positions.wrong[tile].original.degree += direction;
-      if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
-      else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+    if (!state.removeTile) {
+      for (var tile of selected.tiles) {
+        positions.wrong[tile].original.degree += direction;
+        if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
+        else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+      }
     }
   }
   document.onkeyup = function(event) {
@@ -917,17 +936,36 @@ var originalSize = {};
     console.log("pleaseDebug :)");
   }
   }
-  function scrollDownFunction() {
-  if (mausy - scrollY > window.innerHeight - 10 && (modeSelection.value != "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))  {
-  window.scroll(scrollX, scrollY + 3);
-  mausy += 3;
-}
-}
+  function scrollDownFunction(tile) {
+    selected.tiles.forEach((tile, i) => {
+      if ((((modeSelection.value == "traditional" && positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY) || (modeSelection.value != "traditional" && !i && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional"))) {
+        window.scroll(scrollX, scrollY + 3);
+        mausy += 3;
+      }
+    });
+  }
 scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
   if ((mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
+}
+}, 10);
+  function scrollRightFunction() {
+    selected.tiles.forEach((tile, i) => {
+      if ((((modeSelection.value == "traditional" && positions.wrong[tile].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && !i && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional"))) {
+        window.scroll(scrollX + 3, scrollY);
+        mausx += 3;
+      }
+    });
+  }
+scrollleftInt = setInterval(scrollRightFunction, 10);
+scrollLeftInt = setInterval(function () {
+  if ((mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    window.scroll(scrollX - 3, scrollY);
+    mausx -= 3;
 }
 }, 10);
 </script>
