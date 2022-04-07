@@ -84,7 +84,7 @@
 <br>
 <button type="button" id="removeTilesFinishedB" style="display: none;" onclick="shufflePuzzle();" name="button">finished</button>
 <br>
-<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked('elm');" height="700"></canvas>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
@@ -527,7 +527,7 @@ var originalSize = {};
   }
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
-  function canvasClicked() {
+  function canvasClicked(calledBy) {
     if (aufgebenId.style.display == "inline") settings.style.display = "none"
     if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
@@ -569,7 +569,7 @@ var originalSize = {};
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()))) {
+    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected())))) {
       removeTile();
       lastCoord = checkSelected();
     }
@@ -688,14 +688,15 @@ var originalSize = {};
     // if (scrollY > 32) mausy += 32;
     folgenMouseMove();
   }
-  var state = {mouse: "up", shift: false, newTileSelected: false, rotate: {}};
+  var state = {mouse: "up", shift: false, newTileSelected: false, rotate: {}, coord: {x: 0, y: 0}};
   function mouseDown(elmCalled) {
     state.mouse = "down";
+    state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
-      for (var i1 = positions.layoutOrder.length - 1; i1 >= 0; i1--) {
-        if (!state.removeTile) var i = positions.layoutOrder[i1];
+      for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
+        var i = positions.layoutOrder[i1];
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
@@ -711,11 +712,11 @@ var originalSize = {};
           state.newTileSelected = true;
         }
       }
-      folgenMouseMove();
+      folgenMouseMove("mouseDown");
     }
   }
-  function folgenMouseMove() {
-    if (state.mouse == "down" && state.removeTile) canvasClicked();
+  function folgenMouseMove(calledBy) {
+    if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       // select clipped
       for (var tile of selected.tiles) {
