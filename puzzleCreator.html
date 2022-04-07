@@ -85,7 +85,11 @@
 <button type="button" id="removeTilesFinishedB" style="display: none;" onclick="shufflePuzzle();" name="button">finished</button>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked();" height="700"></canvas>
-<p><img id="preview"></p>
+<p>
+  <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
+  <br>
+  <img style="display: none;" id="preview">
+</p>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
@@ -104,7 +108,7 @@
     rightRotationB.style.display = 'none';
     leftRotationB.style.display = 'none';
   }
-  reloadWhenFinished.checked = localStorage.getItem("reloadWhenFinished");
+  reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
   anzahlVerschieben.value = anzahl.value*anzahl.value;
   settings.style.display = "none";
   aufgebenId.style.display = "none";
@@ -116,7 +120,7 @@
   var canvas = textur.getContext('2d');
   function aufgeben(mode) {
     // if (mode == "schieben") {
-      alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + höchstRichtige + " von " + (anzahl.value*anzahl.value - 1) + " Teilen");
+      alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
       // }
   }
   function zuBildschirmgröße() {
@@ -175,6 +179,15 @@
     if (state.rotate[direc]) document.getElementById(direc + 'RotationB').style.backgroundColor = 'rgb(100, 204, 210)';
   }
   var originalSize = {width: 0, height: 0};
+  function originalDisplayChanged(checked) {
+    startPause();
+    if (checked) stats.lookedAtOriginal.times++;
+    if (checked) {
+      preview.style.display = "inline";
+      preview.scrollIntoView();
+    }
+    else preview.style.display = "none";
+  }
   function create() {
     //finished = false;
     // if (swipeSteuerung.checked) textur.style.touchAction = 'none';
@@ -446,8 +459,8 @@ var originalSize = {};
       canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
       canvas.restore();
     }
-    if (höchstRichtige < richtige && !withoutAlert) {
-      höchstRichtige = JSON.parse(JSON.stringify(richtige));
+    if (stats.highestRight.right < richtige && !withoutAlert) {
+      stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (richtige == positions.wrong?.length && !removeTilesScreen) {
       richtige = 0;
@@ -456,7 +469,8 @@ var originalSize = {};
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (modeSelection.value == "schieben") alert("Sie haben es in " + playerMoved + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob du darauf jetzt stolz sein kannst, musst du selber entscheiden ;)");
+        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Zudem haben Sie ${stats.lookedAtOriginal.times} mal für insgesamt ${stats.lookedAtOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -513,7 +527,7 @@ var originalSize = {};
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
             if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.position.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.position.y) {
               console.log("vertausche " + checkSelected().x + "-" + checkSelected().y + " mit " + selected.position.x + "-" + selected.position.y);
-              playerMoved++;
+              stats.turns++;
               vertauscheZwei(i, i1);
               i = positions.wrong.length;
               i1 = positions.wrong.length;
@@ -552,14 +566,15 @@ var originalSize = {};
       lastCoord = checkSelected();
     }
     else {
-      layout(true, true);
+      if (aufgebenId.style.display == "none") layout(true, true);
+      else layout(false, true);
     }
   }
   function moveTile(i, i1) {
     console.log("schiebe...");
     possibleMissing = [];
     pMissing = missing[i1];
-    playerMoved++;
+    stats.turns++;
     var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
     positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
     missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
@@ -657,8 +672,7 @@ var originalSize = {};
   var movement = {missing: [], positions: []};
   var mausx;
   var mausy;
-  var playerMoved = 0;
-  var höchstRichtige = 0;
+  var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, lookedAtOriginal: {times: 0}};
   document.onmousemove = readMouseMove
   function readMouseMove(e) {
     mausx = e.clientX + scrollX;
@@ -713,9 +727,14 @@ var originalSize = {};
         // unclipp
         if (state.shift) {
           objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
+          var unclipped = false;
           clipped.forEach((clipp, i) => {
-            if (clipp.split(' - ').includes(tile + "")) clipped.splice(i, 1);
+            if (clipp.split(' - ').includes(tile + "")) {
+              clipped.splice(i, 1);
+              unclipped = true;
+            }
           });
+          if (unclipped) stats.unclipped++;
         }
         // positions.wrong.forEach((position, i) => {
         //   if (((objTile.original?.left?.x == position.original?.x && objTile.original?.left?.x != undefined && objTile.original?.left?.y == position.original?.y) || (objTile.original?.top?.x == position.original?.x && objTile.original?.top?.x != undefined && objTile.original?.top?.y == position.original?.y) || (objTile.original?.wrong?.x == position.original?.x && objTile.original?.wrong?.x != undefined && objTile.original?.wrong?.y == position.original?.y) || (objTile.original?.bottom?.x == position.original?.x && objTile.original?.bottom?.x != undefined && objTile.original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
@@ -798,7 +817,11 @@ var originalSize = {};
     state.mouse = "up";
     if (modeSelection.value == "traditional") {
       state.newTileSelected = false;
-      if (selected.clip.length > 0) new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
+      if (selected.clip.length > 0) {
+        new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
+        console.log("clipping...");
+        stats.turns++;
+      }
       for (var clip of selected.clip) {
         var directionOpposite = {left: 'right', top: 'bottom', right: 'left', bottom: 'top'};
         positions.wrong[clip.i].original[clip.direction] = {x: positions.right[clip.sI].original.x, y: positions.right[clip.sI].original.y};
@@ -855,10 +878,11 @@ var originalSize = {};
     if (event.key == "ArrowRight") rotateSelected(90);
     if (event.key == "ArrowLeft") rotateSelected(-90);
     if (event.key.includes("Arrow")) layout(true);
-    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && tiles.selected.length && rotateTiles.checked) return false;
+    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && selected.tiles.length && rotateTiles.checked) return false;
   }
   function rotateSelected(direction) {
     if (!state.removeTile) {
+      stats.rotated++;
       for (var tile of selected.tiles) {
         positions.wrong[tile].original.degree += direction;
         if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
@@ -968,4 +992,42 @@ scrollLeftInt = setInterval(function () {
     mausx -= 3;
 }
 }, 10);
+
+// stop clock:
+var time = 0;
+var running = 0;
+
+function startPause() {
+if (running == 0) {
+  running = 1;
+  // time = 0;
+  increment();
+}
+else {
+  running = 0;
+}
+}
+function reset() {
+running = 0;
+timer = 0;
+}
+function increment() {
+if (running == 1) {
+setTimeout(function () {
+  time++;
+  var mins = Math.floor(time/10/60);
+  var secs = Math.floor(time/10);
+      secs += 60*mins;
+  var tenths = time % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  stats.lookedAtOriginal.time = mins + ":" + secs + ":" + "0" + tenths;
+  increment();
+}, 100);
+}
+}
 </script>
