@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" id="preventAutomaticZoom">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <p id="imageSettings">
 <input type="text" value="4" id="anzahl" onchange="anzahlVerschieben.value = value*value" placeholder="Puzzle Teile je x und y achse">
@@ -22,8 +23,24 @@
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
 <button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
-<button type="button" onclick="rotateState('right')" id="rightRotationB" style="position: fixed; left:483px;" name="button">drehe rechts</button>
-<button type="button" onclick="rotateState('left');" id="leftRotationB" style="position: fixed;" name="button">drehe links</button>
+<!-- <button type="button" onclick="buttonStateChanged('rightRotation')" id="rightRotationB" style="position: fixed; left:483px;" name="button">drehe rechts</button>
+<button type="button" onclick="buttonStateChanged('leftRotation');" id="leftRotationB" style="position: fixed;" name="button">drehe links</button>
+<button type="button" onclick="buttonStateChanged('scrollable');" id="scrollableB" style="position: fixed; left: 700px" name="button">scrollable</button> -->
+<p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 55px; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
+  <p id="rotateControls" style="display: none;">
+    <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button">drehe links
+    <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button">drehe rechts
+  </p>
+    <input class="mobileControlsCheckbox" type="checkbox" id="scrollable" name="button">scroll
+</p2>
+<style>
+  .mobileControlsCheckbox {
+    width: 44;
+    height: 44;
+    top: 7px;
+    position: relative;
+  }
+</style>
 <div id="settings">
   <br>
   <br>
@@ -34,10 +51,14 @@
   </select>
   <br>
   <div id="traditionalSettings">
-    <p style="margin-bottom: 6px;" onchange="if (checked) screenIsMax.style.display = 'inline'; else screenIsMax.style.display = 'none';" id="rotateTilesP"> <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile</p>
-    <input id="screenIsMax" checked="true" type="checkbox"> maximum size of picture: screen size
+    <p style="margin-bottom: 6px;" id="rotateTilesP">
+    <input id="rotateTiles" checked="true" onchange="if (checked) screenIsMaxP.style.display = 'inline'; else screenIsMaxP.style.display = 'none';" type="checkbox"> drehe Teile
+  </p>
+    <p id="screenIsMaxP"><input id="screenIsMax" checked="true" type="checkbox"> maximum size of picture: screen size</p>
     <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
+    <br>
+    <p id="scrollOnBlancP" style="display: none;"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings">
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
@@ -82,9 +103,10 @@
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
 </div>
 <br>
-<button type="button" id="removeTilesFinishedB" style="display: none;" onclick="shufflePuzzle();" name="button">finished</button>
+<button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">finished</button>
 <br>
-<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1840" onclick="canvasClicked('elm');" height="700"></canvas>
+<br>
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
@@ -105,9 +127,9 @@
     var gerät = "PC"
     console.log("PC");
     swipeSteuerungP.style.display = "none";
-    rightRotationB.style.display = 'none';
-    leftRotationB.style.display = 'none';
+    scrollOnBlancP.style.display = "none";
   }
+  mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
   anzahlVerschieben.value = anzahl.value*anzahl.value;
   settings.style.display = "none";
@@ -135,17 +157,18 @@
     var referenceSize = originalSize;
     if (noShowing) {
       referenceSize = {width: window.innerWidth + 1, height: window.innerHeight + 1};
-      if (!screenIsMax.checked) referenceSize = {width: größeAnpassenX.value, height: größeAnpassenX.value};
+      if (!screenIsMax.checked) referenceSize = {width: JSON.parse(JSON.stringify(größeAnpassenX.value)), height: größeAnpassenY.value};
     }
     if (window.innerWidth < referenceSize.width && window.innerHeight < referenceSize.height) {
-      größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort()[0];
-      größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort()[0];
+      größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort((a, b) => a - b)[0];
+      größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort((a, b) => a - b)[0];
     }
     else {
-      größeAnpassenX.value = [referenceSize.width, referenceSize.height].sort()[0];
-      größeAnpassenY.value = [referenceSize.width, referenceSize.height].sort()[0];
+      größeAnpassenX.value = [referenceSize.width, referenceSize.height].sort((a, b) => a - b)[0];
+      größeAnpassenY.value = [referenceSize.width, referenceSize.height].sort((a, b) => a - b)[0];
     }
     if (!noShowing) zeigeGröße();
+    else if (screenIsMax.checked) preventAutomaticZoom.content = `width=${größeAnpassenX.value}, height=${größeAnpassenY.value}, initial-scale=1.0, maximum-scale=1.0, user-scalable=0`;
   }
   function zuOptimalerBildschirmgröße() {
     größeAnpassenX.value = preview.width;
@@ -174,13 +197,6 @@
     schiebenSettings.style.display = 'none';
     document.getElementById(value + 'Settings').style.display = 'inline';
   }
-  function rotateState(direc) {
-    if (!state.rotate[direc]) state.rotate = {right: false, left: false};
-    state.rotate[direc] = !state.rotate[direc];
-    rightRotationB.style.backgroundColor = '';
-    leftRotationB.style.backgroundColor = '';
-    if (state.rotate[direc]) document.getElementById(direc + 'RotationB').style.backgroundColor = 'rgb(100, 204, 210)';
-  }
   var originalSize = {width: 0, height: 0};
   function originalDisplayChanged(checked) {
     startPause();
@@ -205,9 +221,10 @@
     else */create2();
   }
   function create2() {
-    positions = {right: []};
-    if (modeSelection.value == "traditional" && rotateTiles.checked) {
-      zuAngepassterBildschirmgröße(true);
+    if (screenIsMax.checked && rotateTiles.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+    positions = {right: [], wrong: []};
+    if (modeSelection.value == "traditional") {
+      if (rotateTiles.checked) zuAngepassterBildschirmgröße(true);
       positions.layoutOrder = new Array(document.getElementById('anzahl').value*document.getElementById('anzahl').value);
       for (var i = 0; i < positions.layoutOrder.length; i++) {
         positions.layoutOrder[i] = i;
@@ -221,6 +238,7 @@
     rotateTilesP.style.display = "none";
     missing = [];
     settings.style.display = 'none';
+    mobileControls.style.display = "inline";
     originalSize.width = preview.width;
     originalSize.height = preview.height;
     preview.width = größeAnpassenX.value;
@@ -262,6 +280,10 @@
     else removeTile(true);
     // else layout();
     if (sourceIsVideo.checked) canvas.clearRect(0, 0, textur.width, textur.height);
+    showSettings.scrollIntoView();
+    textur.style.touchAction = "none";
+    window.scroll(0, 0);
+    texturTop = textur.getBoundingClientRect().top;
   }
 
   function shufflePuzzle() {
@@ -342,7 +364,15 @@
   }
   aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
+  textur.style.touchAction = "none";
+  if (gerät == "Handy") mobileControls.style.display = 'inline';
   selected.boolean = false;
+  if (gerät == "Handy") rotateControls.style.display = "inline";
+  preventAutomaticZoom.content = "";
+  scrollDownInt = setInterval(scrollDownFunction, 10);
+  scrollRightInt = setInterval(scrollRightFunction, 10);
+  window.scroll(0, 0);
+  var texturTop = textur.getBoundingClientRect().top;
   }
   function readImg(input) {
     var reader = new FileReader();
@@ -570,7 +600,7 @@ var originalSize = {};
       selected.boolean = true;
     }
     if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected())))) {
-      removeTile();
+      removeTile(null, calledBy);
       lastCoord = checkSelected();
     }
     else {
@@ -590,8 +620,12 @@ var originalSize = {};
   }
   var doNotChange = [];
   var possibleMissing = [];
-  function removeTile(first) {
-    if (!first) {
+  function removeTile(first, calledBy) {
+    if (!first && (!state.tileRemoved || calledBy == "touchmove" || calledBy == "mousemove")) {
+      state.tileRemoved = true;
+      setTimeout(function () {
+        state.tileRemoved = false;
+      }, 133);
     positions.wrong.forEach((position, i) => {
       if (position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
         if (!selected.tiles.includes(i)) {
@@ -609,7 +643,7 @@ var originalSize = {};
       }
     });
   }
-  else if (modeSelection.value != "schieben") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
+  if (first && modeSelection.value != "schieben") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
@@ -684,12 +718,15 @@ var originalSize = {};
   document.onmousemove = readMouseMove
   function readMouseMove(e) {
     mausx = e.clientX + scrollX;
-    mausy = e.clientY + scrollY - /*96*/32// - 43;
+    mausy = e.clientY + scrollY - texturTop;
+    // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
-    folgenMouseMove();
+    folgenMouseMove("mousemove");
   }
-  var state = {mouse: "up", shift: false, newTileSelected: false, rotate: {}, coord: {x: 0, y: 0}};
-  function mouseDown(elmCalled) {
+  window.scroll(0, 0);
+  var texturTop = textur.getBoundingClientRect().top;
+  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}};
+  function mouseDown(elmCalled, touchStart) {
     state.mouse = "down";
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
@@ -704,9 +741,9 @@ var originalSize = {};
           selected.tiles.push(i);
           positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
           positions.layoutOrder.push(i);
-          if (!elmCalled) {
-            if (state.rotate.right) rotateSelected(90);
-            if (state.rotate.left) rotateSelected(-90);
+          if (!elmCalled && !touchStart) {
+            if (rotatesRight.checked) rotateSelected(90);
+            if (rotatesLeft.checked) rotateSelected(-90);
           }
           layout(true);
           state.newTileSelected = true;
@@ -907,11 +944,14 @@ var originalSize = {};
     }
   }
   function touch(ev) {
+    if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
     if (ev.touches[2]) {
       textur.style.touchAction = '';
     }
-    else if (ev.type == "touchmove") textur.style.touchAction = 'none';
-    if (ev.touches[1]) {
+    else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
+      textur.style.touchAction = 'none';
+    }
+    if (ev.touches[1] && aufgebenId.style.display == "inline") {
       state.shift = true;
       selected.tiles = [];
     }
@@ -920,20 +960,23 @@ var originalSize = {};
       // textur.style.touchAction = '';
       canvasClicked();
     }
-    else if (state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben") && ev.touches[0]) {
+    else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
       mausx = ev.touches[0]["pageX"]// + scrollX;
-      mausy = ev.touches[0]["pageY"] - 32// + scrollY;
+      mausy = ev.touches[0]["pageY"] - texturTop;// - 32// + scrollY;
     }
+    if (!scrollable.checked) {
+      // if (aufgebenId.style.display == "inline") textur.style.touchAction = 'none';
     if (ev.type == "touchstart") {
-      mouseDown();
+      mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
     }
     if (ev.type == "touchend") {
       mouseUp();
       layout(true, true);
     }
     if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
-      folgenMouseMove();
+      folgenMouseMove("touchmove");
     }
+  }
     if (!ev.touches[0]) {
       console.log(":((()))");
     }
@@ -952,6 +995,12 @@ var originalSize = {};
       }
 
       }
+      if (scrollable.checked) textur.style.touchAction = '';
+    }
+    else {
+      console.log("clicked control element");
+    }
+    if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
   }
   function vertauscheZwei(i, i1) {
     var ablage = JSON.parse(JSON.stringify(positions.wrong[i].edit));
@@ -971,33 +1020,31 @@ var originalSize = {};
   }
   }
   function scrollDownFunction(tile) {
-    selected.tiles.forEach((tile, i) => {
-      if ((((modeSelection.value == "traditional" && positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY) || (modeSelection.value != "traditional" && !i && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
-      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional"))) {
+    // selected.tiles.forEach((tile, i) => {
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY + texturTop) || (modeSelection.value != "traditional" && !i && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX, scrollY + 3);
         mausy += 3;
       }
-    });
+    // });
   }
-scrollDownInt = setInterval(scrollDownFunction, 10);
 scrollUpInt = setInterval(function () {
-  if ((mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX, scrollY - 3);
     mausy -= 3;
 }
 }, 10);
   function scrollRightFunction() {
-    selected.tiles.forEach((tile, i) => {
-      if ((((modeSelection.value == "traditional" && positions.wrong[tile].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && !i && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
-      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional"))) {
+    // selected.tiles.forEach((tile, i) => {
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && !i && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX + 3, scrollY);
         mausx += 3;
       }
-    });
+    // });
   }
-scrollleftInt = setInterval(scrollRightFunction, 10);
 scrollLeftInt = setInterval(function () {
-  if ((mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     window.scroll(scrollX - 3, scrollY);
     mausx -= 3;
 }
