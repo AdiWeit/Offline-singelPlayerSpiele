@@ -52,7 +52,13 @@
   <div id="traditionalSettings">
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
-  </p>
+    </p>
+    <select id="shuffleStyle">
+      <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
+      <option value="listTiles">Teile nebeneinander auflisten</option>
+      <option value="noOverlappingTiles">Teile mit Abstand nebeneinander legen</option>
+    </select>
+    <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
     <br>
     <p id="scrollOnBlancP" style="display: none;"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
@@ -104,6 +110,31 @@
 <br>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+<br>
+<canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.7'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.7'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
+<style>
+  #tileSelectionCanvas {
+    position: -webkit-sticky;
+    position: sticky;
+    bottom: 0px;
+    overflow: hidden;
+  }
+  #scrollTileSelectionRight {
+    position: fixed;
+    right: 0px;
+    opacity: 0.7;
+    display: none;
+  }
+  #scrollTileSelectionLeft {
+    position: fixed;
+    left: 0px;
+    opacity: 0.7;
+    transform: rotate(180deg);
+    display: none;
+  }
+</style>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
@@ -120,6 +151,7 @@
   ) {
     var gerät = "Handy"
     console.log("Handy");
+    tileSelectionCanvas.style.position = "fixed";
   } else {
     var gerät = "PC"
     console.log("PC");
@@ -205,6 +237,20 @@
     }
     else preview.style.display = "none";
   }
+  function scrollTileSelection(direc) {
+    tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
+    if (tileSelectionBar.scrollX >= 0) {
+      scrollTileSelectionLeft.style.display = 'none';
+      tileSelectionBar.scrollX = 0;
+    }
+    else scrollTileSelectionLeft.style.display = 'inline';
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length) + window.innerWidth) {
+      scrollTileSelectionRight.style.display = 'none';
+      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length) + window.innerWidth;
+    }
+    else scrollTileSelectionRight.style.display = 'inline';
+    layout();
+  }
   function create() {
     //finished = false;
     // if (swipeSteuerung.checked) textur.style.touchAction = 'none';
@@ -218,7 +264,17 @@
     }
     else */create2();
   }
+  var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0};
+  tileSelectionBar.collides = (pObj) => {
+    var obj = tileSelectionCanvas.getBoundingClientRect();
+    if (lengthPerTeil.edit) {
+      if (gerät == "Handy") obj.y -= lengthPerTeil.edit.y/2;
+      else obj.y -= lengthPerTeil.edit.y/3;
+    }
+    return collides(pObj, obj).boolean;
+  }
   function create2() {
+    if (modeSelection.value != "traditional") shuffleStyle.value = "none";
     if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
     positions = {right: [], wrong: []};
     if (modeSelection.value == "traditional") {
@@ -327,11 +383,15 @@
     if (modeSelection.value == "traditional") {
       textur.width += 500;
       textur.height += 500;
-    for (var position of positions.wrong) {
-      position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
-      position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
-      if (!rotateTiles.checked) position.original.degree = 0;
-    }
+      positions.wrong.forEach((position, i) => {
+        if (shuffleStyle.value != "listTiles") position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+        else {
+          position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2};
+          tileSelectionBar.tiles.push(i);
+        }
+        position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
+        if (!rotateTiles.checked) position.original.degree = 0;
+    });
   }
   // var possible = new Array(positions.wrong.length).fill(0)
   // for (var i = 0; i < possible.length; i++) {
@@ -345,7 +405,7 @@
   //   positions.wrong[i].edit = positions.wrong[j].edit;
   //   positions.wrong[j].edit = x;
   // }
-    for (i = positions.wrong.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
+    for (i = positions.wrong.length - 1; (modeSelection.value == "exchange" || shuffleStyle.value == "listTiles") && i > 0; i--) {
       do {
         j = Math.floor(Math.random() * (i + 1));
       } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
@@ -363,6 +423,16 @@
   aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
   textur.style.touchAction = "none";
+  tileSelectionCanvas.height = lengthPerTeil.edit.y + 10;
+  if (gerät == "Handy") tileSelectionCanvas.style.bottom = lengthPerTeil.edit.y/2;
+  if (shuffleStyle.value != "listTiles") tileSelectionCanvas.style.display = "none";
+  scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/4 + "px";
+  scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/4 + "px";
+  if (gerät == "Handy") {
+    scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
+    scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
+  }
+  if (shuffleStyle.value == "listTiles") scrollTileSelection(0);
   if (gerät == "Handy") {
     mobileControls.style.display = 'inline';
     rotateControls.style.display = "inline";
@@ -416,7 +486,9 @@ function startVideo() {
 function updateVideo(){
   canvas.clearRect(0, 0, textur.width, textur.height);
   for (var i = 0; aufgebenId.style.display == "inline" && i < positions.wrong?.length; i++) {
-    drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
+    // TODO: shuffle styles
+    if (shuffleStyle.value == "listTiles") drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
+    else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
   }
   if (aufgebenId.style.display != "inline") canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
   for (var tile of selected.tiles) {
@@ -478,7 +550,13 @@ var originalSize = {};
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
-      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
+      if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
+    }
+    tileSelectionCanvas.width = tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
+    for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
+      var i = i1;
+      if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
+      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas);
     }
     for (var clip of selected.clip) {
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
@@ -522,40 +600,42 @@ var originalSize = {};
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i) {
-    canvas.save();
-    if (modeSelection.value == "traditional" && !removeTilesScreen) canvas.translate(position.edit.x, position.edit.y);
-    else canvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
-    canvas.rotate(position.original.degree*Math.PI/180);
-    if (sourceIsPicture.checked) canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
-    else canvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
-    // canvas.restore();
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas) {
+    if (!pCanvas) pCanvas = canvas;
+    pCanvas.save();
+    if (modeSelection.value == "traditional" && !removeTilesScreen) pCanvas.translate(position.edit.x, position.edit.y);
+    else pCanvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
+    pCanvas.translate(tileSelectionBar.scrollX, 0);
+    pCanvas.rotate(position.original.degree*Math.PI/180);
+    if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    // pCanvas.restore();
     if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
-      canvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
+      pCanvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
       if (richtigPlazierte.checked) {
-        // canvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
-        // canvas.save();
-        // canvas.translate(position.edit.x, position.edit.y);
-        // canvas.rotate(position.original.degree*Math.PI/180);
-        canvas.fillRect(-(lengthPerTeil.edit.x*rightMarkerRadius.value)/2, -(lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
+        // pCanvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
+        // pCanvas.save();
+        // pCanvas.translate(position.edit.x, position.edit.y);
+        // pCanvas.rotate(position.original.degree*Math.PI/180);
+        pCanvas.fillRect(-(lengthPerTeil.edit.x*rightMarkerRadius.value)/2, -(lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
       }
       richtige++;
     }
-    canvas.restore();
-    canvas.fillStyle = "rgba(0, 0, 255, 0.35)";
+    pCanvas.restore();
+    pCanvas.fillStyle = "rgba(0, 0, 255, 0.35)";
     if (raender.checked) {
-      canvas.save();
-      canvas.translate(position.edit.x, position.edit.y);
-      canvas.rotate((position.original.degree)*Math.PI/180);
-      // if (position.borderincludes("right")) canvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
-      // if (position.borderincludes("left")) canvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
-      // if (position.borderincludes("up")) canvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
-      // if (position.borderincludes("down")) canvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
-      if (position.border.includes("right")) canvas.fillRect((lengthPerTeil.edit.x)/2 - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
-      if (position.border.includes("left")) canvas.fillRect(-((lengthPerTeil.edit.x)/2) + JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
-      if (position.border.includes("up")) canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
-      if (position.border.includes("down")) canvas.fillRect(-((lengthPerTeil.edit.x)/2), ((lengthPerTeil.edit.y)/2) - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
-      canvas.restore();
+      pCanvas.save();
+      pCanvas.translate(position.edit.x, position.edit.y);
+      pCanvas.rotate((position.original.degree)*Math.PI/180);
+      // if (position.borderincludes("right")) pCanvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
+      // if (position.borderincludes("left")) pCanvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
+      // if (position.borderincludes("up")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      // if (position.borderincludes("down")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      if (position.border.includes("right")) pCanvas.fillRect((lengthPerTeil.edit.x)/2 - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
+      if (position.border.includes("left")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2) + JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
+      if (position.border.includes("up")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      if (position.border.includes("down")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), ((lengthPerTeil.edit.y)/2) - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      pCanvas.restore();
     }
   }
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
@@ -730,6 +810,7 @@ var originalSize = {};
   var texturTop = textur.getBoundingClientRect().top;
   var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}};
   function mouseDown(elmCalled, touchStart) {
+    tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
@@ -757,6 +838,11 @@ var originalSize = {};
   }
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
+    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collides({x: mausx, y: mausy, width: 1, height: 1})) {
+      tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
+      tileSelectionBar.swipePosition = mausx;
+      scrollTileSelection(0);
+    }
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       // select clipped
       for (var tile of selected.tiles) {
@@ -925,10 +1011,17 @@ var originalSize = {};
     if (event.shiftKey) {
       state.shift = true;
     }
-    if (event.key == "ArrowRight") rotateSelected(90);
-    if (event.key == "ArrowLeft") rotateSelected(-90);
-    if (event.key.includes("Arrow")) layout(true);
-    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && selected.tiles.length && rotateTiles.checked) return false;
+    var collidesTilesBar = tileSelectionBar.collides({x: mausx, y: mausy, width: 1, height: 1});
+    if (event.key == "ArrowRight") {
+      if (collidesTilesBar) scrollTileSelection(1);
+      else rotateSelected(90);
+    }
+    if (event.key == "ArrowLeft") {
+      if (collidesTilesBar) scrollTileSelection(-1);
+      else rotateSelected(-90);
+    }
+    if (event.key?.includes("Arrow")) layout(true);
+    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && ((selected.tiles.length && rotateTiles.checked) || collidesTilesBar)) return false;
   }
   function rotateSelected(direction) {
     if (!state.removeTile) {
@@ -1024,7 +1117,7 @@ var originalSize = {};
   }
   function scrollDownFunction(tile) {
     // selected.tiles.forEach((tile, i) => {
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY + texturTop) || (modeSelection.value != "traditional" && !i && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY + texturTop) || (modeSelection.value != "traditional" && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX, scrollY + 3);
         mausy += 3;
@@ -1039,7 +1132,7 @@ scrollUpInt = setInterval(function () {
 }, 10);
   function scrollRightFunction() {
     // selected.tiles.forEach((tile, i) => {
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && !i && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX + 3, scrollY);
         mausx += 3;
