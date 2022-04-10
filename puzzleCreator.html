@@ -236,7 +236,7 @@
     rotateTilesP.style.display = "none";
     missing = [];
     settings.style.display = 'none';
-    mobileControls.style.display = "inline";
+    if (gerät == "Handy") mobileControls.style.display = "inline";
     originalSize.width = preview.width;
     originalSize.height = preview.height;
     preview.width = größeAnpassenX.value;
@@ -363,9 +363,11 @@
   aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
   textur.style.touchAction = "none";
-  if (gerät == "Handy") mobileControls.style.display = 'inline';
+  if (gerät == "Handy") {
+    mobileControls.style.display = 'inline';
+    rotateControls.style.display = "inline";
+  }
   selected.boolean = false;
-  if (gerät == "Handy") rotateControls.style.display = "inline";
   preventAutomaticZoom.content = "";
   scrollDownInt = setInterval(scrollDownFunction, 10);
   scrollRightInt = setInterval(scrollRightFunction, 10);
