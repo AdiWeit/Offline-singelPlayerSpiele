@@ -120,6 +120,7 @@
     position: sticky;
     bottom: 0px;
     overflow: hidden;
+    background-color: hsla(0, 0%, 64%, 0.77);
   }
   #scrollTileSelectionRight {
     position: fixed;
@@ -824,7 +825,7 @@ var originalSize = {};
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
-        if (!tileSelectionBar.tiles.includes(i) && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
+        if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
           positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
           positions.layoutOrder.push(i);
@@ -1141,7 +1142,9 @@ var originalSize = {};
   }
   function scrollDownFunction(tile) {
     // selected.tiles.forEach((tile, i) => {
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + scrollY + texturTop) || (modeSelection.value != "traditional" && mausy - scrollY > window.innerHeight - 10))) && (modeSelection.value !=
+    var pScrollY = scrollY;
+    if (shuffleStyle.value == "listTiles") pScrollY -= lengthPerTeil.edit.y - 10;
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + pScrollY + texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.innerHeight - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX, scrollY + 3);
         mausy += 3;
