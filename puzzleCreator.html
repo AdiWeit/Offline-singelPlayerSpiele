@@ -112,8 +112,8 @@
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <br>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.7'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.7'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
 <style>
   #tileSelectionCanvas {
     position: -webkit-sticky;
@@ -124,13 +124,13 @@
   #scrollTileSelectionRight {
     position: fixed;
     right: 0px;
-    opacity: 0.7;
+    opacity: 0.3;
     display: none;
   }
   #scrollTileSelectionLeft {
     position: fixed;
     left: 0px;
-    opacity: 0.7;
+    opacity: 0.3;
     transform: rotate(180deg);
     display: none;
   }
@@ -244,9 +244,9 @@
       tileSelectionBar.scrollX = 0;
     }
     else scrollTileSelectionLeft.style.display = 'inline';
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length) + window.innerWidth) {
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*/*tileSelectionBar.tiles.length*/positions.wrong.length) + window.innerWidth) {
       scrollTileSelectionRight.style.display = 'none';
-      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length) + window.innerWidth;
+      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*/*tileSelectionBar.tiles.length*/positions.wrong.length) + window.innerWidth;
     }
     else scrollTileSelectionRight.style.display = 'inline';
     layout();
@@ -265,13 +265,13 @@
     else */create2();
   }
   var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0};
-  tileSelectionBar.collides = (pObj) => {
+  tileSelectionBar.collidesMouse = () => {
     var obj = tileSelectionCanvas.getBoundingClientRect();
     if (lengthPerTeil.edit) {
       if (gerät == "Handy") obj.y -= lengthPerTeil.edit.y/2;
       else obj.y -= lengthPerTeil.edit.y/3;
     }
-    return collides(pObj, obj).boolean;
+    return collides({x: mausx, y: mausy - scrollY, width: 1, height: 1}, obj).boolean;
   }
   function create2() {
     if (modeSelection.value != "traditional") shuffleStyle.value = "none";
@@ -486,8 +486,7 @@ function startVideo() {
 function updateVideo(){
   canvas.clearRect(0, 0, textur.width, textur.height);
   for (var i = 0; aufgebenId.style.display == "inline" && i < positions.wrong?.length; i++) {
-    // TODO: shuffle styles
-    if (shuffleStyle.value == "listTiles") drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
+    if (shuffleStyle.value == "listTiles" && tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
     else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
   }
   if (aufgebenId.style.display != "inline") canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
@@ -552,9 +551,9 @@ var originalSize = {};
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
-    tileSelectionCanvas.width = tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
+    tileSelectionCanvas.width = /*tileSelectionBar.tiles.length*/positions.wrong.length*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
     for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
-      var i = i1;
+      var i = tileSelectionBar.tiles[i1];
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas);
     }
@@ -564,7 +563,7 @@ var originalSize = {};
       canvas.save();
       canvas.translate(clip.x, clip.y);
       // canvas.rotate((positions.wrong[clip.sI].original.degree + 180)*Math.PI/180);
-      canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), clip.width, clip.height);
+      if (!tileSelectionBar.tiles.includes(clip.i)) canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), clip.width, clip.height);
       canvas.restore();
     }
     for (var tile of selected.tiles) {
@@ -605,7 +604,11 @@ var originalSize = {};
     pCanvas.save();
     if (modeSelection.value == "traditional" && !removeTilesScreen) pCanvas.translate(position.edit.x, position.edit.y);
     else pCanvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
-    pCanvas.translate(tileSelectionBar.scrollX, 0);
+    if (pCanvas.canvas.id == "tileSelectionCanvas") {
+      pCanvas.translate(tileSelectionBar.scrollX, 0);
+      tileSelectionBar.canvas.fillStyle = "red";
+      if (tileSelectionBar.selectedTile?.tileI == i) tileSelectionBar.canvas.fillRect(-(lengthPerTeil.edit.x/2) - 5, -(lengthPerTeil.edit.y/2) - 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
+    }
     pCanvas.rotate(position.original.degree*Math.PI/180);
     if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
@@ -821,7 +824,7 @@ var originalSize = {};
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
-        if (!state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
+        if (!tileSelectionBar.tiles.includes(i) && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           selected.tiles.push(i);
           positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
           positions.layoutOrder.push(i);
@@ -833,12 +836,29 @@ var originalSize = {};
           state.newTileSelected = true;
         }
       }
+      if (tileSelectionBar.selectedTile && !tileSelectionBar.collidesMouse()) {
+        var i = tileSelectionBar.selectedTile;
+        selected.tiles = [i.tileI];
+        positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
+        positions.layoutOrder.push(i.tileI);
+        tileSelectionBar.tiles.splice(i.i, 1);
+        // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
+        tileSelectionBar.selectedTile = undefined;
+        positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
+      }
+      tileSelectionBar.tiles.forEach((tileI, i) => {
+        var tile = positions.wrong[tileI];
+        if (mausx > tile.edit.x + tileSelectionBar.scrollX - lengthPerTeil.edit.x/2 && mausx < tile.edit.x + tileSelectionBar.scrollX + lengthPerTeil.edit.x/2 && tileSelectionBar.collidesMouse()) {
+          tileSelectionBar.selectedTile = {i: i, tileI: tileI};
+          layout();
+        }
+      });
       folgenMouseMove("mouseDown");
     }
   }
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
-    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collides({x: mausx, y: mausy, width: 1, height: 1})) {
+    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles) {
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
@@ -944,7 +964,7 @@ var originalSize = {};
   }
   function selectedCollidesOthers(pClip, tile) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !selected.tiles.includes(i) && tile != i) return true;
+      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) return true;
     }
   }
   var clipped = [];
@@ -952,12 +972,9 @@ var originalSize = {};
     state.mouse = "up";
     if (modeSelection.value == "traditional") {
       state.newTileSelected = false;
-      if (selected.clip.length > 0) {
-        new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
-        console.log("clipping...");
-        stats.turns++;
-      }
+      var bClipped = false;
       for (var clip of selected.clip) {
+        if (!tileSelectionBar.tiles.includes(clip.i)) {
         if ((JSON.stringify(positions.right[clip.i].original[convertDirection(clip.direction, positions.wrong[clip.sI].original.degree)]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y}) || positions.wrong[clip.sI].original.degree != positions.wrong[clip.i].original.degree)) stats.wrongClipped++;
         var directionOpposite = {left: 'right', top: 'bottom', right: 'left', bottom: 'top'};
         positions.wrong[clip.i].original[clip.direction] = {x: positions.right[clip.sI].original.x, y: positions.right[clip.sI].original.y};
@@ -970,6 +987,13 @@ var originalSize = {};
         clipped.push(clip.i + ' - ' + clip.sI);
         // do more clipping if needed
         checkPossibleClipping(clip.sI);
+        bClipped = true;
+      }
+    }
+    if (selected.clip.length && bClipped) {
+      new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
+      console.log("clipping...");
+      stats.turns++;
     }
     selected.clip = [];
     if (selected.tiles.length && !state.shift && !state.removeTile) selected.tiles = [];
@@ -1011,7 +1035,7 @@ var originalSize = {};
     if (event.shiftKey) {
       state.shift = true;
     }
-    var collidesTilesBar = tileSelectionBar.collides({x: mausx, y: mausy, width: 1, height: 1});
+    var collidesTilesBar = tileSelectionBar.collidesMouse();
     if (event.key == "ArrowRight") {
       if (collidesTilesBar) scrollTileSelection(1);
       else rotateSelected(90);
