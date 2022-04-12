@@ -245,12 +245,12 @@
       tileSelectionBar.scrollX = 0;
     }
     else scrollTileSelectionLeft.style.display = 'inline';
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*/*tileSelectionBar.tiles.length*/positions.wrong.length) + window.innerWidth) {
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth) {
       scrollTileSelectionRight.style.display = 'none';
-      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*/*tileSelectionBar.tiles.length*/positions.wrong.length) + window.innerWidth;
+      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth;
     }
     else scrollTileSelectionRight.style.display = 'inline';
-    layout();
+    layout(true, true);
   }
   function create() {
     //finished = false;
@@ -546,17 +546,19 @@ var originalSize = {};
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
+    tileSelectionCanvas.width = tileSelectionBar.tiles.length/*positions.wrong.length*/*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
+    var img = new Image();
+    img.src = 'https://adi.nicolaiweitkemper.de/Bilder/addTile.png';
+    tileSelectionBar.canvas.drawImage(img, tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
-    tileSelectionCanvas.width = /*tileSelectionBar.tiles.length*/positions.wrong.length*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
     for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
       var i = tileSelectionBar.tiles[i1];
-      if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
-      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas);
+      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas, i1);
     }
     for (var clip of selected.clip) {
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
@@ -600,8 +602,11 @@ var originalSize = {};
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas) {
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
     if (!pCanvas) pCanvas = canvas;
+    else {
+      position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2};
+    }
     pCanvas.save();
     if (modeSelection.value == "traditional" && !removeTilesScreen) pCanvas.translate(position.edit.x, position.edit.y);
     else pCanvas.translate(position.edit.x + lengthPerTeil.edit.x/2, position.edit.y + lengthPerTeil.edit.y/2);
@@ -833,11 +838,16 @@ var originalSize = {};
             if (rotatesRight.checked) rotateSelected(90);
             if (rotatesLeft.checked) rotateSelected(-90);
           }
+          if (state.backToBar) {
+            tileSelectionBar.tiles.push(i);
+            // positions.wrong[i1].edit = {x: 5 + (lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2}
+            state.backToBar = false;
+          }
           layout(true);
           state.newTileSelected = true;
         }
       }
-      if (tileSelectionBar.selectedTile && !tileSelectionBar.collidesMouse()) {
+      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse()) {
         var i = tileSelectionBar.selectedTile;
         selected.tiles = [i.tileI];
         positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
@@ -854,6 +864,9 @@ var originalSize = {};
           layout();
         }
       });
+      if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
+        state.backToBar = true;
+      }
       folgenMouseMove("mouseDown");
     }
   }
