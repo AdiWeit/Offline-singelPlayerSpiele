@@ -547,6 +547,12 @@ var originalSize = {};
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     tileSelectionCanvas.width = tileSelectionBar.tiles.length/*positions.wrong.length*/*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
+    if (state.backToBar) {
+      tileSelectionBar.canvas.fillStyle = "red";
+      tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 0, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
+      tileSelectionBar.canvas.fillStyle = "hsla(0, 0%, 64%, 0.77)";
+      tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y);
+    }
     var img = new Image();
     img.src = 'https://adi.nicolaiweitkemper.de/Bilder/addTile.png';
     tileSelectionBar.canvas.drawImage(img, tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
@@ -823,6 +829,16 @@ var originalSize = {};
     state.mouse = "down";
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
+      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse() && !state.backToBar) {
+        var i = tileSelectionBar.selectedTile;
+        selected.tiles = [i.tileI];
+        positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
+        positions.layoutOrder.push(i.tileI);
+        tileSelectionBar.tiles.splice(i.i, 1);
+        // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
+        tileSelectionBar.selectedTile = undefined;
+        positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
+      }
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
       for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
@@ -847,16 +863,6 @@ var originalSize = {};
           state.newTileSelected = true;
         }
       }
-      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse()) {
-        var i = tileSelectionBar.selectedTile;
-        selected.tiles = [i.tileI];
-        positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
-        positions.layoutOrder.push(i.tileI);
-        tileSelectionBar.tiles.splice(i.i, 1);
-        // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
-        tileSelectionBar.selectedTile = undefined;
-        positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
-      }
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
         if (mausx > tile.edit.x + tileSelectionBar.scrollX - lengthPerTeil.edit.x/2 && mausx < tile.edit.x + tileSelectionBar.scrollX + lengthPerTeil.edit.x/2 && tileSelectionBar.collidesMouse()) {
@@ -866,6 +872,7 @@ var originalSize = {};
       });
       if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
         state.backToBar = true;
+        layout();
       }
       folgenMouseMove("mouseDown");
     }
