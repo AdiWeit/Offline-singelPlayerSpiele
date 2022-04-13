@@ -240,15 +240,16 @@
   }
   function scrollTileSelection(direc) {
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
-    if (tileSelectionBar.scrollX >= 0) {
+    if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
       scrollTileSelectionLeft.style.display = 'none';
-      tileSelectionBar.scrollX = 0;
+      tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
     }
+    if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
     else scrollTileSelectionLeft.style.display = 'inline';
     if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth) {
-      scrollTileSelectionRight.style.display = 'none';
       tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth;
     }
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) scrollTileSelectionRight.style.display = 'none';
     else scrollTileSelectionRight.style.display = 'inline';
     layout(true, true);
   }
@@ -547,14 +548,17 @@ var originalSize = {};
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     tileSelectionCanvas.width = tileSelectionBar.tiles.length/*positions.wrong.length*/*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
-    if (state.backToBar) {
+    if (state.backToBar !== false) {
       tileSelectionBar.canvas.fillStyle = "red";
-      tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 0, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
+      if (state.backToBar) tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 0, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
+      else tileSelectionBar.canvas.fillRect(-1*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 0, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
       tileSelectionBar.canvas.fillStyle = "hsla(0, 0%, 64%, 0.77)";
-      tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y);
+      if (state.backToBar) tileSelectionBar.canvas.fillRect(tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y);
+      else tileSelectionBar.canvas.fillRect(-1*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y);
     }
     var img = new Image();
     img.src = 'https://adi.nicolaiweitkemper.de/Bilder/addTile.png';
+    tileSelectionBar.canvas.drawImage(img, -lengthPerTeil.edit.x - 5 + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     tileSelectionBar.canvas.drawImage(img, tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
@@ -823,13 +827,13 @@ var originalSize = {};
   }
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
-  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}};
+  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false};
   function mouseDown(elmCalled, touchStart) {
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
-      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse() && !state.backToBar) {
+      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
         var i = tileSelectionBar.selectedTile;
         selected.tiles = [i.tileI];
         positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
@@ -838,6 +842,7 @@ var originalSize = {};
         // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
         tileSelectionBar.selectedTile = undefined;
         positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
+        state.placeTile = true;
       }
       // selected.tiles = [];
       selected.position = {x: mausx, y: mausy};
@@ -847,22 +852,25 @@ var originalSize = {};
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
         if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
-          selected.tiles.push(i);
-          positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
-          positions.layoutOrder.push(i);
-          if (!elmCalled && !touchStart) {
-            if (rotatesRight.checked) rotateSelected(90);
-            if (rotatesLeft.checked) rotateSelected(-90);
+          if (!state.placeTile) {
+            selected.tiles.push(i);
+            positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
+            positions.layoutOrder.push(i);
+            if (!elmCalled && !touchStart) {
+              if (rotatesRight.checked) rotateSelected(90);
+              if (rotatesLeft.checked) rotateSelected(-90);
+            }
           }
-          if (state.backToBar) {
-            tileSelectionBar.tiles.push(i);
-            // positions.wrong[i1].edit = {x: 5 + (lengthPerTeil.edit.x + 5)*tileSelectionBar.tiles.length + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2}
+          if (state.backToBar !== false) {
+            // tileSelectionBar.tiles.push(i);
+            tileSelectionBar.tiles.splice(state.backToBar, 0, i);
             state.backToBar = false;
           }
           layout(true);
           state.newTileSelected = true;
         }
       }
+      state.placeTile = false;
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
         if (mausx > tile.edit.x + tileSelectionBar.scrollX - lengthPerTeil.edit.x/2 && mausx < tile.edit.x + tileSelectionBar.scrollX + lengthPerTeil.edit.x/2 && tileSelectionBar.collidesMouse()) {
@@ -870,9 +878,15 @@ var originalSize = {};
           layout();
         }
       });
-      if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
-        state.backToBar = true;
-        layout();
+      if (tileSelectionBar.tiles.length != positions.wrong.length) {
+        if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
+          state.backToBar = tileSelectionBar.tiles.length;
+          layout();
+        }
+        if (mausx > -lengthPerTeil.edit.x + tileSelectionBar.scrollX && mausx < tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
+          state.backToBar = 0;
+          layout();
+        }
       }
       folgenMouseMove("mouseDown");
     }
