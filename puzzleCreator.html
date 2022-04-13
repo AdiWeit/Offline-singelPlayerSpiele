@@ -112,6 +112,9 @@
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <br>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
+<div id="backToBarButtons">
+
+</div>
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
 <style>
@@ -134,6 +137,10 @@
     opacity: 0.3;
     transform: rotate(180deg);
     display: none;
+  }
+
+  .backToTileB {
+    position: fixed;
   }
 </style>
 <p id="showOriginalP" style="display:none">
@@ -240,8 +247,19 @@
   }
   function scrollTileSelection(direc) {
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
+    var buttonDirec = direc;
+    // if (tileSelectionBar.scrollX >= 0 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) {
+      // buttonDirec = direc*(-1);
+      if (!((-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) == tileSelectionBar.scrollX && direc == -1) && tileSelectionBar.scrollX != lengthPerTeil.edit.x + 5 && (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth == tileSelectionBar.scrollX - lengthPerTeil.edit.x - 5 || tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth)) {
+        buttonDirec = 0;
+      }
+        // }
+      if (buttonDirec) {
+      for (const elm of document.getElementsByClassName('backToTileB')) {
+        elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (lengthPerTeil.edit.x + 5)*(buttonDirec*(-1)) + 'px';
+      }
+    }
     if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
-      scrollTileSelectionLeft.style.display = 'none';
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
     }
     if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
@@ -434,8 +452,15 @@
     scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
   }
-  if (shuffleStyle.value == "listTiles") scrollTileSelection(0);
-  if (gerät == "Handy") {
+  if (shuffleStyle.value == "listTiles") {
+    scrollTileSelection(0);
+    for (var i = 0; i < tileSelectionBar.tiles.length - 1; i++) {
+      addElement({class: "backToTileB", innerText: '+', style: `width: ${lengthPerTeil.edit.x/7}px; height: ${lengthPerTeil.edit.y/7}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (lengthPerTeil.edit.y/7)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i + 1) - (lengthPerTeil.edit.x/7)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
+      // document.getElementsByClassName('backToTileB')[i].innerHTML = '+';
+      if (gerät == "Handy") document.getElementsByClassName('backToTileB')[i].style.bottom = lengthPerTeil.edit.y + "px";
+    }
+  }
+    if (gerät == "Handy") {
     mobileControls.style.display = 'inline';
     rotateControls.style.display = "inline";
   }
@@ -445,6 +470,26 @@
   scrollRightInt = setInterval(scrollRightFunction, 10);
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
+  }
+  function addElement(attr, elm, childOf, asElement) {
+      var newElement = document.createElement(/*'span'*/elm);
+      if (childOf && !asElement) document.getElementById(childOf).appendChild(newElement);
+      else if (childOf) childOf.appendChild(newElement);
+      else tests.appendChild(newElement);
+      for (attrNow of Object.keys(attr)) {
+        if (attrNow == 'innerText') newElement.innerText = attr[attrNow];
+        else newElement.setAttribute(attrNow/*'style'*/, /*'color:' + word[i].colour*/attr[attrNow]);
+      }
+    }
+  function posInBarSelected(i) {
+    
+    for (const elm of document.getElementsByClassName('backToTileB')) {
+      elm.style.backgroundColor = '';
+    }
+    if (tileSelectionBar.tiles.length != positions.wrong.length) {
+      state.backToBar = i + 1; 
+      document.getElementsByClassName('backToTileB')[i].style.backgroundColor = 'red';
+    }
   }
   function readImg(input) {
     var reader = new FileReader();
@@ -864,6 +909,7 @@ var originalSize = {};
           if (state.backToBar !== false) {
             // tileSelectionBar.tiles.push(i);
             tileSelectionBar.tiles.splice(state.backToBar, 0, i);
+            if (state.backToBar) document.getElementsByClassName('backToTileB')[state.backToBar - 1].style.backgroundColor = '';
             state.backToBar = false;
           }
           layout(true);
@@ -895,6 +941,9 @@ var originalSize = {};
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles) {
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
+      for (const elm of document.getElementsByClassName('backToTileB')) {
+      elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (mausx - tileSelectionBar.swipePosition) + 'px';
+    }
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
     }
