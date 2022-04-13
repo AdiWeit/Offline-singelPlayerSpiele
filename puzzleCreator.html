@@ -939,11 +939,13 @@ var originalSize = {};
   }
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
-    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles) {
+    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length) {
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
       for (const elm of document.getElementsByClassName('backToTileB')) {
-      elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (mausx - tileSelectionBar.swipePosition) + 'px';
-    }
+       if (tileSelectionBar.scrollX < lengthPerTeil.edit.x + 5 + scrollX && tileSelectionBar.scrollX > -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) {
+         elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (mausx - tileSelectionBar.swipePosition) + 'px';
+       }
+      }
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
     }
