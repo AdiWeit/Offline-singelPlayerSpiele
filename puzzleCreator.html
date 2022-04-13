@@ -256,7 +256,7 @@
         // }
       if (buttonDirec) {
       for (const elm of document.getElementsByClassName('backToTileB')) {
-        elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (lengthPerTeil.edit.x + 5)*(buttonDirec*(-1)) + 'px';
+        elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.edit.x + 5)*(buttonDirec*(-1)) + 'px';
       }
     }
     if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
@@ -937,14 +937,20 @@ var originalSize = {};
       folgenMouseMove("mouseDown");
     }
   }
+  function convertStyle(value) {
+    return JSON.parse(value.replace('px', ''));
+  }
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length) {
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
-      for (const elm of document.getElementsByClassName('backToTileB')) {
+      for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
+      var elm = document.getElementsByClassName('backToTileB')[i];
        if (tileSelectionBar.scrollX < lengthPerTeil.edit.x + 5 + scrollX && tileSelectionBar.scrollX > -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) {
-         elm.style.left = JSON.parse(elm.style.left.replace('px', '')) + (mausx - tileSelectionBar.swipePosition) + 'px';
+         elm.style.left = convertStyle(elm.style.left) + (mausx - tileSelectionBar.swipePosition) + 'px';
        }
+       else if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 + scrollX) elm.style.left = (lengthPerTeil.edit.x + 5)*(2 + i) + scrollX - convertStyle(elm.style.width)/2 + 10 + 'px';
+       else if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) elm.style.left = ((lengthPerTeil.edit.x + 5)*(1 + i) + scrollX - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
       }
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
