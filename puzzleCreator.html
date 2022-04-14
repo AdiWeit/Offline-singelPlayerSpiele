@@ -264,7 +264,7 @@
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
         var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = (lengthPerTeil.edit.x + 5)*(2 + i) - convertStyle(elm.style.width)/2 + 10 + 'px';
+        elm.style.left = (lengthPerTeil.edit.x + 5)*(1 + i) - convertStyle(elm.style.width)/2 + 10 + 'px';
       }
     }
     if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
@@ -463,8 +463,8 @@
   }
   if (shuffleStyle.value == "listTiles") {
     scrollTileSelection(0);
-    for (var i = 0; i < tileSelectionBar.tiles.length - 1; i++) {
-      addElement({class: "backToTileB", innerText: '+', style: `width: ${lengthPerTeil.edit.x/7}px; height: ${lengthPerTeil.edit.y/7}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (lengthPerTeil.edit.y/7)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i + 1) - (lengthPerTeil.edit.x/7)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
+    for (var i = 0; i < tileSelectionBar.tiles.length + 1; i++) {
+      addElement({class: "backToTileB", innerText: '+', style: `width: ${lengthPerTeil.edit.x/7}px; height: ${lengthPerTeil.edit.y/7}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (lengthPerTeil.edit.y/7)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i) - (lengthPerTeil.edit.x/7)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
       // document.getElementsByClassName('backToTileB')[i].innerHTML = '+';
       if (gerät == "Handy") document.getElementsByClassName('backToTileB')[i].style.bottom = lengthPerTeil.edit.y + "px";
     }
@@ -491,14 +491,15 @@
       }
     }
   function posInBarSelected(i) {
-    
     for (const elm of document.getElementsByClassName('backToTileB')) {
       elm.style.backgroundColor = '';
     }
     if (tileSelectionBar.tiles.length != positions.wrong.length) {
-      state.backToBar = i + 1; 
+      state.backToBar = i; 
       document.getElementsByClassName('backToTileB')[i].style.backgroundColor = 'red';
     }
+    tileSelectionBar.selectedTile = undefined;
+    layout();
   }
   function readImg(input) {
     var reader = new FileReader();
@@ -601,16 +602,7 @@ var originalSize = {};
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
-    tileSelectionCanvas.width = tileSelectionBar.tiles.length/*positions.wrong.length*/*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x;
-    if (state.backToBar !== false) {
-      tileSelectionBar.canvas.fillStyle = "red";
-      if (state.backToBar === 0) tileSelectionBar.canvas.fillRect(-1*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 0, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
-      tileSelectionBar.canvas.fillStyle = "hsla(0, 0%, 64%, 0.77)";
-      if (state.backToBar === 0) tileSelectionBar.canvas.fillRect(-1*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y);
-    }
-    var img = new Image();
-    img.src = 'https://adi.nicolaiweitkemper.de/Bilder/addTile.png';
-    tileSelectionBar.canvas.drawImage(img, -lengthPerTeil.edit.x - 5 + tileSelectionBar.scrollX, 5, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
@@ -916,7 +908,7 @@ var originalSize = {};
           if (state.backToBar !== false) {
             // tileSelectionBar.tiles.push(i);
             tileSelectionBar.tiles.splice(state.backToBar, 0, i);
-            if (state.backToBar) document.getElementsByClassName('backToTileB')[state.backToBar - 1].style.backgroundColor = '';
+            document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
             state.backToBar = false;
           }
           layout(true);
@@ -957,8 +949,8 @@ var originalSize = {};
          elm.style.left = convertStyle(elm.style.left) + (mausx - tileSelectionBar.swipePosition) + 'px';
        }
         else {
-          if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) elm.style.left = (lengthPerTeil.edit.x + 5)*(2 + i) - convertStyle(elm.style.width)/2 + 10 + 'px';
-          if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) elm.style.left = ((lengthPerTeil.edit.x + 5)*(1 + i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
+          if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) elm.style.left = (lengthPerTeil.edit.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + 'px';
+          if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) elm.style.left = ((lengthPerTeil.edit.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
         }
       }
       tileSelectionBar.swipePosition = mausx;
