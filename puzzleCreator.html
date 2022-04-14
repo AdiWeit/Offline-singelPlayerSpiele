@@ -946,11 +946,13 @@ var originalSize = {};
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
-       if (tileSelectionBar.scrollX < lengthPerTeil.edit.x + 5 + scrollX && tileSelectionBar.scrollX > -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) {
+       if (tileSelectionBar.scrollX < lengthPerTeil.edit.x + 5 - scrollX && tileSelectionBar.scrollX > -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth - scrollX) {
          elm.style.left = convertStyle(elm.style.left) + (mausx - tileSelectionBar.swipePosition) + 'px';
        }
-       else if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 + scrollX) elm.style.left = (lengthPerTeil.edit.x + 5)*(2 + i) + scrollX - convertStyle(elm.style.width)/2 + 10 + 'px';
-       else if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) elm.style.left = ((lengthPerTeil.edit.x + 5)*(1 + i) + scrollX - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
+        else {
+          if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 - scrollX) elm.style.left = (lengthPerTeil.edit.x + 5)*(2 + i) - scrollX - convertStyle(elm.style.width)/2 + 10 + 'px';
+          if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth - scrollX) elm.style.left = ((lengthPerTeil.edit.x + 5)*(1 + i) + scrollX - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX - scrollX) + 'px';
+        }
       }
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
