@@ -119,11 +119,12 @@
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
 <style>
   #tileSelectionCanvas {
-    position: -webkit-sticky;
-    position: sticky;
+    /* position: -webkit-sticky; */
+    position: fixed;
     bottom: 0px;
     overflow: hidden;
     background-color: hsla(0, 0%, 64%, 0.77);
+    touch-action: none;
   }
   #scrollTileSelectionRight {
     position: fixed;
@@ -159,7 +160,7 @@
   ) {
     var gerät = "Handy"
     console.log("Handy");
-    tileSelectionCanvas.style.position = "fixed";
+    // tileSelectionCanvas.style.position = "fixed";
   } else {
     var gerät = "PC"
     console.log("PC");
