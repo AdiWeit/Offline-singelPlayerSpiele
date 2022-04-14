@@ -1000,12 +1000,13 @@ var originalSize = {};
     var objTile = positions.wrong[tile];
     objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
     var unclipped = false;
-    clipped.forEach((clipp, i) => {
-      if (clipp.split(' - ').includes(tile + "")) {
+    for (let i = 0; i < clipped.length; i++) {
+      if (clipped[i].split(' - ').includes(tile + "")) {
         clipped.splice(i, 1);
         unclipped = true;
+        i--;
       }
-    });
+    }
     if (unclipped) stats.unclipped++;
   }
   function checkPossibleClipping(tile) {
