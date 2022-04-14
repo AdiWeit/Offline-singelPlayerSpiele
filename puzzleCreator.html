@@ -910,6 +910,7 @@ var originalSize = {};
             tileSelectionBar.tiles.splice(state.backToBar, 0, i);
             document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
             state.backToBar = false;
+            unclipp(i);
           }
           layout(true);
           state.newTileSelected = true;
@@ -926,10 +927,6 @@ var originalSize = {};
       if (tileSelectionBar.tiles.length != positions.wrong.length) {
         if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
           state.backToBar = tileSelectionBar.tiles.length;
-          layout();
-        }
-        if (mausx > -lengthPerTeil.edit.x + tileSelectionBar.scrollX && mausx < tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
-          state.backToBar = 0;
           layout();
         }
       }
@@ -974,15 +971,7 @@ var originalSize = {};
         }
         // unclipp
         if (state.shift) {
-          objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
-          var unclipped = false;
-          clipped.forEach((clipp, i) => {
-            if (clipp.split(' - ').includes(tile + "")) {
-              clipped.splice(i, 1);
-              unclipped = true;
-            }
-          });
-          if (unclipped) stats.unclipped++;
+          unclipp(tile);
         }
         // positions.wrong.forEach((position, i) => {
         //   if (((objTile.original?.left?.x == position.original?.x && objTile.original?.left?.x != undefined && objTile.original?.left?.y == position.original?.y) || (objTile.original?.top?.x == position.original?.x && objTile.original?.top?.x != undefined && objTile.original?.top?.y == position.original?.y) || (objTile.original?.wrong?.x == position.original?.x && objTile.original?.wrong?.x != undefined && objTile.original?.wrong?.y == position.original?.y) || (objTile.original?.bottom?.x == position.original?.x && objTile.original?.bottom?.x != undefined && objTile.original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
@@ -1006,6 +995,18 @@ var originalSize = {};
         layout(false, true);
       }
     }
+  }
+  function unclipp(tile) {
+    var objTile = positions.wrong[tile];
+    objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
+    var unclipped = false;
+    clipped.forEach((clipp, i) => {
+      if (clipp.split(' - ').includes(tile + "")) {
+        clipped.splice(i, 1);
+        unclipped = true;
+      }
+    });
+    if (unclipped) stats.unclipped++;
   }
   function checkPossibleClipping(tile) {
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}};
