@@ -1144,7 +1144,6 @@ var originalSize = {};
   }
   function rotateSelected(direction) {
     if (!state.removeTile) {
-      stats.rotated++;
       state.rotated = [];
       rotateAround(selected.tiles[0], direction);
       console.log('layout');
@@ -1155,6 +1154,7 @@ var originalSize = {};
     positions.wrong[tile].original.degree += direction;
     if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
     else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+    stats.rotated++;
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
     state.rotated.push(tile);
