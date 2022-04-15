@@ -1169,6 +1169,7 @@ var originalSize = {};
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
       state.shift = true;
       selected.tiles = [];
+      mouseDown();
     }
     else if (ev.type == "touchmove") state.shift = false;
     if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
