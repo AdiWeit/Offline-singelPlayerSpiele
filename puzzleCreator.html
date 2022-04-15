@@ -1145,12 +1145,58 @@ var originalSize = {};
   function rotateSelected(direction) {
     if (!state.removeTile) {
       stats.rotated++;
-      for (var tile of selected.tiles) {
-        positions.wrong[tile].original.degree += direction;
-        if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
-        else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+      state.rotated = [];
+      rotateAround(selected.tiles[0], direction);
+      console.log('layout');
+      layout(true, true);
+    }
+  }
+  function rotateTile(tile, direction) {
+    positions.wrong[tile].original.degree += direction;
+    if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
+    else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
+  }
+  function rotateAround(tile, direction, connectionSide, connectionObj) {
+    state.rotated.push(tile);
+    var tileObj = positions.wrong[tile];
+    if (connectionSide) {
+      if (connectionSide == 'left') {
+        tileObj.edit.x = connectionObj.edit.x - lengthPerTeil.edit.x;
+        tileObj.edit.y = connectionObj.edit.y;
+      }
+      if (connectionSide == 'top') {
+        tileObj.edit.x = connectionObj.edit.x;
+        tileObj.edit.y = connectionObj.edit.y - lengthPerTeil.edit.y;
+      }
+      if (connectionSide == 'right') {
+        tileObj.edit.x = connectionObj.edit.x + lengthPerTeil.edit.x;
+        tileObj.edit.y = connectionObj.edit.y;
+      }
+      if (connectionSide == 'bottom') {
+        tileObj.edit.x = connectionObj.edit.x;
+        tileObj.edit.y = connectionObj.edit.y + lengthPerTeil.edit.y;
       }
     }
+    rotateTile(tile, direction);
+    var directionConverter = {90: {left: 'top', top: 'right', right: 'bottom', bottom: 'left'}, '-90': {left: 'bottom', bottom: 'right', right: 'top', top: 'left'}};
+    for (const side of ['left', 'top', 'right', 'bottom']) {
+      if (tileObj.original[side]) {
+        tileObj.original['new' + directionConverter[direction][side]] = tileObj.original[side];
+        delete tileObj.original[side];
+      }
+    };
+      for (const side of ['left', 'top', 'right', 'bottom']) {
+      if (tileObj.original['new' + directionConverter[direction][side]]) {
+        tileObj.original[directionConverter[direction][side]] = tileObj.original['new' + directionConverter[direction][side]];
+        delete tileObj.original['new' + directionConverter[direction][side]];
+        if (!state.rotated.includes(getTile(tileObj.original[directionConverter[direction][side]]))) rotateAround(getTile(tileObj.original[directionConverter[direction][side]]), direction, directionConverter[direction][side], tileObj);
+      }
+    };
+  }
+  function getTile(originalCoord) {
+    for (var i = 0; i < positions.wrong.length; i++) {
+      if (positions.wrong[i].original.x == originalCoord.x && positions.wrong[i].original.y == originalCoord.y) return i;
+    };
   }
   document.onkeyup = function(event) {
     if (!event.shiftKey && state.shift) {
