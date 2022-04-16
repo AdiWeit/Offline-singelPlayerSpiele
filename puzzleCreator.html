@@ -107,7 +107,9 @@
   <br>
   <div style="display: none;" id="videoControls">
     <h3>video controls</h3>
+    <button onclick="video.currentTime -= 10;"><<</button>
     <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
+    <button onclick="video.currentTime += 10;">>></button>
     <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
     <a id="timeText"></a>
   </div>
@@ -347,6 +349,14 @@
     if (sourceIsVideo.checked) {
       videoControls.style.display = 'inline';
       videoPosition.max = video.duration;
+      settings.style.display = 'inline';
+      videoPosition.style.width = window.innerWidth;
+      while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
+        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
+      }
+      videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
+      playVideo.style.width = playVideo.getBoundingClientRect().width;
+      settings.style.display = 'none';
     }
     originalSize.width = preview.width;
     originalSize.height = preview.height;
@@ -606,14 +616,6 @@ function updateVideo(){
 var originalSize = {};
   function loadImage(width, height) {
     setTimeout(function () {
-      settings.style.display = 'inline';
-      videoControls.style.display = 'inline';
-      videoPosition.style.width = window.innerWidth;
-      while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
-        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
-      }
-      settings.style.display = 'none';
-      videoControls.style.display = 'none';
       // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
       if (!width) {
         width = preview.width;
