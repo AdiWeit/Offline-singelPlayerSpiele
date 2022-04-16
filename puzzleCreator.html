@@ -104,6 +104,13 @@
   <br>
   <br>
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
+  <br>
+  <div style="display: none;" id="videoControls">
+    <h3>video controls</h3>
+    <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
+    <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
+    <a id="timeText"></a>
+  </div>
 </div>
 <br>
 <button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">finished</button>
@@ -231,6 +238,16 @@
     canvas.drawImage(document.getElementById('preview'), 0, 0, größeAnpassenX.value, größeAnpassenY.value);
   }
   }
+  function playPauseVideo(innerHTML) {
+    if (innerHTML == "play") {
+      video.play();
+      playVideo.innerHTML = 'pause';
+    } 
+    else {
+      video.pause();
+      playVideo.innerHTML = 'play';
+    }
+  }
   function modeSelected(value) {
     traditionalSettings.style.display = 'none';
     exchangeSettings.style.display = 'none';
@@ -327,6 +344,10 @@
     missing = [];
     settings.style.display = 'none';
     if (gerät == "Handy") mobileControls.style.display = "inline";
+    if (sourceIsVideo.checked) {
+      videoControls.style.display = 'inline';
+      videoPosition.max = video.duration;
+    }
     originalSize.width = preview.width;
     originalSize.height = preview.height;
     preview.width = größeAnpassenX.value;
@@ -535,9 +556,6 @@
   }
   else {
     video.src = sourceURL.value;
-    setTimeout(function () {
-    loadImage(video.videoWidth, video.videoHeight);
-  }, 100);
     startVideo();
   }
   }
@@ -546,8 +564,23 @@ function startVideo() {
   video.play();  // start playing
   updateVideo(); //Start rendering
 }
-
+video.addEventListener('loadeddata', function() {
+  loadImage(video.videoWidth, video.videoHeight);
+}, false);
+function getTimeString(pTime) {
+  pTime = Math.floor(pTime);
+  var sec, mins, hours;
+  sec = pTime;
+  mins = Math.floor(pTime / 60);
+  hours = Math.floor(pTime / 60 / 60);
+  if (sec < 10) sec = '0' + sec; 
+  if (mins < 10) mins = '0' + mins; 
+  if (hours < 10) hours = '0' + hours;
+  return `${hours}:${mins}:${sec}`;
+}
 function updateVideo(){
+  videoPosition.value = video.currentTime;
+  timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
   canvas.clearRect(0, 0, textur.width, textur.height);
   for (var i = 0; aufgebenId.style.display == "inline" && i < positions.wrong?.length; i++) {
     if (shuffleStyle.value == "listTiles" && tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
@@ -573,6 +606,15 @@ function updateVideo(){
 var originalSize = {};
   function loadImage(width, height) {
     setTimeout(function () {
+      settings.style.display = 'inline';
+      videoControls.style.display = 'inline';
+      videoPosition.style.width = window.innerWidth;
+      while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
+        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
+      }
+      settings.style.display = 'none';
+      videoControls.style.display = 'none';
+      // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
       if (!width) {
         width = preview.width;
         height = preview.height;
