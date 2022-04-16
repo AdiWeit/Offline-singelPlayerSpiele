@@ -148,6 +148,7 @@
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
   <img style="display: none;" id="preview">
+  <canvas style="display: none;" id="videoPreview"></canvas>
 </p>
 <script>
   if (navigator.userAgent.match(/Android/i) ||
@@ -241,10 +242,14 @@
     startPause();
     if (checked) stats.lookedAtOriginal.times++;
     if (checked) {
-      preview.style.display = "inline";
+      if (sourceIsPicture.checked) preview.style.display = "inline";
+      else videoPreview.style.display = "inline";
       showOriginal.scrollIntoView();
     }
-    else preview.style.display = "none";
+    else {
+      if (sourceIsPicture.checked) preview.style.display = "none";
+      else videoPreview.style.display = "none";
+    }
   }
   function scrollTileSelection(direc) {
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
@@ -328,6 +333,8 @@
     preview.height = größeAnpassenY.value;
     textur.width = preview.width// + 111;
     textur.height = preview.height// + 111;
+    videoPreview.width = größeAnpassenX.value;
+    videoPreview.height = größeAnpassenY.value;
     var anzahl = document.getElementById('anzahl').value;
     if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
     else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
@@ -547,6 +554,7 @@ function updateVideo(){
     else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
   }
   if (aufgebenId.style.display != "inline") canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
+  videoPreview.getContext('2d').drawImage(video, 0, 0, größeAnpassenX.value, größeAnpassenY.value);
   for (var tile of selected.tiles) {
     canvas.fillStyle = "rgba(255, 0, 0, 0.3)";
     canvas.save();
