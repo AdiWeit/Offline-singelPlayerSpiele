@@ -110,7 +110,7 @@
     <input id="loop" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
     <a id="stopAtEndP"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
     <br>
-    beginne bei <input type="text" id="loopBeginning"> <button onclick="loopBeginning.value = timeText.innerHTML.split(' / ')[0];">nimm aktuelle Zeit</button> und ende bei <input id="loopEnding" type="text"> <button onclick="loopEnding.value = timeText.innerHTML.split(' / ')[0];">nimm aktuelle Zeit</button>
+    beginne bei <input type="text" id="loopBeginning"> <button onclick="loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button> und ende bei <input id="loopEnding" type="text"> <button onclick="loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button>
     <br>
     <button onclick="video.currentTime -= 10;"><<</button>
     <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
@@ -630,6 +630,7 @@ function convertTime(value, id){
   if (sec < 10) sec = sec[1];
   if (mins < 10) mins = mins[1];
   if (hours < 10) hours = hours[1];
+  if (value.split(':')[3]) time += JSON.parse(value.split(':')[3])/100;
     try {
       time += JSON.parse(sec);
       time += JSON.parse(mins)*60;
