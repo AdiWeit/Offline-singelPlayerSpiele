@@ -107,6 +107,11 @@
   <br>
   <div style="display: none;" id="videoControls">
     <h3>video controls</h3>
+    <input id="loop" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
+    <a id="stopAtEndP"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
+    <br>
+    beginne bei <input type="text" id="loopBeginning"> <button onclick="loopBeginning.value = timeText.innerHTML.split(' / ')[0];">nimm aktuelle Zeit</button> und ende bei <input id="loopEnding" type="text"> <button onclick="loopEnding.value = timeText.innerHTML.split(' / ')[0];">nimm aktuelle Zeit</button>
+    <br>
     <button onclick="video.currentTime -= 10;"><<</button>
     <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
     <button onclick="video.currentTime += 10;">>></button>
@@ -607,11 +612,35 @@ function updateVideo(){
     canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     canvas.restore();
   }
-  if (video.ended) {
-    video.currentTime = 0;
+  if (video.currentTime >= convertTime(loopEnding.value, 'loopEnding')  && loop.checked) {
+    video.currentTime = convertTime(loopBeginning.value);
     video.play();
   }
-  requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
+  else if (video.currentTime >= convertTime(loopEnding.value, 'loopEnding')) {
+    if (stopAtEnd.checked) playPauseVideo('pause');
+    else if(video.currentTime >= video.duration) playVideo.innerHTML = 'play';
+  }
+    requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
+}
+function convertTime(value, id){
+  var time = 0;
+  var sec = value.split(':')[2];
+  var mins = value.split(':')[1];
+  var hours = value.split(':')[0];
+  if (sec < 10) sec = sec[1];
+  if (mins < 10) mins = mins[1];
+  if (hours < 10) hours = hours[1];
+    try {
+      time += JSON.parse(sec);
+      time += JSON.parse(mins)*60;
+      time += JSON.parse(hours)*60*60;
+      if (time > video.duration || time < 0) console.log(abc);
+    }
+    catch (e) {
+      if (id == 'loopEnding') time = video.duration;
+      else time = 0;
+    }
+  return time;
 }
 var originalSize = {};
   function loadImage(width, height) {
