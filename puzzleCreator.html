@@ -53,11 +53,18 @@
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
     </p>
-    <select id="shuffleStyle">
+    <select onchange="if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; else tilesGapS.style.display = 'none';";  id="shuffleStyle">
       <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
       <option value="listTiles">Teile nebeneinander auflisten</option>
-      <option value="noOverlappingTiles">Teile mit Abstand nebeneinander legen</option>
+      <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
+    <br>
+    <div id="tilesGapS" style="display: none;">
+      <input id="tilesGap" oninput="gapSizeChanged(value);" value="55" type="text">
+      <br>
+      <br>
+      <canvas id="gapCanvas"></canvas>
+    </div>
     <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
     <br>
@@ -183,6 +190,7 @@
     swipeSteuerungP.style.display = "none";
     scrollOnBlancP.style.display = "none";
   }
+  gapSizeChanged(tilesGap.value);
   mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
   anzahlVerschieben.value = anzahl.value*anzahl.value;
@@ -275,6 +283,23 @@
       if (sourceIsPicture.checked) preview.style.display = "none";
       else videoPreview.style.display = "none";
     }
+  }
+  function gapSizeChanged(value) {
+    // playing around with width representation
+    // gapCanvas.width = Math.round(größeAnpassenX.value/anzahl.value) + JSON.parse(tilesGap.value) + Math.round(größeAnpassenX.value/anzahl.value/anzahl.value);
+    // gapCanvas.height = Math.round(größeAnpassenX.value/anzahl.value);
+    // var gCanvas = gapCanvas.getContext('2d');
+    // gCanvas.clearRect(0, 0, gCanvas.width, gCanvas.height);
+    // gCanvas.fillStyle = 'red';
+    // gCanvas.fillRect(0, 0, Math.round(größeAnpassenX.value/anzahl.value/anzahl.value), Math.round(größeAnpassenY.value/anzahl.value/anzahl.value));
+    // gCanvas.fillRect(Math.round(größeAnpassenX.value/anzahl.value/anzahl.value) + JSON.parse(tilesGap.value), 0, Math.round(größeAnpassenY.value/anzahl.value/anzahl.value), Math.round(größeAnpassenY.value/anzahl.value/anzahl.value));
+    gapCanvas.width = 100 + JSON.parse(tilesGap.value);
+    gapCanvas.height = 100;
+    var gCanvas = gapCanvas.getContext('2d');
+    gCanvas.clearRect(0, 0, gCanvas.width, gCanvas.height);
+    gCanvas.fillStyle = 'red';
+    gCanvas.fillRect(0, 0, 50, 50);
+    gCanvas.fillRect(50 + JSON.parse(tilesGap.value), 0, 50, 50);
   }
   function scrollTileSelection(direc) {
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
@@ -482,7 +507,24 @@
   //   positions.wrong[i].edit = positions.wrong[j].edit;
   //   positions.wrong[j].edit = x;
   // }
-    for (i = positions.wrong.length - 1; (modeSelection.value == "exchange" || shuffleStyle.value == "listTiles") && i > 0; i--) {
+  if (shuffleStyle.value == "nextToEachOther") {
+      try {
+        if (isNaN(JSON.parse(tilesGap.value))) tilesGap.value = 55;
+      } 
+      catch (err) {
+        tilesGap.value = 55;
+      }
+      var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
+      for (let i = 0; i < positions.wrong.length; i++) {
+        positions.wrong[i].edit = {x: pos.x, y: pos.y};
+        pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+        if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.innerWidth) {
+          pos.x = lengthPerTeil.edit.x/2;
+          pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+        }
+      }
+    }
+    for (i = positions.wrong.length - 1; (modeSelection.value == "exchange" || shuffleStyle.value != "overlapTiles") && i > 0; i--) {
       do {
         j = Math.floor(Math.random() * (i + 1));
       } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
@@ -973,7 +1015,8 @@ var originalSize = {};
         positions.layoutOrder.push(i.tileI);
         tileSelectionBar.tiles.splice(i.i, 1);
         // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
-        tileSelectionBar.selectedTile = undefined;
+        if (true/*TODO: optional*/) tileSelectionBar.selectedTile = undefined;
+        else tileSelectionBar.selectedTile.tileI = tileSelectionBar.tiles[tileSelectionBar.selectedTile.tileI];
         positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
         state.placeTile = true;
         scrollTileSelection(0);
