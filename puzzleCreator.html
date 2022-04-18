@@ -303,7 +303,7 @@
       tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = ((lengthPerTeil.edit.x + 5)*(1 + i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
+        elm.style.left = ((lengthPerTeil.edit.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
       }
     }
     if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) scrollTileSelectionRight.style.display = 'none';
@@ -1001,6 +1001,7 @@ var originalSize = {};
             document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
             state.backToBar = false;
             unclipp(i);
+            mouseDown();
           }
           layout(true);
           state.newTileSelected = true;
