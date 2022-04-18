@@ -393,8 +393,8 @@
         positions.right[positions.right.length - 1].border = [];
         if (i == 0) positions.right[positions.right.length - 1].border.push("left");
         if (i == anzahl - 1) positions.right[positions.right.length - 1].border.push("right");
-        if (i1 == 0) positions.right[positions.right.length - 1].border.push("up");
-        if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("down");
+        if (i1 == 0) positions.right[positions.right.length - 1].border.push("top");
+        if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("bottom");
       }
     }
     positions.wrong = JSON.parse(JSON.stringify(positions.right));
@@ -416,19 +416,23 @@
   function shufflePuzzle() {
     if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
+      var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
     for (var i of selected.tiles) {
       missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
       positions.wrong.forEach((position, i1) => {
         for (var direc of ['top', 'right', 'bottom', 'left']) {
-          if (position.original[direc]) {
-            position.original[direc].degree = 0;// position.edit.degree;
-            if (angular.equals(position.original[direc], {x: positions.wrong[i].original.x, y: positions.wrong[i].original.y, degree: 0})) {
-              delete position.original[direc].degree;
-              delete positions.right[i1].original[direc]
-              // delete position.original[direc];
-            }
-            else delete position.original[direc].degree;
+          if (positions.wrong[i].border.includes(directionConverter[direc]) && positions.wrong[i].original[direc] && !i1/* && !selected.tiles.includes(getTile(positions.wrong[i].original[direc]))*/) {
+            positions.wrong[getTile(positions.wrong[i].original[direc])].border.push(directionConverter[direc]);
           }
+          if (position.original[direc]) {
+          position.original[direc].degree = 0;// position.edit.degree;
+          if (angular.equals(position.original[direc], {x: positions.wrong[i].original.x, y: positions.wrong[i].original.y, degree: 0})) {
+            delete position.original[direc].degree;
+            delete positions.right[i1].original[direc];
+            // delete position.original[direc];
+          }
+          else delete position.original[direc].degree;
+        }
         }
       });
     }
@@ -777,12 +781,12 @@ var originalSize = {};
       pCanvas.rotate((position.original.degree)*Math.PI/180);
       // if (position.borderincludes("right")) pCanvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
       // if (position.borderincludes("left")) pCanvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
-      // if (position.borderincludes("up")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
-      // if (position.borderincludes("down")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      // if (position.borderincludes("top")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
+      // if (position.borderincludes("bottom")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
       if (position.border.includes("right")) pCanvas.fillRect((lengthPerTeil.edit.x)/2 - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
       if (position.border.includes("left")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2) + JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
-      if (position.border.includes("up")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
-      if (position.border.includes("down")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), ((lengthPerTeil.edit.y)/2) - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      if (position.border.includes("top")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
+      if (position.border.includes("bottom")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), ((lengthPerTeil.edit.y)/2) - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
       pCanvas.restore();
     }
   }
