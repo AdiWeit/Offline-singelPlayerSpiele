@@ -25,7 +25,9 @@
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
 <button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
-<p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 55px; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
+<br>
+<button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
+<p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button">drehe links
     <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button">drehe rechts
@@ -58,6 +60,9 @@
       <option value="listTiles">Teile nebeneinander auflisten</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
+    <div id="listTilesS">
+      <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
+    </div>
     <br>
     <p id="autoSelectTileBarP" style="display: none;">
       <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
@@ -210,6 +215,17 @@
     else tilesGapS.style.display = 'none';
     if (value == "listTiles") autoSelectTileBarP.style.display = 'inline';
     else autoSelectTileBarP.style.display = 'none';
+  }
+  function backToBarVis(checked) {
+    if (checked) backToBarButtons.style.display = 'inline';
+    else backToBarButtons.style.display = 'none';
+  }
+  function generalBackToBar(elm) {
+    if (tileSelectionBar.tiles.length != anzahl.value*anzahl.value) {
+      state.backToBar = tileSelectionBar.selectedTile.i + 1; 
+      elm.style.backgroundColor = 'red';
+      tileSelectionBar.selectedTile = undefined;
+    }
   }
   function aufgeben(mode) {
     if (mode != "traditional") {
@@ -554,12 +570,14 @@
   textur.style.touchAction = "none";
   tileSelectionCanvas.height = lengthPerTeil.edit.y + 10;
   if (gerät == "Handy") tileSelectionCanvas.style.bottom = lengthPerTeil.edit.y/2;
-  if (shuffleStyle.value != "listTiles") tileSelectionCanvas.style.display = "none";
+  if (shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
+  else tileSelectionCanvas.style.display = "none";
   scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/4 + "px";
   scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/4 + "px";
   if (gerät == "Handy") {
     scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
+    selectBackToBarB.style.fontSize = '5vh';
   }
   if (shuffleStyle.value == "listTiles") {
     scrollTileSelection(0);
@@ -1081,6 +1099,7 @@ var originalSize = {};
               }, 10);
             }
             document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
+            selectBackToBarB.style.backgroundColor = '';
             state.backToBar = false;
             unclipp(i);
             mouseDown();
