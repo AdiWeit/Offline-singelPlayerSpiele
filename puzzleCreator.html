@@ -60,14 +60,22 @@
       <option value="listTiles">Teile nebeneinander auflisten</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
-    <div id="listTilesS">
+    <div style="display: none;" id="listTilesS">
+      <br>
       <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
+      <br>
+      <div id="backToBarBSize">
+        <input id="backToBarBWidth" oninput="changeBackToBarB('width', value)" type="range"> Breite der Buttons
+        <br>
+        <input id="backToBarBHeight" oninput="changeBackToBarB('height', value)" type="range"> Höhe der Buttons
+      </div>
+      <br>
+      <div id="autoSelectTileBarP">
+        <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
+      </div>
     </div>
-    <br>
-    <p id="autoSelectTileBarP" style="display: none;">
-      <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
-    </p>
     <div id="tilesGapS" style="display: none;">
+      <br>
       <input id="tilesGap" oninput="gapSizeChanged(value);" value="55" type="text">
       <br>
       <br>
@@ -213,18 +221,30 @@
   function shuffleStyleVisibilities(value) {
     if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
     else tilesGapS.style.display = 'none';
-    if (value == "listTiles") autoSelectTileBarP.style.display = 'inline';
-    else autoSelectTileBarP.style.display = 'none';
   }
   function backToBarVis(checked) {
-    if (checked) backToBarButtons.style.display = 'inline';
-    else backToBarButtons.style.display = 'none';
+    if (checked) {
+      backToBarButtons.style.display = 'inline';
+      backToBarBSize.style.display = 'inline';
+    }
+    else {
+      backToBarButtons.style.display = 'none';
+      backToBarBSize.style.display = 'none';
+    }
   }
   function generalBackToBar(elm) {
     if (tileSelectionBar.tiles.length != anzahl.value*anzahl.value) {
       state.backToBar = tileSelectionBar.selectedTile.i + 1; 
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
+    }
+  }
+  function changeBackToBarB(side, value) {
+    for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
+      var button = document.getElementsByClassName('backToTileB')[i];
+      button.style[side] = value + 'px';
+      button.style.bottom = (lengthPerTeil.edit.y + 5)/2 - (backToBarBHeight.value)/2 + 'px';
+      button.style.left = 10 + (5 + lengthPerTeil.edit.x)*(i) - (backToBarBWidth.value)/2 + 'px';
     }
   }
   function aufgeben(mode) {
@@ -376,11 +396,7 @@
   var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0};
   tileSelectionBar.collidesMouse = () => {
     var obj = tileSelectionCanvas.getBoundingClientRect();
-    if (lengthPerTeil.edit) {
-      if (gerät == "Handy") obj.y -= lengthPerTeil.edit.y/2;
-      else obj.y -= lengthPerTeil.edit.y/3;
-    }
-    return collides({x: mausx, y: mausy - scrollY, width: 1, height: 1}, obj).boolean;
+    return collides({x: mausx, y: mausy - scrollY + textur.getBoundingClientRect().top, width: 1, height: 1}, obj).boolean;
   }
   function create2() {
     if (modeSelection.value != "traditional") shuffleStyle.value = "none";
@@ -394,7 +410,7 @@
       }
     }
     removeTilesFinishedB.style.display = 'inline';
-    showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit Aufzugeben";
+    showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
     imageSettings.style.display = "none";
     modeSelection.style.display = "none";
     schiebenSettings.style.display = "none";
@@ -568,9 +584,16 @@
   showOriginalP.style.display = 'inline';
   shuffleStyle.style.display = 'none';
   textur.style.touchAction = "none";
+  if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionCanvas.height = lengthPerTeil.edit.y + 10;
-  if (gerät == "Handy") tileSelectionCanvas.style.bottom = lengthPerTeil.edit.y/2;
-  if (shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
+  backToBarBWidth.max = lengthPerTeil.edit.x;
+  backToBarBHeight.max = lengthPerTeil.edit.y;
+  backToBarBWidth.value = lengthPerTeil.edit.x/7;
+  backToBarBHeight.value = lengthPerTeil.edit.y/7;
+  if (shuffleStyle.value == "listTiles") {
+    selectBackToBarB.style.display = 'inline';
+    listTilesS.style.display = 'inline';
+  }
   else tileSelectionCanvas.style.display = "none";
   scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/4 + "px";
   scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/4 + "px";
@@ -578,13 +601,12 @@
     scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
     selectBackToBarB.style.fontSize = '5vh';
+    if (shuffleStyle.value == "listTiles") alert('bitte aktivieren Sie "scroll" und zoomen Sie komplett raus, damit das Layout funktioniert wie gedacht.');
   }
   if (shuffleStyle.value == "listTiles") {
     scrollTileSelection(0);
     for (var i = 0; i < tileSelectionBar.tiles.length + 1; i++) {
-      addElement({class: "backToTileB", innerText: '+', style: `width: ${lengthPerTeil.edit.x/7}px; height: ${lengthPerTeil.edit.y/7}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (lengthPerTeil.edit.y/7)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i) - (lengthPerTeil.edit.x/7)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
-      // document.getElementsByClassName('backToTileB')[i].innerHTML = '+';
-      if (gerät == "Handy") document.getElementsByClassName('backToTileB')[i].style.bottom = lengthPerTeil.edit.y + "px";
+      addElement({class: "backToTileB", innerText: '+', style: `width: ${backToBarBWidth.value}px; height: ${backToBarBHeight.value}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (backToBarBHeight.value)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i) - (backToBarBWidth.value)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
     }
   }
     if (gerät == "Handy") {
@@ -1419,7 +1441,7 @@ var originalSize = {};
     }
     if (!scrollable.checked) {
       // if (aufgebenId.style.display == "inline") textur.style.touchAction = 'none';
-    if (ev.type == "touchstart") {
+    if (ev.type == "touchstart" && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
       mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
     }
     if (ev.type == "touchend") {
