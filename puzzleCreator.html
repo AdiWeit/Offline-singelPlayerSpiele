@@ -53,12 +53,15 @@
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
     </p>
-    <select onchange="if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; else tilesGapS.style.display = 'none';";  id="shuffleStyle">
+    <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
       <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
       <option value="listTiles">Teile nebeneinander auflisten</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
     <br>
+    <p id="autoSelectTileBarP" style="display: none;">
+      <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
+    </p>
     <div id="tilesGapS" style="display: none;">
       <input id="tilesGap" oninput="gapSizeChanged(value);" value="55" type="text">
       <br>
@@ -202,6 +205,12 @@
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
+  function shuffleStyleVisibilities(value) {
+    if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
+    else tilesGapS.style.display = 'none';
+    if (value == "listTiles") autoSelectTileBarP.style.display = 'inline';
+    else autoSelectTileBarP.style.display = 'none';
+  }
   function aufgeben(mode) {
     if (mode != "traditional") {
       alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
@@ -1003,21 +1012,45 @@ var originalSize = {};
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
   var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false};
+  function tileSelected() {
+    for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
+      var i = positions.layoutOrder[i1];
+      var coord = positions.wrong[i].edit;
+      var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
+      if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
+      if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
+        return true;
+      }
+    }
+  }
   function mouseDown(elmCalled, touchStart) {
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
-      if (tileSelectionBar.selectedTile?.tileI != undefined && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
+      if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
         var i = tileSelectionBar.selectedTile;
         selected.tiles = [i.tileI];
         positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
         positions.layoutOrder.push(i.tileI);
         tileSelectionBar.tiles.splice(i.i, 1);
         // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
-        if (true/*TODO: optional*/) tileSelectionBar.selectedTile = undefined;
-        else tileSelectionBar.selectedTile.tileI = tileSelectionBar.tiles[tileSelectionBar.selectedTile.tileI];
-        positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
+        if (!autoSelectTileBar.checked) tileSelectionBar.selectedTile = undefined;
+        else {
+          if (!tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
+          else {
+            setTimeout(function () {
+              tileSelectionBar.selectedTile.byUser = false;
+              tileSelectionBar.selectedTile.tileI++;
+              if (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) tileSelectionBar.selectedTile.i--;
+              while (tileSelectionBar.tiles.length > 0 && !positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) {
+                tileSelectionBar.selectedTile.tileI--;
+              }
+              layout();
+            }, 10);
+          }
+        }
+          positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
         state.placeTile = true;
         scrollTileSelection(0);
       }
@@ -1041,6 +1074,12 @@ var originalSize = {};
           if (state.backToBar !== false) {
             // tileSelectionBar.tiles.push(i);
             tileSelectionBar.tiles.splice(state.backToBar, 0, i);
+            if (autoSelectTileBar.checked && tileSelectionBar.tiles.length == 1) {
+              state.setSelected = {i: state.backToBar, tileI: i};
+              setTimeout(function() {
+                tileSelectionBar.selectedTile = state.setSelected;
+              }, 10);
+            }
             document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
             state.backToBar = false;
             unclipp(i);
@@ -1054,7 +1093,7 @@ var originalSize = {};
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
         if (mausx > tile.edit.x + tileSelectionBar.scrollX - lengthPerTeil.edit.x/2 && mausx < tile.edit.x + tileSelectionBar.scrollX + lengthPerTeil.edit.x/2 && tileSelectionBar.collidesMouse()) {
-          tileSelectionBar.selectedTile = {i: i, tileI: tileI};
+          tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
           layout();
         }
       });
