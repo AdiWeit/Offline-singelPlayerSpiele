@@ -24,7 +24,7 @@
 <br>
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
-<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
+<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'; texturTop = textur.getBoundingClientRect().top;" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
@@ -396,7 +396,7 @@
   var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0};
   tileSelectionBar.collidesMouse = () => {
     var obj = tileSelectionCanvas.getBoundingClientRect();
-    return collides({x: mausx, y: mausy - scrollY + textur.getBoundingClientRect().top, width: 1, height: 1}, obj).boolean;
+    return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
   }
   function create2() {
     if (modeSelection.value != "traditional") shuffleStyle.value = "none";
@@ -618,7 +618,7 @@
   scrollDownInt = setInterval(scrollDownFunction, 10);
   scrollRightInt = setInterval(scrollRightFunction, 10);
   window.scroll(0, 0);
-  var texturTop = textur.getBoundingClientRect().top;
+  texturTop = textur.getBoundingClientRect().top;
   }
   function addElement(attr, elm, childOf, asElement) {
       var newElement = document.createElement(/*'span'*/elm);
@@ -1497,8 +1497,8 @@ var originalSize = {};
   function scrollDownFunction(tile) {
     // selected.tiles.forEach((tile, i) => {
     var pScrollY = scrollY;
-    if (shuffleStyle.value == "listTiles") pScrollY -= lengthPerTeil.edit.y - 10;
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + pScrollY + texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.innerHeight - 10))) && (modeSelection.value !=
+    if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.innerHeight - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX, scrollY + 3);
         mausy += 3;
@@ -1526,6 +1526,10 @@ scrollLeftInt = setInterval(function () {
     mausx -= 3;
 }
 }, 10);
+window.addEventListener('scroll',()=>{
+  if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
+  else if (aufgebenId.style.display == "inline") selectBackToBarB.style.display = 'inline';
+});
 
 // stop clock:
 var time = 0;
