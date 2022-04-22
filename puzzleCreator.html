@@ -371,7 +371,7 @@
         elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.sizeAdapted.x + 5)*(buttonDirec*(-1)) + 'px';
       }
     }
-    if (tileSelectionBar.scrollX >= lengthPerTeil.sizeAdapted.x + 5) {
+    if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
       tileSelectionBar.offset = 0;
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
@@ -391,7 +391,7 @@
       }
       tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
     }
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.sizeAdapted.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
     else scrollTileSelectionRight.style.display = 'inline';
     layout(true, true);
   }
