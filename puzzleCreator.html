@@ -355,13 +355,14 @@
   }
   function scrollTileSelection(direc) {
     var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
+    var screenScrollX = window.innerWidth/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
     tileSelectionBar.leftOffScreenTiles += direc;
     var scrollXBefore = tileSelectionBar.scrollX;
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
     var buttonDirec = direc;
-    // if (tileSelectionBar.scrollX >= 0 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) {
+    // if (tileSelectionBar.scrollX >= 0 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) {
       // buttonDirec = direc*(-1);
-      if (!((-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) == tileSelectionBar.scrollX && direc == -1) && tileSelectionBar.scrollX != lengthPerTeil.edit.x + 5 && (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth == tileSelectionBar.scrollX - lengthPerTeil.edit.x - 5 || tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth)) {
+      if (!((-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) == tileSelectionBar.scrollX && direc == -1) && tileSelectionBar.scrollX != lengthPerTeil.edit.x + 5 && (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX == tileSelectionBar.scrollX - lengthPerTeil.edit.x - 5 || tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX)) {
         buttonDirec = 0;
       }
         // }
@@ -370,7 +371,7 @@
         elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.sizeAdapted.x + 5)*(buttonDirec*(-1)) + 'px';
       }
     }
-    if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
+    if (tileSelectionBar.scrollX >= lengthPerTeil.sizeAdapted.x + 5) {
       tileSelectionBar.offset = 0;
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
@@ -381,16 +382,16 @@
     }
     if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
     else scrollTileSelectionLeft.style.display = 'inline';
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth) {
-      if (!tileSelectionBar.offset) tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth));
-      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + window.innerWidth;
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) {
+      if (!tileSelectionBar.offset) tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX));
+      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
         var elm = document.getElementsByClassName('backToTileB')[i];
         elm.style.left = ((lengthPerTeil.sizeAdapted.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
       }
-      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(window.innerWidth/lengthPerTeil.sizeAdapted.x) + 1;
+      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
     }
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.sizeAdapted.x + 5)*(tileSelectionBar.tiles.length)) + window.innerWidth) scrollTileSelectionRight.style.display = 'none';
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.sizeAdapted.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
     else scrollTileSelectionRight.style.display = 'inline';
     layout(true, true);
   }
@@ -1171,9 +1172,10 @@ var originalSize = {};
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length) {
+      var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
       tileSelectionBar.leftOffScreenTiles = - (Math.floor(tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5)));
-      if ((tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1]) tileSelectionBar.offset = - (JSON.parse("0." + (tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.edit.x + 5));
+      if ((tileSelectionBar.scrollX/(lengthPerTeil.sizeAdapted.x + 5) + "").split('.')[1]) tileSelectionBar.offset = - (JSON.parse("0." + (tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5));
       else tileSelectionBar.offset = 0;
       if (tileSelectionBar.scrollX >= 0) tileSelectionBar.offset = -(tileSelectionBar.offset);
       else tileSelectionBar.leftOffScreenTiles--;
