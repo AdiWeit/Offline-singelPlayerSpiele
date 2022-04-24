@@ -241,19 +241,19 @@
     }
   }
   function changeBackToBarB(side, value) {
+    var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var button = document.getElementsByClassName('backToTileB')[i];
       button.style[side] = value + 'px';
-      button.style.bottom = (lengthPerTeil.edit.y + 5)/2 - (backToBarBHeight.value)/2 + 'px';
-      button.style.left = 10 + (5 + lengthPerTeil.edit.x)*(i) - (backToBarBWidth.value)/2 + 'px';
+      button.style.bottom = (lengthPerTeil.sizeAdapted.y + 5)/2 - (backToBarBHeight.value)/2 + 'px';
+      button.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(button.style.width)/2 + 'px';
     }
   }
   function changeTileBarHeight(value) {
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
     // TODO: handle sides seperately
-    tileSelectionBar.pictureSize = {width: JSON.parse(value - 10), height:JSON.parse(value) - 10};
+    tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
     layout();
-    addElement({class: "backToTileB", innerText: '+', style: `width: ${backToBarBWidth.value}px; height: ${backToBarBHeight.value}; bottom: ${(lengthPerTeil.edit.y + 5)/2 - (backToBarBHeight.value)/2}px; left: ${10 + (5 + lengthPerTeil.edit.x)*(i) - (backToBarBWidth.value)/2}px`, onclick: `posInBarSelected(${i});`}, 'button', 'backToBarButtons');
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
       backToBarBWidth.value = tileSelectionBar.pictureSize.width/7;
@@ -261,7 +261,17 @@
       elm.style.width = backToBarBWidth.value;
       elm.style.height = backToBarBHeight.value;
       elm.style.bottom = (tileSelectionBar.pictureSize.height + 5)/2 - (backToBarBHeight.value)/2;
-      elm.style.left = 10 + (5 + tileSelectionBar.pictureSize.width)*(i) - (backToBarBWidth.value)/2;
+      elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (tileSelectionBar.pictureSize.width + 5*(tileSelectionBar.pictureSize.width/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
+    }
+    backToBarBWidth.max = tileSelectionBar.pictureSize.width;
+   backToBarBHeight.max = tileSelectionBar.pictureSize.height;
+    scrollTileSelectionRight.style.bottom = tileSelectionBar.pictureSize.height/4 + "px";
+    scrollTileSelectionLeft.style.bottom = tileSelectionBar.pictureSize.height/4 + "px";
+    scrollTileSelectionLeft.height = tileSelectionBar.pictureSize.height/2;
+    scrollTileSelectionRight.height = tileSelectionBar.pictureSize.height/2;
+    if (gerät == "Handy") {
+      scrollTileSelectionRight.style.bottom = tileSelectionBar.pictureSize.height/2 + "px";
+      scrollTileSelectionLeft.style.bottom = tileSelectionBar.pictureSize.height/2 + "px";
     }
   }
   function aufgeben(mode) {
@@ -379,28 +389,32 @@
         // }
       if (buttonDirec) {
       for (const elm of document.getElementsByClassName('backToTileB')) {
-        elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.sizeAdapted.x + 5)*(buttonDirec*(-1)) + 'px';
+        elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(buttonDirec*(-1)) + 'px';
+        if (scrollXBefore - 1 <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) elm.style.left = convertStyle(elm.style.left) + tileSelectionBar.offset*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x);
       }
     }
     if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
       tileSelectionBar.offset = 0;
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
+      tileSelectionBar.leftOffScreenTiles = -1;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
         var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = (lengthPerTeil.sizeAdapted.x + 5)*(1 + i) - convertStyle(elm.style.width)/2 + 10 + 'px';
-        tileSelectionBar.leftOffScreenTiles = -1;
+        elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
       }
     }
     if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
     else scrollTileSelectionLeft.style.display = 'inline';
     if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) {
-      if (!tileSelectionBar.offset) tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX));
+      if (!tileSelectionBar.offset) {
+        tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX));
+        tileSelectionBar.elmleftBefore = document.getElementsByClassName('backToTileB')[0].style.left;
+      }
       tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX + 1;
+      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
         var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = ((lengthPerTeil.sizeAdapted.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
+        elm.style.left = convertStyle(tileSelectionBar.elmLeftBefore) + tileSelectionBar.offset*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x) + 'px';
       }
-      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
     }
     if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
     else scrollTileSelectionRight.style.display = 'inline';
@@ -1192,13 +1206,7 @@ var originalSize = {};
       else tileSelectionBar.leftOffScreenTiles--;
       for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
-       if (tileSelectionBar.scrollX < lengthPerTeil.edit.x + 5 && tileSelectionBar.scrollX > -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) {
-         elm.style.left = convertStyle(elm.style.left) + (mausx - tileSelectionBar.swipePosition) + 'px';
-       }
-        else {
-          if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) elm.style.left = (lengthPerTeil.edit.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + 'px';
-          if (tileSelectionBar.scrollX <= -(lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1) + window.innerWidth) elm.style.left = ((lengthPerTeil.edit.x + 5)*(i) - convertStyle(elm.style.width)/2 + 10 + tileSelectionBar.scrollX) + 'px';
-        }
+        elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
       }
       tileSelectionBar.swipePosition = mausx;
       scrollTileSelection(0);
