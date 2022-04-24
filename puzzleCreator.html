@@ -842,7 +842,7 @@ var originalSize = {};
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
-    if (lengthPerTeil.sizeAdapted) positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x));
+    if (lengthPerTeil.sizeAdapted) tileSelectionCanvas.width = positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.edit.x/lengthPerTeil.sizeAdapted.x));
     else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
