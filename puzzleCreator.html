@@ -241,7 +241,6 @@
     }
   }
   function changeBackToBarB(side, value) {
-    var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var button = document.getElementsByClassName('backToTileB')[i];
       button.style[side] = value + 'px';
@@ -253,25 +252,27 @@
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
     // TODO: handle sides seperately
     tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
+    lengthPerTeil.sizeAdapted = {x: tileSelectionBar.pictureSize.width, y: tileSelectionBar.pictureSize.height};
+    tileSelectionCanvas.width = 10000;
     layout();
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
-      backToBarBWidth.value = tileSelectionBar.pictureSize.width/7;
-      backToBarBHeight.value = tileSelectionBar.pictureSize.height/7;
+      backToBarBWidth.value = lengthPerTeil.sizeAdapted.x/7;
+      backToBarBHeight.value = lengthPerTeil.sizeAdapted.y/7;
       elm.style.width = backToBarBWidth.value;
       elm.style.height = backToBarBHeight.value;
-      elm.style.bottom = (tileSelectionBar.pictureSize.height + 5)/2 - (backToBarBHeight.value)/2;
-      elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (tileSelectionBar.pictureSize.width + 5*(tileSelectionBar.pictureSize.width/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
+      elm.style.bottom = (lengthPerTeil.sizeAdapted.y + 5)/2 - (backToBarBHeight.value)/2;
+      elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
     }
-    backToBarBWidth.max = tileSelectionBar.pictureSize.width;
-   backToBarBHeight.max = tileSelectionBar.pictureSize.height;
-    scrollTileSelectionRight.style.bottom = tileSelectionBar.pictureSize.height/4 + "px";
-    scrollTileSelectionLeft.style.bottom = tileSelectionBar.pictureSize.height/4 + "px";
-    scrollTileSelectionLeft.height = tileSelectionBar.pictureSize.height/2;
-    scrollTileSelectionRight.height = tileSelectionBar.pictureSize.height/2;
+    backToBarBWidth.max = lengthPerTeil.sizeAdapted.x;
+    backToBarBHeight.max = lengthPerTeil.sizeAdapted.y;
+    scrollTileSelectionRight.style.bottom = lengthPerTeil.sizeAdapted.y/4 + "px";
+    scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/4 + "px";
+    scrollTileSelectionLeft.height = lengthPerTeil.sizeAdapted.y/2;
+    scrollTileSelectionRight.height = lengthPerTeil.sizeAdapted.y/2;
     if (gerät == "Handy") {
-      scrollTileSelectionRight.style.bottom = tileSelectionBar.pictureSize.height/2 + "px";
-      scrollTileSelectionLeft.style.bottom = tileSelectionBar.pictureSize.height/2 + "px";
+      scrollTileSelectionRight.style.bottom = lengthPerTeil.sizeAdapted.y/2 + "px";
+      scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 + "px";
     }
   }
   function aufgeben(mode) {
@@ -374,7 +375,6 @@
     gCanvas.fillRect(50 + JSON.parse(tilesGap.value), 0, 50, 50);
   }
   function scrollTileSelection(direc) {
-    var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
     var screenScrollX = window.innerWidth/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
     if (screenScrollX/lengthPerTeil.edit.x > positions.wrong.length) screenScrollX = positions.wrong.length*lengthPerTeil.edit.x;
     tileSelectionBar.leftOffScreenTiles += direc;
@@ -842,7 +842,8 @@ var originalSize = {};
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
-    tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
+    if (lengthPerTeil.sizeAdapted) positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x));
+    else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
@@ -1176,18 +1177,11 @@ var originalSize = {};
       state.placeTile = false;
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
-        var lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}};
-        if (mausx > (5 + lengthPerTeil.edit.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.edit.x + 5) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.edit.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.edit.x + 5) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
+        if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
           tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
           layout();
         }
       });
-      if (tileSelectionBar.tiles.length != positions.wrong.length) {
-        if (mausx > tileSelectionBar.tiles.length*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && mausx < (tileSelectionBar.tiles.length + 1)*(lengthPerTeil.edit.x + 5) + tileSelectionBar.scrollX && tileSelectionBar.collidesMouse()) {
-          state.backToBar = tileSelectionBar.tiles.length;
-          layout();
-        }
-      }
       folgenMouseMove("mouseDown");
     }
   }
@@ -1195,7 +1189,6 @@ var originalSize = {};
     return JSON.parse(value.replace('px', ''));
   }
   function folgenMouseMove(calledBy) {
-    if (tileSelectionBar.pictureSize) var lengthPerTeil = {sizeAdapted: {x: tileSelectionBar.pictureSize.width, y:tileSelectionBar.pictureSize.height}, original: {x: Math.round(originalSize.width/anzahl.value), y: Math.round(originalSize.height/anzahl.value)}, edit: {x: Math.round(preview.width/anzahl.value), y: Math.round(preview.height/anzahl.value)}};
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length) {
       tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
