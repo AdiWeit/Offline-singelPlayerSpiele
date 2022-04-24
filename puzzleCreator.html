@@ -1177,7 +1177,7 @@ var originalSize = {};
       state.placeTile = false;
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
-        if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
+        if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
           tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
           layout();
         }
