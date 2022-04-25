@@ -24,7 +24,7 @@
 <br>
 <button type="button" onclick="create();" name="button">create puzzle</button>
 </p>
-<button type="button" id="showSettings" onclick="if (settings.style.display == 'none') settings.style.display = 'inline'; else settings.style.display = 'none'; texturTop = textur.getBoundingClientRect().top;" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
+<button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
@@ -42,7 +42,7 @@
     position: relative;
   }
 </style>
-<div id="settings">
+<div id="settings" style="display: none;">
   <br>
   <br>
   <select onchange="modeSelected(value);" id="modeSelection">
@@ -70,7 +70,8 @@
         <input id="backToBarBHeight" oninput="changeBackToBarB('height', value)" type="range"> Höhe der Buttons
       </div>
       <br>
-      <input type="range" oninput="changeTileBarHeight(value);" id="tileBarHeight"> Höhe der Leiste
+      <input type="range" oninput="changeTileBarHeight(value);" min="25" id="tileBarHeight"> <a id="tileBarHeightText">Höhe der Leiste</a>
+      <button onclick="changeTileBarHeight(lengthPerTeil.edit.y + 10);" id="resetBarSize">reset</button>
       <div id="autoSelectTileBarP">
         <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
       </div>
@@ -211,7 +212,6 @@
   mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
   anzahlVerschieben.value = anzahl.value*anzahl.value;
-  settings.style.display = "none";
   aufgebenId.style.display = "none";
   // schiebenSettings.style.display  = "inline"
   randSettings.style.display = "none";
@@ -239,6 +239,11 @@
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
     }
+  }
+  function changeSettingsVis(vis) {
+    if ((settings.style.display == 'none' || vis == "inline") && vis != "none") settings.style.display = 'inline'; 
+    else settings.style.display = 'none';
+    texturTop = textur.getBoundingClientRect().top;
   }
   function changeBackToBarB(side, value) {
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
@@ -380,27 +385,10 @@
     tileSelectionBar.leftOffScreenTiles += direc;
     var scrollXBefore = tileSelectionBar.scrollX;
     tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
-    var buttonDirec = direc;
-    // if (tileSelectionBar.scrollX >= 0 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) {
-      // buttonDirec = direc*(-1);
-      if (!((-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) == tileSelectionBar.scrollX && direc == -1) && tileSelectionBar.scrollX != lengthPerTeil.edit.x + 5 && (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX == tileSelectionBar.scrollX - lengthPerTeil.edit.x - 5 || tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5 || tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX)) {
-        buttonDirec = 0;
-      }
-        // }
-      if (buttonDirec) {
-      for (const elm of document.getElementsByClassName('backToTileB')) {
-        elm.style.left = convertStyle(elm.style.left) + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(buttonDirec*(-1)) + 'px';
-        if (scrollXBefore - 1 <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) elm.style.left = convertStyle(elm.style.left) + tileSelectionBar.offset*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x);
-      }
-    }
     if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
       tileSelectionBar.offset = 0;
       tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
       tileSelectionBar.leftOffScreenTiles = -1;
-      for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
-        var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
-      }
     }
     if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
     else scrollTileSelectionLeft.style.display = 'inline';
@@ -411,14 +399,11 @@
       }
       tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX + 1;
       tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
-      for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
-        var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = convertStyle(tileSelectionBar.elmLeftBefore) + tileSelectionBar.offset*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x) + 'px';
-      }
     }
     if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
     else scrollTileSelectionRight.style.display = 'inline';
     layout(true, true);
+    positionBackToTileBarButtons();
   }
   function create() {
     //finished = false;
@@ -456,7 +441,6 @@
     schiebenSettings.style.display = "none";
     rotateTilesP.style.display = "none";
     missing = [];
-    settings.style.display = 'none';
     if (gerät == "Handy") mobileControls.style.display = "inline";
     if (sourceIsVideo.checked) {
       videoControls.style.display = 'inline';
@@ -516,7 +500,7 @@
     showSettings.scrollIntoView();
     textur.style.touchAction = "none";
     window.scroll(0, 0);
-    texturTop = textur.getBoundingClientRect().top;
+    changeSettingsVis('none');
   }
 
   function shufflePuzzle() {
@@ -637,6 +621,9 @@
   if (shuffleStyle.value == "listTiles") {
     selectBackToBarB.style.display = 'inline';
     listTilesS.style.display = 'inline';
+    settings.style.display = 'inline';
+    tileBarHeight.style.width = window.innerWidth - tileBarHeightText.getBoundingClientRect().width - resetBarSize.getBoundingClientRect().width - 100;
+    settings.style.display = 'none';
   }
   else tileSelectionCanvas.style.display = "none";
   scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/4 + "px";
@@ -844,6 +831,7 @@ var originalSize = {};
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     if (lengthPerTeil.sizeAdapted) tileSelectionCanvas.width = positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.edit.x/lengthPerTeil.sizeAdapted.x));
     else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
+    if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.innerWidth) tileSelectionBar.scrollX = 0;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
@@ -928,7 +916,7 @@ var originalSize = {};
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
   function canvasClicked(calledBy) {
-    if (aufgebenId.style.display == "inline") settings.style.display = "none"
+    if (aufgebenId.style.display == "inline") changeSettingsVis('none');
     if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
@@ -1120,7 +1108,7 @@ var originalSize = {};
         tileSelectionBar.tiles.splice(i.i, 1);
         // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
         if (!autoSelectTileBar.checked) tileSelectionBar.selectedTile = undefined;
-        else {
+          else {
           if (!tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
           else {
             setTimeout(function () {
@@ -1188,10 +1176,9 @@ var originalSize = {};
   function convertStyle(value) {
     return JSON.parse(value.replace('px', ''));
   }
-  function folgenMouseMove(calledBy) {
-    if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
-    if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length) {
-      tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
+  function positionBackToTileBarButtons(calledByMouseDown) {
+    if (!calledByMouseDown || (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length)) {
+      if (calledByMouseDown) tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
       tileSelectionBar.leftOffScreenTiles = - (Math.floor(tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5)));
       if (((tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5)) tileSelectionBar.offset = - (JSON.parse("0." + (tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5));
       else tileSelectionBar.offset = 0;
@@ -1202,8 +1189,12 @@ var originalSize = {};
         elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
       }
       tileSelectionBar.swipePosition = mausx;
-      scrollTileSelection(0);
+      if (calledByMouseDown) scrollTileSelection(0);
     }
+  }
+  function folgenMouseMove(calledBy) {
+    if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
+    positionBackToTileBarButtons(true);
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
       // select clipped
       for (var tile of selected.tiles) {
