@@ -916,7 +916,7 @@ var originalSize = {};
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
   function canvasClicked(calledBy) {
-    if (aufgebenId.style.display == "inline") changeSettingsVis('none');
+    if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
     if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
@@ -1075,7 +1075,7 @@ var originalSize = {};
   var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, lookedAtOriginal: {times: 0}};
   document.onmousemove = readMouseMove
   function readMouseMove(e) {
-    mausx = e.clientX + scrollX;
+    mausx = e.clientX + scrollX - textur.getBoundingClientRect().left;
     mausy = e.clientY + scrollY - texturTop;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
@@ -1115,7 +1115,7 @@ var originalSize = {};
               tileSelectionBar.selectedTile.byUser = false;
               tileSelectionBar.selectedTile.tileI++;
               if (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) tileSelectionBar.selectedTile.i--;
-              while (tileSelectionBar.tiles.length > 0 && !positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) {
+              while (tileSelectionBar.selectedTile.tileI >= 0 && tileSelectionBar.tiles.length > 0 && (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2)) {
                 tileSelectionBar.selectedTile.tileI--;
               }
               layout();
@@ -1297,12 +1297,32 @@ var originalSize = {};
     if (obj.all && !positions.wrong[tile].original.bottom) {
       selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
     }
-    if (selected.clip.length > clipLength && (selectedCollidesOthers(selected.clip[selected.clip.length - 1], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1], 3), screenObj).boolean)) selected.clip.pop();
+    checkedTiles = [];
+    for (var i = 0; i < selected.clip.length - clipLength; i++) {
+      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile))) {
+        selected.clip.pop();
+        i--;
+      }
+    }
   }
-  function selectedCollidesOthers(pClip, tile) {
+  function selectedCollidesOthers(pClip,  tile) {
     for (var i = 0; i < positions.wrong.length; i++) {
       if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) return true;
     }
+  }
+  var checkedTiles = [];
+  function selectedCollideOther(clipIndex, clipDirection, tile) {
+    checkedTiles.push(clipIndex);
+    var boolean = false;
+    for (const tile of selected.tiles) {
+      if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
+        return true;
+      }
+    }
+    for (const direction of ['top', 'right', 'bottom', 'left']) {
+      if (positions.wrong[clipIndex].original[direction] && !checkedTiles.includes(getTile(positions.wrong[clipIndex].original[direction]))) boolean = selectedCollideOther(getTile(positions.wrong[clipIndex].original[direction]), direction, tile);
+    }
+    return boolean;
   }
   var clipped = [];
   function mouseUp() {
@@ -1464,7 +1484,7 @@ var originalSize = {};
       canvasClicked();
     }
     else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
-      mausx = ev.touches[0]["pageX"]// + scrollX;
+      mausx = ev.touches[0]["pageX"] - textur.getBoundingClientRect().left;// + scrollX;
       mausy = ev.touches[0]["pageY"] - texturTop;// - 32// + scrollY;
     }
     if (!scrollable.checked) {
