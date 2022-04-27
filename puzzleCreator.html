@@ -146,7 +146,11 @@
   </div>
 </div>
 <br>
-<button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">finished</button>
+<button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">Fertig</button>
+<a id="tileStatusOptions" style="display: none; position: fixed; background-color: rgba(205, 218, 199, 0.77); border-radius: 5px;">
+<input type="radio" id="pRemoveTile" checked="true" style="accent-color: red;" name="tileStatus"> Teil löschen
+<input type="radio" id="doNotMoveTile" style="accent-color: blue;" name="tileStatus"> Teil beim Mischen nicht bewegen
+</a>
 <br>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
@@ -425,6 +429,7 @@
   }
   function create2() {
     if (modeSelection.value != "traditional") shuffleStyle.value = "none";
+    if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
     if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
     positions = {right: [], wrong: []};
     if (modeSelection.value == "traditional") {
@@ -435,6 +440,7 @@
       }
     }
     removeTilesFinishedB.style.display = 'inline';
+    if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
     showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
     imageSettings.style.display = "none";
     modeSelection.style.display = "none";
@@ -531,6 +537,9 @@
         if (selected.objTiles.includes(JSON.stringify(positions.wrong[i].edit))) {
           positions.wrong.splice(i, 1);
           positions.right.splice(i, 1);
+          for (var i1 = 0; i1 < doNotChange.length; i1++) {
+            if (doNotChange[i1] > i) doNotChange[i1]--;
+          }
           if (modeSelection.value == "traditional") {
             positions.layoutOrder.splice(i, 1);
             for (var i1 = i; i1 < positions.layoutOrder.length; i1++) {
@@ -541,7 +550,6 @@
         }
       }
     }
-    else doNotChange = selected.tiles;
     selected.tiles = [];
     removeTilesFinishedB.style.display = 'none';
     state.removeTile = false;
@@ -600,13 +608,12 @@
     }
     }
     stats.preOrdered = doNotChange.length;
-    doNotChange = [];
-    layout();
   }
-  }
+  doNotChange = [];
   aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
   shuffleStyle.style.display = 'none';
+  tileStatusOptions.style.display = 'none';
   textur.style.touchAction = "none";
   texturTop = textur.getBoundingClientRect().top;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
@@ -650,6 +657,8 @@
   scrollRightInt = setInterval(scrollRightFunction, 10);
   window.scroll(0, 0);
   }
+  layout(null, true);
+}
   function addElement(attr, elm, childOf, asElement) {
       var newElement = document.createElement(/*'span'*/elm);
       if (childOf && !asElement) document.getElementById(childOf).appendChild(newElement);
@@ -804,15 +813,21 @@ var originalSize = {};
     }
     return direc;
   }
+  function showSelectedTile(tile, color) {
+    canvas.fillStyle = color;
+    canvas.save();
+    if (state.removeTile/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
+    else canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
+    canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
+    canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.restore();
+  }
   function showSelected() {
     for (var tile of selected.tiles) {
-      canvas.fillStyle = "rgba(255, 0, 0, 0.3)";
-      canvas.save();
-      if (state.removeTile/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
-      else canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
-      canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
-      canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
-      canvas.restore();
+      showSelectedTile(tile, "rgba(255, 0, 0, 0.3)");
+    }
+    for (var tile of doNotChange) {
+      showSelectedTile(tile, "rgba(0, 76, 255, 0.3)");
     }
   }
   function showClippingOptions(params) {
@@ -986,31 +1001,46 @@ var originalSize = {};
       }, 133);
     positions.wrong.forEach((position, i) => {
       if (position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-        if (!selected.tiles.includes(i)) {
+        if (pRemoveTile.checked && !selected.tiles.includes(i)) {
           selected.tiles.push(i);
           selected.objTiles.push(JSON.stringify(position.edit));
         }
-        else {
+        else if (doNotMoveTile.checked && !doNotChange.includes(i)) doNotChange.push(i);
+        else if (pRemoveTile.checked && selected.tiles.includes(i)) {
           for (var i1 = 0; i1 < selected.tiles.length; i1++) {
             if (selected.tiles[i1] == i) {
               selected.tiles.splice(i1, 1);
               selected.objTiles.splice(i1, 1);
+              }
+            }
+          }
+          else if (doNotMoveTile.checked && doNotChange.includes(i)) {
+            for (var i1 = 0; i1 < doNotChange.length; i1++) {
+            if (doNotChange[i1] == i) {
+              doNotChange.splice(i1, 1);
+              }
             }
           }
         }
-      }
     });
   }
   if (first && modeSelection.value != "schieben") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
+  function listCoordinates(tiles) {
+    var list = [];
+    for (const tile of tiles) {
+      list.push(positions.wrong[tile].edit.x + ' - ' + positions.wrong[tile].edit.y);
+    }
+    return list;
+  }
   function verschiebenPC() {
     var missingArray = [];
     var workingNumbers = [];
     var maleZurrück = {number: 0, normalSlide: 0};
     for (var i = 0; i < positions.wrong.length; i++) {
-      workingNumbers.push(i);
+      if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i);
     }
     var counter = 0;
     for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlVerschieben.value); i++) {
@@ -1018,8 +1048,8 @@ var originalSize = {};
       if (!workingNumbers.length) break;
       missing.forEach((pMissing, i1) => {
       try {
-      if (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
-      (positions.wrong[side].edit.x - lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y)/*left*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y + lengthPerTeil.edit.y))/*down*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y - lengthPerTeil.edit.y))/*up*/)) {
+      if (!listCoordinates(doNotChange).includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y) && (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
+      (positions.wrong[side].edit.x - lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y)/*left*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y + lengthPerTeil.edit.y))/*down*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y - lengthPerTeil.edit.y))/*up*/))) {
       if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y))) {
         maleZurrück.number++;
       }
@@ -1050,7 +1080,7 @@ var originalSize = {};
           missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
           workingNumbers = [];
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            workingNumbers.push(i1);
+            if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i1);
           }
       // }
     }
