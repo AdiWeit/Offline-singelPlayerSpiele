@@ -129,6 +129,24 @@
   <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
   <br>
   <br>
+  <div id="movementPlayer" style="display: none;">
+    <input onchange="if (checked) innerMovementPlayer.style.display = 'inline'; else innerMovementPlayer.style.display = 'none';" type="checkbox">Züge des PCs ansehen
+    <div id="innerMovementPlayer" style="display: none;">
+      <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
+      <button>play/pause</button>
+      <button>⟲</button>
+      <button onclick="playMovementPos(objMovementPlayer.position + 1);">></button>
+      <br>
+      <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
+      <button>zu deiner Positionierung (falls vorhanden)</button>
+      <br>
+      <input min="0.1" type="range"> Geschwindigkeit
+      <button>zurücksetzen</button>
+      <br>
+      <canvas id="movementPlayerTextur"></canvas>
+    </div>
+  </div>
+  <br>
   <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
   <div style="display: none;" id="videoControls">
@@ -248,6 +266,7 @@
     if ((settings.style.display == 'none' || vis == "inline") && vis != "none") settings.style.display = 'inline'; 
     else settings.style.display = 'none';
     texturTop = textur.getBoundingClientRect().top;
+    if (settings.style.display == 'none') canvas = textur.getContext('2d');
   }
   function changeBackToBarB(side, value) {
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
@@ -382,6 +401,19 @@
     gCanvas.fillStyle = 'red';
     gCanvas.fillRect(0, 0, 50, 50);
     gCanvas.fillRect(50 + JSON.parse(tilesGap.value), 0, 50, 50);
+  }
+  var objMovementPlayer = {pause: false, position: 0};
+  function playMovementPos(position) {
+    if (position < 0) position = 0;
+    if (position > movement.move.length) position = movement.move.length;
+    positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
+    for (let i = movement.move.length - 1; i >= position; i--) {
+      positions.wrong[movement.move[i].tile].edit.x += movement.move[i].x;
+      positions.wrong[movement.move[i].tile].edit.y += movement.move[i].y;
+    }
+    canvas = movementPlayerTextur.getContext('2d');
+    objMovementPlayer.position = JSON.parse(position);
+    layout(true, true);
   }
   function scrollTileSelection(direc) {
     var screenScrollX = window.innerWidth/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
@@ -553,7 +585,14 @@
     selected.tiles = [];
     removeTilesFinishedB.style.display = 'none';
     state.removeTile = false;
-    if (modeSelection.value == "schieben") verschiebenPC();
+    if (modeSelection.value == "schieben") {
+      movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
+      verschiebenPC();
+      movementPlayer.style.display = 'inline';
+      movementPlayerTextur.width = textur.width;
+      movementPlayerTextur.height = textur.height;
+      movementPosition.max = movement.move.length;
+    }
     else {
     if (modeSelection.value == "traditional") {
       textur.width += 500;
@@ -657,7 +696,7 @@
   scrollRightInt = setInterval(scrollRightFunction, 10);
   window.scroll(0, 0);
   }
-  layout(null, true);
+  layout(true, true);
 }
   function addElement(attr, elm, childOf, asElement) {
       var newElement = document.createElement(/*'span'*/elm);
@@ -869,7 +908,7 @@ var originalSize = {};
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.positions.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
+        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen geschafft! Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
         if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
         alert(`Zudem haben Sie ${stats.lookedAtOriginal.times} mal für insgesamt ${stats.lookedAtOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
@@ -990,6 +1029,7 @@ var originalSize = {};
     positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
     missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
     selected.boolean = false;
+    movement.playerPosition = positions.wrong;
   }
   var doNotChange = [];
   var possibleMissing = [];
@@ -1056,9 +1096,10 @@ var originalSize = {};
       else maleZurrück.normalSlide++;
       missingArray.push(pMissing);
       //console.log(missingArray);
-      movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
-      movement.missing.unshift(JSON.parse(JSON.stringify(pMissing)));
+      // movement.positions.unshift(JSON.parse(JSON.stringify(positions)));
       var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
+      movement.move.unshift({x: (pMissing.split(' - ')[0] - ablage.edit.x), y: (pMissing.split(' - ')[1] - ablage.edit.y), tile: side});
+      // movement.missing.unshift(JSON.parse(JSON.stringify(missingArray)));
       positions.wrong[side].edit = JSON.parse(JSON.stringify({x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])}));//.splice(side, 1);
       textur.width = textur.width;
       layout(true);
@@ -1099,7 +1140,7 @@ var originalSize = {};
     }
     if (layout(undefined, true, true) != undefined) verschiebenPC();
   }
-  var movement = {missing: [], positions: []};
+  var movement = {move: [], startPosition: []};
   var mausx;
   var mausy;
   var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, lookedAtOriginal: {times: 0}};
