@@ -43,8 +43,10 @@
   }
 </style>
 <div id="settings" style="display: none;">
-  <br>
-  <br>
+  <div id="settingsSpace">
+    <br>
+    <br>
+  </div>
   <select onchange="modeSelected(value);" id="modeSelection">
     <option value="traditional">traditionell</option>
     <option value="exchange">austauschen</option>
@@ -104,9 +106,11 @@
     <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
-  <br>
-  <br>
-  <br>
+  <div id="settingsSpace">
+    <br>
+    <br>
+    <br>
+  </div>
   <input type="checkbox" onchange="layout(true); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none';" id="richtigPlazierte" checked="true"> markiere richtig plazierte
   <!-- <h3>general</h3> -->
   <p id="rightMarkerSettings">
@@ -130,18 +134,24 @@
   <br>
   <br>
   <div id="movementPlayer" style="display: none;">
-    <input onchange="if (checked) innerMovementPlayer.style.display = 'inline'; else innerMovementPlayer.style.display = 'none';" type="checkbox">Züge des PCs ansehen
+    <input onchange="changeMovementPlayerVis(checked);" type="checkbox">Züge des PCs ansehen
+    <br>
     <div id="innerMovementPlayer" style="display: none;">
+      <br>
+      <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
       <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
-      <button>play/pause</button>
-      <button>⟲</button>
+      <button id="movementPlayButton" onclick="playPauseMovement();">play</button>
+      <button onclick="playMovementPos(0);">⟲</button>
       <button onclick="playMovementPos(objMovementPlayer.position + 1);">></button>
+      <button id="movementDirectionRight" style="background-color: hsla(180, 100%, 50%, 1);" onclick="changeMovementDirection(1);">>></button>
       <br>
       <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
-      <button>zu deiner Positionierung (falls vorhanden)</button>
+      <button onclick="playMovementPos(getPlayerPosition());">zu deiner Positionierung (falls vorhanden)</button>
       <br>
-      <input min="0.1" type="range"> Geschwindigkeit
-      <button>zurücksetzen</button>
+      <b>Geschwindigkeit</b>
+      <br>
+      schnell <input min="155" value="500" max="1000" id="movementPlayerSpeed" type="range"> langsam
+      <button onclick="movementPlayerSpeed.value = 500;">zurücksetzen</button>
       <br>
       <canvas id="movementPlayerTextur"></canvas>
     </div>
@@ -268,6 +278,19 @@
     texturTop = textur.getBoundingClientRect().top;
     if (settings.style.display == 'none') canvas = textur.getContext('2d');
   }
+  function changeMovementPlayerVis(checked) {
+    if (checked) {
+      innerMovementPlayer.style.display = 'inline'; 
+      playMovementPos(getPlayerPosition(true));
+      texturTop = textur.getBoundingClientRect().top;
+      movementPlayer.scrollIntoView();
+      window.scroll(0, scrollY);
+    }
+    else {
+      innerMovementPlayer.style.display = 'none';
+      texturTop = textur.getBoundingClientRect().top;
+    }
+  }
   function changeBackToBarB(side, value) {
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var button = document.getElementsByClassName('backToTileB')[i];
@@ -275,6 +298,13 @@
       button.style.bottom = (lengthPerTeil.sizeAdapted.y + 5)/2 - (backToBarBHeight.value)/2 + 'px';
       button.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(button.style.width)/2 + 'px';
     }
+  }
+  function changeMovementDirection(direc) {
+    objMovementPlayer.direc = direc;
+    movementDirectionLeft.style.backgroundColor = '';
+    movementDirectionRight.style.backgroundColor = '';
+    if (direc == -1) movementDirectionLeft.style.backgroundColor = 'hsla(180, 100%, 50%, 1)';
+    else movementDirectionRight.style.backgroundColor = 'hsla(180, 100%, 50%, 1)';
   }
   function changeTileBarHeight(value) {
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
@@ -402,15 +432,40 @@
     gCanvas.fillRect(0, 0, 50, 50);
     gCanvas.fillRect(50 + JSON.parse(tilesGap.value), 0, 50, 50);
   }
-  var objMovementPlayer = {pause: false, position: 0};
-  function playMovementPos(position) {
+  function playPauseMovement() {
+    if (movementPlayButton.innerHTML == "play") {
+      movementPlayButton.innerHTML = "pause";
+      playMovementFunction();
+    }
+    else movementPlayButton.innerHTML = "play";
+  }
+  function playMovementFunction() {
+    if (movementPlayButton.innerHTML == "pause") {
+      if (JSON.parse(movementPosition.value) < movement.move.length || JSON.parse(movementPosition.value) + objMovementPlayer.direc < 0) playMovementPos(JSON.parse(movementPosition.value) + objMovementPlayer.direc);
+      else movementPlayButton.innerHTML = "play";
+      setTimeout(function () {
+        playMovementFunction();
+      }, JSON.parse(movementPlayerSpeed.value));
+    }
+  }
+  var objMovementPlayer = {pause: false, position: 0, direc: 1};
+  function getPlayerPosition(backToBeginningIfNeeded) {
+    for (let i = 0; i < movement.move.length; i++) {
+      if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
+    }
+    if (backToBeginningIfNeeded) return 0;
+    else return JSON.parse(movementPosition.value);
+  }
+  function playMovementPos(position, pReturn, doNotChangeVal) {
     if (position < 0) position = 0;
     if (position > movement.move.length) position = movement.move.length;
+    if (!doNotChangeVal) movementPosition.value = position;
     positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
     for (let i = movement.move.length - 1; i >= position; i--) {
       positions.wrong[movement.move[i].tile].edit.x += movement.move[i].x;
       positions.wrong[movement.move[i].tile].edit.y += movement.move[i].y;
     }
+    if (pReturn) return positions.wrong;
     canvas = movementPlayerTextur.getContext('2d');
     objMovementPlayer.position = JSON.parse(position);
     layout(true, true);
@@ -472,6 +527,9 @@
       }
     }
     removeTilesFinishedB.style.display = 'inline';
+    for (const space of settingsSpace) {
+      space.style.display = "none";
+    }
     if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
     showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
     imageSettings.style.display = "none";
@@ -1104,25 +1162,25 @@ var originalSize = {};
       textur.width = textur.width;
       layout(true);
       // for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
-      //   if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
-      //     positions = JSON.parse(JSON.stringify(movement.positions[1]));
-      //     missing = JSON.parse(JSON.stringify(movement.missing[1]));
-      //     movement.positions.splice(0, 1);
-      //     movement.missing.splice(0, 1);
-      //     maleZurrück.number++;
-      //     i1 = movement.positions.length;
-      //     i--;
-      //     for (var i2 = 0; i2 < workingNumbers.length; i2++) {
-      //       if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
-      //     }
-      //   }
-      // }
-      // if (i1 != movement.positions.length + 1) {
-          missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
-          workingNumbers = [];
-          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i1);
-          }
+        //   if (angular.equals(positions, movement.positions[i1])/* && angular.equals(missing, movement.missing[i1])*/) {
+          //     positions = JSON.parse(JSON.stringify(movement.positions[1]));
+          //     missing = JSON.parse(JSON.stringify(movement.missing[1]));
+          //     movement.positions.splice(0, 1);
+          //     movement.missing.splice(0, 1);
+          //     maleZurrück.number++;
+          //     i1 = movement.positions.length;
+          //     i--;
+          //     for (var i2 = 0; i2 < workingNumbers.length; i2++) {
+            //       if (workingNumbers[i2] == side) workingNumbers.splice(i2, 1);
+            //     }
+            //   }
+            // }
+            // if (i1 != movement.positions.length + 1) {
+      missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
+      workingNumbers = [];
+      for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+        if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i1);
+      }
       // }
     }
       else {
@@ -1647,7 +1705,7 @@ scrollLeftInt = setInterval(function () {
 }, 10);
 window.addEventListener('scroll',()=>{
   if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
-  else if (aufgebenId.style.display == "inline") selectBackToBarB.style.display = 'inline';
+  else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
 });
 
 // stop clock:
