@@ -339,7 +339,7 @@
     }
     else alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
     if (mode == "exchange" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
-    alert(`Zudem haben Sie bis jetzt ${stats.lookedAtOriginal.times} mal für insgesamt ${stats.lookedAtOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
+    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbraucht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
     größeAnpassenX.value = window.innerWidth;
@@ -403,8 +403,8 @@
   }
   var originalSize = {width: 0, height: 0};
   function originalDisplayChanged(checked) {
-    startPause();
-    if (checked) stats.lookedAtOriginal.times++;
+    startPause('viewOriginal');
+    if (checked) stats.viewOriginal.times++;
     if (checked) {
       if (sourceIsPicture.checked) preview.style.display = "inline";
       else videoPreview.style.display = "inline";
@@ -515,156 +515,160 @@
     return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
   }
   function create2() {
-    if (modeSelection.value != "traditional") shuffleStyle.value = "none";
-    if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
-    if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
-    positions = {right: [], wrong: []};
-    if (modeSelection.value == "traditional") {
-      if (rotateTiles.checked) zuAngepassterBildschirmgröße(true);
-      positions.layoutOrder = new Array(document.getElementById('anzahl').value*document.getElementById('anzahl').value);
-      for (var i = 0; i < positions.layoutOrder.length; i++) {
-        positions.layoutOrder[i] = i;
-      }
-    }
-    removeTilesFinishedB.style.display = 'inline';
-    for (const space of settingsSpace) {
-      space.style.display = "none";
-    }
-    if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
-    showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
-    imageSettings.style.display = "none";
-    modeSelection.style.display = "none";
-    schiebenSettings.style.display = "none";
-    rotateTilesP.style.display = "none";
-    missing = [];
-    if (gerät == "Handy") mobileControls.style.display = "inline";
-    if (sourceIsVideo.checked) {
-      videoControls.style.display = 'inline';
-      videoPosition.max = video.duration;
-      settings.style.display = 'inline';
-      videoPosition.style.width = window.innerWidth;
-      while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
-        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
-      }
-      videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
-      playVideo.style.width = playVideo.getBoundingClientRect().width;
-      settings.style.display = 'none';
-    }
-    originalSize.width = preview.width;
-    originalSize.height = preview.height;
-    preview.width = größeAnpassenX.value;
-    preview.height = größeAnpassenY.value;
-    textur.width = preview.width// + 111;
-    textur.height = preview.height// + 111;
-    videoPreview.width = größeAnpassenX.value;
-    videoPreview.height = größeAnpassenY.value;
-    var anzahl = document.getElementById('anzahl').value;
-    if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
-    else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
-    breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
-    randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
-    for (var i = 0; i < anzahl; i++) {
-      for (var i1 = 0; i1 < anzahl; i1++) {
-        if (modeSelection.value == "traditional") {
-          var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1, degree: 0}};
-          if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
-          if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
-          positions.right.push(newTile);
-          if (i1) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
-          if (i) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
+    if (document.getElementById('preview').src == '' && video.src == '') alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
+    else {
+      if (modeSelection.value != "traditional") shuffleStyle.value = "none";
+      if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
+      if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+      positions = {right: [], wrong: []};
+      if (modeSelection.value == "traditional") {
+        if (rotateTiles.checked) zuAngepassterBildschirmgröße(true);
+        positions.layoutOrder = new Array(document.getElementById('anzahl').value*document.getElementById('anzahl').value);
+        for (var i = 0; i < positions.layoutOrder.length; i++) {
+          positions.layoutOrder[i] = i;
         }
-        else {
-          positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
-        }
-        positions.right[positions.right.length - 1].border = [];
-        if (i == 0) positions.right[positions.right.length - 1].border.push("left");
-        if (i == anzahl - 1) positions.right[positions.right.length - 1].border.push("right");
-        if (i1 == 0) positions.right[positions.right.length - 1].border.push("top");
-        if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("bottom");
       }
+      removeTilesFinishedB.style.display = 'inline';
+      for (const space of settingsSpace) {
+        space.style.display = "none";
+      }
+      if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
+      showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
+      imageSettings.style.display = "none";
+      modeSelection.style.display = "none";
+      schiebenSettings.style.display = "none";
+      rotateTilesP.style.display = "none";
+      missing = [];
+      if (gerät == "Handy") mobileControls.style.display = "inline";
+      if (sourceIsVideo.checked) {
+        videoControls.style.display = 'inline';
+        videoPosition.max = video.duration;
+        settings.style.display = 'inline';
+        videoPosition.style.width = window.innerWidth;
+        while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
+          videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
+        }
+        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
+        playVideo.style.width = playVideo.getBoundingClientRect().width;
+        settings.style.display = 'none';
+      }
+      originalSize.width = preview.width;
+      originalSize.height = preview.height;
+      preview.width = größeAnpassenX.value;
+      preview.height = größeAnpassenY.value;
+      textur.width = preview.width// + 111;
+      textur.height = preview.height// + 111;
+      videoPreview.width = größeAnpassenX.value;
+      videoPreview.height = größeAnpassenY.value;
+      var anzahl = document.getElementById('anzahl').value;
+      if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
+      else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
+      breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
+      randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
+      for (var i = 0; i < anzahl; i++) {
+        for (var i1 = 0; i1 < anzahl; i1++) {
+          if (modeSelection.value == "traditional") {
+            var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1, degree: 0}};
+            if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
+            if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
+            positions.right.push(newTile);
+            if (i1) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+            if (i) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
+          }
+          else {
+            positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
+          }
+          positions.right[positions.right.length - 1].border = [];
+          if (i == 0) positions.right[positions.right.length - 1].border.push("left");
+          if (i == anzahl - 1) positions.right[positions.right.length - 1].border.push("right");
+          if (i1 == 0) positions.right[positions.right.length - 1].border.push("top");
+          if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("bottom");
+        }
+      }
+      positions.wrong = JSON.parse(JSON.stringify(positions.right));
+      //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
+      window.scroll(0, /*96 50*/32);
+      if (modeSelection.value == "schieben") {
+        alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
+        layout(true);
+      }
+      else removeTile(true);
+      // else layout();
+      if (sourceIsVideo.checked) canvas.clearRect(0, 0, textur.width, textur.height);
+      showSettings.scrollIntoView();
+      textur.style.touchAction = "none";
+      window.scroll(0, 0);
+      changeSettingsVis('none');
     }
-    positions.wrong = JSON.parse(JSON.stringify(positions.right));
-    //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
-    window.scroll(0, /*96 50*/32);
-    if (modeSelection.value == "schieben") {
-      alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
-      layout(true);
-    }
-    else removeTile(true);
-    // else layout();
-    if (sourceIsVideo.checked) canvas.clearRect(0, 0, textur.width, textur.height);
-    showSettings.scrollIntoView();
-    textur.style.touchAction = "none";
-    window.scroll(0, 0);
-    changeSettingsVis('none');
   }
 
   function shufflePuzzle() {
     if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
       var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
-    for (var i of selected.tiles) {
-      missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
-      positions.wrong.forEach((position, i1) => {
-        for (var direc of ['top', 'right', 'bottom', 'left']) {
-          if (positions.wrong[i].border.includes(directionConverter[direc]) && positions.wrong[i].original[direc] && !i1/* && !selected.tiles.includes(getTile(positions.wrong[i].original[direc]))*/) {
-            positions.wrong[getTile(positions.wrong[i].original[direc])].border.push(directionConverter[direc]);
-          }
-          if (position.original[direc]) {
-          position.original[direc].degree = 0;// position.edit.degree;
-          if (angular.equals(position.original[direc], {x: positions.wrong[i].original.x, y: positions.wrong[i].original.y, degree: 0})) {
-            delete position.original[direc].degree;
-            delete positions.right[i1].original[direc];
-            // delete position.original[direc];
-          }
-          else delete position.original[direc].degree;
-        }
-        }
-      });
-    }
-    if (modeSelection.value != "exchange") {
-      for (var i = 0; i < positions.wrong.length; i++) {
-        if (selected.objTiles.includes(JSON.stringify(positions.wrong[i].edit))) {
-          positions.wrong.splice(i, 1);
-          positions.right.splice(i, 1);
-          for (var i1 = 0; i1 < doNotChange.length; i1++) {
-            if (doNotChange[i1] > i) doNotChange[i1]--;
-          }
-          if (modeSelection.value == "traditional") {
-            positions.layoutOrder.splice(i, 1);
-            for (var i1 = i; i1 < positions.layoutOrder.length; i1++) {
-              positions.layoutOrder[i1]--;
+      for (var i of selected.tiles) {
+        missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
+        positions.wrong.forEach((position, i1) => {
+          for (var direc of ['top', 'right', 'bottom', 'left']) {
+            if (positions.wrong[i].border.includes(directionConverter[direc]) && positions.wrong[i].original[direc] && !i1/* && !selected.tiles.includes(getTile(positions.wrong[i].original[direc]))*/) {
+              positions.wrong[getTile(positions.wrong[i].original[direc])].border.push(directionConverter[direc]);
             }
+            if (position.original[direc]) {
+            position.original[direc].degree = 0;// position.edit.degree;
+            if (angular.equals(position.original[direc], {x: positions.wrong[i].original.x, y: positions.wrong[i].original.y, degree: 0})) {
+              delete position.original[direc].degree;
+              delete positions.right[i1].original[direc];
+              // delete position.original[direc];
+            }
+            else delete position.original[direc].degree;
           }
-          i--;
+          }
+        });
+      }
+      if (modeSelection.value != "exchange") {
+        for (var i = 0; i < positions.wrong.length; i++) {
+          if (selected.objTiles.includes(JSON.stringify(positions.wrong[i].edit))) {
+            positions.wrong.splice(i, 1);
+            positions.right.splice(i, 1);
+            for (var i1 = 0; i1 < doNotChange.length; i1++) {
+              if (doNotChange[i1] > i) doNotChange[i1]--;
+            }
+            if (modeSelection.value == "traditional") {
+              positions.layoutOrder.splice(i, 1);
+              for (var i1 = i; i1 < positions.layoutOrder.length; i1++) {
+                positions.layoutOrder[i1]--;
+              }
+            }
+            i--;
+          }
         }
       }
+      selected.tiles = [];
+      removeTilesFinishedB.style.display = 'none';
+      state.removeTile = false;
+      if (modeSelection.value == "schieben") {
+        movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
+        verschiebenPC();
+        movementPlayer.style.display = 'inline';
+        movementPlayerTextur.width = textur.width;
+        movementPlayerTextur.height = textur.height;
+        movementPosition.max = movement.move.length;
+      }
+      else {
+      if (modeSelection.value == "traditional") {
+        textur.width += 500;
+        textur.height += 500;
+        positions.wrong.forEach((position, i) => {
+          if (shuffleStyle.value != "listTiles") position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+          else {
+            position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2};
+            tileSelectionBar.tiles.push(i);
+          }
+          position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, -90][Math.round(Math.random()*3)]};
+          stats.minimumRotations += Math.abs(position.original.degree/90);
+          if (!rotateTiles.checked) position.original.degree = 0;
+      });
     }
-    selected.tiles = [];
-    removeTilesFinishedB.style.display = 'none';
-    state.removeTile = false;
-    if (modeSelection.value == "schieben") {
-      movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
-      verschiebenPC();
-      movementPlayer.style.display = 'inline';
-      movementPlayerTextur.width = textur.width;
-      movementPlayerTextur.height = textur.height;
-      movementPosition.max = movement.move.length;
-    }
-    else {
-    if (modeSelection.value == "traditional") {
-      textur.width += 500;
-      textur.height += 500;
-      positions.wrong.forEach((position, i) => {
-        if (shuffleStyle.value != "listTiles") position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
-        else {
-          position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2};
-          tileSelectionBar.tiles.push(i);
-        }
-        position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
-        if (!rotateTiles.checked) position.original.degree = 0;
-    });
-  }
   // var possible = new Array(positions.wrong.length).fill(0)
   // for (var i = 0; i < possible.length; i++) {
   //   possible[i] += i;
@@ -677,34 +681,34 @@
   //   positions.wrong[i].edit = positions.wrong[j].edit;
   //   positions.wrong[j].edit = x;
   // }
-  if (shuffleStyle.value == "nextToEachOther") {
-      try {
-        if (isNaN(JSON.parse(tilesGap.value))) tilesGap.value = 55;
-      } 
-      catch (err) {
-        tilesGap.value = 55;
-      }
-      var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
-      for (let i = 0; i < positions.wrong.length; i++) {
-        positions.wrong[i].edit = {x: pos.x, y: pos.y};
-        pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
-        if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.innerWidth) {
-          pos.x = lengthPerTeil.edit.x/2;
-          pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+    if (shuffleStyle.value == "nextToEachOther") {
+        try {
+          if (isNaN(JSON.parse(tilesGap.value))) tilesGap.value = 55;
+        } 
+        catch (err) {
+          tilesGap.value = 55;
+        }
+        var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
+        for (let i = 0; i < positions.wrong.length; i++) {
+          positions.wrong[i].edit = {x: pos.x, y: pos.y};
+          pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+          if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.innerWidth) {
+            pos.x = lengthPerTeil.edit.x/2;
+            pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+          }
         }
       }
-    }
-    for (i = positions.wrong.length - 1; (modeSelection.value == "exchange" || shuffleStyle.value != "overlapTiles") && i > 0; i--) {
-      do {
-        j = Math.floor(Math.random() * (i + 1));
-      } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
-      x = positions.wrong[i].edit;
-      if (!doNotChange.includes(i)) {
-      positions.wrong[i].edit = positions.wrong[j].edit;
-      positions.wrong[j].edit = x;
-    }
-    }
-    stats.preOrdered = doNotChange.length;
+      for (i = positions.wrong.length - 1; (modeSelection.value == "exchange" || shuffleStyle.value != "overlapTiles") && i > 0; i--) {
+        do {
+          j = Math.floor(Math.random() * (i + 1));
+        } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
+        x = positions.wrong[i].edit;
+        if (!doNotChange.includes(i)) {
+        positions.wrong[i].edit = positions.wrong[j].edit;
+        positions.wrong[j].edit = x;
+      }
+      }
+      stats.preOrdered = doNotChange.length;
   }
   doNotChange = [];
   aufgebenId.style.display = "inline";
@@ -755,6 +759,7 @@
   window.scroll(0, 0);
   }
   layout(true, true);
+  startPause('completionTime');
 }
   function addElement(attr, elm, childOf, asElement) {
       var newElement = document.createElement(/*'span'*/elm);
@@ -960,16 +965,17 @@ var originalSize = {};
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (richtige == positions.wrong?.length && !removeTilesScreen) {
+      stopClock.completionTime.running = 0;
       richtige = 0;
       finished = true;
       layout(true);
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
-        if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen geschafft! Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
-        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
-        alert(`Zudem haben Sie ${stats.lookedAtOriginal.times} mal für insgesamt ${stats.lookedAtOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
+        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
+        if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
+        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
+        alert(`Zudem haben Sie ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -1201,10 +1207,10 @@ var originalSize = {};
   var movement = {move: [], startPosition: []};
   var mausx;
   var mausy;
-  var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, lookedAtOriginal: {times: 0}};
+  var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, viewOriginal: {times: 0}, minimumRotations: 0};
   document.onmousemove = readMouseMove
   function readMouseMove(e) {
-    mausx = e.clientX + scrollX - textur.getBoundingClientRect().left;
+    mausx = e.clientX + scrollX - texturLeft;
     mausy = e.clientY + scrollY - texturTop;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
@@ -1213,6 +1219,7 @@ var originalSize = {};
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
   var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false};
+  var texturLeft = textur.getBoundingClientRect().left;
   function tileSelected() {
     for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
       var i = positions.layoutOrder[i1];
@@ -1541,47 +1548,49 @@ var originalSize = {};
     }
   }
   function rotateTile(tile, direction) {
-    positions.wrong[tile].original.degree += direction;
-    if (positions.wrong[tile].original.degree < 0) positions.wrong[tile].original.degree = 270;
-    else if (positions.wrong[tile].original.degree >= 360) positions.wrong[tile].original.degree = 0;
-    stats.rotated++;
+      positions.wrong[tile].original.degree += direction;
+      if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
+      else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
+      stats.rotated++;
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
     state.rotated.push(tile);
     var tileObj = positions.wrong[tile];
-    if (connectionSide) {
-      if (connectionSide == 'left') {
-        tileObj.edit.x = connectionObj.edit.x - lengthPerTeil.edit.x;
-        tileObj.edit.y = connectionObj.edit.y;
+    if (tileObj) { 
+      if (connectionSide) {
+        if (connectionSide == 'left') {
+          tileObj.edit.x = connectionObj.edit.x - lengthPerTeil.edit.x;
+          tileObj.edit.y = connectionObj.edit.y;
+        }
+        if (connectionSide == 'top') {
+          tileObj.edit.x = connectionObj.edit.x;
+          tileObj.edit.y = connectionObj.edit.y - lengthPerTeil.edit.y;
+        }
+        if (connectionSide == 'right') {
+          tileObj.edit.x = connectionObj.edit.x + lengthPerTeil.edit.x;
+          tileObj.edit.y = connectionObj.edit.y;
+        }
+        if (connectionSide == 'bottom') {
+          tileObj.edit.x = connectionObj.edit.x;
+          tileObj.edit.y = connectionObj.edit.y + lengthPerTeil.edit.y;
+        }
       }
-      if (connectionSide == 'top') {
-        tileObj.edit.x = connectionObj.edit.x;
-        tileObj.edit.y = connectionObj.edit.y - lengthPerTeil.edit.y;
-      }
-      if (connectionSide == 'right') {
-        tileObj.edit.x = connectionObj.edit.x + lengthPerTeil.edit.x;
-        tileObj.edit.y = connectionObj.edit.y;
-      }
-      if (connectionSide == 'bottom') {
-        tileObj.edit.x = connectionObj.edit.x;
-        tileObj.edit.y = connectionObj.edit.y + lengthPerTeil.edit.y;
-      }
-    }
-    rotateTile(tile, direction);
-    var directionConverter = {90: {left: 'top', top: 'right', right: 'bottom', bottom: 'left'}, '-90': {left: 'bottom', bottom: 'right', right: 'top', top: 'left'}};
-    for (const side of ['left', 'top', 'right', 'bottom']) {
-      if (tileObj.original[side]) {
-        tileObj.original['new' + directionConverter[direction][side]] = tileObj.original[side];
-        delete tileObj.original[side];
-      }
-    };
+      rotateTile(tile, direction);
+      var directionConverter = {90: {left: 'top', top: 'right', right: 'bottom', bottom: 'left'}, '-90': {left: 'bottom', bottom: 'right', right: 'top', top: 'left'}};
       for (const side of ['left', 'top', 'right', 'bottom']) {
-      if (tileObj.original['new' + directionConverter[direction][side]]) {
-        tileObj.original[directionConverter[direction][side]] = tileObj.original['new' + directionConverter[direction][side]];
-        delete tileObj.original['new' + directionConverter[direction][side]];
-        if (!state.rotated.includes(getTile(tileObj.original[directionConverter[direction][side]]))) rotateAround(getTile(tileObj.original[directionConverter[direction][side]]), direction, directionConverter[direction][side], tileObj);
-      }
-    };
+        if (tileObj.original[side]) {
+          tileObj.original['new' + directionConverter[direction][side]] = tileObj.original[side];
+          delete tileObj.original[side];
+        }
+      };
+        for (const side of ['left', 'top', 'right', 'bottom']) {
+        if (tileObj.original['new' + directionConverter[direction][side]]) {
+          tileObj.original[directionConverter[direction][side]] = tileObj.original['new' + directionConverter[direction][side]];
+          delete tileObj.original['new' + directionConverter[direction][side]];
+          if (!state.rotated.includes(getTile(tileObj.original[directionConverter[direction][side]]))) rotateAround(getTile(tileObj.original[directionConverter[direction][side]]), direction, directionConverter[direction][side], tileObj);
+        }
+      };
+    }
   }
   function getTile(originalCoord) {
     for (var i = 0; i < positions.wrong.length; i++) {
@@ -1709,30 +1718,32 @@ window.addEventListener('scroll',()=>{
 });
 
 // stop clock:
+var stopClock = {viewOriginal: {time: 0, running: 0}, completionTime: {time: 0, running: 0}};
 var time = 0;
 var running = 0;
 
-function startPause() {
-if (running == 0) {
-  running = 1;
+function startPause(type) {
+if (stopClock[type].running == 0) {
+  stopClock[type].running = 1;
   // time = 0;
-  increment();
+  increment(type);
 }
 else {
-  running = 0;
+  stopClock[type].running = 0;
 }
 }
-function reset() {
+function reset(type) {
 running = 0;
 timer = 0;
 }
-function increment() {
-if (running == 1) {
+function increment(type) {
+if (stopClock[type].running == 1) {
 setTimeout(function () {
-  time++;
+  stopClock[type].time++;
+  var time = stopClock[type].time;
   var mins = Math.floor(time/10/60);
   var secs = Math.floor(time/10);
-      secs += 60*mins;
+      secs -= 60*mins;
   var tenths = time % 10;
   if (mins < 10) {
     mins = "0" + mins
@@ -1740,8 +1751,9 @@ setTimeout(function () {
   if (secs < 10) {
     secs = "0" + secs;
   }
-  stats.lookedAtOriginal.time = mins + ":" + secs + ":" + "0" + tenths;
-  increment();
+  if (type == "viewOriginal") stats[type].time = mins + ":" + secs + ":" + "0" + tenths;
+  else stats[type] = mins + ":" + secs + ":" + "0" + tenths;
+  increment(type);
 }, 100);
 }
 }
