@@ -1435,6 +1435,8 @@ var originalSize = {};
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
+      // changes something so the if statement is false afterwords (fixed unclipping)
+      selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile);
       if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile))) {
         selected.clip.pop();
         i--;
@@ -1443,7 +1445,9 @@ var originalSize = {};
   }
   function selectedCollidesOthers(pClip,  tile) {
     for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) return true;
+      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) {
+        return true;
+      }
     }
   }
   var checkedTiles = [];
