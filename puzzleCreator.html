@@ -7,13 +7,13 @@
 <input type="file" onchange="readImg(this);">
 <br>
 <input type="text" placeholder="URL" id="sourceURL">
-<button type="button" onclick="useURL();" name="button">use</button>
+<button type="button" onclick="useURL();" name="button">nutze (als Quelle)</button>
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
-<button onclick="changeCamera(cameraSelection.value);">use live camera</button>
+<button onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
 <br>
-<input id="sourceIsPicture" checked="true" name="mediaType" type="radio">picture
-<input id="sourceIsVideo" name="mediaType" type="radio">video
+<input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
+<input id="sourceIsVideo" name="mediaType" type="radio">Video
 <br>
 <input type="range" width="window.innerWidth" oninput="zeigeGröße();" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
@@ -23,9 +23,9 @@
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" name="button">Größenverhältnis optimieren</button>
 <br>
-<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="setPresetImgHeight(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximum size of picture: screen size</p1>
+<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="setPresetImgHeight(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
 <br>
-<button type="button" onclick="create();" name="button">create puzzle</button>
+<button type="button" onclick="create();" name="button">erstelle Puzzle</button>
 </p>
 <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
@@ -149,7 +149,7 @@
       <button id="movementDirectionRight" style="background-color: hsla(180, 100%, 50%, 1);" onclick="changeMovementDirection(1);">>></button>
       <br>
       <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
-      <button onclick="playMovementPos(getPlayerPosition());">zu deiner Positionierung (falls vorhanden)</button>
+      <button onclick="playMovementPos(getPlayerPosition());">zu Ihrer Positionierung (falls vorhanden)</button>
       <br>
       <b>Geschwindigkeit</b>
       <br>
@@ -1370,6 +1370,7 @@ var originalSize = {};
       });
       folgenMouseMove("mouseDown");
     }
+    else if (state.removeTile) folgenMouseMove("mouseDown");
   }
   function convertStyle(value) {
     return JSON.parse(value.replace('px', ''));
