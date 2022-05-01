@@ -9,6 +9,9 @@
 <input type="text" placeholder="URL" id="sourceURL">
 <button type="button" onclick="useURL();" name="button">use</button>
 <br>
+<select id="cameraSelection" onchange="changeCamera(value);"></select>
+<button onclick="changeCamera(cameraSelection.value);">use live camera</button>
+<br>
 <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">picture
 <input id="sourceIsVideo" name="mediaType" type="radio">video
 <br>
@@ -88,9 +91,9 @@
     <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
     <br>
-    <p id="scrollOnBlancP" style="display: none;"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
+    <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
-  <div id="exchangeSettings">
+  <div id="exchangeSettings" style="display: none">
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
   <p id="schiebenSettings">
@@ -161,16 +164,20 @@
   <br>
   <div style="display: none;" id="videoControls">
     <h3>video controls</h3>
+    <div id="timeChangeDiv">
     <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
     <a id="stopAtEndP"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
     <br>
     beginne bei <input type="text" id="loopBeginning"> <button onclick="loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button> und ende bei <input id="loopEnding" type="text"> <button onclick="loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button>
     <br>
     <button onclick="video.currentTime -= 10;"><<</button>
+    </div>
     <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
+    <div id="timeChangeDiv">
     <button onclick="video.currentTime += 10;">>></button>
     <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
     <a id="timeText"></a>
+    </div>
   </div>
 </div>
 <br>
@@ -515,7 +522,7 @@
     return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
   }
   function create2() {
-    if (document.getElementById('preview').src == '' && video.src == '') alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
+    if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else {
       if (modeSelection.value != "traditional") shuffleStyle.value = "none";
       if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
@@ -551,6 +558,11 @@
         videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
         playVideo.style.width = playVideo.getBoundingClientRect().width;
         settings.style.display = 'none';
+        if (video.srcObject) {
+          for (const elm of timeChangeDiv) {
+            elm.style.display = 'none';
+          }
+        }
       }
       originalSize.width = preview.width;
       originalSize.height = preview.height;
@@ -784,11 +796,11 @@
   }
   function readImg(input) {
     var reader = new FileReader();
+    stopLiveFeed();
     reader.onload = function (e) {
       if (sourceIsPicture.checked) document.getElementById('preview').setAttribute("src", e.target.result);
       else {
         video.setAttribute("src", e.target.result);
-        startVideo();
         setTimeout(function () {
           loadImage(video.videoWidth, video.videoHeight);
         }, 1000);
@@ -803,13 +815,13 @@
   function useURL() {
     if (sourceURL.value.includes('.mp4') || sourceURL.value.includes('.move')) sourceIsVideo.checked = true;
     if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
+    stopLiveFeed();
     if (sourceIsPicture.checked) {
     preview.src = sourceURL.value;
     loadImage();
   }
   else {
     video.src = sourceURL.value;
-    startVideo();
   }
   }
 
@@ -818,6 +830,7 @@ function startVideo() {
   updateVideo(); //Start rendering
 }
 video.addEventListener('loadeddata', function() {
+  startVideo();
   loadImage(video.videoWidth, video.videoHeight);
 }, false);
 function getTimeString(pTime) {
@@ -856,6 +869,55 @@ function updateVideo(){
   }
   else video.pause();
 }
+// live camera
+// Prefer camera resolution nearest to 1280x720.
+var constraints = { /*audio: true, */video: { width: 1280, height: 720 } };
+var pMediaStream;
+// navigator.mediaDevices.getUserMedia(constraints)
+// .then(function(mediaStream) {
+//   video.srcObject = mediaStream;
+//   pMediaStream = mediaStream;
+//   video.onloadedmetadata = function(e) {
+//     video.play();
+//   };
+// })
+// .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
+function stopLiveFeed() {
+  if (pMediaStream) {
+    pMediaStream.getTracks().forEach(track => {
+      track.stop();
+    });
+    video.srcObject = undefined;
+  }
+  // pMediaStream = undefined;
+}
+async function changeCamera(index) {
+  sourceIsVideo.checked = true;
+  stopLiveFeed();
+  var Test = await navigator.mediaDevices.enumerateDevices();
+  constraints.video.deviceId = Test[index].deviceId;
+  navigator.mediaDevices.getUserMedia(constraints)
+  .then(function(mediaStream) {
+    video.srcObject = mediaStream;
+    pMediaStream = mediaStream;
+  })
+}
+
+// get available cameras
+navigator.mediaDevices.enumerateDevices()
+.then(function(devices) {
+  devices.forEach( (device, i) => {
+    console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
+    if (device.kind == "videoinput") {
+      opt = document.createElement("option");
+      document.getElementById("cameraSelection").options.add(opt);
+      opt.text = device.label;
+      opt.value = i;
+    }
+  });
+  if (cameraSelection.options.length < 2) cameraSelection.style.display = 'none';
+})
+
 function convertTime(value, id){
   var time = 0;
   var sec = value.split(':')[2];
@@ -1661,9 +1723,6 @@ var originalSize = {};
 
       }
       if (scrollable.checked) textur.style.touchAction = '';
-    }
-    else {
-      console.log("clicked control element");
     }
     if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
   }
