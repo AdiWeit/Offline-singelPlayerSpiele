@@ -7,7 +7,7 @@
 <input type="file" onchange="readImg(this);">
 <br>
 <input type="text" placeholder="URL" id="sourceURL">
-<button type="button" onclick="useURL();" name="button">nutze (als Quelle)</button>
+<button type="button" onclick="useURL();" name="button">nutzen (als Quelle)</button>
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 <button onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
@@ -346,7 +346,7 @@
     }
     else alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
     if (mode == "exchange" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
-    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbraucht.`.replace('undefined', '0'));
+    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
     größeAnpassenX.value = window.innerWidth;
@@ -1438,7 +1438,11 @@ var originalSize = {};
     }
   }
   function unclipp(tile) {
+    var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
     var objTile = positions.wrong[tile];
+    for (const direc of ['left', 'top', 'left', 'down']) {
+      if (objTile.original[direc]) delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
+    }
     objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
     var unclipped = false;
     for (let i = 0; i < clipped.length; i++) {
@@ -1450,7 +1454,7 @@ var originalSize = {};
     }
     if (unclipped) stats.unclipped++;
   }
-  function checkPossibleClipping(tile) {
+  function checkPossibleClipping(tile, afterClipping) {
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}};
     positions.wrong.forEach((pos, i) => {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
@@ -1500,7 +1504,7 @@ var originalSize = {};
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
       // changes something so the if statement is false afterwords (fixed unclipping)
       selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile);
-      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile))) {
+      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
@@ -1546,7 +1550,7 @@ var originalSize = {};
         }
         clipped.push(clip.i + ' - ' + clip.sI);
         // do more clipping if needed
-        checkPossibleClipping(clip.sI);
+        checkPossibleClipping(clip.sI, true);
         bClipped = true;
       }
     }
