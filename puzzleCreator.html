@@ -57,6 +57,8 @@
   </select>
   <br>
   <div id="traditionalSettings">
+    <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
+    <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
     </p>
@@ -246,6 +248,7 @@
     console.log("PC");
     swipeSteuerungP.style.display = "none";
     scrollOnBlancP.style.display = "none";
+    vibrate.style.display = "none";
   }
   gapSizeChanged(tilesGap.value);
   mobileControls.style.display = 'none';
@@ -1509,7 +1512,13 @@ var originalSize = {};
         i--;
       }
     }
+    if (selected.clip.length > clipLength && (!clipOptionsBefore || JSON.stringify(clipOptionsBefore) != JSON.stringify(selected.clip))) {
+      new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3').play();
+      clipOptionsBefore = selected.clip;
+      if (vibrate.checked) window.navigator.vibrate(33);
+    }
   }
+  var clipOptionsBefore;
   function selectedCollidesOthers(pClip,  tile) {
     for (var i = 0; i < positions.wrong.length; i++) {
       if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) {
