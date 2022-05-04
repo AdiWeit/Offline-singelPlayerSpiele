@@ -32,13 +32,15 @@
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
-    <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button">drehe links
-    <input class="mobileControlsCheckbox" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button">drehe rechts
+    <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button">⟲
+    <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button">⟳
+    <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
+    <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true;">⇧
   </p>
-    <input class="mobileControlsCheckbox" type="checkbox" id="scrollable" name="button">scroll
+    <input class="mobileControlsElm" type="checkbox" id="scrollable" name="button">scroll
 </p2>
 <style>
-  .mobileControlsCheckbox {
+  .mobileControlsElm {
     width: 44;
     height: 44;
     top: 7px;
@@ -1301,6 +1303,7 @@ var originalSize = {};
   function mouseDown(elmCalled, touchStart) {
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
+    if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
     state.coord = checkSelected();
     if (modeSelection.value == "traditional") {
       if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
@@ -1400,6 +1403,7 @@ var originalSize = {};
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     positionBackToTileBarButtons(true);
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
+      if (calledBy != "mouseDown") selectMultiple.checked = false;
       // select clipped
       for (var tile of selected.tiles) {
         var objTile = positions.wrong[tile];
@@ -1416,8 +1420,9 @@ var originalSize = {};
           }
         }
         // unclipp
-        if (state.shift) {
+        if (state.shift && calledBy != "mouseDown") {
           unclipp(tile);
+          state.shiftBySwipe = false;
         }
         // positions.wrong.forEach((position, i) => {
         //   if (((objTile.original?.left?.x == position.original?.x && objTile.original?.left?.x != undefined && objTile.original?.left?.y == position.original?.y) || (objTile.original?.top?.x == position.original?.x && objTile.original?.top?.x != undefined && objTile.original?.top?.y == position.original?.y) || (objTile.original?.wrong?.x == position.original?.x && objTile.original?.wrong?.x != undefined && objTile.original?.wrong?.y == position.original?.y) || (objTile.original?.bottom?.x == position.original?.x && objTile.original?.bottom?.x != undefined && objTile.original?.bottom?.y == position.original?.y)) && !selected.tiles.includes(i)) {
@@ -1446,12 +1451,14 @@ var originalSize = {};
     var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
     var objTile = positions.wrong[tile];
     for (const direc of ['left', 'top', 'left', 'down']) {
-      if (objTile.original[direc]) delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
+      if (objTile.original[direc] && !selected.tiles.includes(getTile(objTile.original[direc]))) {
+        delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
+        delete objTile.original[direc];
+      }
     }
-    objTile.original = {x: objTile.original.x, y: objTile.original.y, degree: objTile.original.degree};
     var unclipped = false;
     for (let i = 0; i < clipped.length; i++) {
-      if (clipped[i].split(' - ').includes(tile + "")) {
+      if (clipped[i].split(' - ').includes(tile + "") && (!selected.tiles.includes(parseInt(clipped[i].split(' - ')[0])) || !selected.tiles.includes(parseInt(clipped[i].split(' - ')[1])))) {
         clipped.splice(i, 1);
         unclipped = true;
         i--;
@@ -1566,6 +1573,7 @@ var originalSize = {};
   var clipped = [];
   function mouseUp() {
     state.mouse = "up";
+    if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (modeSelection.value == "traditional") {
       state.newTileSelected = false;
       var bClipped = false;
@@ -1590,6 +1598,9 @@ var originalSize = {};
       new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
       console.log("clipping...");
       stats.turns++;
+      // selectMultiple.checked = false;
+      state.shift = false;
+      selected.tiles = [];
     }
     selected.clip = [];
     if (selected.tiles.length && !state.shift && !state.removeTile) selected.tiles = [];
@@ -1716,10 +1727,10 @@ var originalSize = {};
     }
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
       state.shift = true;
+      state.shiftBySwipe = true;
       selected.tiles = [];
       mouseDown();
     }
-    else if (ev.type == "touchmove") state.shift = false;
     if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
       // textur.style.touchAction = '';
       canvasClicked();
