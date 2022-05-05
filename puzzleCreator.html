@@ -536,6 +536,11 @@
     var obj = tileSelectionCanvas.getBoundingClientRect();
     return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
   }
+  tileSelectionBar.getTilePosition = (generalPosition) => {
+    for (const tile of tileSelectionBar.tiles) {
+      if (tile == generalPosition) return tile;
+    }
+  }
   function create2() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else {
@@ -1064,6 +1069,7 @@ var originalSize = {};
 }
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
+    if (!i1) i1 = tileSelectionBar.getTilePosition(i);
     if (!pCanvas) pCanvas = canvas;
     else {
       position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2};
