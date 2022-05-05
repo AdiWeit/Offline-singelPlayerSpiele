@@ -11,6 +11,7 @@
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 <button onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
+<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
 <br>
 <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
 <input id="sourceIsVideo" name="mediaType" type="radio">Video
@@ -291,6 +292,13 @@
     else settings.style.display = 'none';
     texturTop = textur.getBoundingClientRect().top;
     if (settings.style.display == 'none') canvas = textur.getContext('2d');
+  }
+  function mirrorCanvas(checked) {
+    if (checked) textur.style = "-webkit-transform: scaleX(-1); transform: scaleX(-1);";
+    else {
+      textur.style.transform = "";
+      textur.style.webkitTransform = "";
+    }
   }
   function changeMovementPlayerVis(checked) {
     if (checked) {
@@ -1281,6 +1289,7 @@ var originalSize = {};
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft;
     mausy = e.clientY + scrollY - texturTop;
+    if (mirrorInput.checked) mausx = (textur.width + scrollX) - mausx;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
     folgenMouseMove("mousemove");
@@ -1662,10 +1671,11 @@ var originalSize = {};
     }
   }
   function rotateTile(tile, direction) {
-      positions.wrong[tile].original.degree += direction;
-      if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
-      else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
-      stats.rotated++;
+    if (mirrorInput.checked) direction *= -1;
+    positions.wrong[tile].original.degree += direction;
+    if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
+    else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
+    stats.rotated++;
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
     state.rotated.push(tile);
