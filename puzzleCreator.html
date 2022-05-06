@@ -2,7 +2,9 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <p id="imageSettings">
-<input type="text" value="4" id="anzahl" onchange="anzahlVerschieben.value = value*value" placeholder="Puzzle Teile je x und y achse">
+<input type="text" value="4" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile je x-Achse">
+<br>
+<input type="text" value="4" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile je y-Achse">
 <br>
 <input type="file" onchange="readImg(this);">
 <br>
@@ -25,7 +27,7 @@
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" name="button">Größenverhältnis optimieren</button>
 <br>
-<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="setPresetImgHeight(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
+<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
 <br>
 <button type="button" style="font-size: 33px;" onclick="create();" name="button">erstelle Puzzle</button>
 </p>
@@ -259,7 +261,7 @@
   gapSizeChanged(tilesGap.value);
   mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
-  anzahlVerschieben.value = anzahl.value*anzahl.value;
+  anzahlVerschieben.value = anzahlX.value*anzahlY.value;
   aufgebenId.style.display = "none";
   // schiebenSettings.style.display  = "inline"
   randSettings.style.display = "none";
@@ -282,7 +284,7 @@
     }
   }
   function generalBackToBar(elm) {
-    if (tileSelectionBar.tiles.length != anzahl.value*anzahl.value) {
+    if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
       state.backToBar = tileSelectionBar.selectedTile.i + 1; 
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
@@ -439,14 +441,6 @@
     }
   }
   function gapSizeChanged(value) {
-    // playing around with width representation
-    // gapCanvas.width = Math.round(größeAnpassenX.value/anzahl.value) + JSON.parse(tilesGap.value) + Math.round(größeAnpassenX.value/anzahl.value/anzahl.value);
-    // gapCanvas.height = Math.round(größeAnpassenX.value/anzahl.value);
-    // var gCanvas = gapCanvas.getContext('2d');
-    // gCanvas.clearRect(0, 0, gCanvas.width, gCanvas.height);
-    // gCanvas.fillStyle = 'red';
-    // gCanvas.fillRect(0, 0, Math.round(größeAnpassenX.value/anzahl.value/anzahl.value), Math.round(größeAnpassenY.value/anzahl.value/anzahl.value));
-    // gCanvas.fillRect(Math.round(größeAnpassenX.value/anzahl.value/anzahl.value) + JSON.parse(tilesGap.value), 0, Math.round(größeAnpassenY.value/anzahl.value/anzahl.value), Math.round(größeAnpassenY.value/anzahl.value/anzahl.value));
     gapCanvas.width = 100 + JSON.parse(tilesGap.value);
     gapCanvas.height = 100;
     var gCanvas = gapCanvas.getContext('2d');
@@ -542,6 +536,15 @@
       if (tile == generalPosition) return tile;
     }
   }
+  function getSizeTileAmoutAdaption() {
+    for (let i = 0; i < 1000; i++) {
+      for (let i1 = 0; i1 < 1000; i1++) {
+        if (i > 1 && i1 > 1 && Math.abs(Math.abs(Math.round(größeAnpassenX.value/i)) - Math.abs(Math.round(größeAnpassenY.value/i1))) < 1) {
+          return {x: i, y: i1};
+        }
+      }
+    }
+  }
   function create2() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else {
@@ -550,8 +553,15 @@
       if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
       positions = {right: [], wrong: []};
       if (modeSelection.value == "traditional") {
-        if (rotateTiles.checked) zuAngepassterBildschirmgröße(true);
-        positions.layoutOrder = new Array(document.getElementById('anzahl').value*document.getElementById('anzahl').value);
+        if (rotateTiles.checked) {
+          var data = getSizeTileAmoutAdaption();
+          if (data && confirm(`Damit die Teile drehbar sind, muss das Bild gleich lang wie hoch sein. Wollen Sie mit ${data.x} x ${data.y} Teilen Spielen, um dies zu erreichen oder lieber die Seitenverhältnisse des Bildes anpassen? Wenn Sie die Anzahl der Teile wie eben genannt verändern wollen, klicken Sie bitte auf OK o.ä., andernfalls auf abbrechen.`)) {
+            anzahlX.value = data.x;
+            anzahlY.value = data.y;
+          }
+          else zuAngepassterBildschirmgröße(true);
+        }
+        positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
         for (var i = 0; i < positions.layoutOrder.length; i++) {
           positions.layoutOrder[i] = i;
         }
@@ -593,29 +603,30 @@
       textur.height = preview.height// + 111;
       videoPreview.width = größeAnpassenX.value;
       videoPreview.height = größeAnpassenY.value;
-      var anzahl = document.getElementById('anzahl').value;
-      if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/anzahl), y: Math.round(originalSize.height/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
-      else lengthPerTeil = {original: {x: Math.round(video.videoWidth/anzahl), y: Math.round(video.videoHeight/anzahl)}, edit: {x: Math.round(preview.width/anzahl), y: Math.round(preview.height/anzahl)}};
+      var pAnzahlX = anzahlX.value;
+      var pAnzahlY = anzahlY.value;
+      if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/pAnzahlX), y: Math.round(originalSize.height/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
+      else lengthPerTeil = {original: {x: Math.round(video.videoWidth/pAnzahlX), y: Math.round(video.videoHeight/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
       breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
       randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
-      for (var i = 0; i < anzahl; i++) {
-        for (var i1 = 0; i1 < anzahl; i1++) {
+      for (var i = 0; i < pAnzahlY; i++) {
+        for (var i1 = 0; i1 < pAnzahlX; i1++) {
           if (modeSelection.value == "traditional") {
-            var newTile = {original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1, degree: 0}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1, degree: 0}};
-            if (i) newTile.original.left = {x: positions.right[i*anzahl + i1 - anzahl]?.original.x, y: positions.right[i*anzahl + i1 - anzahl]?.original.y};
-            if (i1) newTile.original.top = {x: positions.right[i*anzahl + i1 - 1]?.original.x, y: positions.right[i*anzahl + i1 - 1]?.original.y};
+            var newTile = {original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}};
+            if (i) newTile.original.left = {x: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.x, y: positions.right[i*pAnzahlY + i1 - pAnzahlY]?.original.y};
+            if (i1) newTile.original.top = {x: positions.right[i*pAnzahlX + i1 - 1]?.original.x, y: positions.right[i*pAnzahlY + i1 - 1]?.original.y};
             positions.right.push(newTile);
-            if (i1) positions.right[i*anzahl + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
-            if (i) positions.right[i*anzahl + i1 - anzahl].original.right = {x: newTile.original.x, y: newTile.original.y};
+            if (i1) positions.right[i*pAnzahlX + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+            if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.right = {x: newTile.original.x, y: newTile.original.y};
           }
           else {
             positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
           }
           positions.right[positions.right.length - 1].border = [];
           if (i == 0) positions.right[positions.right.length - 1].border.push("left");
-          if (i == anzahl - 1) positions.right[positions.right.length - 1].border.push("right");
+          if (i == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
           if (i1 == 0) positions.right[positions.right.length - 1].border.push("top");
-          if (i1 == anzahl - 1) positions.right[positions.right.length - 1].border.push("bottom");
+          if (i1 == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
         }
       }
       positions.wrong = JSON.parse(JSON.stringify(positions.right));
@@ -970,10 +981,10 @@ var originalSize = {};
       }
       originalSize = {width: width, height: height};
        canvas.drawImage(document.getElementById('preview'), 0, 0);
-       setPresetImgHeight(width, height);
+       changeAdaptedSizeMax(width, height);
     }, 500);
   }
-  function setPresetImgHeight(width, height) {
+  function changeAdaptedSizeMax(width, height) {
     textur.width = width// + 111;
     textur.height = height// + 111;
     if (window.innerWidth > width || screenIsMax.checked) größeAnpassenX.max = window.innerWidth;
@@ -1231,12 +1242,12 @@ var originalSize = {};
       if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i);
     }
     var counter = 0;
-    for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlVerschieben.value); i++) {
+    for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlYVerschieben.value) || (richtigeCheck.checked && richtige > anzahlYRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlYVerschieben.value); i++) {
       var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
       if (!workingNumbers.length) break;
       missing.forEach((pMissing, i1) => {
       try {
-      if (!listCoordinates(doNotChange).includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y) && (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
+      if (!listCoordinates(doNotChange).includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y) && (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlYVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
       (positions.wrong[side].edit.x - lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y)/*left*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y + lengthPerTeil.edit.y))/*down*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y - lengthPerTeil.edit.y))/*up*/))) {
       if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y))) {
         maleZurrück.number++;
@@ -1800,8 +1811,8 @@ var originalSize = {};
   }
   function checkSelected() {
     try {
-    for (var i = 0; i < anzahl.value; i++) {
-      for (var i1 = 0; i1 < anzahl.value; i1++) {
+    for (var i = 0; i < anzahlX.value; i++) {
+      for (var i1 = 0; i1 < anzahlY.value; i1++) {
         if (mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
       }
     }
