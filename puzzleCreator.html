@@ -11,10 +11,11 @@
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 <button onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
-<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
 <br>
 <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
 <input id="sourceIsVideo" name="mediaType" type="radio">Video
+<br>
+<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
 <br>
 <input type="range" width="window.innerWidth" oninput="zeigeGröße();" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
