@@ -1385,7 +1385,7 @@ var originalSize = {};
     if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
-    folgenMouseMove("mousemove");
+    if (gerät == "PC") folgenMouseMove("mousemove");
   }
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
@@ -1853,8 +1853,10 @@ var originalSize = {};
       mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
     }
     if (ev.type == "touchend") {
-      mouseUp();
-      layout(true, true);
+      setTimeout(function () {
+        mouseUp();
+        layout(true, true);
+      }, 100);
     }
     if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
       folgenMouseMove("touchmove");
