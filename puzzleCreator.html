@@ -67,6 +67,8 @@
     <br>
     <a id="vibrateA"><input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)</a>
     <br>
+    <input id="automaticTileSelectionReset" checked="true" type="checkbox"> automatisch Teile abwählen
+    <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (!checked) {größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
     <a id="rotateTilesAdaptionSettings">
@@ -1410,7 +1412,7 @@ var originalSize = {};
     if (modeSelection.value == "traditional") {
       if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
         var i = tileSelectionBar.selectedTile;
-        selected.tiles = [i.tileI];
+        selected.tiles.push(i.tileI);
         positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
         positions.layoutOrder.push(i.tileI);
         tileSelectionBar.tiles.splice(i.i, 1);
@@ -1441,6 +1443,9 @@ var originalSize = {};
         var coord = positions.wrong[i].edit;
         var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
         if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
+        if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height) {
+          state.oldTileSelected = true;
+        }
         if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
           if (!state.placeTile) {
             selected.tiles.push(i);
@@ -1470,6 +1475,7 @@ var originalSize = {};
           state.newTileSelected = true;
         }
       }
+      if (!state.newTileSelected && !state.oldTileSelected && !automaticTileSelectionReset.checked) selected.tiles = [];
       state.placeTile = false;
       tileSelectionBar.tiles.forEach((tileI, i) => {
         var tile = positions.wrong[tileI];
@@ -1682,6 +1688,7 @@ var originalSize = {};
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (modeSelection.value == "traditional") {
       state.newTileSelected = false;
+      state.oldTileSelected = false;
       var bClipped = false;
       for (var clip of selected.clip) {
         if (!tileSelectionBar.tiles.includes(clip.i)) {
@@ -1709,7 +1716,7 @@ var originalSize = {};
       selected.tiles = [];
     }
     selected.clip = [];
-    if (selected.tiles.length && !state.shift && !state.removeTile) selected.tiles = [];
+    if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
     }
   }
   function collides(a, b) {
@@ -1747,6 +1754,7 @@ var originalSize = {};
   document.onkeydown = function(event) {
     if (event.shiftKey) {
       state.shift = true;
+      selected.tiles = [];
     }
     var collidesTilesBar = tileSelectionBar.collidesMouse();
     if (event.key == "ArrowRight") {
@@ -1821,7 +1829,7 @@ var originalSize = {};
   document.onkeyup = function(event) {
     if (!event.shiftKey && state.shift) {
       state.shift = false;
-      selected.tiles = [];
+      if (automaticTileSelectionReset.checked) selected.tiles = [];
     }
   }
   function touch(ev) {
