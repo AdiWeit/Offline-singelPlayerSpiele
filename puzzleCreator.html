@@ -19,9 +19,9 @@
 <br>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
 <br>
-<input type="range" width="window.innerWidth" oninput="zeigeGröße();" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
+<input type="range" width="window.innerWidth" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
-<input type="range" width="window.innerHeight"  max="window.innerHeight" onInput="zeigeGröße();" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
+<input type="range" width="window.innerHeight" onchange="adaptTileAmount();" max="window.innerHeight" onInput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
@@ -68,7 +68,18 @@
     <a id="vibrateA"><input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)</a>
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" checked="true" type="checkbox"> drehe Teile
+    <input id="rotateTiles" onchange="if (!checked) {größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
+    <a id="rotateTilesAdaptionSettings">
+      <br>
+      <input type="radio" id="bAdaptAmount" onchange="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen
+      <a style="display: none;" id="adaptAmountSettings">
+        <br>
+        <input id="minTileAmount" oninput="adaptTileAmount();" value="16" placeholder="min. Anzahl" type="text">
+        <br>
+      </a>
+      <br>
+      <input type="radio" id="adaptImgSize" onchange="if (checked) zuAngepassterBildschirmgröße(false, true);" checked="true" name="adaptionStyle"> Größe Bild anpassen
+    </a>
     </p>
     <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
       <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
@@ -371,7 +382,13 @@
     größeAnpassenY.value = window.innerHeight;
     zeigeGröße();
   }
-  function zuAngepassterBildschirmgröße(noShowing) {
+  function zuAngepassterBildschirmgröße(noShowing, storeBefore) {
+    if (storeBefore) {
+      sizeBefore = {x: größeAnpassenX.value, y: größeAnpassenY.value};
+      anzahlX.value = amountBefore.x; 
+      anzahlY.value = amountBefore.y;
+      adaptAmountSettings.style.display = 'none';
+    }
     var referenceSize = originalSize;
     if (!screenIsMax.checked) referenceSize = {width: JSON.parse(JSON.stringify(größeAnpassenX.value)), height: größeAnpassenY.value};
     else referenceSize = {width: window.innerWidth + 1, height: window.innerHeight + 1};
@@ -383,7 +400,7 @@
       größeAnpassenX.value = [referenceSize.width, referenceSize.height].sort((a, b) => a - b)[0];
       größeAnpassenY.value = [referenceSize.width, referenceSize.height].sort((a, b) => a - b)[0];
     }
-    if (!noShowing || noShowing == "repeat") zeigeGröße();
+    if (!noShowing || noShowing == "repeat") zeigeGröße(true);
     if (screenIsMax.checked) {
       preventAutomaticZoom.content = `width=${größeAnpassenX.value}, height=${größeAnpassenY.value}, initial-scale=1.0, maximum-scale=1.0, user-scalable=0`;
       if (!noShowing) zuAngepassterBildschirmgröße("repeat");
@@ -398,7 +415,14 @@
     }
     zeigeGröße();
   }
-  function zeigeGröße() {
+  function zeigeGröße(adapted, onInput) {
+    if (größeAnpassenX.value != größeAnpassenY.value && !state.loadImage) bAdaptAmount.checked = true;
+    if (state.loadImage && !adapted) zuAngepassterBildschirmgröße();
+    delete state.loadImage;
+    if (bAdaptAmount.checked && !adapted && !onInput) {
+      adaptTileAmount();
+      if (!getSizeTileAmoutAdaption()) adaptImgSize.checked = true;
+    }
     textur.width = größeAnpassenX.value;
     textur.height = größeAnpassenY.value
     // canvas.clearRect(0, 0, textur.width, textur.height);
@@ -539,10 +563,26 @@
   function getSizeTileAmoutAdaption() {
     for (let i = 0; i < 1000; i++) {
       for (let i1 = 0; i1 < 1000; i1++) {
-        if (i > 1 && i1 > 1 && Math.abs(Math.abs(Math.round(größeAnpassenX.value/i)) - Math.abs(Math.round(größeAnpassenY.value/i1))) < 1) {
+        if (i > 1 && i1 > 1 && !Math.abs(Math.abs(Math.round(größeAnpassenX.value/i)) - Math.abs(Math.round(größeAnpassenY.value/i1))) && i*i1 > minTileAmount.value) {
           return {x: i, y: i1};
         }
       }
+    }
+  }
+  var sizeBefore;
+  var amountBefore;
+  function adaptTileAmount(adaptionStyleChanged) {
+    adaptAmountSettings.style.display = 'inline';
+    amountBefore = {x: anzahlX.value, y: anzahlY.value};
+    if (sizeBefore && adaptionStyleChanged) {
+      größeAnpassenX.value = sizeBefore.x; 
+      größeAnpassenY.value = sizeBefore.y;
+      zeigeGröße(true);
+    }
+    var data = getSizeTileAmoutAdaption();
+    if (data) {
+      anzahlX.value = data.x;
+      anzahlY.value = data.y;
     }
   }
   function create2() {
@@ -553,14 +593,15 @@
       if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
       positions = {right: [], wrong: []};
       if (modeSelection.value == "traditional") {
-        if (rotateTiles.checked) {
-          var data = getSizeTileAmoutAdaption();
-          if (data && confirm(`Damit die Teile drehbar sind, muss das Bild gleich lang wie hoch sein. Wollen Sie mit ${data.x} x ${data.y} Teilen Spielen, um dies zu erreichen oder lieber die Seitenverhältnisse des Bildes anpassen? Wenn Sie die Anzahl der Teile wie eben genannt verändern wollen, klicken Sie bitte auf OK o.ä., andernfalls auf abbrechen.`)) {
-            anzahlX.value = data.x;
-            anzahlY.value = data.y;
-          }
-          else zuAngepassterBildschirmgröße(true);
-        }
+        // if (rotateTiles.checked) {
+
+          // var data = getSizeTileAmoutAdaption();
+          // if (data && confirm(`Damit die Teile drehbar sind, muss das Bild gleich lang wie hoch sein. Wollen Sie mit ${data.x} x ${data.y} Teilen Spielen, um dies zu erreichen oder lieber die Seitenverhältnisse des Bildes anpassen? Wenn Sie die Anzahl der Teile wie eben genannt verändern wollen, klicken Sie bitte auf OK o.ä., andernfalls auf abbrechen.`)) {
+          //   anzahlX.value = data.x;
+          //   anzahlY.value = data.y;
+          // }
+          // else zuAngepassterBildschirmgröße(true);
+        // }
         positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
         for (var i = 0; i < positions.layoutOrder.length; i++) {
           positions.layoutOrder[i] = i;
@@ -981,6 +1022,7 @@ var originalSize = {};
       }
       originalSize = {width: width, height: height};
        canvas.drawImage(document.getElementById('preview'), 0, 0);
+       if (adaptImgSize.checked && modeSelection.value == "traditional" && rotateTiles.checked) state.loadImage = true;
        changeAdaptedSizeMax(width, height);
     }, 500);
   }
