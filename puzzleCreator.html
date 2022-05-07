@@ -1520,7 +1520,7 @@ var originalSize = {};
   function unclipp(tile) {
     var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
     var objTile = positions.wrong[tile];
-    for (const direc of ['left', 'top', 'left', 'down']) {
+    for (const direc of ['left', 'top', 'right', 'bottom']) {
       if (objTile.original[direc] && !selected.tiles.includes(getTile(objTile.original[direc]))) {
         delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
         delete objTile.original[direc];
