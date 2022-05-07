@@ -12,7 +12,7 @@
 <button type="button" onclick="useURL();" name="button">nutzen (als Quelle)</button>
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
-<button onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
+<button id="useLiveCam" onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
 <br>
 <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
 <input id="sourceIsVideo" name="mediaType" type="radio">Video
@@ -989,6 +989,7 @@ navigator.mediaDevices.enumerateDevices()
     }
   });
   if (cameraSelection.options.length < 2) cameraSelection.style.display = 'none';
+  if (!cameraSelection.options.length) useLiveCam.style.display = 'none';
 })
 
 function convertTime(value, id){
