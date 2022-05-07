@@ -19,9 +19,9 @@
 <br>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
 <br>
-<input type="range" width="window.innerWidth" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
+<input type="range" width="window.screen.availWidth" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
-<input type="range" width="window.innerHeight" onchange="adaptTileAmount();" max="window.innerHeight" onInput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
+<input type="range" width="window.screen.availHeight" onchange="adaptTileAmount();" max="window.screen.availHeight" onInput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
@@ -277,8 +277,8 @@
   // schiebenSettings.style.display  = "inline"
   randSettings.style.display = "none";
   schiebenSettings.style.display = "none";
-  größeAnpassenX.max = window.innerWidth
-  größeAnpassenY.max = window.innerHeight
+  größeAnpassenX.max = window.screen.availWidth
+  größeAnpassenY.max = window.screen.availHeight
   var canvas = textur.getContext('2d');
   function shuffleStyleVisibilities(value) {
     if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
@@ -378,8 +378,8 @@
     alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
-    größeAnpassenX.value = window.innerWidth;
-    größeAnpassenY.value = window.innerHeight;
+    größeAnpassenX.value = window.screen.availWidth;
+    größeAnpassenY.value = window.screen.availHeight;
     zeigeGröße();
   }
   function zuAngepassterBildschirmgröße(noShowing, storeBefore) {
@@ -391,10 +391,10 @@
     }
     var referenceSize = originalSize;
     if (!screenIsMax.checked) referenceSize = {width: JSON.parse(JSON.stringify(größeAnpassenX.value)), height: größeAnpassenY.value};
-    else referenceSize = {width: window.innerWidth + 1, height: window.innerHeight + 1};
-    if (window.innerWidth < referenceSize.width && window.innerHeight < referenceSize.height) {
-      größeAnpassenX.value = [window.innerWidth, window.innerHeight].sort((a, b) => a - b)[0];
-      größeAnpassenY.value = [window.innerWidth, window.innerHeight].sort((a, b) => a - b)[0];
+    else referenceSize = {width: window.screen.availWidth + 1, height: window.screen.availHeight + 1};
+    if (window.screen.availWidth < referenceSize.width && window.screen.availHeight < referenceSize.height) {
+      größeAnpassenX.value = [window.screen.availWidth, window.screen.availHeight].sort((a, b) => a - b)[0];
+      größeAnpassenY.value = [window.screen.availWidth, window.screen.availHeight].sort((a, b) => a - b)[0];
     }
     else {
       größeAnpassenX.value = [referenceSize.width, referenceSize.height].sort((a, b) => a - b)[0];
@@ -409,7 +409,7 @@
   function zuOptimalerBildschirmgröße() {
     größeAnpassenX.value = preview.width;
     größeAnpassenY.value = preview.height;
-    while (größeAnpassenX.value > window.innerWidth || größeAnpassenY.value > window.innerHeight) {
+    while (größeAnpassenX.value > window.screen.availWidth || größeAnpassenY.value > window.screen.availHeight) {
       größeAnpassenX.value--;
       größeAnpassenY.value--;
     }
@@ -512,7 +512,7 @@
     layout(true, true);
   }
   function scrollTileSelection(direc) {
-    var screenScrollX = window.innerWidth/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
+    var screenScrollX = window.screen.availWidth/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
     if (screenScrollX/lengthPerTeil.edit.x > positions.wrong.length) screenScrollX = positions.wrong.length*lengthPerTeil.edit.x;
     tileSelectionBar.leftOffScreenTiles += direc;
     var scrollXBefore = tileSelectionBar.scrollX;
@@ -623,7 +623,7 @@
         videoControls.style.display = 'inline';
         videoPosition.max = video.duration;
         settings.style.display = 'inline';
-        videoPosition.style.width = window.innerWidth;
+        videoPosition.style.width = window.screen.availWidth;
         while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
           videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
         }
@@ -685,6 +685,38 @@
       window.scroll(0, 0);
       changeSettingsVis('none');
     }
+    autoScroll = setInterval(function () {
+  // up
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    window.scroll(scrollX, scrollY - 3);
+    mausy -= 3;
+}
+// right 
+if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.screen.availWidth && selected.tiles?.length) {
+      window.scroll(scrollX + 3, scrollY);
+    }
+      if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.screen.availWidth + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.screen.availWidth - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
+        window.scroll(scrollX + 3, scrollY);
+        mausx += 3;
+      }
+      // left
+      if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit?.x/2 < 0 && selected.tiles.length) {
+      window.scroll(scrollX - 3, scrollY);
+    }
+  if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && (mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    window.scroll(scrollX - 3, scrollY);
+    mausx -= 3;
+}
+// down
+var pScrollY = scrollY;
+    if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.screen.availHeight + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.screen.availHeight - 10))) && (modeSelection.value !=
+      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
+        window.scroll(scrollX, scrollY + 3);
+        mausy += 3;
+      }
+});
   }
 
   function shufflePuzzle() {
@@ -777,7 +809,7 @@
         for (let i = 0; i < positions.wrong.length; i++) {
           positions.wrong[i].edit = {x: pos.x, y: pos.y};
           pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
-          if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.innerWidth) {
+          if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.screen.availWidth) {
             pos.x = lengthPerTeil.edit.x/2;
             pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
           }
@@ -804,7 +836,7 @@
   texturTop = textur.getBoundingClientRect().top;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionBar.height = lengthPerTeil.edit.y + 10;
-  tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
+  tileBarHeight.max = window.screen.availHeight - texturTop - lengthPerTeil.edit.y;
   changeTileBarHeight(lengthPerTeil.edit.y + 10);
   tileSelectionCanvas.height = lengthPerTeil.edit.y + 10;
   backToBarBWidth.max = lengthPerTeil.edit.x;
@@ -815,7 +847,7 @@
     selectBackToBarB.style.display = 'inline';
     listTilesS.style.display = 'inline';
     settings.style.display = 'inline';
-    tileBarHeight.style.width = window.innerWidth - tileBarHeightText.getBoundingClientRect().width - resetBarSize.getBoundingClientRect().width - 100;
+    tileBarHeight.style.width = window.screen.availWidth - tileBarHeightText.getBoundingClientRect().width - resetBarSize.getBoundingClientRect().width - 100;
     settings.style.display = 'none';
   }
   else tileSelectionCanvas.style.display = "none";
@@ -839,8 +871,6 @@
   }
   selected.boolean = false;
   preventAutomaticZoom.content = "";
-  scrollDownInt = setInterval(scrollDownFunction, 10);
-  scrollRightInt = setInterval(scrollRightFunction, 10);
   window.scroll(0, 0);
   }
   layout(true, true);
@@ -1016,7 +1046,7 @@ function convertTime(value, id){
 var originalSize = {};
   function loadImage(width, height) {
     setTimeout(function () {
-      // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
+      // videoPosition.style.width = window.screen.availWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
       if (!width) {
         width = preview.width;
         height = preview.height;
@@ -1030,9 +1060,9 @@ var originalSize = {};
   function changeAdaptedSizeMax(width, height) {
     textur.width = width// + 111;
     textur.height = height// + 111;
-    if (window.innerWidth > width || screenIsMax.checked) größeAnpassenX.max = window.innerWidth;
+    if (window.screen.availWidth > width || screenIsMax.checked) größeAnpassenX.max = window.screen.availWidth;
     else größeAnpassenX.max = width;
-    if (window.innerHeight > height || screenIsMax.checked) größeAnpassenY.max = window.innerHeight;
+    if (window.screen.availHeight > height || screenIsMax.checked) größeAnpassenY.max = window.screen.availHeight;
     else größeAnpassenY.max = height;
     größeAnpassenX.value = width;
     größeAnpassenY.value = height;
@@ -1085,7 +1115,7 @@ var originalSize = {};
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
     if (lengthPerTeil.sizeAdapted) tileSelectionCanvas.width = positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.edit.x/lengthPerTeil.sizeAdapted.x));
     else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
-    if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.innerWidth) tileSelectionBar.scrollX = 0;
+    if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.screen.availWidth) tileSelectionBar.scrollX = 0;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
@@ -1347,10 +1377,12 @@ var originalSize = {};
   var mausy;
   var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, viewOriginal: {times: 0}, minimumRotations: 0};
   document.onmousemove = readMouseMove
+  var originalMausX;
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft;
     mausy = e.clientY + scrollY - texturTop;
-    if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
+    originalMausX = e.clientX;
+    if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
     folgenMouseMove("mousemove");
@@ -1478,7 +1510,8 @@ var originalSize = {};
       for (var tile of selected.tiles) {
         var objTile = positions.wrong[tile];
         if (gerät == "PC") {
-        if (objTile.edit.x + lengthPerTeil.edit.x > textur.width) textur.width += lengthPerTeil.edit.x;
+        if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0 && selected.tiles.length) textur.width += 15;
+        if (!mirrorInput.checked && objTile.edit.x + lengthPerTeil.edit.x > textur.width) textur.width += lengthPerTeil.edit.x;
         if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) textur.height += lengthPerTeil.edit.y;
       }
         for (var clipp of clipped) {
@@ -1564,7 +1597,10 @@ var originalSize = {};
         }
       }
     });
-    var screenObj = {x: scrollX, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
+    var screenObj = {x: scrollX, y: scrollY, width: window.screen.availWidth - 22, height: window.screen.availHeight};
+    if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.screen.availWidth, y: scrollY, width: window.screen.availWidth - 22, height: window.screen.availHeight};
+    canvas.fillStyle = "blue";
+    // canvas.fillRect(textur.width - scrollX - window.screen.availWidth, scrollY, window.screen.availWidth, window.screen.availHeight);
     var clipLength = selected.clip.length;
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.left) {
@@ -1863,38 +1899,6 @@ var originalSize = {};
     console.log("pleaseDebug :)");
   }
   }
-  function scrollDownFunction(tile) {
-    // selected.tiles.forEach((tile, i) => {
-    var pScrollY = scrollY;
-    if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.innerHeight - 10))) && (modeSelection.value !=
-      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
-        window.scroll(scrollX, scrollY + 3);
-        mausy += 3;
-      }
-    // });
-  }
-scrollUpInt = setInterval(function () {
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
-    window.scroll(scrollX, scrollY - 3);
-    mausy -= 3;
-}
-}, 10);
-  function scrollRightFunction() {
-    // selected.tiles.forEach((tile, i) => {
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
-      "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
-        window.scroll(scrollX + 3, scrollY);
-        mausx += 3;
-      }
-    // });
-  }
-scrollLeftInt = setInterval(function () {
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
-    window.scroll(scrollX - 3, scrollY);
-    mausx -= 3;
-}
-}, 10);
 window.addEventListener('scroll',()=>{
   if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
   else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
