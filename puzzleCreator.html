@@ -36,19 +36,33 @@
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
-    <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button">⟲
-    <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button">⟳
+    <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button"><a onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a>
+
+    <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button"><a onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a>
     <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
-    <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true;">⇧
+    <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true;"><a onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a>
   </p>
-    <input class="mobileControlsElm" type="checkbox" id="scrollable" name="button">scroll
+    <input class="mobileControlsElm" type="checkbox" id="scrollable" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
 </p2>
+<div id="tileElements">
+  <div id="rotateLeftTitle" style="left: -143px; top: 30px; display: none;" class="speech top">
+    Teil pro klick um 90° nach links verschieben 
+  </div>
+  <div id="rotateRightTitle" style="left: 1px; top: 30px; display: none;" class="speech top">
+    Teil pro klick um 90° nach rechts verschieben 
+  </div>
+  <div id="selectMultipleTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
+    Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählen Teile
+  </div>
+  <div id="swipeTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
+    Scrollen nach einmal swipen ermöglichen (bis nicht mehr aktiviert und einmal geswiped)
+  </div>
+</div>
 <style>
   .mobileControlsElm {
     width: 44;
     height: 44;
     top: 7px;
-    position: relative;
   }
 </style>
 <div id="settings" style="display: none;">
@@ -246,6 +260,89 @@
     position: fixed;
   }
 </style>
+<style name="bubbleStyle">
+  /* (A) SPEECH BOX */
+  .speech {
+    /* (A1) FONT */
+    font-family: arial, sans-serif;
+    /* font-size: 0.5em; */
+    /* font-size: 0.7em; */
+    /* font-size: 1vw; */
+    font-size: 25px;
+  
+    /* (A2) COLORS */
+    color: #fff;
+    background: blue;
+  
+    /* (A3) DIMENSIONS + POSITION */
+    position: absolute;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 320px;
+    z-index: 2;
+  }
+  
+  /* (B) ADD SPEECH "CALLOUT TAIL" */
+  /* (B1) USE ::AFTER TO CREATE THE "TAIL" */
+  .speech::after {
+    /* (B1-1) ATTACH TRANSPARENT BORDERS */
+    content: "";
+    border: 20px solid transparent;
+  
+    /* (B1-2) NECESSARY TO POSITION THE "TAIL" */
+    position: absolute;
+  }
+  
+  /* (B2) BOTTOM "CALLOUT TAIL" */
+  .bottom.speech::after {
+    /* (B2-1) DOWN TRIANGLE */
+    border-top-color: blue;
+    border-bottom: 0;
+  
+    /* (B2-2) POSITION AT BOTTOM */
+    bottom: -20px; left: 50%;
+    margin-left: -20px;
+  }
+  
+  /* (C) DIFFERENT TAIL POSITIONS */
+  /* (C1) TOP */
+  .top.speech::after {
+    /* (C1-1) UP TRIANGLE */
+    border-bottom-color: blue;
+    border-top: 0;
+  
+    /* (C1-2) POSITION AT TOP */
+    top: -20px; left: 50%;
+    margin-left: -20px;
+  }
+  
+  /* (C2) LEFT */
+  .left.speech::after {
+    /* (C2-1) LEFT TRIANGLE */
+    border-right-color: blue;
+    border-left: 0;
+  
+    /* (C2-2) POSITION AT LEFT */
+    left: -20px; top: 50%;
+    margin-top: -20px;
+  }
+  
+  /* (C3) RIGHT */
+  .right.speech::after {
+    /* (C3-1) RIGHT TRIANGLE */
+    border-left-color: blue;
+    border-right: 0;
+  
+    /* (C3-2) POSITION AT RIGHT */
+    right: -20px; top: 50%;
+    margin-top: -20px;
+  }
+  
+  /* (X) DOES NOT MATTER - SPACERS */
+  /* .speech, .circular { margin: 50px 0 0 50px; } */
+  body { padding-bottom: 100px; }
+  
+  </style>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
@@ -294,6 +391,16 @@
     else {
       backToBarButtons.style.display = 'none';
       backToBarBSize.style.display = 'none';
+    }
+  }
+  function showTitle(id, display) {
+    id = id.replace('Symbol', 'Title');
+    if (document.getElementById(id).style.display == "inline") document.getElementById(id).style.display = "none";
+    else {
+      document.getElementById(id).style.display = "inline";
+      setTimeout(function () {
+        document.getElementById(id).style.display = "none";
+      }, 5000);
     }
   }
   function generalBackToBar(elm) {
@@ -719,6 +826,10 @@ var pScrollY = scrollY;
         mausy += 3;
       }
 });
+swipeTitle.style.display = "inline";
+swipeTitle.style.top = swipeSymbol.getBoundingClientRect().height + 31;
+swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left - swipeTitle.getBoundingClientRect().width/2 + 15;
+swipeTitle.style.display = "none";
   }
 
   function shufflePuzzle() {
@@ -875,6 +986,19 @@ var pScrollY = scrollY;
   preventAutomaticZoom.content = "";
   window.scroll(0, 0);
   }
+
+  rotateLeftTitle.style.display = "inline";
+  rotateRightTitle.style.display = "inline";
+  selectMultipleTitle.style.display = "inline";
+  rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().height + 31;
+  rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().height + 31;
+  selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().height + 31;
+  rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left - rotateLeftTitle.getBoundingClientRect().width/2 + 15;
+  rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left - rotateRightTitle.getBoundingClientRect().width/2 + 15;
+  selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left - selectMultipleTitle.getBoundingClientRect().width/2 + 15;
+  rotateLeftTitle.style.display = "none";
+  rotateRightTitle.style.display = "none";
+  selectMultipleTitle.style.display = "none";
   layout(true, true);
   startPause('completionTime');
 }
