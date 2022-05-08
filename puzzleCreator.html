@@ -827,8 +827,8 @@ var pScrollY = scrollY;
       }
 });
 swipeTitle.style.display = "inline";
-swipeTitle.style.top = swipeSymbol.getBoundingClientRect().height + 31;
-swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left - swipeTitle.getBoundingClientRect().width/2 + 15;
+swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
+swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
 swipeTitle.style.display = "none";
   }
 
@@ -990,15 +990,19 @@ swipeTitle.style.display = "none";
   rotateLeftTitle.style.display = "inline";
   rotateRightTitle.style.display = "inline";
   selectMultipleTitle.style.display = "inline";
-  rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().height + 31;
-  rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().height + 31;
-  selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().height + 31;
-  rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left - rotateLeftTitle.getBoundingClientRect().width/2 + 15;
-  rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left - rotateRightTitle.getBoundingClientRect().width/2 + 15;
-  selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left - selectMultipleTitle.getBoundingClientRect().width/2 + 15;
+  rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().bottom + 20;
+  rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().bottom + 20;
+  selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().bottom + 20;
+  rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left + rotateLeftSymbol.getBoundingClientRect().width/2 - rotateLeftTitle.getBoundingClientRect().width/2;
+  rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left + rotateRightSymbol.getBoundingClientRect().width/2 - rotateRightTitle.getBoundingClientRect().width/2;
+  selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left + selectMultipleSymbol.getBoundingClientRect().width/2 - selectMultipleTitle.getBoundingClientRect().width/2;
   rotateLeftTitle.style.display = "none";
   rotateRightTitle.style.display = "none";
   selectMultipleTitle.style.display = "none";
+  swipeTitle.style.display = "inline";
+  swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
+  swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
+  swipeTitle.style.display = "none";
   layout(true, true);
   startPause('completionTime');
 }
