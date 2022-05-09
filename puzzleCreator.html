@@ -350,6 +350,10 @@
   <canvas style="display: none;" id="videoPreview"></canvas>
 </p>
 <script>
+    window.onbeforeunload = function(){
+    console.log("Leave Website");
+      return 'Are you sure you want to leave?';
+  };
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
