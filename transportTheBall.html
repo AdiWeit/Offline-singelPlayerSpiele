@@ -478,12 +478,8 @@ localStorage.setItem("storedName", name);
     },
     slide: {
       1: {
-        // slideLength: 10,
-        // slideStop: 44
       },
       3: {
-        // slideStop: 44
-        slideStop: 1
       },
       5: {
 
@@ -710,10 +706,7 @@ localStorage.setItem("storedName", name);
   }*/
 
   for (var i = 1; i < Object.keys(level.slide).length + 1; i++) {
-    // if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
-    // if (!level.slide[i].slideLength) level.slide[i].slideLength = 10;
-    if (!level.slide[i].slideStop) level.slide[i].slideStop = 5;
-    if (!level.slide[i].slideLength) level.slide[i].slideLength = 5;
+    if (!level.slide[i].deceleration) level.slide[i].deceleration = 0.09;
   }
   for (var i = 0; i < Object.keys(level).length; i++) {
     if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
@@ -952,7 +945,8 @@ function checkpointSelected(value) {
         timeDirection.over.right = 0;
       }
     }
-      if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && zaehler == 0) moveDirection(directionBefore, nextCoordinates);
+      if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && geteiltDurch == 1) moveDirection(directionBefore, nextCoordinates, {x: 0, y: 0});
+      else if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball)) moveDirection(directionBefore, nextCoordinates, {x: 0, y: 0}, null, true);
       invisibleDirectionCheck(nextCoordinates);
       // normal mode
       if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
@@ -1041,7 +1035,7 @@ function checkpointSelected(value) {
     }
   };
   var zaehler = 0;
-  var geteiltDurch = 0.5;
+  var geteiltDurch = 1;
   var coordinatesBefore;
   var bounceCoordinates;
   var scrolling = false;
@@ -1090,29 +1084,79 @@ function checkpointSelected(value) {
     if (scrollY  < 5 && document.getElementById('gameModeSelection').value != "showScores"/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
   }
   document.addEventListener('touchstart', touch);
-  function moveDirection(pDirectionBefore, nextCoordinates) {
+  function moveDirection(pDirectionBefore, nextCoordinates, speed, originalSpeed, addUp) {
     if (zaehler != "newLevel") {
-    if (pDirectionBefore.includes( "right") && nextCoordinates.x > x1) ball.x += (nextCoordinates.x - x1)/geteiltDurch;
-    else if (pDirectionBefore.includes( "right")) ball.x += (x1 - nextCoordinates.x)/geteiltDurch;
-    if (pDirectionBefore.includes( "left") && nextCoordinates.x > x1) ball.x -= (nextCoordinates.x - x1)/geteiltDurch;
-    else if (pDirectionBefore.includes( "left")) ball.x -= (x1 - nextCoordinates.x)/geteiltDurch;
-    if (pDirectionBefore.includes( "down") && nextCoordinates.y > y1) ball.y += (nextCoordinates.y - y1)/geteiltDurch;
-    else if (pDirectionBefore.includes( "down")) ball.y += (y1 - nextCoordinates.y)/geteiltDurch;
-    if (pDirectionBefore.includes( "up") && nextCoordinates.y > y1) ball.y -= (nextCoordinates.y - y1)/geteiltDurch;
-    else if (pDirectionBefore.includes( "up")) ball.y -= (y1 - nextCoordinates.y)/geteiltDurch;
-    zaehler++;
+        // if (pDirectionBefore.includes( "right")) {
+        //   ball.x += Math.abs(ax1)/geteiltDurch;
+        // }
+        // else if (pDirectionBefore.includes( "left")) {
+        //   ball.x -= Math.abs(ax1)/geteiltDurch;
+        // }
+        // else if (pDirectionBefore.includes( "up")) {
+        //   ball.y -= Math.abs(ay1)/geteiltDurch;
+        // }
+        // else {
+        //   ball.y += Math.abs(ay1)/geteiltDurch;
+        // }
+        if (geteiltDurch == 1 || addUp) {
+          if (addUp) console.log('add up');
+          if (pDirectionBefore.includes( "right") || pDirectionBefore.includes( "left")) {
+            speed = {x: speed.x + (nextCoordinates.x - x1), y: speed.y};
+          }
+          if (pDirectionBefore.includes( "up") || pDirectionBefore.includes( "down")) {
+            speed = {x: speed.x, y: speed.y + (nextCoordinates.y - y1)};
+          }
+
+    //       if (pDirectionBefore.includes( "right") && nextCoordinates.x > x1) {
+    //         // ball.x += (nextCoordinates.x - x1)/geteiltDurch;
+    //         speed = {x: (nextCoordinates.x - x1)/geteiltDurch, y: 0};
+    //       }
+    //       else if (pDirectionBefore.includes( "right")) {
+    //   // ball.x += (x1 - nextCoordinates.x)/geteiltDurch;
+    //   speed = {x: (x1 - nextCoordinates.x)/geteiltDurch, y: 0}
+    // }
+    // if (pDirectionBefore.includes( "left") && nextCoordinates.x > x1) {
+    //   // ball.x -= (nextCoordinates.x - x1)/geteiltDurch;
+    //   speed = {x: -(x1 - nextCoordinates.x)/geteiltDurch, y: 0}
+    // }
+    // else if (pDirectionBefore.includes( "left")) {
+    //   // ball.x -= (x1 - nextCoordinates.x)/geteiltDurch;
+    //   speed = {x: -(x1 - nextCoordinates.x)/geteiltDurch, y: 0}
+    // }
+    // if (pDirectionBefore.includes( "down") && nextCoordinates.y > y1) {
+    //   // ball.y += (nextCoordinates.y - y1)/geteiltDurch;
+    //   speed = {x: 0, y: (nextCoordinates.y - y1)/geteiltDurch}
+    // }
+    // else if (pDirectionBefore.includes( "down")) {
+    //   // ball.y += (y1 - nextCoordinates.y)/geteiltDurch;
+    //   speed = {x: 0, y: (y1 - nextCoordinates.y)/geteiltDurch}
+    // }
+    // if (pDirectionBefore.includes( "up") && nextCoordinates.y > y1) {
+    //   // ball.y -= (nextCoordinates.y - y1)/geteiltDurch;
+    //   speed = {y: -(nextCoordinates.y - y1)/geteiltDurch, x: 0};
+    // }
+    // else if (pDirectionBefore.includes( "up")) {
+    //   // ball.y -= (y1 - nextCoordinates.y)/geteiltDurch;
+    //   speed ={y: -(y1 - nextCoordinates.y)/geteiltDurch, x: 0};
+    // }
+    originalSpeed = speed;
+  }
+    ball.x += speed.x;
+    ball.y += speed.y;
+    speed = {x: originalSpeed.x/geteiltDurch, y: originalSpeed.y/geteiltDurch};
+    // zaehler++;
     sphere.ball.style.top = ball.y + "px";
     sphere.ball.style.left = ball.x + "px";
     checkColourCollisions();
-    if (zaehler < /*20*/(level.slide[level.aktuell].slideLength) || (geteiltDurch < level.slide[level.aktuell].slideStop)) {
-      if (zaehler > (level.slide[level.aktuell].slideLength - 1)/*19*/) geteiltDurch++;
+    // if (zaehler < /*20*/(level.slide[level.aktuell].slideLength) || (geteiltDurch < level.slide[level.aktuell].slideStop)) {
+    if ((speed.x.toString()[0] != "0" || speed.y.toString()[0] != "0")) {
+      geteiltDurch += level.slide[level.aktuell].deceleration;
       setTimeout(function () {
-        moveDirection(pDirectionBefore, nextCoordinates);
+        if (zaehler != "newLevel" && geteiltDurch != 1) moveDirection(pDirectionBefore, nextCoordinates, speed, originalSpeed);
       }, 10);
     }
     else {
-      geteiltDurch = 0.5;
-      zaehler = 0;
+      geteiltDurch = 1;
     }
   }
   }
@@ -1381,6 +1425,7 @@ function checkpointSelected(value) {
   };
 
   function restartLevel(value) {
+    geteiltDurch = 1;
     var valueBefore = checkpointSelection.value;
     // if (valueBefore == "" && checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) valueBefore = (checkpoints[level.mode][level.aktuell].length - 1) + ". checkpoint";
     if (valueBefore == "") valueBefore = "start";
