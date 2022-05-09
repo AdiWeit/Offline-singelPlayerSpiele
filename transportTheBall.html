@@ -504,9 +504,6 @@ localStorage.setItem("storedName", name);
         }]
       },
       6: {
-
-      },
-      7: {
         ballTeleporter: [{
           ballSide: {
             x: 1111,
@@ -524,9 +521,10 @@ localStorage.setItem("storedName", name);
             width: 233,
             height: 100
           }
-        }]
+        }],
+        deceleration: 0.07
       },
-      8: {
+      7: {
         heart: {
           ball: {
             min: 13,
@@ -539,7 +537,7 @@ localStorage.setItem("storedName", name);
           },
         }
       },
-      9: {
+      8: {
         heart: {
           ball: {
             min: 13,
@@ -552,7 +550,7 @@ localStorage.setItem("storedName", name);
           },
         }
       },
-      10: {
+      9: {
         heart: {
           ball: {
             min: 13,
@@ -584,7 +582,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      11: {
+      10: {
         rotating: [
           {
         shape: "rectangle",
@@ -712,19 +710,17 @@ localStorage.setItem("storedName", name);
     if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
       for (var i1 = 1; i1 < Object.keys(level[Object.keys(level)[i]]).length + 1; i1++) {
         if (!level[Object.keys(level)[i]][i1].sizes) level[Object.keys(level)[i]][i1].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
-        if (!level[Object.keys(level)[i]][i1].bounceUpDown) level[Object.keys(level)[i]][i1].bounceUpDown = 3;
-        if (!level[Object.keys(level)[i]][i1].bounceleftRight) level[Object.keys(level)[i]][i1].bounceleftRight = 10;
         if (!level[Object.keys(level)[i]][i1].checkpointWhen_touches) level[Object.keys(level)[i]][i1].checkpointWhen_touches = "ball";
         if (!level[Object.keys(level)[i]][i1].spawnPoint) level[Object.keys(level)[i]][i1].spawnPoint =     {
-                    schieber: {
-                      x: 155,
-                      y: 200
-                    },
-                    ball: {
-                      x: 155,
-                      y: 266
-                    }
-                  }
+          schieber: {
+            x: 155,
+            y: 200
+          },
+          ball: {
+            x: 155,
+            y: 266
+          }
+        }
       }
     }
   }
@@ -945,8 +941,10 @@ function checkpointSelected(value) {
         timeDirection.over.right = 0;
       }
     }
-      if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && geteiltDurch == 1) moveDirection(directionBefore, nextCoordinates, {x: 0, y: 0});
-      else if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball)) moveDirection(directionBefore, nextCoordinates, {x: 0, y: 0}, null, true);
+      if (level.mode == "slide" && isCollide({x: nextCoordinates.x, y:  nextCoordinates.y, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball)) {
+        speed = {x: 0, y: 0};
+        moveDirection(directionBefore, nextCoordinates, geteiltDurch != 1);
+      }
       invisibleDirectionCheck(nextCoordinates);
       // normal mode
       if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
@@ -1084,21 +1082,11 @@ function checkpointSelected(value) {
     if (scrollY  < 5 && document.getElementById('gameModeSelection').value != "showScores"/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
   }
   document.addEventListener('touchstart', touch);
-  function moveDirection(pDirectionBefore, nextCoordinates, speed, originalSpeed, addUp) {
+  var speed = {x: 0, y: 0};
+  var originalSpeed = 0;
+  function moveDirection(pDirectionBefore, nextCoordinates, addUp) {
     if (zaehler != "newLevel") {
-        // if (pDirectionBefore.includes( "right")) {
-        //   ball.x += Math.abs(ax1)/geteiltDurch;
-        // }
-        // else if (pDirectionBefore.includes( "left")) {
-        //   ball.x -= Math.abs(ax1)/geteiltDurch;
-        // }
-        // else if (pDirectionBefore.includes( "up")) {
-        //   ball.y -= Math.abs(ay1)/geteiltDurch;
-        // }
-        // else {
-        //   ball.y += Math.abs(ay1)/geteiltDurch;
-        // }
-        if (geteiltDurch == 1 || addUp) {
+        if ((geteiltDurch == 1 || addUp) && pDirectionBefore) {
           if (addUp) console.log('add up');
           if (pDirectionBefore.includes( "right") || pDirectionBefore.includes( "left")) {
             speed = {x: speed.x + (nextCoordinates.x - x1), y: speed.y};
@@ -1106,40 +1094,7 @@ function checkpointSelected(value) {
           if (pDirectionBefore.includes( "up") || pDirectionBefore.includes( "down")) {
             speed = {x: speed.x, y: speed.y + (nextCoordinates.y - y1)};
           }
-
-    //       if (pDirectionBefore.includes( "right") && nextCoordinates.x > x1) {
-    //         // ball.x += (nextCoordinates.x - x1)/geteiltDurch;
-    //         speed = {x: (nextCoordinates.x - x1)/geteiltDurch, y: 0};
-    //       }
-    //       else if (pDirectionBefore.includes( "right")) {
-    //   // ball.x += (x1 - nextCoordinates.x)/geteiltDurch;
-    //   speed = {x: (x1 - nextCoordinates.x)/geteiltDurch, y: 0}
-    // }
-    // if (pDirectionBefore.includes( "left") && nextCoordinates.x > x1) {
-    //   // ball.x -= (nextCoordinates.x - x1)/geteiltDurch;
-    //   speed = {x: -(x1 - nextCoordinates.x)/geteiltDurch, y: 0}
-    // }
-    // else if (pDirectionBefore.includes( "left")) {
-    //   // ball.x -= (x1 - nextCoordinates.x)/geteiltDurch;
-    //   speed = {x: -(x1 - nextCoordinates.x)/geteiltDurch, y: 0}
-    // }
-    // if (pDirectionBefore.includes( "down") && nextCoordinates.y > y1) {
-    //   // ball.y += (nextCoordinates.y - y1)/geteiltDurch;
-    //   speed = {x: 0, y: (nextCoordinates.y - y1)/geteiltDurch}
-    // }
-    // else if (pDirectionBefore.includes( "down")) {
-    //   // ball.y += (y1 - nextCoordinates.y)/geteiltDurch;
-    //   speed = {x: 0, y: (y1 - nextCoordinates.y)/geteiltDurch}
-    // }
-    // if (pDirectionBefore.includes( "up") && nextCoordinates.y > y1) {
-    //   // ball.y -= (nextCoordinates.y - y1)/geteiltDurch;
-    //   speed = {y: -(nextCoordinates.y - y1)/geteiltDurch, x: 0};
-    // }
-    // else if (pDirectionBefore.includes( "up")) {
-    //   // ball.y -= (y1 - nextCoordinates.y)/geteiltDurch;
-    //   speed ={y: -(y1 - nextCoordinates.y)/geteiltDurch, x: 0};
-    // }
-    originalSpeed = speed;
+          originalSpeed = speed;
   }
     ball.x += speed.x;
     ball.y += speed.y;
@@ -1152,7 +1107,7 @@ function checkpointSelected(value) {
     if ((speed.x.toString()[0] != "0" || speed.y.toString()[0] != "0")) {
       geteiltDurch += level.slide[level.aktuell].deceleration;
       setTimeout(function () {
-        if (zaehler != "newLevel" && geteiltDurch != 1) moveDirection(pDirectionBefore, nextCoordinates, speed, originalSpeed);
+        if (zaehler != "newLevel" && geteiltDurch != 1) moveDirection(pDirectionBefore, nextCoordinates);
       }, 10);
     }
     else {
@@ -1242,23 +1197,6 @@ function checkpointSelected(value) {
       [ball.x, ball.y + ball.height],
       [ball.x + ball.width, ball.y + ball.height]
     ]
-    for (var i = 0; i < 4; i++) {
-      data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
-      red = data.data[0];
-      green = data.data[1];
-      blue = data.data[2];
-      alpha = data.data[3];
-      if (red = 255 && green == 126 && blue == 0) {
-        console.log("bouncing");
-        bounceCoordinates = {x1: x1, y1: y1}
-        if (x1 - coordinatesBefore.x1 > -3 && x1 - coordinatesBefore.x1 < 3) bounceCoordinates.x1 = coordinatesBefore.x1 + 3;
-        zaehler = "bouncing";
-        if (i == 0) {bounceBall(["down", "right"], 0);}
-        if (i == 1) {bounceBall(["down", "left"], 0);}
-        if (i == 2) {bounceBall(["up", "right"], 0);}
-        if (i == 3) {bounceBall(["up", "left"], 0);}
-      }
-    }
     for (var i = 0; level[level.mode][level.aktuell] && level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
       if (x1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x && x1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width && y1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y && y1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height &&
          ball.x > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x && ball.x < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width && ball.y > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y && ball.y < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height)
@@ -1324,34 +1262,6 @@ function checkpointSelected(value) {
       alertWhenFinishedSaving = false;
     }
   }, 2222);
-  function bounceBall(direction, time) {
-    console.log("boundce " + direction);
-    if (zaehler != "newLevel") {
-    if (direction.includes("right") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x += (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
-    else if (direction.includes("right")) ball.x += (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
-    if (direction.includes("left") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x -= (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
-    else if (direction.includes("left")) ball.x -= (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
-    if (direction.includes("down") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y += (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
-    else if (direction.includes("down")) ball.y += (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
-    if (direction.includes("up") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y -= (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
-    else if (direction.includes("up")) ball.y -= (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
-
-  }
-  else {
-    time = 13;
-  }
-    time++;
-    sphere.ball.style.left = ball.x + "px";
-    sphere.ball.style.top = ball.y + "px";
-    if (time < 15) {
-      setTimeout(function () {
-        bounceBall(direction, time + 1);
-      }, 27);
-    }
-    else {
-      zaehler = 0;
-    }
-  }
   function removeCheckpoint() {
     if (checkpoint.length > 1) {
      sphere.ball.style.left = checkpoint[checkpoint.length - 2].ball.x + "px";
@@ -1407,7 +1317,7 @@ function checkpointSelected(value) {
       else canvas.fillStyle = "blue";
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y, cssToNumber(ball.width), ball.height);
-      canvas.fillStyle = "red";
+      canvas.fillStyle = "hsl(0, 100%, 32%)";
       canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height);
       canvas.beginPath();
       canvas.moveTo(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width/2, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height/2);
