@@ -589,6 +589,7 @@
     }
   }
   function modeSelected(value) {
+    if (value == "traditional") zeigeGröße();
     traditionalSettings.style.display = 'none';
     exchangeSettings.style.display = 'none';
     schiebenSettings.style.display = 'none';
@@ -716,17 +717,19 @@
   var sizeBefore;
   var amountBefore;
   function adaptTileAmount(adaptionStyleChanged) {
-    adaptAmountSettings.style.display = 'inline';
-    amountBefore = {x: anzahlX.value, y: anzahlY.value};
-    if (sizeBefore && adaptionStyleChanged) {
-      größeAnpassenX.value = sizeBefore.x; 
-      größeAnpassenY.value = sizeBefore.y;
-      zeigeGröße(true);
-    }
-    var data = getSizeTileAmoutAdaption();
-    if (data) {
-      anzahlX.value = data.x;
-      anzahlY.value = data.y;
+    if (modeSelection.value == 'traditional' && rotateTiles.checked) {
+      adaptAmountSettings.style.display = 'inline';
+      amountBefore = {x: anzahlX.value, y: anzahlY.value};
+      if (sizeBefore && adaptionStyleChanged) {
+        größeAnpassenX.value = sizeBefore.x; 
+        größeAnpassenY.value = sizeBefore.y;
+        zeigeGröße(true);
+      }
+      var data = getSizeTileAmoutAdaption();
+      if (data) {
+        anzahlX.value = data.x;
+        anzahlY.value = data.y;
+      }
     }
   }
   function create2() {
