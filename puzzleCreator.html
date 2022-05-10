@@ -36,11 +36,12 @@
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
-    <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button"><a onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a>
-
-    <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button"><a onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a>
-    <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
-    <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true;"><a onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a>
+    <a style="display: none;" id="traditionalModeMobileControls">
+      <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
+      <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
+      <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
+      <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true;"><a1 onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a1>
+    </a>
   </p>
     <input class="mobileControlsElm" type="checkbox" id="scrollable" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
 </p2>
@@ -1037,9 +1038,6 @@ swipeTitle.style.display = "none";
   window.scroll(0, 0);
   }
 
-  rotateLeftTitle.style.display = "inline";
-  rotateRightTitle.style.display = "inline";
-  selectMultipleTitle.style.display = "inline";
   rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().bottom + 20;
   rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().bottom + 20;
   selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().bottom + 20;
@@ -1055,6 +1053,7 @@ swipeTitle.style.display = "none";
   swipeTitle.style.display = "none";
   emptyTileBar.style.display = "none";
   if (modeSelection.value == "traditional") {
+    traditionalModeMobileControls.style.display = 'inline';
     for (const elm of document.getElementsByClassName('canvasMarker')) {
       elm.style.display = "block";
     }
