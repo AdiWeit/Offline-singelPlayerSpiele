@@ -986,7 +986,7 @@ swipeTitle.style.display = "none";
         positions.wrong[j].edit = x;
       }
       }
-      stats.preOrdered = doNotChange.length;
+      stats.preOrdered = "pending";
   }
   if (shuffleStyle.value == "nextToEachOther") tilesGapS.style.display = "none";
   shuffleStyle.value = shuffleStyleBefore;
@@ -1317,6 +1317,7 @@ var originalSize = {};
     if (stats.highestRight.right < richtige && !withoutAlert) {
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
+    if (stats.preOrdered == "pending") stats.preOrdered = richtige;
     if (richtige == positions.wrong?.length && !removeTilesScreen) {
       stopClock.completionTime.running = 0;
       richtige = 0;
