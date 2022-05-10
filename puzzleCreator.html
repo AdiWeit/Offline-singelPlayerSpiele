@@ -102,7 +102,14 @@
       <option value="listTiles">Teile nebeneinander auflisten</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
+    <a style="display: none" id="aEmptyTileBar">
+      <br>
+      <input id="emptyTileBar" type="checkbox">mit leerer Liste starten
+      <br>
+      <br>
+      <a>
     <div style="display: none;" id="listTilesS">
+      <br>
       <br>
       <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
       <br>
@@ -386,6 +393,8 @@
   function shuffleStyleVisibilities(value) {
     if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
     else tilesGapS.style.display = 'none';
+    if (value == "listTiles") aEmptyTileBar.style.display = "inline";
+    else aEmptyTileBar.style.display = "none";
   }
   function backToBarVis(checked) {
     if (checked) {
@@ -893,7 +902,10 @@ swipeTitle.style.display = "none";
         textur.width += 500;
         textur.height += 500;
         positions.wrong.forEach((position, i) => {
-          if (shuffleStyle.value != "listTiles") position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+          if (shuffleStyle.value != "listTiles" || emptyTileBar.checked) {
+            position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+            if (emptyTileBar.checked) tileSelectionBar.tiles.push(i);
+          }
           else {
             position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2};
             tileSelectionBar.tiles.push(i);
@@ -902,6 +914,14 @@ swipeTitle.style.display = "none";
           stats.minimumRotations += Math.abs(position.original.degree/90);
           if (!rotateTiles.checked) position.original.degree = 0;
       });
+      if (emptyTileBar.checked) {
+        state.modelEmptybar = true;
+        setTimeout(function () {
+          tileSelectionBar.tiles = [];
+          state.modelEmptybar = false;
+          layout();
+        }, 100);  
+      }
     }
   // var possible = new Array(positions.wrong.length).fill(0)
   // for (var i = 0; i < possible.length; i++) {
@@ -1007,6 +1027,7 @@ swipeTitle.style.display = "none";
   swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
   swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
   swipeTitle.style.display = "none";
+  emptyTileBar.style.display = "none";
   layout(true, true);
   startPause('completionTime');
 }
@@ -1288,9 +1309,9 @@ var originalSize = {};
 }
   var richtige = 0;
   function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
-    if (!i1) i1 = tileSelectionBar.getTilePosition(i);
+    if (i1 == undefined) i1 = tileSelectionBar.getTilePosition(i);
     if (!pCanvas) pCanvas = canvas;
-    else {
+    else if (!state.modelEmptybar) {
       position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2};
     }
     pCanvas.save();
