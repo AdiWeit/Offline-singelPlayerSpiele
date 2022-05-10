@@ -248,7 +248,7 @@
 </a>
 <br>
 <br>
-<hr class="canvasMarker"">
+<hr class="canvasMarker">
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <hr class="canvasMarker">
 <br>
@@ -805,7 +805,7 @@
             if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.right = {x: newTile.original.x, y: newTile.original.y};
           }
           else {
-            positions.right.push({original: {x: lengthPerTeil.original.x*i, y: lengthPerTeil.original.y*i1}, edit: {x: lengthPerTeil.edit.x*i, y: lengthPerTeil.edit.y*i1}})
+            positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i}})
           }
           positions.right[positions.right.length - 1].border = [];
           if (i == 0) positions.right[positions.right.length - 1].border.push("left");
