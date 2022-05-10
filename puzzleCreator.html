@@ -1501,12 +1501,12 @@ var originalSize = {};
       if (!listCoordinates(doNotChange).includes(i)) workingNumbers.push(i);
     }
     var counter = 0;
-    for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlYVerschieben.value) || (richtigeCheck.checked && richtige > anzahlYRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlYVerschieben.value); i++) {
+    for (var i = 0; (i < /*positions.wrong.length + */JSON.parse(anzahlVerschieben.value) || (richtigeCheck.checked && richtige > anzahlRichtige.value)) && (!zurrückVermeiden.checked || counter < 100000 || counter < anzahlVerschieben.value); i++) {
       var side = workingNumbers[Math.round(Math.random()*(workingNumbers.length - 1))];
       if (!workingNumbers.length) break;
       missing.forEach((pMissing, i1) => {
       try {
-      if (!listCoordinates(doNotChange).includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y) && (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlYVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
+      if (!listCoordinates(doNotChange).includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y) && (((zurrückVermeiden.checked && ((missingArray.length < 1 || workingNumbers.length == 0/*positions.wrong[side].edit.x != missingBefore.data.edit.x && positions.wrong[side].edit.y != missingBefore.data.edit.y*/) || ((maleZurrück.number < anzahlVerboten.value && !((maleZurrück.normalSlide/5 + "").includes("."))) || !(missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y)/*missingBefore.data.edit.x != missing.data.edit.x && missingBefore.data.edit.y != missing.data.edit.y*/)))) || !zurrückVermeiden.checked) && ((pMissing == (positions.wrong[side].edit.x + lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y) /*right*/ || (pMissing ==
       (positions.wrong[side].edit.x - lengthPerTeil.edit.x) + ' - ' + positions.wrong[side].edit.y)/*left*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y + lengthPerTeil.edit.y))/*down*/ || (pMissing == positions.wrong[side].edit.x + ' - ' + (positions.wrong[side].edit.y - lengthPerTeil.edit.y))/*up*/))) {
       if (zurrückVermeiden.checked && (missingArray.includes(positions.wrong[side].edit.x + " - " + positions.wrong[side].edit.y))) {
         maleZurrück.number++;
