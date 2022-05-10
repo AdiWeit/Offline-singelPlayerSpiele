@@ -104,7 +104,16 @@
     </select>
     <a style="display: none" id="aEmptyTileBar">
       <br>
-      <input id="emptyTileBar" type="checkbox">mit leerer Liste starten
+      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'inline'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
+      <a style="display: none;" id="emptyTileBarSettings">
+        <br>
+        dabei folgendermaßen die Teile mischen: 
+        <br>
+        <select onchange="if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; else tilesGapS.style.display = 'none';" id="shuffleStyleBar">
+          <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
+          <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
+        </select>
+      </a>
       <br>
       <br>
       <a>
@@ -131,8 +140,14 @@
       <br>
       <br>
       <canvas id="gapCanvas"></canvas>
+      <br>
+      <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm voll
+      <br>
+      <a style="display: none" id="aScrollXTileGap">
+        <input id="tilesXTileGap" placeholder="Teile nebeneinander" type="text">
+        <br>
+      </a>
     </div>
-    <br>
     <input id="markWrong" type="checkbox" > markiere nicht passende
     <br>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
@@ -232,7 +247,9 @@
 </a>
 <br>
 <br>
+<hr class="canvasMarker"">
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+<hr class="canvasMarker">
 <br>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div id="backToBarButtons">
@@ -265,6 +282,10 @@
 
   .backToTileB {
     position: fixed;
+  }
+  .canvasMarker {
+    margin: 0px;
+    display: none;
   }
 </style>
 <style name="bubbleStyle">
@@ -846,6 +867,11 @@ swipeTitle.style.display = "none";
   }
 
   function shufflePuzzle() {
+    var shuffleStyleBefore = shuffleStyle.value;
+    if (emptyTileBar.checked) {
+      shuffleStyle.value = shuffleStyleBar.value;
+      autoSelectTileBar.checked = false;
+    }
     if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
       var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
@@ -936,19 +962,17 @@ swipeTitle.style.display = "none";
   //   positions.wrong[j].edit = x;
   // }
     if (shuffleStyle.value == "nextToEachOther") {
-        try {
-          if (isNaN(JSON.parse(tilesGap.value))) tilesGap.value = 55;
-        } 
-        catch (err) {
-          tilesGap.value = 55;
-        }
+        if (isNaN(tilesGap.value) || tilesGap.value == '') tilesGap.value = 55;
+        if (isNaN(tilesXTileGap.value) || tilesXTileGap.value == '') tilesXTileGap.value = anzahlX.value;
         var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
         for (let i = 0; i < positions.wrong.length; i++) {
           positions.wrong[i].edit = {x: pos.x, y: pos.y};
           pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
-          if (pos.x + lengthPerTeil.edit.x + tilesGap.value > window.innerWidth) {
+          if ((pos.x + lengthPerTeil.edit.x/2 > window.innerWidth && fillScreenTileGap.checked) || (!fillScreenTileGap.checked && pos.x > lengthPerTeil.edit.x + (lengthPerTeil.edit.x + JSON.parse(tilesGap.value))*(parseInt(tilesXTileGap.value) - 1))) {
             pos.x = lengthPerTeil.edit.x/2;
+            if (pos.x + lengthPerTeil.edit.x/2 > textur.width) textur.width += lengthPerTeil.edit.x + parseInt(tilesGap.value);
             pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
+            if (pos.y + lengthPerTeil.edit.y/2 > textur.height) textur.height += lengthPerTeil.edit.y + parseInt(tilesGap.value);
           }
         }
       }
@@ -964,6 +988,8 @@ swipeTitle.style.display = "none";
       }
       stats.preOrdered = doNotChange.length;
   }
+  if (shuffleStyle.value == "nextToEachOther") tilesGapS.style.display = "none";
+  shuffleStyle.value = shuffleStyleBefore;
   doNotChange = [];
   aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
@@ -1028,6 +1054,11 @@ swipeTitle.style.display = "none";
   swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
   swipeTitle.style.display = "none";
   emptyTileBar.style.display = "none";
+  if (modeSelection.value == "traditional") {
+    for (const elm of document.getElementsByClassName('canvasMarker')) {
+      elm.style.display = "block";
+    }
+  }
   layout(true, true);
   startPause('completionTime');
 }
