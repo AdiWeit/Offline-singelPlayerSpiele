@@ -1141,7 +1141,8 @@ function updateVideo(){
     videoPosition.value = video.currentTime;
     timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
     canvas.clearRect(0, 0, textur.width, textur.height);
-    for (var i = 0; aufgebenId.style.display == "inline" && i < positions.wrong?.length; i++) {
+    for (var i1 = 0; aufgebenId.style.display == "inline" && i1 < positions.wrong?.length; i1++) {
+      if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       if (shuffleStyle.value == "listTiles" && tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
       else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
     }
