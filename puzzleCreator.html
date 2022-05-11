@@ -85,7 +85,7 @@
     <input id="automaticTileSelectionReset" checked="true" type="checkbox"> automatisch Teile abwählen
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" onchange="if (!checked) {größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
+    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'inline'; größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
     <a id="rotateTilesAdaptionSettings">
       <br>
       <input type="radio" id="bAdaptAmount" onchange="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen
@@ -801,20 +801,20 @@
         for (var i1 = 0; i1 < pAnzahlX; i1++) {
           if (modeSelection.value == "traditional") {
             var newTile = {original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}};
-            if (i) newTile.original.left = {x: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.x, y: positions.right[i*pAnzahlY + i1 - pAnzahlY]?.original.y};
-            if (i1) newTile.original.top = {x: positions.right[i*pAnzahlX + i1 - 1]?.original.x, y: positions.right[i*pAnzahlY + i1 - 1]?.original.y};
+            if (i1) newTile.original.left = {x: positions.right[i*pAnzahlX + i1 - 1]?.original.x, y: positions.right[i*pAnzahlX + i1 - 1]?.original.y};
+            if (i) newTile.original.top = {x: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.x, y: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.y};
             positions.right.push(newTile);
-            if (i1) positions.right[i*pAnzahlX + i1 - 1].original.bottom = {x: newTile.original.x, y: newTile.original.y};
-            if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.right = {x: newTile.original.x, y: newTile.original.y};
+            if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+            if (i1) positions.right[i*pAnzahlX + i1 - 1].original.right = {x: newTile.original.x, y: newTile.original.y};
           }
           else {
             positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i}})
           }
           positions.right[positions.right.length - 1].border = [];
-          if (i == 0) positions.right[positions.right.length - 1].border.push("left");
-          if (i == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
-          if (i1 == 0) positions.right[positions.right.length - 1].border.push("top");
-          if (i1 == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
+          if (i1 == 0) positions.right[positions.right.length - 1].border.push("left");
+          if (i1 == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
+          if (i == 0) positions.right[positions.right.length - 1].border.push("top");
+          if (i == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
         }
       }
       positions.wrong = JSON.parse(JSON.stringify(positions.right));
@@ -1913,6 +1913,7 @@ var originalSize = {};
     selected.clip = [];
     if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
     }
+    delete state.rotated;
   }
   function collides(a, b) {
     try {
@@ -1965,7 +1966,6 @@ var originalSize = {};
   }
   function rotateSelected(direction) {
     if (!state.removeTile) {
-      if (gerät == "Handy") state.rotated = true;
       state.rotated = [];
       rotateAround(selected.tiles[0], direction);
       layout(true, true);
