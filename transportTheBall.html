@@ -131,6 +131,48 @@ localStorage.setItem("storedName", name);
     aktuell: 0,
     mode: "normal",
     easyMaps: {
+      allDirections: {
+        2: {
+        spawnPoint: {
+          schieber: {
+            x: 50,
+            y: 533
+          },
+          ball: {
+            x: 150,
+            y: 533
+          }
+        }
+        },
+        7: {
+          rotating: [{
+          shape: "rectangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 11111,
+          sizeRelationToOriginal: 4,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+        },
+        10: {
+          rotating: [{
+          shape: "triangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 13111,
+          sizeRelationToOriginal: 6,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+        }
+      },
       slide: {
         5: {
           sizes: {
@@ -562,15 +604,113 @@ localStorage.setItem("storedName", name);
             y: 333
           },
           ball: {
-            x: 100,
+            x: 250,
             y: 333
+          }
+        },
+        sizes: {
+          ball: {
+            width: 50,
+            height: 50
+          },
+          schieber: {
+            width: 100,
+            height: 100
           }
         }
       },
       2: {
-
+        spawnPoint: {
+          schieber: {
+            x: 80,
+            y: 589
+          },
+          ball: {
+            x: 150,
+            y: 577
+          }
+        }
       },
       3: {
+        spawnPoint: {
+          schieber: {
+            x: 222,
+            y: 200
+          },
+          ball: {
+            x: 222,
+            y: 266
+          }
+        }
+      },
+      4: {
+        spawnPoint: {
+          schieber: {
+            x: 50,
+            y: 433
+          },
+          ball: {
+            x: 150,
+            y: 433
+          }
+        },
+      },
+      5: {
+        spawnPoint: {
+          schieber: {
+            x: 80,
+            y: 289
+          },
+          ball: {
+            x: 150,
+            y: 377
+          }
+        }
+      },
+      6: {
+        spawnPoint: {
+          schieber: {
+            x: 222,
+            y: 300
+          },
+          ball: {
+            x: 222,
+            y: 366
+          }
+        }
+      },
+      7: {
+        rotating: [{
+          shape: "rectangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 11111,
+          sizeRelationToOriginal: 5,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+      }, 
+      8: {},
+      9: {},
+      10: {
+        rotating: [{
+          shape: "triangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 10000,
+          sizeRelationToOriginal: 6,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+      },
+      11: {},
+      12: {
         spawnPoint: {
           schieber: {
             x: 50,
@@ -582,7 +722,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      4: {
+      13: {
         spawnPoint: {
           schieber: {
             x: 30,
@@ -594,7 +734,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      5: {
+      14: {
         rotating: [
           {
         shape: "rectangle",
@@ -613,7 +753,7 @@ localStorage.setItem("storedName", name);
       }
     ],
     },
-    6: {
+    15: {
       spawnPoint: {
         schieber: {
           x: 300,
@@ -625,7 +765,7 @@ localStorage.setItem("storedName", name);
         }
       }
     },
-    7: {
+    16: {
       spawnPoint: {
         schieber: {
           x: 70,
@@ -900,11 +1040,12 @@ localStorage.setItem("storedName", name);
 };
   getDatabase();
 function getDatabase() {
-  dbGet("transportTheBall", "checkpoints " + name).then(result => {
-    checkpoints = JSON.parse(result)
-  }).catch(function(e) {
-    console.log(e);
-  });
+  // TODO: undo
+  // dbGet("transportTheBall", "checkpoints " + name).then(result => {
+  //   checkpoints = JSON.parse(result)
+  // }).catch(function(e) {
+  //   console.log(e);
+  // });
   dbGet("transportTheBall", "highscores").then(result => {
     highscores = JSON.parse(result);
     for (var i = 0; i < Object.keys(level).length; i++) {
