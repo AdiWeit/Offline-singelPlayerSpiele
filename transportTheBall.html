@@ -175,6 +175,23 @@ localStorage.setItem("storedName", name);
       },
       slide: {
         4: {
+          rotating: [
+          {
+        shape: "triangle",
+        position: {
+          x: 750,
+          y: 374
+          },
+        angle: 144,
+        miliSecsPerRotation: 11111,
+        sizeRelationToOriginal: 6,
+        heart: {
+          onceInMiliSec: 1111
+        }
+      }
+    ],
+        },
+        10: {
           sizes: {
             ball: {
               width: 40,
@@ -205,7 +222,7 @@ localStorage.setItem("storedName", name);
           checkpoint: true
         }],
         },
-      5: {
+      11: {
         sizes: {
           ball: {
             width: 40,
@@ -217,7 +234,7 @@ localStorage.setItem("storedName", name);
           }
     },
       },
-      6: {
+      12: {
         heart: {
           ball: {
             min: 13,
@@ -230,7 +247,7 @@ localStorage.setItem("storedName", name);
           },
         }
       },
-      8: {
+      14: {
         deceleration: 0.05,
         heart: {
           ball: {
@@ -253,7 +270,7 @@ localStorage.setItem("storedName", name);
           }
         },
       },
-      9: {
+      15: {
         rotating: [
           {
         shape: "rectangle",
@@ -808,10 +825,34 @@ localStorage.setItem("storedName", name);
     }
     },
     slide: {
-      1: {
-      },
+      1: {},
+      2: {},
       3: {},
       4: {
+        rotating: [
+          {
+        shape: "triangle",
+        position: {
+          x: 750,
+          y: 374
+          },
+        angle: 144,
+        miliSecsPerRotation: 11111,
+        sizeRelationToOriginal: 6,
+        // heart: {
+        //   onceInMiliSec: 1111
+        // }
+      }
+    ],
+      },
+      5: {
+        deceleration: 0.05
+      },
+      6: {},
+      7: {},
+      8: {},
+      9: {},
+      10: {
         ballTeleporter: [{
           ballSide: {
             x: 1200,
@@ -831,7 +872,7 @@ localStorage.setItem("storedName", name);
           }
         }]
       },
-      5: {
+      11: {
         ballTeleporter: [{
           ballSide: {
             x: 1111,
@@ -852,7 +893,7 @@ localStorage.setItem("storedName", name);
         }],
         deceleration: 0.07
       },
-      6: {
+      12: {
         deceleration: 0.05,
         heart: {
           ball: {
@@ -866,7 +907,7 @@ localStorage.setItem("storedName", name);
           },
         }
       },
-      7: {
+      13: {
         deceleration: 0.05,
         heart: {
           ball: {
@@ -880,7 +921,7 @@ localStorage.setItem("storedName", name);
           },
         }
       },
-      8: {
+      14: {
         // deceleration: 0.05,
         heart: {
           schieber: {
@@ -904,7 +945,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      9: {
+      15: {
         rotating: [
           {
         shape: "rectangle",
@@ -934,7 +975,7 @@ localStorage.setItem("storedName", name);
     }
   };
   level.magnet[10] = level.normal[5];
-  level.slide[2] = level.normal[5];
+  level.slide[8] = level.normal[5];
   level.opposite = level.normal;
    // rotating examples:
 //   var shapes = [
