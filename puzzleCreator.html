@@ -1827,9 +1827,7 @@ var originalSize = {};
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
-      // changes something so the if statement is false afterwords (fixed unclipping)
-      selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile);
-      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
+      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
@@ -1883,18 +1881,14 @@ var originalSize = {};
     }
   }
   var checkedTiles = [];
-  function selectedCollideOther(clipIndex, clipDirection, tile) {
-    checkedTiles.push(clipIndex);
-    var boolean = false;
-    for (const tile of selected.tiles) {
-      if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
-        return true;
+  function selectedCollideOther(pClipIndex) {
+    for (const clipIndex of getConnectedTiles(pClipIndex, true)) {
+      for (const tile of selected.tiles) {
+        if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
+          return true;
+        }
       }
     }
-    for (const direction of ['top', 'right', 'bottom', 'left']) {
-      if (positions.wrong[clipIndex].original[direction] && !checkedTiles.includes(getTile(positions.wrong[clipIndex].original[direction]))) boolean = selectedCollideOther(getTile(positions.wrong[clipIndex].original[direction]), direction, tile);
-    }
-    return boolean;
   }
   var clipped = [];
   function mouseUp() {
