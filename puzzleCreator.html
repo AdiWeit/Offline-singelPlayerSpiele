@@ -220,7 +220,7 @@
     </div>
   </div>
   <br>
-  <button type="button" id="aufgebenId" onclick="aufgeben(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
+  <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
   <div style="display: none;" id="videoControls">
     <h3>video controls</h3>
@@ -412,6 +412,7 @@
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
+  // section 1: mainly change element syle and visibility
   function shuffleStyleVisibilities(value) {
     if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
     else tilesGapS.style.display = 'none';
@@ -438,13 +439,6 @@
       }, 5000);
     }
   }
-  function generalBackToBar(elm) {
-    if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
-      state.backToBar = tileSelectionBar.selectedTile.i + 1; 
-      elm.style.backgroundColor = 'red';
-      tileSelectionBar.selectedTile = undefined;
-    }
-  }
   function changeSettingsVis(vis) {
     if ((settings.style.display == 'none' || vis == "inline") && vis != "none") settings.style.display = 'inline'; 
     else settings.style.display = 'none';
@@ -458,6 +452,7 @@
       textur.style.webkitTransform = "";
     }
   }
+  // change visibility of player of PC movement in schieben mode
   function changeMovementPlayerVis(checked) {
     if (checked) {
       innerMovementPlayer.style.display = 'inline'; 
@@ -471,6 +466,7 @@
       texturTop = textur.getBoundingClientRect().top;
     }
   }
+  // change size of + buttons for backToBar
   function changeBackToBarB(side, value) {
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var button = document.getElementsByClassName('backToTileB')[i];
@@ -479,6 +475,7 @@
       button.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(button.style.width)/2 + 'px';
     }
   }
+  // change play direction of movement player (player which shows the moves the PC did in schieben mode)
   function changeMovementDirection(direc) {
     objMovementPlayer.direc = direc;
     movementDirectionLeft.style.backgroundColor = '';
@@ -513,7 +510,40 @@
       scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 + "px";
     }
   }
-  function aufgeben(mode) {
+  function originalDisplayChanged(checked) {
+    startPause('viewOriginal');
+    if (checked) stats.viewOriginal.times++;
+    if (checked) {
+      if (sourceIsPicture.checked) preview.style.display = "inline";
+      else videoPreview.style.display = "inline";
+      showOriginal.scrollIntoView();
+    }
+    else {
+      if (sourceIsPicture.checked) preview.style.display = "none";
+      else videoPreview.style.display = "none";
+    }
+  }
+  // section 2: actions followed by element change/user input
+  function changeAdaptedSizeMax(width, height) {
+    textur.width = width// + 111;
+    textur.height = height// + 111;
+    if (window.innerWidth > width || screenIsMax.checked) größeAnpassenX.max = window.innerWidth;
+    else größeAnpassenX.max = width;
+    if (window.innerHeight > height || screenIsMax.checked) größeAnpassenY.max = window.innerHeight;
+    else größeAnpassenY.max = height;
+    größeAnpassenX.value = width;
+    größeAnpassenY.value = height;
+    zeigeGröße();
+  }
+    // back to bar to the right of the selected tile in the tileBar
+    function generalBackToBar(elm) {
+    if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
+      state.backToBar = tileSelectionBar.selectedTile.i + 1; 
+      elm.style.backgroundColor = 'red';
+      tileSelectionBar.selectedTile = undefined;
+    }
+  }
+  function showCurrentStats(mode) {
     if (mode != "traditional") {
       alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
     }
@@ -526,6 +556,7 @@
     größeAnpassenY.value = window.innerHeight;
     zeigeGröße();
   }
+  // Seitenverhältnisse des Bildes anpassen
   function zuAngepassterBildschirmgröße(noShowing, storeBefore) {
     if (storeBefore) {
       sizeBefore = {x: größeAnpassenX.value, y: größeAnpassenY.value};
@@ -596,19 +627,6 @@
     document.getElementById(value + 'Settings').style.display = 'inline';
   }
   var originalSize = {width: 0, height: 0};
-  function originalDisplayChanged(checked) {
-    startPause('viewOriginal');
-    if (checked) stats.viewOriginal.times++;
-    if (checked) {
-      if (sourceIsPicture.checked) preview.style.display = "inline";
-      else videoPreview.style.display = "inline";
-      showOriginal.scrollIntoView();
-    }
-    else {
-      if (sourceIsPicture.checked) preview.style.display = "none";
-      else videoPreview.style.display = "none";
-    }
-  }
   function gapSizeChanged(value) {
     gapCanvas.width = 100 + JSON.parse(tilesGap.value);
     gapCanvas.height = 100;
@@ -618,121 +636,8 @@
     gCanvas.fillRect(0, 0, 50, 50);
     gCanvas.fillRect(50 + JSON.parse(tilesGap.value), 0, 50, 50);
   }
-  function playPauseMovement() {
-    if (movementPlayButton.innerHTML == "play") {
-      movementPlayButton.innerHTML = "pause";
-      playMovementFunction();
-    }
-    else movementPlayButton.innerHTML = "play";
-  }
-  function playMovementFunction() {
-    if (movementPlayButton.innerHTML == "pause") {
-      if (JSON.parse(movementPosition.value) < movement.move.length || JSON.parse(movementPosition.value) + objMovementPlayer.direc < 0) playMovementPos(JSON.parse(movementPosition.value) + objMovementPlayer.direc);
-      else movementPlayButton.innerHTML = "play";
-      setTimeout(function () {
-        playMovementFunction();
-      }, JSON.parse(movementPlayerSpeed.value));
-    }
-  }
-  var objMovementPlayer = {pause: false, position: 0, direc: 1};
-  function getPlayerPosition(backToBeginningIfNeeded) {
-    for (let i = 0; i < movement.move.length; i++) {
-      if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
-    }
-    if (backToBeginningIfNeeded) return 0;
-    else return JSON.parse(movementPosition.value);
-  }
-  function playMovementPos(position, pReturn, doNotChangeVal) {
-    if (position < 0) position = 0;
-    if (position > movement.move.length) position = movement.move.length;
-    if (!doNotChangeVal) movementPosition.value = position;
-    positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
-    for (let i = movement.move.length - 1; i >= position; i--) {
-      positions.wrong[movement.move[i].tile].edit.x += movement.move[i].x;
-      positions.wrong[movement.move[i].tile].edit.y += movement.move[i].y;
-    }
-    if (pReturn) return positions.wrong;
-    canvas = movementPlayerTextur.getContext('2d');
-    objMovementPlayer.position = JSON.parse(position);
-    layout(true, true);
-  }
-  function scrollTileSelection(direc) {
-    var screenScrollX = window.visualViewport.width/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
-    if (screenScrollX/lengthPerTeil.edit.x > positions.wrong.length) screenScrollX = positions.wrong.length*lengthPerTeil.edit.x;
-    tileSelectionBar.leftOffScreenTiles += direc;
-    var scrollXBefore = tileSelectionBar.scrollX;
-    tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
-    if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
-      tileSelectionBar.offset = 0;
-      tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
-      tileSelectionBar.leftOffScreenTiles = -1;
-    }
-    if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
-    else scrollTileSelectionLeft.style.display = 'inline';
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) {
-      if (!tileSelectionBar.offset) {
-        tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX));
-        tileSelectionBar.elmleftBefore = document.getElementsByClassName('backToTileB')[0].style.left;
-      }
-      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX + 1;
-      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
-    }
-    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
-    else scrollTileSelectionRight.style.display = 'inline';
-    layout(true, true);
-    positionBackToTileBarButtons();
-  }
-  function create() {
-    //finished = false;
-    // if (swipeSteuerung.checked) textur.style.touchAction = 'none';
-    /*if (swipeSteuerung.checked) {
-      alert("Please zoom out as far as possible! You have 5 sec. for that!");
-      // textur.style.touchAction = '';
-      setTimeout(function () {
-        textur.style.touchAction = 'none';
-        create2();
-      }, 5000);
-    }
-    else */create2();
-  }
-  var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0, height: 0, leftOffScreenTiles: 0, offset: 0};
-  tileSelectionBar.collidesMouse = () => {
-    var obj = tileSelectionCanvas.getBoundingClientRect();
-    return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
-  }
-  tileSelectionBar.getTilePosition = (generalPosition) => {
-    for (const tile of tileSelectionBar.tiles) {
-      if (tile == generalPosition) return tile;
-    }
-  }
-  function getSizeTileAmoutAdaption() {
-    for (let i = 0; i < 1000; i++) {
-      for (let i1 = 0; i1 < 1000; i1++) {
-        if (i > 1 && i1 > 1 && !Math.abs(Math.abs(Math.round(größeAnpassenX.value/i)) - Math.abs(Math.round(größeAnpassenY.value/i1))) && i*i1 > minTileAmount.value) {
-          return {x: i, y: i1};
-        }
-      }
-    }
-  }
-  var sizeBefore;
-  var amountBefore;
-  function adaptTileAmount(adaptionStyleChanged) {
-    if (modeSelection.value == 'traditional' && rotateTiles.checked) {
-      adaptAmountSettings.style.display = 'inline';
-      amountBefore = {x: anzahlX.value, y: anzahlY.value};
-      if (sizeBefore && adaptionStyleChanged) {
-        größeAnpassenX.value = sizeBefore.x; 
-        größeAnpassenY.value = sizeBefore.y;
-        zeigeGröße(true);
-      }
-      var data = getSizeTileAmoutAdaption();
-      if (data) {
-        anzahlX.value = data.x;
-        anzahlY.value = data.y;
-      }
-    }
-  }
-  function create2() {
+    // create the puzzle
+    function create() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else {
       if (modeSelection.value != "traditional") shuffleStyle.value = "none";
@@ -740,15 +645,6 @@
       if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
       positions = {right: [], wrong: []};
       if (modeSelection.value == "traditional") {
-        // if (rotateTiles.checked) {
-
-          // var data = getSizeTileAmoutAdaption();
-          // if (data && confirm(`Damit die Teile drehbar sind, muss das Bild gleich lang wie hoch sein. Wollen Sie mit ${data.x} x ${data.y} Teilen Spielen, um dies zu erreichen oder lieber die Seitenverhältnisse des Bildes anpassen? Wenn Sie die Anzahl der Teile wie eben genannt verändern wollen, klicken Sie bitte auf OK o.ä., andernfalls auf abbrechen.`)) {
-          //   anzahlX.value = data.x;
-          //   anzahlY.value = data.y;
-          // }
-          // else zuAngepassterBildschirmgröße(true);
-        // }
         positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
         for (var i = 0; i < positions.layoutOrder.length; i++) {
           positions.layoutOrder[i] = i;
@@ -869,7 +765,6 @@ swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
 swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
 swipeTitle.style.display = "none";
   }
-
   function shufflePuzzle() {
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked) {
@@ -953,18 +848,6 @@ swipeTitle.style.display = "none";
         }, 100);  
       }
     }
-  // var possible = new Array(positions.wrong.length).fill(0)
-  // for (var i = 0; i < possible.length; i++) {
-  //   possible[i] += i;
-  //   if (doNotChange.includes(i)) possible.splice(i, 1);
-  // }
-  // possible = possible.filter(x => x);
-  // for (i = possible.length - 1; modeSelection.value == "exchange" && i > 0; i--) {
-  //   j = possible[Math.floor(Math.random() * (i + 1))];
-  //   x = positions.wrong[possible[i]].edit;
-  //   positions.wrong[i].edit = positions.wrong[j].edit;
-  //   positions.wrong[j].edit = x;
-  // }
     if (shuffleStyle.value == "nextToEachOther") {
         if (isNaN(tilesGap.value) || tilesGap.value == '') tilesGap.value = 55;
         if (isNaN(tilesXTileGap.value) || tilesXTileGap.value == '') tilesXTileGap.value = anzahlX.value;
@@ -1065,17 +948,99 @@ swipeTitle.style.display = "none";
   layout(true, true);
   startPause('completionTime');
 }
-  function addElement(attr, elm, childOf, asElement) {
-      var newElement = document.createElement(/*'span'*/elm);
-      if (childOf && !asElement) document.getElementById(childOf).appendChild(newElement);
-      else if (childOf) childOf.appendChild(newElement);
-      else tests.appendChild(newElement);
-      for (attrNow of Object.keys(attr)) {
-        if (attrNow == 'innerText') newElement.innerText = attr[attrNow];
-        else newElement.setAttribute(attrNow/*'style'*/, /*'color:' + word[i].colour*/attr[attrNow]);
+// #importantUserInputs
+// select tiles to remove and move tiles or exchange them depending on the mode
+function canvasClicked(calledBy) {
+    if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
+    if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
+      for (var i = 0; i < positions.wrong.length; i++) {
+        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.position.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.position.y) {
+              console.log("vertausche " + checkSelected().x + "-" + checkSelected().y + " mit " + selected.position.x + "-" + selected.position.y);
+              stats.turns++;
+              vertauscheZwei(i, i1);
+              i = positions.wrong.length;
+              i1 = positions.wrong.length;
+            }
+          }
+        }
       }
+      selected.boolean = false;
     }
-  function posInBarSelected(i) {
+    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing.length && !state.removeTile) {
+      for (var i1 = 0; i1 < missing.length; i1++) {
+        pMissing = missing[i1];
+        if (possibleMissing.length && pMissing == (checkSelected().x)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) {
+          moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
+        }
+        else {
+        if ((pMissing == (checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (pMissing == checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y)/*up*/)) {
+          for (var i = 0; i < positions.wrong.length; i++) {
+            if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+              possibleMissing.push({i: i, i1: i1});
+            }
+          }
+        }
+      }
+  }
+  if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
+}
+    else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
+      selected.position = {x: checkSelected().x, y: checkSelected().y};
+      selected.boolean = true;
+    }
+    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected())))) {
+      removeTile(null, calledBy);
+      lastCoord = checkSelected();
+    }
+    else {
+      if (aufgebenId.style.display == "none") layout(true, true);
+      else layout(false, true);
+    }
+  }
+  // section 2.1: movementPlayer (player of PC movement in schieben mode)
+  function playPauseMovement() {
+    if (movementPlayButton.innerHTML == "play") {
+      movementPlayButton.innerHTML = "pause";
+      playMovementFunction();
+    }
+    else movementPlayButton.innerHTML = "play";
+  }
+  function playMovementFunction() {
+    if (movementPlayButton.innerHTML == "pause") {
+      if (JSON.parse(movementPosition.value) < movement.move.length || JSON.parse(movementPosition.value) + objMovementPlayer.direc < 0) playMovementPos(JSON.parse(movementPosition.value) + objMovementPlayer.direc);
+      else movementPlayButton.innerHTML = "play";
+      setTimeout(function () {
+        playMovementFunction();
+      }, JSON.parse(movementPlayerSpeed.value));
+    }
+  }
+  var objMovementPlayer = {pause: false, position: 0, direc: 1};
+  function getPlayerPosition(backToBeginningIfNeeded) {
+    for (let i = 0; i < movement.move.length; i++) {
+      if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
+    }
+    if (backToBeginningIfNeeded) return 0;
+    else return JSON.parse(movementPosition.value);
+  }
+  function playMovementPos(position, pReturn, doNotChangeVal) {
+    if (position < 0) position = 0;
+    if (position > movement.move.length) position = movement.move.length;
+    if (!doNotChangeVal) movementPosition.value = position;
+    positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
+    for (let i = movement.move.length - 1; i >= position; i--) {
+      positions.wrong[movement.move[i].tile].edit.x += movement.move[i].x;
+      positions.wrong[movement.move[i].tile].edit.y += movement.move[i].y;
+    }
+    if (pReturn) return positions.wrong;
+    canvas = movementPlayerTextur.getContext('2d');
+    objMovementPlayer.position = JSON.parse(position);
+    layout(true, true);
+  }
+  // end section 2.1
+    // backTobar button clicked
+    function posInBarSelected(i) {
     for (const elm of document.getElementsByClassName('backToTileB')) {
       elm.style.backgroundColor = '';
     }
@@ -1086,6 +1051,8 @@ swipeTitle.style.display = "none";
     tileSelectionBar.selectedTile = undefined;
     layout();
   }
+  // section 2.2: handle input data (picture, video, URL)
+  // load selected file
   function readImg(input) {
     var reader = new FileReader();
     stopLiveFeed();
@@ -1116,15 +1083,33 @@ swipeTitle.style.display = "none";
     video.src = sourceURL.value;
   }
   }
+  function startVideo() {
+    video.play();  // start playing
+    updateVideo(); //Start rendering
+  }
+  video.addEventListener('loadeddata', function() {
+    startVideo();
+    loadImage(video.videoWidth, video.videoHeight);
+  }, false);
+  var originalSize = {};
+  function loadImage(width, height) {
+    setTimeout(function () {
+      // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
+      if (!width) {
+        width = preview.width;
+        height = preview.height;
+      }
+      originalSize = {width: width, height: height};
+       canvas.drawImage(document.getElementById('preview'), 0, 0);
+       if (adaptImgSize.checked && modeSelection.value == "traditional" && rotateTiles.checked) state.loadImage = true;
+       changeAdaptedSizeMax(width, height);
+    }, 500);
+  }
+  // end section 2
+  // section 3: handle videos
 
-function startVideo() {
-  video.play();  // start playing
-  updateVideo(); //Start rendering
-}
-video.addEventListener('loadeddata', function() {
-  startVideo();
-  loadImage(video.videoWidth, video.videoHeight);
-}, false);
+  // returns string with UI time
+// @param: pTime: total time in seconds
 function getTimeString(pTime) {
   pTime = Math.floor(pTime);
   var sec, mins, hours;
@@ -1136,6 +1121,32 @@ function getTimeString(pTime) {
   if (hours < 10) hours = '0' + hours;
   return `${hours}:${mins}:${sec}`;
 }
+// converts time string back into time in seconds
+// @param: 
+  // value: String with UI time layout
+  // id: undefined or loopEnding (value then is time stamp of loop ending)
+  function convertTime(value, id){
+  var time = 0;
+  var sec = value.split(':')[2];
+  var mins = value.split(':')[1];
+  var hours = value.split(':')[0];
+  if (sec < 10) sec = sec[1];
+  if (mins < 10) mins = mins[1];
+  if (hours < 10) hours = hours[1];
+  if (value.split(':')[3]) time += JSON.parse(value.split(':')[3])/100;
+    try {
+      time += JSON.parse(sec);
+      time += JSON.parse(mins)*60;
+      time += JSON.parse(hours)*60*60;
+      if (time > video.duration || time < 0) console.log(abc);
+    }
+    catch (e) {
+      if (id == 'loopEnding') time = video.duration;
+      else time = 0;
+    }
+  return time;
+}
+// draw changes in the video on the canvas and changes the current position in the video
 function updateVideo(){
   if (sourceIsVideo.checked) { 
     videoPosition.value = video.currentTime;
@@ -1162,19 +1173,11 @@ function updateVideo(){
   }
   else video.pause();
 }
-// live camera
+// section 3.1: live camera
 // Prefer camera resolution nearest to 1280x720.
 var constraints = { /*audio: true, */video: { width: 1280, height: 720 } };
 var pMediaStream;
-// navigator.mediaDevices.getUserMedia(constraints)
-// .then(function(mediaStream) {
-//   video.srcObject = mediaStream;
-//   pMediaStream = mediaStream;
-//   video.onloadedmetadata = function(e) {
-//     video.play();
-//   };
-// })
-// .catch(function(err) { console.log(err.name + ": " + err.message); }); // always check for errors at the end.
+// stop live feed, so another one can start
 function stopLiveFeed() {
   if (pMediaStream) {
     pMediaStream.getTracks().forEach(track => {
@@ -1184,6 +1187,7 @@ function stopLiveFeed() {
   }
   // pMediaStream = undefined;
 }
+// changes camera source
 async function changeCamera(index) {
   sourceIsVideo.checked = true;
   stopLiveFeed();
@@ -1196,7 +1200,7 @@ async function changeCamera(index) {
   })
 }
 
-// get available cameras
+// gets available cameras
 navigator.mediaDevices.enumerateDevices()
 .then(function(devices) {
   devices.forEach( (device, i) => {
@@ -1211,53 +1215,83 @@ navigator.mediaDevices.enumerateDevices()
   if (cameraSelection.options.length < 2) cameraSelection.style.display = 'none';
   if (!cameraSelection.options.length) useLiveCam.style.display = 'none';
 })
-
-function convertTime(value, id){
-  var time = 0;
-  var sec = value.split(':')[2];
-  var mins = value.split(':')[1];
-  var hours = value.split(':')[0];
-  if (sec < 10) sec = sec[1];
-  if (mins < 10) mins = mins[1];
-  if (hours < 10) hours = hours[1];
-  if (value.split(':')[3]) time += JSON.parse(value.split(':')[3])/100;
-    try {
-      time += JSON.parse(sec);
-      time += JSON.parse(mins)*60;
-      time += JSON.parse(hours)*60*60;
-      if (time > video.duration || time < 0) console.log(abc);
+// end section 3
+  // scroll TileSelectionBar (translate)
+  function scrollTileSelection(direc) {
+    var screenScrollX = window.visualViewport.width/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
+    if (screenScrollX/lengthPerTeil.edit.x > positions.wrong.length) screenScrollX = positions.wrong.length*lengthPerTeil.edit.x;
+    tileSelectionBar.leftOffScreenTiles += direc;
+    var scrollXBefore = tileSelectionBar.scrollX;
+    tileSelectionBar.scrollX += (lengthPerTeil.edit.x + 5)*(direc*(-1));
+    if (tileSelectionBar.scrollX >= lengthPerTeil.edit.x + 5) {
+      tileSelectionBar.offset = 0;
+      tileSelectionBar.scrollX = lengthPerTeil.edit.x + 5;
+      tileSelectionBar.leftOffScreenTiles = -1;
     }
-    catch (e) {
-      if (id == 'loopEnding') time = video.duration;
-      else time = 0;
-    }
-  return time;
-}
-var originalSize = {};
-  function loadImage(width, height) {
-    setTimeout(function () {
-      // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
-      if (!width) {
-        width = preview.width;
-        height = preview.height;
+    if (tileSelectionBar.scrollX >= 0) scrollTileSelectionLeft.style.display = 'none';
+    else scrollTileSelectionLeft.style.display = 'inline';
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX) {
+      if (!tileSelectionBar.offset) {
+        tileSelectionBar.offset = - (scrollXBefore - (-((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX));
+        tileSelectionBar.elmleftBefore = document.getElementsByClassName('backToTileB')[0].style.left;
       }
-      originalSize = {width: width, height: height};
-       canvas.drawImage(document.getElementById('preview'), 0, 0);
-       if (adaptImgSize.checked && modeSelection.value == "traditional" && rotateTiles.checked) state.loadImage = true;
-       changeAdaptedSizeMax(width, height);
-    }, 500);
+      tileSelectionBar.scrollX = -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length + 1)) + screenScrollX + 1;
+      tileSelectionBar.leftOffScreenTiles = tileSelectionBar.tiles.length - Math.ceil(screenScrollX/lengthPerTeil.sizeAdapted.x) + 1;
+    }
+    if (tileSelectionBar.scrollX <= -((lengthPerTeil.edit.x + 5)*(tileSelectionBar.tiles.length)) + screenScrollX) scrollTileSelectionRight.style.display = 'none';
+    else scrollTileSelectionRight.style.display = 'inline';
+    layout(true, true);
+    positionBackToTileBarButtons();
   }
-  function changeAdaptedSizeMax(width, height) {
-    textur.width = width// + 111;
-    textur.height = height// + 111;
-    if (window.innerWidth > width || screenIsMax.checked) größeAnpassenX.max = window.innerWidth;
-    else größeAnpassenX.max = width;
-    if (window.innerHeight > height || screenIsMax.checked) größeAnpassenY.max = window.innerHeight;
-    else größeAnpassenY.max = height;
-    größeAnpassenX.value = width;
-    größeAnpassenY.value = height;
-    zeigeGröße();
+  var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0, height: 0, leftOffScreenTiles: 0, offset: 0};
+  tileSelectionBar.collidesMouse = () => {
+    var obj = tileSelectionCanvas.getBoundingClientRect();
+    return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
   }
+  tileSelectionBar.getTilePosition = (generalPosition) => {
+    for (const tile of tileSelectionBar.tiles) {
+      if (tile == generalPosition) return tile;
+    }
+  }
+  // get amount of tiles on x and y-axis to equal width and height
+  function getSizeTileAmoutAdaption() {
+    for (let i = 0; i < 1000; i++) {
+      for (let i1 = 0; i1 < 1000; i1++) {
+        if (i > 1 && i1 > 1 && !Math.abs(Math.abs(Math.round(größeAnpassenX.value/i)) - Math.abs(Math.round(größeAnpassenY.value/i1))) && i*i1 > minTileAmount.value) {
+          return {x: i, y: i1};
+        }
+      }
+    }
+  }
+  var sizeBefore;
+  var amountBefore;
+  // adapt amount of tiles on x and y-axis to equal width and height
+  function adaptTileAmount(adaptionStyleChanged) {
+    if (modeSelection.value == 'traditional' && rotateTiles.checked) {
+      adaptAmountSettings.style.display = 'inline';
+      amountBefore = {x: anzahlX.value, y: anzahlY.value};
+      if (sizeBefore && adaptionStyleChanged) {
+        größeAnpassenX.value = sizeBefore.x; 
+        größeAnpassenY.value = sizeBefore.y;
+        zeigeGröße(true);
+      }
+      var data = getSizeTileAmoutAdaption();
+      if (data) {
+        anzahlX.value = data.x;
+        anzahlY.value = data.y;
+      }
+    }
+  }
+  function addElement(attr, elm, childOf, asElement) {
+      var newElement = document.createElement(/*'span'*/elm);
+      if (childOf && !asElement) document.getElementById(childOf).appendChild(newElement);
+      else if (childOf) childOf.appendChild(newElement);
+      else tests.appendChild(newElement);
+      for (attrNow of Object.keys(attr)) {
+        if (attrNow == 'innerText') newElement.innerText = attr[attrNow];
+        else newElement.setAttribute(attrNow/*'style'*/, /*'color:' + word[i].colour*/attr[attrNow]);
+      }
+    }
   var lengthPerTeil = {};
   var positions = {right: []};
   var finished = false;
@@ -1272,6 +1306,7 @@ var originalSize = {};
     }
     return direc;
   }
+  // section 4: layout
   function showSelectedTile(tile, color) {
     canvas.fillStyle = color;
     canvas.save();
@@ -1390,59 +1425,9 @@ var originalSize = {};
       pCanvas.restore();
     }
   }
+  // end section 4
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
-  function canvasClicked(calledBy) {
-    if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
-    if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
-      for (var i = 0; i < positions.wrong.length; i++) {
-        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.position.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.position.y) {
-              console.log("vertausche " + checkSelected().x + "-" + checkSelected().y + " mit " + selected.position.x + "-" + selected.position.y);
-              stats.turns++;
-              vertauscheZwei(i, i1);
-              i = positions.wrong.length;
-              i1 = positions.wrong.length;
-            }
-          }
-        }
-      }
-      selected.boolean = false;
-    }
-    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing.length && !state.removeTile) {
-      for (var i1 = 0; i1 < missing.length; i1++) {
-        pMissing = missing[i1];
-        if (possibleMissing.length && pMissing == (checkSelected().x)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) {
-          moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
-        }
-        else {
-        if ((pMissing == (checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (pMissing == checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y)/*up*/)) {
-          for (var i = 0; i < positions.wrong.length; i++) {
-            if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
-              possibleMissing.push({i: i, i1: i1});
-            }
-          }
-        }
-        // canvas.clearRect(0, 0, 10000, 10000);
-        // layout();
-      }
-  }
-  if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
-}
-    else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
-      selected.position = {x: checkSelected().x, y: checkSelected().y};
-      selected.boolean = true;
-    }
-    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected())))) {
-      removeTile(null, calledBy);
-      lastCoord = checkSelected();
-    }
-    else {
-      if (aufgebenId.style.display == "none") layout(true, true);
-      else layout(false, true);
-    }
-  }
   function moveTile(i, i1) {
     console.log("schiebe...");
     possibleMissing = [];
@@ -1456,6 +1441,7 @@ var originalSize = {};
   }
   var doNotChange = [];
   var possibleMissing = [];
+  // select tiles to be removed or ignored
   function removeTile(first, calledBy) {
     if (!first && (!state.tileRemoved || calledBy == "touchmove" || calledBy == "mousemove")) {
       state.tileRemoved = true;
@@ -1491,6 +1477,7 @@ var originalSize = {};
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
+  // lists coordinates of all entered tiles
   function listCoordinates(tiles) {
     var list = [];
     for (const tile of tiles) {
@@ -1498,6 +1485,7 @@ var originalSize = {};
     }
     return list;
   }
+  // PC moving the tiles in schieben mode
   function verschiebenPC() {
     var missingArray = [];
     var workingNumbers = [];
@@ -1569,6 +1557,12 @@ var originalSize = {};
   var stats = {turns: 0, highestRight: {turns: 0, right: 0}, rotated: 0, unclipped: 0, wrongClipped: 0, viewOriginal: {times: 0}, minimumRotations: 0};
   document.onmousemove = readMouseMove
   var originalMausX;
+  // section 5: most user inputs
+  window.addEventListener('scroll',()=>{
+    if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
+    else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
+  });
+  // #importantUserInputs
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft;
     mausy = e.clientY + scrollY - texturTop;
@@ -1582,6 +1576,72 @@ var originalSize = {};
   var texturTop = textur.getBoundingClientRect().top;
   var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false};
   var texturLeft = textur.getBoundingClientRect().left;
+  // #importantUserInputs
+  // if (gerät == "Handy") {
+    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchstart', touch);
+    document.addEventListener('touchend', touch);
+    function touch(ev) {
+    if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
+    if (ev.touches[2]) {
+      textur.style.touchAction = '';
+    }
+    else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
+      textur.style.touchAction = 'none';
+    }
+    if (ev.touches[1] && aufgebenId.style.display == "inline") {
+      state.shift = true;
+      state.shiftBySwipe = true;
+      selected.tiles = [];
+      mouseDown();
+    }
+    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
+      // textur.style.touchAction = '';
+      canvasClicked();
+    }
+    else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
+      mausx = ev.touches[0]["pageX"] - textur.getBoundingClientRect().left;// + scrollX;
+      mausy = ev.touches[0]["pageY"] - texturTop;// - 32// + scrollY;
+      if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
+    }
+    if (!scrollable.checked) {
+      // if (aufgebenId.style.display == "inline") textur.style.touchAction = 'none';
+    if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
+      mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
+    }
+    if (ev.type == "touchend") {
+      setTimeout(function () {
+        mouseUp();
+        layout(true, true);
+      }, 100);
+    }
+    if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
+      folgenMouseMove("touchmove");
+    }
+  }
+    if (!ev.touches[0]) {
+      console.log(":((()))");
+    }
+      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
+        if (textur.style.touchAction != 'none') {
+        setTimeout(function () {
+          window.scroll(0, /*96 50*/32);
+          textur.style.touchAction = 'none';
+          selected.position = {x: checkSelected().x, y: checkSelected().y};
+          selected.boolean = true;
+        }, 3000);
+      }
+      else {
+        selected.position = {x: checkSelected().x, y: checkSelected().y};
+        selected.boolean = true;
+      }
+
+      }
+      if (scrollable.checked) textur.style.touchAction = '';
+    }
+    if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
+  }
+  // }
   function tileSelected() {
     for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
       var i = positions.layoutOrder[i1];
@@ -1678,25 +1738,7 @@ var originalSize = {};
     }
     else if (state.removeTile) folgenMouseMove("mouseDown");
   }
-  function convertStyle(value) {
-    return JSON.parse(value.replace('px', ''));
-  }
-  function positionBackToTileBarButtons(calledByMouseDown) {
-    if (!calledByMouseDown || (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length)) {
-      if (calledByMouseDown) tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
-      tileSelectionBar.leftOffScreenTiles = - (Math.floor(tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5)));
-      if (((tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5)) tileSelectionBar.offset = - (JSON.parse("0." + (tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5));
-      else tileSelectionBar.offset = 0;
-      if (tileSelectionBar.scrollX >= 0) tileSelectionBar.offset = -(tileSelectionBar.offset);
-      else tileSelectionBar.leftOffScreenTiles--;
-      for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
-      var elm = document.getElementsByClassName('backToTileB')[i];
-        elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
-      }
-      tileSelectionBar.swipePosition = mausx;
-      if (calledByMouseDown) scrollTileSelection(0);
-    }
-  }
+  // #importantUserInput
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     positionBackToTileBarButtons(true);
@@ -1747,150 +1789,7 @@ var originalSize = {};
       }
     }
   }
-  function unclipp(tile) {
-    var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
-    var objTile = positions.wrong[tile];
-    for (const direc of ['left', 'top', 'right', 'bottom']) {
-      if (objTile.original[direc] && !selected.tiles.includes(getTile(objTile.original[direc]))) {
-        delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
-        delete objTile.original[direc];
-      }
-    }
-    var unclipped = false;
-    for (let i = 0; i < clipped.length; i++) {
-      if (clipped[i].split(' - ').includes(tile + "") && (!selected.tiles.includes(parseInt(clipped[i].split(' - ')[0])) || !selected.tiles.includes(parseInt(clipped[i].split(' - ')[1])))) {
-        clipped.splice(i, 1);
-        unclipped = true;
-        i--;
-      }
-    }
-    if (unclipped) stats.unclipped++;
-  }
-  function checkPossibleClipping(tile, afterClipping) {
-    var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
-    positions.wrong.forEach((pos, i) => {
-      var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
-      // canvas.fillStyle = "yellow";
-      // canvas.fillRect(obj.all.x + lengthPerTeil.edit.x, obj.all.y, 10, lengthPerTeil.edit.y);
-      // canvas.fillStyle = "orange";
-      // canvas.fillRect(obj.slc.x - 10, obj.slc.y, 10, lengthPerTeil.edit.y);
-      var selectedObj = {
-        right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-        left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-        bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-        top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
-      };
-      if (!clipped.includes(i + ' - ' + tile) && !clipped.includes(tile + ' - ' + i)) {
-        var nearTile = {
-          right: collides(selectedObj.right, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
-          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
-          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}),
-          top: collides(selectedObj.top, {x: obj.all.x + 1, y: obj.all.y - 10, width: lengthPerTeil.edit.x - 2, height: 10})
-        };
-        for (var side of Object.keys(nearTile)) {
-          if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
-            nearest[side] = {area: nearTile[side].area, i: i};
-          }
-        }
-      }
-    });
-    if (nearest) {
-      // console.log("new check");
-      for (const near of Object.values(nearest)) {
-        // console.log(near.area);
-        if (near.area < nearest.overAll.area) {
-          nearest.overAll = {area: near.area, i: near.i};
-        }
-      }
-    }
-    var acceptedI = getConnectedTiles(nearest.overAll.i, true);
-    var screenObj = {x: scrollX, y: scrollY, width: window.visualViewport.width - 22, height: window.visualViewport.height};
-    if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.innerWidth, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
-    canvas.fillStyle = "blue";
-    // canvas.fillRect(textur.width - scrollX - window.innerWidth, scrollY, window.innerWidth, window.innerHeight);
-    var clipLength = selected.clip.length;
-    var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.left) {
-      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
-    }
-    obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.right) {
-      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
-    }
-    obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.top) {
-      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
-    }
-    obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.bottom) {
-      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
-    }
-    checkedTiles = [];
-    for (var i = 0; i < selected.clip.length - clipLength; i++) {
-      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
-        selected.clip.pop();
-        i--;
-      }
-    }
-  }
-  function getConnectedTiles(tile, firstCall, connectedTiles) {
-    if (!connectedTiles) connectedTiles = [];
-    connectedTiles.push(tile);
-    var tileObj = positions.wrong[tile];
-    for (const side of ['left', 'top', 'right', 'bottom']) {
-      if (tileObj && tileObj.original[side] && !connectedTiles.includes(getTile(tileObj.original[side]))) getConnectedTiles(getTile(tileObj.original[side]), false, connectedTiles);
-    };
-    if (firstCall) return connectedTiles;
-  }
-  function playClippingSound() {
-    for (const option of selected.clip) {
-      // new option
-      if (!clipOptionsBefore || !JSON.stringify(clipOptionsBefore).includes(JSON.stringify(filterSI([option])[0]))) {
-        if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click)_V3.mp3').play();
-        clipOptionsBefore = (filterSI(selected.clip));
-        if (vibrate.checked) window.navigator.vibrate(33);
-      }
-    }
-    if (clipOptionsBefore) {
-      for (const option of clipOptionsBefore) {
-        if (!JSON.stringify(filterSI(selected.clip)).includes(JSON.stringify(option))) {
-          if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3').play();
-          clipOptionsBefore = (filterSI(selected.clip));
-          if (vibrate.checked) {
-            setTimeout(function () {
-              window.navigator.vibrate(27);
-            }, 100);
-          }
-        }
-      }
-    }
-  }
-  function filterSI(clipOptions) {
-    var stored = JSON.parse(JSON.stringify(clipOptions));
-    for (const elm of stored) {
-      delete elm.sI;
-    }
-    return stored;
-  }
-  var clipOptionsBefore;
-  function selectedCollidesOthers(pClip,  tile) {
-    for (var i = 0; i < positions.wrong.length; i++) {
-      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) {
-        return true;
-      }
-    }
-  }
-  var checkedTiles = [];
-  function selectedCollideOther(pClipIndex) {
-    for (const clipIndex of getConnectedTiles(pClipIndex, true)) {
-      for (const tile of selected.tiles) {
-        if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
-          return true;
-        }
-      }
-    }
-  }
-  var clipped = [];
+  // #importantUserImput
   function mouseUp() {
     state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
@@ -1928,38 +1827,7 @@ var originalSize = {};
     }
     delete state.rotated;
   }
-  function collides(a, b) {
-    try {
-      return {boolean: !(
-        ((a.y + a.height) < (b.y)) ||
-        (a.y > (b.y + b.height)) ||
-        ((a.x + a.width) < b.x) ||
-        (a.x > (b.x + b.width))
-        ), area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)};
-
-    } catch (e) {
-      console.log('err: ' + e);
-    }
-  }
-  function selectedCollides(potentiallySelected) {
-    for (var tile of selected.tiles) {
-      // if (collides({x: positions.wrong[tile].edit.x, y: positions.wrong[tile].edit.y, width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y}, potentiallySelected)
-      if (collides(transformToObj(tile), transformToObj(potentiallySelected)).boolean) return tile;
-    }
-  }
-  function transformToObj(i, tolerance) {
-    var obj =  positions.wrong[i].edit;
-    if (!tolerance) tolerance = 0;
-    return {x: obj.x + tolerance, y: obj.y + tolerance, width: lengthPerTeil.edit.x - tolerance*2, height: lengthPerTeil.edit.y - tolerance*2};
-  }
-  function addTolerance(obj, tolerance) {
-    return {...obj, x: obj.x + tolerance, y: obj.y + tolerance, width: obj.width - tolerance*2, height: obj.height - tolerance*2};
-  }
-  // if (gerät == "Handy") {
-    document.addEventListener('touchmove', touch);
-    document.addEventListener('touchstart', touch);
-    document.addEventListener('touchend', touch);
-  // }
+    // #importantUserInputs
   document.onkeydown = function(event) {
     if (event.shiftKey) {
       state.shift = true;
@@ -2030,83 +1898,294 @@ var originalSize = {};
       };
     }
   }
-  function getTile(originalCoord) {
-    for (var i = 0; i < positions.wrong.length; i++) {
-      if (positions.wrong[i].original.x == originalCoord.x && positions.wrong[i].original.y == originalCoord.y) return i;
-    };
-  }
   document.onkeyup = function(event) {
     if (!event.shiftKey && state.shift) {
       state.shift = false;
       if (automaticTileSelectionReset.checked) selected.tiles = [];
     }
   }
-  function touch(ev) {
-    if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
-    if (ev.touches[2]) {
-      textur.style.touchAction = '';
-    }
-    else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
-      textur.style.touchAction = 'none';
-    }
-    if (ev.touches[1] && aufgebenId.style.display == "inline") {
+  // end section 5
+  // section 6: rotate tile(s)
+    // #importantUserInputs
+    document.onkeydown = function(event) {
+    if (event.shiftKey) {
       state.shift = true;
-      state.shiftBySwipe = true;
       selected.tiles = [];
-      mouseDown();
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
-      // textur.style.touchAction = '';
-      canvasClicked();
+    var collidesTilesBar = tileSelectionBar.collidesMouse();
+    if (event.key == "ArrowRight") {
+      if (collidesTilesBar) scrollTileSelection(1);
+      else rotateSelected(90);
     }
-    else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
-      mausx = ev.touches[0]["pageX"] - textur.getBoundingClientRect().left;// + scrollX;
-      mausy = ev.touches[0]["pageY"] - texturTop;// - 32// + scrollY;
-      if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
+    if (event.key == "ArrowLeft") {
+      if (collidesTilesBar) scrollTileSelection(-1);
+      else rotateSelected(-90);
     }
-    if (!scrollable.checked) {
-      // if (aufgebenId.style.display == "inline") textur.style.touchAction = 'none';
-    if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
-      mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
-    }
-    if (ev.type == "touchend") {
-      setTimeout(function () {
-        mouseUp();
-        layout(true, true);
-      }, 100);
-    }
-    if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
-      folgenMouseMove("touchmove");
+    if (event.key?.includes("Arrow")) layout(true);
+    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && ((selected.tiles.length && rotateTiles.checked) || collidesTilesBar)) return false;
+  }
+  function rotateSelected(direction) {
+    if (!state.removeTile) {
+      state.rotated = [];
+      rotateAround(selected.tiles[0], direction);
+      layout(true, true);
     }
   }
-    if (!ev.touches[0]) {
-      console.log(":((()))");
+  function rotateTile(tile, direction) {
+    if (mirrorInput.checked) direction *= -1;
+    positions.wrong[tile].original.degree += direction;
+    if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
+    else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
+    stats.rotated++;
+  }
+  function rotateAround(tile, direction, connectionSide, connectionObj) {
+    state.rotated.push(tile);
+    var tileObj = positions.wrong[tile];
+    if (tileObj) { 
+      if (connectionSide) {
+        if (connectionSide == 'left') {
+          tileObj.edit.x = connectionObj.edit.x - lengthPerTeil.edit.x;
+          tileObj.edit.y = connectionObj.edit.y;
+        }
+        if (connectionSide == 'top') {
+          tileObj.edit.x = connectionObj.edit.x;
+          tileObj.edit.y = connectionObj.edit.y - lengthPerTeil.edit.y;
+        }
+        if (connectionSide == 'right') {
+          tileObj.edit.x = connectionObj.edit.x + lengthPerTeil.edit.x;
+          tileObj.edit.y = connectionObj.edit.y;
+        }
+        if (connectionSide == 'bottom') {
+          tileObj.edit.x = connectionObj.edit.x;
+          tileObj.edit.y = connectionObj.edit.y + lengthPerTeil.edit.y;
+        }
+      }
+      rotateTile(tile, direction);
+      var directionConverter = {90: {left: 'top', top: 'right', right: 'bottom', bottom: 'left'}, '-90': {left: 'bottom', bottom: 'right', right: 'top', top: 'left'}};
+      for (const side of ['left', 'top', 'right', 'bottom']) {
+        if (tileObj.original[side]) {
+          tileObj.original['new' + directionConverter[direction][side]] = tileObj.original[side];
+          delete tileObj.original[side];
+        }
+      };
+        for (const side of ['left', 'top', 'right', 'bottom']) {
+        if (tileObj.original['new' + directionConverter[direction][side]]) {
+          tileObj.original[directionConverter[direction][side]] = tileObj.original['new' + directionConverter[direction][side]];
+          delete tileObj.original['new' + directionConverter[direction][side]];
+          if (!state.rotated.includes(getTile(tileObj.original[directionConverter[direction][side]]))) rotateAround(getTile(tileObj.original[directionConverter[direction][side]]), direction, directionConverter[direction][side], tileObj);
+        }
+      };
     }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
-        if (textur.style.touchAction != 'none') {
-        setTimeout(function () {
-          window.scroll(0, /*96 50*/32);
-          textur.style.touchAction = 'none';
-          selected.position = {x: checkSelected().x, y: checkSelected().y};
-          selected.boolean = true;
-        }, 3000);
+  }
+  // end section 6
+  // returns pixel as a number
+  function convertStyle(value) {
+    return JSON.parse(value.replace('px', ''));
+  }
+  // adapts the position of the backToTileBarButtons
+  function positionBackToTileBarButtons(calledByMouseDown) {
+    if (!calledByMouseDown || (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles" && state.mouse == "down" && tileSelectionBar.collidesMouse() && !selected.tiles.length)) {
+      if (calledByMouseDown) tileSelectionBar.scrollX += (mausx - tileSelectionBar.swipePosition);
+      tileSelectionBar.leftOffScreenTiles = - (Math.floor(tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5)));
+      if (((tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5)) tileSelectionBar.offset = - (JSON.parse("0." + (tileSelectionBar.scrollX/(lengthPerTeil.edit.x + 5) + "").split('.')[1])*(lengthPerTeil.sizeAdapted.x + 5));
+      else tileSelectionBar.offset = 0;
+      if (tileSelectionBar.scrollX >= 0) tileSelectionBar.offset = -(tileSelectionBar.offset);
+      else tileSelectionBar.leftOffScreenTiles--;
+      for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
+      var elm = document.getElementsByClassName('backToTileB')[i];
+        elm.style.left = tileSelectionCanvas.getBoundingClientRect().left + (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*(i - tileSelectionBar.leftOffScreenTiles) + tileSelectionBar.offset - convertStyle(elm.style.width)/2 + 'px';
       }
-      else {
-        selected.position = {x: checkSelected().x, y: checkSelected().y};
-        selected.boolean = true;
+      tileSelectionBar.swipePosition = mausx;
+      if (calledByMouseDown) scrollTileSelection(0);
+    }
+  }
+  function unclipp(tile) {
+    var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
+    var objTile = positions.wrong[tile];
+    for (const direc of ['left', 'top', 'right', 'bottom']) {
+      if (objTile.original[direc] && !selected.tiles.includes(getTile(objTile.original[direc]))) {
+        delete positions.wrong[getTile(objTile.original[direc])].original[directionConverter[direc]];
+        delete objTile.original[direc];
       }
+    }
+    var unclipped = false;
+    for (let i = 0; i < clipped.length; i++) {
+      if (clipped[i].split(' - ').includes(tile + "") && (!selected.tiles.includes(parseInt(clipped[i].split(' - ')[0])) || !selected.tiles.includes(parseInt(clipped[i].split(' - ')[1])))) {
+        clipped.splice(i, 1);
+        unclipped = true;
+        i--;
+      }
+    }
+    if (unclipped) stats.unclipped++;
+  }
+  function checkPossibleClipping(tile, afterClipping) {
+    var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
+    positions.wrong.forEach((pos, i) => {
+      var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
+      var selectedObj = {
+        right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
+        left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
+        bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
+        top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
+      };
+      if (!clipped.includes(i + ' - ' + tile) && !clipped.includes(tile + ' - ' + i)) {
+        var nearTile = {
+          right: collides(selectedObj.right, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
+          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
+          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}),
+          top: collides(selectedObj.top, {x: obj.all.x + 1, y: obj.all.y - 10, width: lengthPerTeil.edit.x - 2, height: 10})
+        };
+        for (var side of Object.keys(nearTile)) {
+          if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
+            nearest[side] = {area: nearTile[side].area, i: i};
+          }
+        }
+      }
+    });
+    if (nearest) {
+      // console.log("new check");
+      for (const near of Object.values(nearest)) {
+        // console.log(near.area);
+        if (near.area < nearest.overAll.area) {
+          nearest.overAll = {area: near.area, i: near.i};
+        }
+      }
+    }
+    var acceptedI = getConnectedTiles(nearest.overAll.i, true);
+    var screenObj = {x: scrollX, y: scrollY, width: window.visualViewport.width - 22, height: window.visualViewport.height};
+    if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.innerWidth, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
+    canvas.fillStyle = "blue";
+    // canvas.fillRect(textur.width - scrollX - window.innerWidth, scrollY, window.innerWidth, window.innerHeight);
+    var clipLength = selected.clip.length;
+    var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
+    if (obj.all && !positions.wrong[tile].original.left) {
+      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
+    }
+    obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
+    if (obj.all && !positions.wrong[tile].original.right) {
+      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
+    }
+    obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
+    if (obj.all && !positions.wrong[tile].original.top) {
+      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
+    }
+    obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
+    if (obj.all && !positions.wrong[tile].original.bottom) {
+      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
+    }
+    checkedTiles = [];
+    for (var i = 0; i < selected.clip.length - clipLength; i++) {
+      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
+        selected.clip.pop();
+        i--;
+      }
+    }
+  }
+  // returns a list with the indizes (plural index) of all tiles the entered tile ('tile') is connected to
+  function getConnectedTiles(tile, firstCall, connectedTiles) {
+    if (!connectedTiles) connectedTiles = [];
+    connectedTiles.push(tile);
+    var tileObj = positions.wrong[tile];
+    for (const side of ['left', 'top', 'right', 'bottom']) {
+      if (tileObj && tileObj.original[side] && !connectedTiles.includes(getTile(tileObj.original[side]))) getConnectedTiles(getTile(tileObj.original[side]), false, connectedTiles);
+    };
+    if (firstCall) return connectedTiles;
+  }
+  function playClippingSound() {
+    for (const option of selected.clip) {
+      // new option
+      if (!clipOptionsBefore || !JSON.stringify(clipOptionsBefore).includes(JSON.stringify(filterSI([option])[0]))) {
+        if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click)_V3.mp3').play();
+        clipOptionsBefore = (filterSI(selected.clip));
+        if (vibrate.checked) window.navigator.vibrate(33);
+      }
+    }
+    if (clipOptionsBefore) {
+      for (const option of clipOptionsBefore) {
+        if (!JSON.stringify(filterSI(selected.clip)).includes(JSON.stringify(option))) {
+          if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3').play();
+          clipOptionsBefore = (filterSI(selected.clip));
+          if (vibrate.checked) {
+            setTimeout(function () {
+              window.navigator.vibrate(27);
+            }, 100);
+          }
+        }
+      }
+    }
+  }
+  // remove sI out of the entered obj
+  function filterSI(clipOptions) {
+    var stored = JSON.parse(JSON.stringify(clipOptions));
+    for (const elm of stored) {
+      delete elm.sI;
+    }
+    return stored;
+  }
+  var clipOptionsBefore;
+  // checks collision of tiles with the clip options marker
+  function selectedCollidesOthers(pClip,  tile) {
+    for (var i = 0; i < positions.wrong.length; i++) {
+      if (collides(transformToObj(i), addTolerance(pClip, 3)).boolean && !tileSelectionBar.tiles.includes(i) && !selected.tiles.includes(i) && tile != i) {
+        return true;
+      }
+    }
+  }
+  var checkedTiles = [];
+  // checks if selected tiles collide tiles which are (connected to) tiles you want to clip to
+  function selectedCollideOther(pClipIndex) {
+    for (const clipIndex of getConnectedTiles(pClipIndex, true)) {
+      for (const tile of selected.tiles) {
+        if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
+          return true;
+        }
+      }
+    }
+  }
+  var clipped = [];
+  function collides(a, b) {
+    try {
+      return {boolean: !(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
+        ), area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)};
 
-      }
-      if (scrollable.checked) textur.style.touchAction = '';
+    } catch (e) {
+      console.log('err: ' + e);
     }
-    if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
   }
+  // checks if potentiallySelected collides with any other tile (not used anymore due to more advanced collision detection (TODO: optional?))
+  function selectedCollides(potentiallySelected) {
+    for (var tile of selected.tiles) {
+      if (collides(transformToObj(tile), transformToObj(potentiallySelected)).boolean) return tile;
+    }
+  }
+  // transforms index of tile into an obj that can be used for collision checks (tolerance can be added)
+  function transformToObj(i, tolerance) {
+    var obj =  positions.wrong[i].edit;
+    if (!tolerance) tolerance = 0;
+    return {x: obj.x + tolerance, y: obj.y + tolerance, width: lengthPerTeil.edit.x - tolerance*2, height: lengthPerTeil.edit.y - tolerance*2};
+  }
+  // adds tolerance by decreacing the size of the entered hitbox (obj)
+  function addTolerance(obj, tolerance) {
+    return {...obj, x: obj.x + tolerance, y: obj.y + tolerance, width: obj.width - tolerance*2, height: obj.height - tolerance*2};
+  }
+  // returns the index of the tile which has the entered original coordinates
+  function getTile(originalCoord) {
+    for (var i = 0; i < positions.wrong.length; i++) {
+      if (positions.wrong[i].original.x == originalCoord.x && positions.wrong[i].original.y == originalCoord.y) return i;
+    };
+  }
+  // exchanges two tiles (positions)
   function vertauscheZwei(i, i1) {
     var ablage = JSON.parse(JSON.stringify(positions.wrong[i].edit));
     positions.wrong[i].edit = JSON.parse(JSON.stringify(positions.wrong[i1].edit));
     positions.wrong[i1].edit = JSON.parse(JSON.stringify(ablage));
     if (positions.wrong[i1].edit == undefined) positions.wrong.splice(i1, 1);
   }
+  // returns the coordinates of a selected tile (schieben and exchange mode)
   function checkSelected() {
     try {
     for (var i = 0; i < anzahlX.value; i++) {
@@ -2118,12 +2197,8 @@ var originalSize = {};
     console.log("pleaseDebug :)");
   }
   }
-window.addEventListener('scroll',()=>{
-  if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
-  else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
-});
 
-// stop clock:
+// section 7: stop clock:
 var stopClock = {viewOriginal: {time: 0, running: 0}, completionTime: {time: 0, running: 0}};
 var time = 0;
 var running = 0;
@@ -2163,4 +2238,5 @@ setTimeout(function () {
 }, 100);
 }
 }
+// end section 7
 </script>
