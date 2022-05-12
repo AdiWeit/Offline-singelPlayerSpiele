@@ -103,15 +103,6 @@
   var canvas = textur.getContext('2d'); //Dimension
   var highscores = {};
   var checkpoints = {};
-  if (!localStorage.getItem("storedName")) {
-    var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-    while (Object.keys(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
-      var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
-    }
-  }
-  else var name = localStorage.getItem("storedName");
-localStorage.setItem("storedName", name);
-  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
   var x1 = 10,
     y1 = 177; //window.innerHeight - 150 + 3,
   x2 = 0, y2 = 0,
@@ -1211,6 +1202,15 @@ function getDatabase() {
     }
     modeSelected("normal");
     difficultyChanged(true);
+    if (!localStorage.getItem("storedName")) {
+    var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+    while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+      var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+    }
+  }
+  else var name = localStorage.getItem("storedName");
+  localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
   }).catch(function(e) {
     for (var i = 0; i < Object.keys(level).length; i++) {
       if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
