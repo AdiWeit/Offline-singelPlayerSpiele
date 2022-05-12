@@ -1767,7 +1767,7 @@ var originalSize = {};
     if (unclipped) stats.unclipped++;
   }
   function checkPossibleClipping(tile, afterClipping) {
-    var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}};
+    var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
     positions.wrong.forEach((pos, i) => {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
       // canvas.fillStyle = "yellow";
@@ -1794,6 +1794,16 @@ var originalSize = {};
         }
       }
     });
+    if (nearest) {
+      // console.log("new check");
+      for (const near of Object.values(nearest)) {
+        // console.log(near.area);
+        if (near.area < nearest.overAll.area) {
+          nearest.overAll = {area: near.area, i: near.i};
+        }
+      }
+    }
+    var acceptedI = getConnectedTiles(nearest.overAll.i, true);
     var screenObj = {x: scrollX, y: scrollY, width: window.visualViewport.width - 22, height: window.visualViewport.height};
     if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.innerWidth, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
     canvas.fillStyle = "blue";
@@ -1819,11 +1829,20 @@ var originalSize = {};
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
       // changes something so the if statement is false afterwords (fixed unclipping)
       selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile);
-      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile)) && !afterClipping))) {
+      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i, selected.clip[selected.clip.length - 1 - i].direction, tile) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
     }
+  }
+  function getConnectedTiles(tile, firstCall, connectedTiles) {
+    if (!connectedTiles) connectedTiles = [];
+    connectedTiles.push(tile);
+    var tileObj = positions.wrong[tile];
+    for (const side of ['left', 'top', 'right', 'bottom']) {
+      if (tileObj && tileObj.original[side] && !connectedTiles.includes(getTile(tileObj.original[side]))) getConnectedTiles(getTile(tileObj.original[side]), false, connectedTiles);
+    };
+    if (firstCall) return connectedTiles;
   }
   function playClippingSound() {
     for (const option of selected.clip) {
