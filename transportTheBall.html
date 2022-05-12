@@ -131,6 +131,58 @@ localStorage.setItem("storedName", name);
     aktuell: 0,
     mode: "normal",
     easyMaps: {
+      normal: {
+        3: {
+          spawnPoint: {
+            schieber: {
+              x: 380,
+              y: 150
+            },
+            ball: {
+              x: 380,
+              y: 300
+            }
+          }
+        },
+        4: {
+          spawnPoint: {
+            schieber: {
+              x: 380,
+              y: 150
+            },
+            ball: {
+              x: 380,
+              y: 300
+            }
+          }
+        },
+        5: {
+          rotating: [{
+          shape: "rectangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 11111,
+          sizeRelationToOriginal: 4,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+        },
+        7: {
+          spawnPoint: {
+          schieber: {
+            x: 0,
+            y: 333
+          },
+          ball: {
+            x: 100,
+            y: 333
+          }
+        }
+        },
+      },
       allDirections: {
         2: {
         spawnPoint: {
@@ -427,9 +479,26 @@ localStorage.setItem("storedName", name);
         }
       },
       5: {
+        rotating: [{
+          shape: "rectangle",
+          position: {
+            x: 750,
+            y: 374
+          },
+          miliSecsPerRotation: 10000,
+          sizeRelationToOriginal: 5,
+          heart: {
+            onceInMiliSec: 3333
+          }
+        }]
+      },
+      6: {},
+      7: {},
+      8: {},
+      9: {
 
       },
-      6: {
+      10: {
         ballTeleporter: [{
           ballSide: {
             x: 150,
@@ -449,10 +518,10 @@ localStorage.setItem("storedName", name);
           }
         }]
       },
-      7: {
+      11: {
         checkpointWhen_touches: "schieber"
       },
-      8: {
+      12: {
         heart: {
           ball: {
             min: 17,
@@ -485,7 +554,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      9: {
+      13: {
         invisible: {
           timeUntilInvisible: 3,
           timeUntilVisivleAgain: 3,
@@ -496,7 +565,7 @@ localStorage.setItem("storedName", name);
           }
         }
       },
-      10: {
+      14: {
         sizes: {
           ball: {
             width: 200,
@@ -528,7 +597,7 @@ localStorage.setItem("storedName", name);
         }
         */
       },
-      11: {
+      15: {
         sizes: {
           ball: {
             width: 17,
@@ -1007,8 +1076,8 @@ localStorage.setItem("storedName", name);
   },
     }
   };
-  level.magnet[10] = level.normal[5];
-  level.slide[8] = level.normal[5];
+  level.magnet[10] = level.normal[9];
+  level.slide[8] = level.normal[9];
   level.opposite = level.normal;
    // rotating examples:
 //   var shapes = [
