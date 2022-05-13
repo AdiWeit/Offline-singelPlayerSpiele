@@ -544,10 +544,11 @@
     }
   }
   function showCurrentStats(mode) {
-    if (mode != "traditional") {
+    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
+    else {
       alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
+      if (mode == "exchange") alert("Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?");
     }
-    else alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
     if (mode == "exchange" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
     alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
@@ -1366,7 +1367,7 @@ navigator.mediaDevices.enumerateDevices()
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
-        if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
+        if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
         if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
         alert(`Zudem haben Sie ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
