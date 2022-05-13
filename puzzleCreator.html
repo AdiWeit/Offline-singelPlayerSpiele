@@ -200,6 +200,7 @@
     <input onchange="changeMovementPlayerVis(checked);" type="checkbox">Züge des PCs ansehen
     <br>
     <div id="innerMovementPlayer" style="display: none;">
+      <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung
       <br>
       <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
       <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
@@ -544,10 +545,11 @@
     }
   }
   function showCurrentStats(mode) {
-    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
+    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
     else {
       alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
       if (mode == "exchange") alert("Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?");
+      if (mode == "schieben") alert(`Es ist mit ${distinctMoves.length} Zügen oder weniger möglich.`);
     }
     if (mode == "exchange" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
     alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
@@ -818,10 +820,49 @@ swipeTitle.style.display = "none";
       if (modeSelection.value == "schieben") {
         movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
         verschiebenPC();
+        setTimeout(function () {
+          // create misstingDistinct
+          distinctMoves = JSON.parse(JSON.stringify(movement.move));
+          var distinctPositions = [];
+          var change;
+          var firstRunThrough = true;
+          playerMovement = movement.move;
+          do {
+            change = false;
+            var leftBeginning = 1;
+            for (let i = 0; i < movement.move.length; i++) {
+              var move = JSON.stringify(playMovementPos(i, true, true));
+            if (distinctPositions.includes(move) || JSON.stringify(movement.startPosition) == move) {
+              for (let i1 = leftBeginning; i1 < /*movement.move.length*/i; i1++) {
+                if (JSON.stringify(playMovementPos(i1, true, true)) == JSON.stringify(movement.startPosition) && !state.redoI1) {
+                  distinctPositions.splice(0, (i1));
+                  distinctMoves.fill(undefined, 0, i1);
+                  i1 = 0;
+                  state.redoI1 = true;
+                  change = true;
+                }
+                if (JSON.stringify(playMovementPos(i1, true, true)) == move && distinctMoves[i1] != undefined && distinctMoves[i] != undefined) {
+                  distinctPositions.splice(i1, (i - i1));
+                  // distinctMoves.splice(i1, (i - i1));
+                  distinctMoves.fill(undefined, i1, i);
+                  leftBeginning = i1 + (i - i1);
+                  // i1 = i1 + (i - i1);
+                  change = true;
+                  break;
+                }
+              }
+              }
+              if (firstRunThrough) distinctPositions.push(move);
+            }
+            firstRunThrough = false;
+          } while (change)
+          distinctMoves = distinctMoves.filter(x => x != undefined);
+          movementStepsChanged(distinctMovement.checked);
+          state.redoI1 = undefined;
+        }, 500);
         movementPlayer.style.display = 'inline';
         movementPlayerTextur.width = textur.width;
         movementPlayerTextur.height = textur.height;
-        movementPosition.max = movement.move.length;
       }
       else {
       if (modeSelection.value == "traditional") {
@@ -1001,6 +1042,11 @@ function canvasClicked(calledBy) {
     }
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
+  function movementStepsChanged(checked) {
+    if (checked) playerMovement = distinctMoves;
+    else playerMovement = movement.move;
+    movementPosition.max = playerMovement.length;
+  }
   function playPauseMovement() {
     if (movementPlayButton.innerHTML == "play") {
       movementPlayButton.innerHTML = "pause";
@@ -1008,9 +1054,10 @@ function canvasClicked(calledBy) {
     }
     else movementPlayButton.innerHTML = "play";
   }
+  var playerMovement = [];
   function playMovementFunction() {
     if (movementPlayButton.innerHTML == "pause") {
-      if (JSON.parse(movementPosition.value) < movement.move.length || JSON.parse(movementPosition.value) + objMovementPlayer.direc < 0) playMovementPos(JSON.parse(movementPosition.value) + objMovementPlayer.direc);
+      if (JSON.parse(movementPosition.value) < playerMovement.length || JSON.parse(movementPosition.value) + objMovementPlayer.direc < 0) playMovementPos(JSON.parse(movementPosition.value) + objMovementPlayer.direc);
       else movementPlayButton.innerHTML = "play";
       setTimeout(function () {
         playMovementFunction();
@@ -1019,7 +1066,7 @@ function canvasClicked(calledBy) {
   }
   var objMovementPlayer = {pause: false, position: 0, direc: 1};
   function getPlayerPosition(backToBeginningIfNeeded) {
-    for (let i = 0; i < movement.move.length; i++) {
+    for (let i = 0; i < playerMovement.length; i++) {
       if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
     }
     if (backToBeginningIfNeeded) return 0;
@@ -1027,12 +1074,12 @@ function canvasClicked(calledBy) {
   }
   function playMovementPos(position, pReturn, doNotChangeVal) {
     if (position < 0) position = 0;
-    if (position > movement.move.length) position = movement.move.length;
+    if (position > playerMovement.length) position = playerMovement.length;
     if (!doNotChangeVal) movementPosition.value = position;
     positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
-    for (let i = movement.move.length - 1; i >= position; i--) {
-      positions.wrong[movement.move[i].tile].edit.x += movement.move[i].x;
-      positions.wrong[movement.move[i].tile].edit.y += movement.move[i].y;
+    for (let i = playerMovement.length - 1; i >= position; i--) {
+      positions.wrong[playerMovement[i].tile].edit.x += playerMovement[i].x;
+      positions.wrong[playerMovement[i].tile].edit.y += playerMovement[i].y;
     }
     if (pReturn) return positions.wrong;
     canvas = movementPlayerTextur.getContext('2d');
@@ -1297,6 +1344,7 @@ navigator.mediaDevices.enumerateDevices()
   var positions = {right: []};
   var finished = false;
   var missing = [];
+  var distinctMoves = [];
   function convertDirection(direc, degr) {
     var directions = ['top', 'right', 'bottom', 'left'];
     var direcObj = {top: 0, right: 1, bottom: 2, left: 3};
@@ -1366,9 +1414,9 @@ navigator.mediaDevices.enumerateDevices()
       finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
-        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
+        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
-        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
+        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden (man schafft es mit mindestens ${anazhlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
         alert(`Zudem haben Sie ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
