@@ -21,7 +21,7 @@
 </select>
 <button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before (checkpoint will be removed)</button>
 <br>
-<button type="button" onclick="scrollingInterac.user = false; window.scroll(cssToNumber(sphere.schieber.style.left), cssToNumber(sphere.schieber.style.top))" name="button">autoscroll again</button>
+<button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
 <br>
 <h3>sensibility</h3>
@@ -1188,6 +1188,7 @@
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
 };
   getDatabase();
+  var name = '';
 function getDatabase() {
   // TODO: undo
   // dbGet("transportTheBall", "checkpoints " + name).then(result => {
@@ -1195,23 +1196,27 @@ function getDatabase() {
   // }).catch(function(e) {
   //   console.log(e);
   // });
+  function getName() {
+    if (!localStorage.getItem("storedName")) {
+      name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+      while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+        name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+      }
+    }
+    else name = localStorage.getItem("storedName");
+    localStorage.setItem("storedName", name);
+    nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+  }
   dbGet("transportTheBall", "highscores").then(result => {
+    getName();
     highscores = JSON.parse(result);
     for (var i = 0; i < Object.keys(level).length; i++) {
       if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
     }
     modeSelected("normal");
     difficultyChanged(true);
-    if (!localStorage.getItem("storedName")) {
-    var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-    while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
-      var name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
-    }
-  }
-  else var name = localStorage.getItem("storedName");
-  localStorage.setItem("storedName", name);
-  nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
   }).catch(function(e) {
+    getName();
     for (var i = 0; i < Object.keys(level).length; i++) {
       if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
     }
@@ -1254,6 +1259,7 @@ function checkpointSelected(value) {
       else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
     }
     setInterval(function() {
+      if (!pause) { 
       // joy-stick:
       var nextCoordinates = {x: 0, y: 0};
       if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores"/* && !pause*/) {
@@ -1271,14 +1277,25 @@ function checkpointSelected(value) {
       if (level.aktuell == "winnerScreen") sphere.schieber.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
       else/* if (!scrollingByUser)*/ {
         if (currentLevel) {
-        scrollingInterac.PC = true;
-        if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width- 150) window.scroll(scrollX + 3, scrollY);
-        if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- 150) window.scroll(scrollX, scrollY + 3);
-        if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + 150) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-        if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + 150) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
-        setTimeout(function () {
+        if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width- 150) {
+          window.scroll(scrollX + 3, scrollY);
+          registerAutoScrolling();
+        }
+        else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- 150) {
+          window.scroll(scrollX, scrollY + 3);
+          registerAutoScrolling();
+        }
+        else if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + 150) && scrollX > 2) {
+          window.scroll(scrollX - 3, scrollY);
+          registerAutoScrolling();
+        }
+        else if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + 150) && scrollY > 2) {
+          window.scroll(scrollX, scrollY - 3);
+          registerAutoScrolling();
+        }
+        else {
           scrollingInterac.PC = false;
-        }, 23);
+        }
       }
       }
       // scroll all the way down when at bottom
@@ -1462,6 +1479,7 @@ function checkpointSelected(value) {
         canvas.stroke();
         canvas.closePath();
       }
+    }
     }, 25);
   }
   else if (gerät == "Handy") {
@@ -1469,7 +1487,7 @@ function checkpointSelected(value) {
     // alert("Bitte rufen sie diese Seite als https (sicher) auf, um die benötigte Bewegungssteuerung benutzen zu können!")
     gerät = "unsaveHandyBrowser";
   }
-  var scrollingInterac = {user: false, PC: false}
+  var scrollingInterac = {user: false, PC: false, pos: {x: -1, y: -1}}
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -1542,12 +1560,12 @@ function checkpointSelected(value) {
     if (!pause) {
     sphere.schieber.style.top = y1 + "px";
     sphere.schieber.style.left = x1 + "px";
-  }
+   }
   }
   window.onscroll = function (e) {
-    // if (!scrollingInterac.PC) {
-    //   scrollingInterac.user = true;
-    // }
+    if (gerät == "PC" && !scrollingInterac.PC && scrollingInterac.pos.x != scrollX && scrollingInterac.pos.y != scrollY) {
+      scrollingInterac.user = true;
+    }
     if (scrollY  < 5 && document.getElementById('gameModeSelection').value != "showScores"/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
   }
   document.addEventListener('touchstart', touch);
@@ -1834,18 +1852,35 @@ function checkpointSelected(value) {
       sphere.schieber.style.width = checkpoint[checkpoint.length - 1].schieber.width + "px";
       sphere.schieber.style.height = checkpoint[checkpoint.length - 1].schieber.height + "px";
     }
-    scrollingInterac.PC = true;
     for (var i = 0; i < Bild.width; i++) {
-      if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
-      if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
-      if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + currentLevel.sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
-      if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + currentLevel.sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+      if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width*5) {
+        window.scroll(scrollX + 3, scrollY);
+        registerAutoScrolling();
+      }
+      else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height*5) {
+        window.scroll(scrollX, scrollY + 3);
+        registerAutoScrolling();
+      }
+      else if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + currentLevel.sizes.ball.width*5) && scrollX > 2) {
+        window.scroll(scrollX - 3, scrollY);
+        registerAutoScrolling();
+      }
+      else if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + currentLevel.sizes.ball.height*5) && scrollY > 2) {
+        window.scroll(scrollX, scrollY - 3);
+        registerAutoScrolling();
+      }
+      else {
+        scrollingInterac.PC = false;
+      }
     }
-    setTimeout(function () {
-      scrollingInterac.PC = false;
-    }, 1000);
   }
-
+  function registerAutoScrolling() {
+    scrollingInterac.PC = true;
+    scrollingInterac.pos = {x: scrollX, y: scrollY};
+    // setTimeout(function () {
+    //   scrollingInterac.PC = false;
+    // }, 500);
+  }
   function nextLevel() {
     level.aktuell++;
     zaehler = "newLevel";
@@ -1985,10 +2020,12 @@ function checkpointSelected(value) {
       winnerScreen();
     }
     else {
+      levelSelector.value = value;
+      if (levelSelector.value == "") levelSelector.value = "✅ " + value;
+      value = value.replace('✅ ', '');
       level.aktuell = JSON.parse(value.toString().split('. level')[0]);
       currentLevel = level[level.mode][level.aktuell];
       if (easyMaps.checked) currentLevel = level.easyMaps[level.mode][level.aktuell];
-      levelSelector.value = value;
     if (running == 0) startPause();
     else time = 0;
     setupLevel();
@@ -1997,7 +2034,8 @@ function checkpointSelected(value) {
   if (currentLevel.rotating) requestAnimationFrame(renderLoop);
 }
   function modeSelected(mode) {
-    if (mode != "showScores") {
+    if (mode == "showScores") showScores(highscores);
+    else {
       textur.style.display = "inline";
       levelSelector.style.display = "inline";
       sphere.schieber.style.display = "inline";
@@ -2010,17 +2048,12 @@ function checkpointSelected(value) {
     for (var i = 0; highscores[mode] && i < Object.keys(highscores[mode]).length; i++) {
       if (Object.keys(highscores[mode][Object.keys(highscores[mode])[0]]).includes(name)) mapsFinished++;
     }
-    if (name == "allLevel") mapsFinished = Object.keys(level[mode]).length;
-    for (var i = 0; ((mapsFinished == 0 && i < 1) || (mapsFinished == Object.keys(level[mode]).length && i < mapsFinished) || (highscores[mode] && mapsFinished != Object.keys(level[mode]).length && i < mapsFinished + 1)); i++) {
-      if ( mapsFinished > 0) {
+    for (var i = 0; i < Object.keys(level[mode]).length; i++) {
       opt = document.createElement("option");
       document.getElementById("levelSelector").options.add(opt);
       // opt.setAttribute("id", i);
       opt.text = (i + 1) + ". level";
-    }
-    else if (i == 0) {
-      levelSelector.style.display = "none";
-    }
+      if (i < mapsFinished) opt.text = "✅ " + opt.text;
     }
     if (mapsFinished == Object.keys(level[mode]).length) {
       opt = document.createElement("option");
@@ -2033,9 +2066,6 @@ function checkpointSelected(value) {
     // else inOrAgainstDirection = 1;
     gameModeSelection.value = mode;
 }
-  else {
-    showScores(highscores);
-  }
   }
   var highscoresDisplayedBefore = {};
   function showScores(highscores) {
