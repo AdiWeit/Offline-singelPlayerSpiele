@@ -546,12 +546,9 @@
   }
   function showCurrentStats(mode) {
     if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
-    else {
-      alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen");
-      if (mode == "exchange") alert("Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?");
-      if (mode == "schieben") alert(`Es ist mit ${distinctMoves.length} Zügen oder weniger möglich.`);
-    }
-    if (mode == "exchange" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
+    if (mode == "exchange") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?)");
+    if (mode == "schieben") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + distinctMoves.length + "Zügen oder weniger möglich! Werden Sie es wohl schaffen?)");
+    if (mode != "traditional" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
     alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
