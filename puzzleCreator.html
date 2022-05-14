@@ -1413,7 +1413,7 @@ navigator.mediaDevices.enumerateDevices()
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
-        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden (man schafft es mit mindestens ${anazhlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
+        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden (man schafft es mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
         alert(`Zudem haben Sie ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
@@ -2182,7 +2182,7 @@ navigator.mediaDevices.enumerateDevices()
   function selectedCollideOther(pClipIndex) {
     for (const clipIndex of getConnectedTiles(pClipIndex, true)) {
       for (const tile of selected.tiles) {
-        if (collides(transformToObj(clipIndex), transformToObj(tile)).boolean) {
+        if (collides(transformToObj(clipIndex, 3), transformToObj(tile, 3)).boolean) {
           return true;
         }
       }
