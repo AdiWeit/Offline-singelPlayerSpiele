@@ -1,7 +1,6 @@
 <title>transport the ball</title>
 <meta charset="utf-8">
 <canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
-<h1 id="nameEingeloggt" onclick='name = prompt ("Which user(name) do you want to log in?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
   <option id="normalSelection" value="normal">normal</option>
@@ -25,7 +24,7 @@
 <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
 <br>
 <h3>sensibility</h3>
-<input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, the progress and the score will not be saved after leaving the website. If you do not want to continue, please press cancel!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
+<input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, it will not count the completion time!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
 <button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
 <br>
 <select id="tabletPositionModeSelection">
@@ -1198,32 +1197,12 @@ function getDatabase() {
   // }).catch(function(e) {
   //   console.log(e);
   // });
-  // function getName() {
-  //   if (!localStorage.getItem("storedName")) {
-  //     name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-  //     while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
-  //       name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
-  //     }
-  //   }
-  //   else name = localStorage.getItem("storedName");
-  //   localStorage.setItem("storedName", name);
-  //   nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
-  // }
   result = localStorage.getItem('highscoresTransportTheBall');
   // dbGet("transportTheBall", "highscores").then(result => {
     // getName();
     if (result) highscores = JSON.parse(result);
     modeSelected("normal");
     difficultyChanged(true);
-  // }).catch(function(e) {
-  //   getName();
-  //   for (var i = 0; i < Object.keys(level).length; i++) {
-  //     if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
-  //   }
-  //   levelSelector.style.display = "none";
-  //   modeSelected("normal");
-  //   difficultyChanged(true);
-  // });
 }
 function checkpointSelected(value) {
   if (value.includes(".")) checkpoint.push(JSON.parse(JSON.stringify(checkpoint[value.split(".")[0]])));
@@ -1696,18 +1675,7 @@ function checkpointSelected(value) {
     sphere.ball.style.top = ball.y + "px";
   }
   function setHighscores(nextLevel) {
-    // dbGet("transportTheBall", "highscores").then(result => {
-      // highscores = JSON.parse(result);
       addToHighscore(nextLevel);
-    // }).catch(function(e) {
-    //   addToHighscore(nextLevel);
-    // });
-  // if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != currentLevel.spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != currentLevel.spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != currentLevel.spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != currentLevel.spawnPoint.ball.y*/) {
-  //   checkpoints[level.mode].splice(level.aktuell, 1);
-  //   setTimeout(function () {
-  //     if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
-  //   }, 1000);
-  // }
   }
   function onTeleporter() {
     var onTeleporterObj = {schieber: false, ball: false, checkpoint: false}
@@ -1730,27 +1698,13 @@ function checkpointSelected(value) {
       highscores[level.mode][level.aktuell] = mins + ":" + secs + ":" + "0" + tenths;
     }
     goalReached = false;
-    // setTimeout(function () {
-      // dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});
       localStorage.setItem('highscoresTransportTheBall', JSON.stringify(highscores));
-    // }, 1000);
     level.mode = level.mode.replace(' opposite', '');
     level.mode = level.mode.replace(' easy maps', '');
     level.mode = level.mode.replace(' (joystick)', '');
     if (pNextLevel) nextLevel();
     else winnerScreen();
   }
-  var dbSetWarteschlange = [];
-  setInterval(function () {
-    if (dbSetWarteschlange.length > 0) {
-      // dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
-      dbSetWarteschlange.shift();
-    }
-    else if (alertWhenFinishedSaving) {
-      alert("Saving finished! You can now leave the website!");
-      alertWhenFinishedSaving = false;
-    }
-  }, 2222);
   function removeCheckpoint() {
     if (checkpoint.length > 1) {
      sphere.ball.style.left = checkpoint[checkpoint.length - 2].ball.x + "px";
@@ -2056,9 +2010,6 @@ function checkpointSelected(value) {
     if (highscores[mode + " easy maps"] && Object.keys(highscores[mode + " easy maps"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " easy maps"])?.length;
     if (highscores[mode + " easy maps (joystick)"] && Object.keys(highscores[mode + " easy maps (joystick)"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " easy maps (joystick)"])?.length;
     if (highscores[mode + " (joystick))"] && Object.keys(highscores[mode + " (joystick))"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " (joystick)"])?.length;
-    // for (var i = 0; highscores[mode] && i < Object.keys(highscores[mode]).length; i++) {
-    //   if (Object.keys(highscores[mode][Object.keys(highscores[mode])[0]]).includes(name)) mapsFinished++;
-    // }
     for (var i = 0; i < Object.keys(level[mode]).length; i++) {
       opt = document.createElement("option");
       document.getElementById("levelSelector").options.add(opt);
@@ -2096,50 +2047,24 @@ function checkpointSelected(value) {
     var player = []
     var mostLevel = 0;
     for (const mode of Object.keys(highscores)) {
-      for (var i = 1; i < Object.keys(highscores[mode]).length + 1; i++) {
-        // for (var i1 = 0; highscores[mode][i] && i1 < Object.keys(highscores[mode][i]).length; i1++) {
-        //   if (!(player.includes(Object.keys(highscores[mode][i])[i1]))) player.push(Object.keys(highscores[mode][i])[i1]);
-        // }
-      }
       if (mostLevel < Object.keys(highscores[mode]).length) mostLevel = Object.keys(highscores[mode]).length;
-    // for (var i = 0; i < player.length; i++) {
-      // if (!(Object.keys(highscores)[i] == "allMaps")) {
-     // if (player[i] != "allLevel") {
         var table = document.getElementById("scores");
         var row = table.insertRow(0); // row geht nach unten (Spalt)
         cell.push(row.insertCell(0)); // cell geht nach rechts (Zeit))
         cell.push(row.insertCell(1));
-        // cell[cell.length - 1].innerHTML = player[i];
-      // }
-      //  var cell = [/*row.insertCell(0)*/];
         cell[cell.length - 2] = row.insertCell(1);
       for (var i1 = 1; highscores[mode] && i1 < Object.keys(highscores[mode]).length + 1; i1++) {
-        // if (!(Object.keys(highscores[mode])[i] == "allMaps")) {
           if (i1 < Object.keys(highscores[mode]).length + 1) {
             cell[cell.length] = row.insertCell(i1 + 2);
-            // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
-            //   i1--;
-            // }
             if (highscores[mode] && highscores[mode][i1]) {
               if (highscores[mode][i1]) cell[cell.length - 1].innerHTML = highscores[mode][i1];
-              /*if (highscores[mode][i1] < highscores[mode][i1][name]) cell[cell.length - 1].style.color = "red";
-              else if (highscores[mode][i1] > highscores[mode][i1][name]) cell[cell.length - 1].style.color = "green";
-              else if (name == player[i]) */cell[cell.length - 1].style.color = "blue";
-              // else cell[cell.length - 1].style.color = "black";
             }
 
           } else {
             cell[cell.length - 1] = row.insertCell(i1 + 1);
-            //  cell[cell.length - 2].innerHTML = "unmade";
-            //  cell[cell.length - 2].style.color = "black";
           }
-        // }
       }
       if (table) var row = table.insertRow(/*i*/table.rows.length);
-      //  var row = table.insertRow(i+1);
-      // var row = table.insertRow(i + 1);
-    //}
-  // }
   if (table) {
     var row = table.insertRow(/*i2*/0);
     cell[0] = row.insertCell(0);
@@ -2148,10 +2073,6 @@ function checkpointSelected(value) {
     cell[0].innerHTML = mode;
   }
     }
-    //  var row = table.insertRow(0);
-    //  var cell = [/*row.insertCell(0)*/];
-    // cell.push(row.insertCell(0));
-    // cell[cell.length - 1].innerHTML = "name";
     var row = table.insertRow(0);
     cell.push(row.insertCell(0));
     for (var i1 = 0; i1 < mostLevel + 1; i1++) {
@@ -2161,7 +2082,6 @@ function checkpointSelected(value) {
     }
     cell.push(row.insertCell(1));
     cell.push(row.insertCell(2));
-    // cell[cell.length - 1].innerHTML = "name"
   }
   // function removeDirection(direction) {
   //   for (var i = 0; i < directionBefore.length; i++) {
