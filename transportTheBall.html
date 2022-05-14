@@ -119,7 +119,7 @@
   sphere.schieber.style.ball = "50px";
   sphere.schieber.style.ball = "50px";
   var level = {
-    aktuell: 0,
+    aktuell: 1,
     mode: "normal",
     easyMaps: {
       normal: {
@@ -1187,8 +1187,10 @@
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
 };
+setTimeout(function() {
   getDatabase();
-  var name = '';
+}, 500) 
+var name = '';
 function getDatabase() {
   // TODO: undo
   // dbGet("transportTheBall", "checkpoints " + name).then(result => {
@@ -1196,34 +1198,32 @@ function getDatabase() {
   // }).catch(function(e) {
   //   console.log(e);
   // });
-  function getName() {
-    if (!localStorage.getItem("storedName")) {
-      name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-      while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
-        name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
-      }
-    }
-    else name = localStorage.getItem("storedName");
-    localStorage.setItem("storedName", name);
-    nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
-  }
-  dbGet("transportTheBall", "highscores").then(result => {
-    getName();
-    highscores = JSON.parse(result);
-    for (var i = 0; i < Object.keys(level).length; i++) {
-      if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
-    }
+  // function getName() {
+  //   if (!localStorage.getItem("storedName")) {
+  //     name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
+  //     while (JSON.stringify(highscores.normal).includes(name) && !confirm('This username is in use already! Do you want to sign into this account?')) {
+  //       name = prompt("So What's your user name then? (This information is needed to save your highscores (best time))");
+  //     }
+  //   }
+  //   else name = localStorage.getItem("storedName");
+  //   localStorage.setItem("storedName", name);
+  //   nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
+  // }
+  result = localStorage.getItem('highscoresTransportTheBall');
+  // dbGet("transportTheBall", "highscores").then(result => {
+    // getName();
+    if (result) highscores = JSON.parse(result);
     modeSelected("normal");
     difficultyChanged(true);
-  }).catch(function(e) {
-    getName();
-    for (var i = 0; i < Object.keys(level).length; i++) {
-      if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
-    }
-    levelSelector.style.display = "none";
-    modeSelected("normal");
-    difficultyChanged(true);
-  });
+  // }).catch(function(e) {
+  //   getName();
+  //   for (var i = 0; i < Object.keys(level).length; i++) {
+  //     if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
+  //   }
+  //   levelSelector.style.display = "none";
+  //   modeSelected("normal");
+  //   difficultyChanged(true);
+  // });
 }
 function checkpointSelected(value) {
   if (value.includes(".")) checkpoint.push(JSON.parse(JSON.stringify(checkpoint[value.split(".")[0]])));
@@ -1563,7 +1563,7 @@ function checkpointSelected(value) {
    }
   }
   window.onscroll = function (e) {
-    if (gerät == "PC" && !scrollingInterac.PC && scrollingInterac.pos.x != scrollX && scrollingInterac.pos.y != scrollY) {
+    if (gerät == "PC" && !scrollingInterac.PC && (scrollingInterac.pos.x != scrollX || textur.width < window.innerWidth) && (scrollingInterac.pos.y != scrollY || textur.height < window.innerHeight)) {
       scrollingInterac.user = true;
     }
     if (scrollY  < 5 && document.getElementById('gameModeSelection').value != "showScores"/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
@@ -1696,12 +1696,12 @@ function checkpointSelected(value) {
     sphere.ball.style.top = ball.y + "px";
   }
   function setHighscores(nextLevel) {
-    dbGet("transportTheBall", "highscores").then(result => {
-      highscores = JSON.parse(result);
+    // dbGet("transportTheBall", "highscores").then(result => {
+      // highscores = JSON.parse(result);
       addToHighscore(nextLevel);
-    }).catch(function(e) {
-      addToHighscore(nextLevel);
-    });
+    // }).catch(function(e) {
+    //   addToHighscore(nextLevel);
+    // });
   // if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != currentLevel.spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != currentLevel.spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != currentLevel.spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != currentLevel.spawnPoint.ball.y*/) {
   //   checkpoints[level.mode].splice(level.aktuell, 1);
   //   setTimeout(function () {
@@ -1721,27 +1721,29 @@ function checkpointSelected(value) {
   var goalReached = false;
   function addToHighscore(pNextLevel) {
     if (oppositeCheck.checked) level.mode += ' opposite';
-    if (easyMaps.checked) level.mode += ' easy_maps';
+    if (easyMaps.checked) level.mode += ' easy maps';
+    if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
     if (!highscores[level.mode]) highscores[level.mode] = {};
     if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
-    if (!highscores[level.mode][level.aktuell][joyStickPlay.checked]) highscores[level.mode][level.aktuell][joyStickPlay.checked] = {};
-    if (!highscores[level.mode][level.aktuell] || !highscores[level.mode][level.aktuell][joyStickPlay.checked][name] || highscores[level.mode][level.aktuell][joyStickPlay.checked][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][joyStickPlay.checked][name] = mins + ":" + secs + ":" + "0" + tenths;
+    if (!highscores[level.mode][level.aktuell] || highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) {
+      if (Object.keys(highscores[level.mode][level.aktuell]).length && highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
+      highscores[level.mode][level.aktuell] = mins + ":" + secs + ":" + "0" + tenths;
+    }
     goalReached = false;
-    setTimeout(function () {
-      if (name != "allLevel") dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});//dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
-      for (var i = 0; i < Object.keys(level).length; i++) {
-        if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
-      }
-    }, 1000);
+    // setTimeout(function () {
+      // dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});
+      localStorage.setItem('highscoresTransportTheBall', JSON.stringify(highscores));
+    // }, 1000);
     level.mode = level.mode.replace(' opposite', '');
-    level.mode = level.mode.replace(' easy_maps', '');
+    level.mode = level.mode.replace(' easy maps', '');
+    level.mode = level.mode.replace(' (joystick)', '');
     if (pNextLevel) nextLevel();
     else winnerScreen();
   }
   var dbSetWarteschlange = [];
   setInterval(function () {
     if (dbSetWarteschlange.length > 0) {
-      dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      // dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
       dbSetWarteschlange.shift();
     }
     else if (alertWhenFinishedSaving) {
@@ -1836,7 +1838,8 @@ function checkpointSelected(value) {
       else opt.text = "start";
     }
     checkpointSelection.value = valueBefore;
-    if (document.getElementById('checkpointSelection').options.length > 0 && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length] && highscores[level.mode][Object.keys(level[level.mode]).length][name]) checkpointSelection.style.display = 'inline';
+    // TODO: why highscore checks?
+    if (document.getElementById('checkpointSelection').options.length > 0/* && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length]*/) checkpointSelection.style.display = 'inline';
     else checkpointSelection.style.display = 'none';
     x1 = checkpoint[checkpoint.length - 1].schieber.x;
     y1 = checkpoint[checkpoint.length - 1].schieber.y;
@@ -1882,6 +1885,7 @@ function checkpointSelected(value) {
     // }, 500);
   }
   function nextLevel() {
+    if (!document.getElementById('level ' + level.aktuell).text.includes("✅")) document.getElementById('level ' + level.aktuell).text = "✅ " + document.getElementById('level ' + level.aktuell).text;
     level.aktuell++;
     zaehler = "newLevel";
     setTimeout(function () {
@@ -2015,6 +2019,9 @@ function checkpointSelected(value) {
   }
   var currentLevel = level.normal[1];
   function levelSelected(value) {
+    for (const mode of Object.keys(level)) {
+      if (highscores[mode] && highscores[mode][Object.keys(level[mode]).length]) document.getElementById(mode + "Selection").innerHTML = "✅" + mode;
+    }
     sphere.schieber.backgroundColor = "blue";
     if (value == "winnerScreen") {
       winnerScreen();
@@ -2045,13 +2052,17 @@ function checkpointSelected(value) {
       document.getElementById('levelSelector').options[0] = undefined;
     }
     var mapsFinished = 0;
-    for (var i = 0; highscores[mode] && i < Object.keys(highscores[mode]).length; i++) {
-      if (Object.keys(highscores[mode][Object.keys(highscores[mode])[0]]).includes(name)) mapsFinished++;
-    }
+    if (highscores[mode]) mapsFinished = Object.keys(highscores[mode])?.length;//0;
+    if (highscores[mode + " easy maps"] && Object.keys(highscores[mode + " easy maps"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " easy maps"])?.length;
+    if (highscores[mode + " easy maps (joystick)"] && Object.keys(highscores[mode + " easy maps (joystick)"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " easy maps (joystick)"])?.length;
+    if (highscores[mode + " (joystick))"] && Object.keys(highscores[mode + " (joystick))"])?.length > mapsFinished) mapsFinished = Object.keys(highscores[mode + " (joystick)"])?.length;
+    // for (var i = 0; highscores[mode] && i < Object.keys(highscores[mode]).length; i++) {
+    //   if (Object.keys(highscores[mode][Object.keys(highscores[mode])[0]]).includes(name)) mapsFinished++;
+    // }
     for (var i = 0; i < Object.keys(level[mode]).length; i++) {
       opt = document.createElement("option");
       document.getElementById("levelSelector").options.add(opt);
-      // opt.setAttribute("id", i);
+      opt.setAttribute("id", "level " + (i + 1));
       opt.text = (i + 1) + ". level";
       if (i < mapsFinished) opt.text = "✅ " + opt.text;
     }
@@ -2081,42 +2092,40 @@ function checkpointSelected(value) {
       }
     }
     highscoresDisplayedBefore = highscores;
-    console.log("highScores: " + highscores);
     var cell = [ /*row.insertCell(0)*/ ];
     var player = []
     var mostLevel = 0;
-    for (var i2 = 0; i2 < Object.keys(highscores).length; i2++) {
-
-      for (var i = 1; i < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i++) {
-        for (var i1 = 0; highscores[Object.keys(highscores)[i2]][i][joyStickPlay.checked] && i1 < Object.keys(highscores[Object.keys(highscores)[i2]][i][joyStickPlay.checked]).length; i1++) {
-          if (!(player.includes(Object.keys(highscores[Object.keys(highscores)[i2]][i][joyStickPlay.checked])[i1]))) player.push(Object.keys(highscores[Object.keys(highscores)[i2]][i][joyStickPlay.checked])[i1]);
-        }
+    for (const mode of Object.keys(highscores)) {
+      for (var i = 1; i < Object.keys(highscores[mode]).length + 1; i++) {
+        // for (var i1 = 0; highscores[mode][i] && i1 < Object.keys(highscores[mode][i]).length; i1++) {
+        //   if (!(player.includes(Object.keys(highscores[mode][i])[i1]))) player.push(Object.keys(highscores[mode][i])[i1]);
+        // }
       }
-      if (mostLevel < Object.keys(highscores[Object.keys(highscores)[i2]]).length) mostLevel = Object.keys(highscores[Object.keys(highscores)[i2]]).length;
-    for (var i = 0; i < player.length; i++) {
+      if (mostLevel < Object.keys(highscores[mode]).length) mostLevel = Object.keys(highscores[mode]).length;
+    // for (var i = 0; i < player.length; i++) {
       // if (!(Object.keys(highscores)[i] == "allMaps")) {
      // if (player[i] != "allLevel") {
         var table = document.getElementById("scores");
-        var row = table.insertRow(i); // row geht nach unten (Spalt)
+        var row = table.insertRow(0); // row geht nach unten (Spalt)
         cell.push(row.insertCell(0)); // cell geht nach rechts (Zeit))
         cell.push(row.insertCell(1));
-        cell[cell.length - 1].innerHTML = player[i];
+        // cell[cell.length - 1].innerHTML = player[i];
       // }
       //  var cell = [/*row.insertCell(0)*/];
         cell[cell.length - 2] = row.insertCell(1);
-      for (var i1 = 1; highscores[Object.keys(highscores)[i2]] && i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i1++) {
-        // if (!(Object.keys(highscores[Object.keys(highscores)[i2]])[i] == "allMaps")) {
-          if (i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1) {
+      for (var i1 = 1; highscores[mode] && i1 < Object.keys(highscores[mode]).length + 1; i1++) {
+        // if (!(Object.keys(highscores[mode])[i] == "allMaps")) {
+          if (i1 < Object.keys(highscores[mode]).length + 1) {
             cell[cell.length] = row.insertCell(i1 + 2);
             // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
             //   i1--;
             // }
-            if (highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked]) {
-              if (highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][player[i]]) cell[cell.length - 1].innerHTML = highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][player[i]]
-              if (highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][player[i]] < highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][name]) cell[cell.length - 1].style.color = "red";
-              else if (highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][player[i]] > highscores[Object.keys(highscores)[i2]][i1][joyStickPlay.checked][name]) cell[cell.length - 1].style.color = "green";
-              else if (name == player[i]) cell[cell.length - 1].style.color = "blue";
-              else cell[cell.length - 1].style.color = "black";
+            if (highscores[mode] && highscores[mode][i1]) {
+              if (highscores[mode][i1]) cell[cell.length - 1].innerHTML = highscores[mode][i1];
+              /*if (highscores[mode][i1] < highscores[mode][i1][name]) cell[cell.length - 1].style.color = "red";
+              else if (highscores[mode][i1] > highscores[mode][i1][name]) cell[cell.length - 1].style.color = "green";
+              else if (name == player[i]) */cell[cell.length - 1].style.color = "blue";
+              // else cell[cell.length - 1].style.color = "black";
             }
 
           } else {
@@ -2126,19 +2135,19 @@ function checkpointSelected(value) {
           }
         // }
       }
-      if (table) var row = table.insertRow(i);
+      if (table) var row = table.insertRow(/*i*/table.rows.length);
       //  var row = table.insertRow(i+1);
       // var row = table.insertRow(i + 1);
     //}
-  }
+  // }
   if (table) {
     var row = table.insertRow(/*i2*/0);
     cell[0] = row.insertCell(0);
     cell[0].innerHTML = "";
     cell[0] = row.insertCell(0);
-    cell[0].innerHTML = Object.keys(highscores)[i2];
+    cell[0].innerHTML = mode;
   }
-  }
+    }
     //  var row = table.insertRow(0);
     //  var cell = [/*row.insertCell(0)*/];
     // cell.push(row.insertCell(0));
@@ -2152,7 +2161,7 @@ function checkpointSelected(value) {
     }
     cell.push(row.insertCell(1));
     cell.push(row.insertCell(2));
-    cell[cell.length - 1].innerHTML = "name"
+    // cell[cell.length - 1].innerHTML = "name"
   }
   // function removeDirection(direction) {
   //   for (var i = 0; i < directionBefore.length; i++) {
