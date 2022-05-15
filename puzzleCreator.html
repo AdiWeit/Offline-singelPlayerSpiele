@@ -69,11 +69,7 @@
   }
 </style>
 <div id="settings" style="display: none;">
-  <div id="settingsSpace">
-    <br>
-    <br>
-  </div>
-  <b>Modus: </b>
+  <h2>Modus: </h2>
   <select onchange="modeSelected(value);" id="modeSelection">
     <option value="traditional">traditionell</option>
     <option value="exchange">austauschen</option>
@@ -660,9 +656,6 @@
         }
       }
       removeTilesFinishedB.style.display = 'inline';
-      for (const space of settingsSpace) {
-        space.style.display = "none";
-      }
       if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
       showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
       imageSettings.style.display = "none";
