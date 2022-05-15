@@ -441,10 +441,16 @@
     }
   }
   function changeSettingsVis(vis) {
-    if ((settings.style.display == 'none' || vis == "inline") && vis != "none") settings.style.display = 'inline'; 
-    else settings.style.display = 'none';
+    if ((settings.style.display == 'none' || vis == "inline") && vis != "none") {
+      settings.style.display = 'inline'; 
+      wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
+    }
+    else {
+      settings.style.display = 'none';
+      canvas = textur.getContext('2d');
+      if (wrongPosition) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
+    }
     texturTop = textur.getBoundingClientRect().top;
-    if (settings.style.display == 'none') canvas = textur.getContext('2d');
   }
   function mirrorCanvas(checked) {
     if (checked) textur.style = "-webkit-transform: scaleX(-1); transform: scaleX(-1);";
@@ -817,6 +823,7 @@ swipeTitle.style.display = "none";
       if (modeSelection.value == "schieben") {
         movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
         verschiebenPC();
+        wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
         setTimeout(function () {
           // create misstingDistinct
           distinctMoves = JSON.parse(JSON.stringify(movement.move));
@@ -854,6 +861,7 @@ swipeTitle.style.display = "none";
             firstRunThrough = false;
           } while (change)
           distinctMoves = distinctMoves.filter(x => x != undefined);
+          positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
           movementStepsChanged(distinctMovement.checked);
           state.redoI1 = undefined;
         }, 500);
@@ -984,6 +992,7 @@ swipeTitle.style.display = "none";
       elm.style.display = "block";
     }
   }
+  canvas = textur.getContext('2d');
   layout(true, true);
   startPause('completionTime');
 }
@@ -1069,6 +1078,7 @@ function canvasClicked(calledBy) {
     if (backToBeginningIfNeeded) return 0;
     else return JSON.parse(movementPosition.value);
   }
+  var wrongPosition;
   function playMovementPos(position, pReturn, doNotChangeVal) {
     if (position < 0) position = 0;
     if (position > playerMovement.length) position = playerMovement.length;
