@@ -13,11 +13,13 @@
 <br>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 <button id="useLiveCam" onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
+<a style="display: none;" id="sourceCheckboxes">
 <br>
-<input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
-<input id="sourceIsVideo" name="mediaType" type="radio">Video
+  <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
+  <input id="sourceIsVideo" name="mediaType" type="radio">Video
+</a>
 <br>
-<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> spiegeln
+<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Input spiegeln
 <br>
 <input type="range" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
@@ -71,16 +73,20 @@
     <br>
     <br>
   </div>
+  <b>Modus: </b>
   <select onchange="modeSelected(value);" id="modeSelection">
     <option value="traditional">traditionell</option>
     <option value="exchange">austauschen</option>
     <option value="schieben">nur schieben</option>
   </select>
   <br>
+  <h2>modusspezifische Einstellungen: </h2>
   <div id="traditionalSettings">
     <input id="clipOptionsSound" checked="true" type="checkbox"> akustisches Feedback (Audio bei Verbindungsmöglichkeiten)
-    <br>
-    <a id="vibrateA"><input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)</a>
+    <a id="vibrateA">
+      <br>
+      <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
+    </a>
     <br>
     <input id="automaticTileSelectionReset" checked="true" type="checkbox"> automatisch Teile abwählen
     <br>
@@ -98,11 +104,17 @@
       <input type="radio" id="adaptImgSize" onchange="if (checked) zuAngepassterBildschirmgröße(false, true);" checked="true" name="adaptionStyle"> Größe Bild anpassen
     </a>
     </p>
+    <input id="markWrong" style="accent-color: red;" type="checkbox" > markiere nicht passende
+    <br>
+    Art der Verteilung der Teile: 
     <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
       <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
       <option value="listTiles">Teile nebeneinander auflisten</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
+    <br>
+    <br>
+    <h2>Einstellungen zu der Verteilung der Teile:</h2>
     <a style="display: none" id="aEmptyTileBar">
       <br>
       <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'inline'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
@@ -115,7 +127,6 @@
           <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
         </select>
       </a>
-      <br>
       <br>
       <a>
     <div style="display: none;" id="listTilesS">
@@ -142,15 +153,13 @@
       <br>
       <canvas id="gapCanvas"></canvas>
       <br>
-      <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm voll
+      <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm füllen
       <br>
       <a style="display: none" id="aScrollXTileGap">
         <input id="tilesXTileGap" placeholder="Teile nebeneinander" type="text">
         <br>
       </a>
     </div>
-    <input id="markWrong" type="checkbox" > markiere nicht passende
-    <br>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings" style="display: none">
@@ -164,17 +173,11 @@
     <br>
     <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
     <br>
-    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle verboten (einfacher, weil immer direkt nebeneinander)</font>
-    <br>
-    <input type="text" id="anzahlVerboten" value="3" placeholder="Male bevor verboten">
+    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle nach <input type="text" id="anzahlVerboten" value="3" style="width: 25px;"> Malen verboten (einfacher, weil immer direkt nebeneinander)</font>
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
-  <div id="settingsSpace">
-    <br>
-    <br>
-    <br>
-  </div>
-  <input type="checkbox" onchange="layout(true); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none';" id="richtigPlazierte" checked="true"> markiere richtig plazierte
+  <h2>allgemeine Einstellungen: </h2>
+  <input type="checkbox" onchange="if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
   <!-- <h3>general</h3> -->
   <p id="rightMarkerSettings">
   <br>
