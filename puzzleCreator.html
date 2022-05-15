@@ -838,16 +838,10 @@ swipeTitle.style.display = "none";
               var move = JSON.stringify(playMovementPos(i, true, true));
             if (distinctPositions.includes(move) || JSON.stringify(movement.startPosition) == move) {
               for (let i1 = leftBeginning; i1 < /*movement.move.length*/i; i1++) {
-                if (JSON.stringify(playMovementPos(i1, true, true)) == JSON.stringify(movement.startPosition) && !state.redoI1) {
-                  distinctPositions.splice(0, (i1));
-                  distinctMoves.fill(undefined, 0, i1);
-                  i1 = 0;
-                  state.redoI1 = true;
-                  change = true;
-                }
                 if (JSON.stringify(playMovementPos(i1, true, true)) == move && distinctMoves[i1] != undefined && distinctMoves[i] != undefined) {
                   distinctPositions.splice(i1, (i - i1));
                   // distinctMoves.splice(i1, (i - i1));
+                  // console.log('lösche ' + i1 + ' bis ' + (i-1));
                   distinctMoves.fill(undefined, i1, i);
                   leftBeginning = i1 + (i - i1);
                   // i1 = i1 + (i - i1);
@@ -861,6 +855,7 @@ swipeTitle.style.display = "none";
             firstRunThrough = false;
           } while (change)
           distinctMoves = distinctMoves.filter(x => x != undefined);
+          if ((Math.abs(distinctMoves[0].x) == Math.abs(distinctMoves[1].x) || Math.abs(distinctMoves[0].y) == Math.abs(distinctMoves[1].y)) && distinctMoves[0].tile == distinctMoves[1].tile) distinctMoves.splice(0, 2);
           positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
           movementStepsChanged(distinctMovement.checked);
           state.redoI1 = undefined;
