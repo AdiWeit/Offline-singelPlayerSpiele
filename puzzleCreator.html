@@ -1043,7 +1043,8 @@ function canvasClicked(calledBy) {
     }
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
-  function movementStepsChanged(checked) {
+  function movementStepsChanged(checked, doNotSetChecked) {
+    if (!doNotSetChecked)  distinctMovement.checked = checked;
     if (checked) playerMovement = distinctMoves;
     else playerMovement = movement.move;
     movementPosition.max = playerMovement.length;
@@ -1066,9 +1067,16 @@ function canvasClicked(calledBy) {
     }
   }
   var objMovementPlayer = {pause: false, position: 0, direc: 1};
-  function getPlayerPosition(backToBeginningIfNeeded) {
+  function getPlayerPosition(backToBeginningIfNeeded, easySteps) {
     for (let i = 0; i < playerMovement.length; i++) {
       if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
+    }
+    if (easySteps != undefined) {
+      movementStepsChanged(easySteps);
+    }
+    else {
+      movementStepsChanged(false, true);
+      getPlayerPosition(false, distinctMovement.checked);
     }
     if (backToBeginningIfNeeded) return 0;
     else return JSON.parse(movementPosition.value);
