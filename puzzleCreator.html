@@ -1834,12 +1834,27 @@ navigator.mediaDevices.enumerateDevices()
         for (var tile of selected.tiles) {
           checkPossibleClipping(tile);
         }
+        deleteFurtherClipOptions();
         playClippingSound();
         selected.position = {x: mausx, y: mausy};
         layout(false, true);
       }
     }
   }
+  // deletes clip options that apply to the same tile but are further away
+  function deleteFurtherClipOptions() {
+    nearestTile = {};
+    selected.clip.forEach((clip, i1) => {
+      if (!nearestTile[clip.i] || clip.distance < nearestTile[clip.i].clip.distance) {
+        if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
+        nearestTile[clip.i] = {clip: clip, i: i1};
+      }
+      else if (clip.distance > nearestTile[clip.i].clip.distance) {
+        selected.clip.splice(i1, 1);
+      }
+    });
+  }
+  var nearestTile = {};
   // #importantUserImput
   function mouseUp() {
     state.mouse = "up";
@@ -1862,6 +1877,7 @@ navigator.mediaDevices.enumerateDevices()
         clipped.push(clip.i + ' - ' + clip.sI);
         // do more clipping if needed
         checkPossibleClipping(clip.sI, true);
+        deleteFurtherClipOptions();
         bClipped = true;
       }
     }
@@ -2110,19 +2126,19 @@ navigator.mediaDevices.enumerateDevices()
     var clipLength = selected.clip.length;
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.left) {
-      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}});;
+      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.right) {
-      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}});
+      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.top) {
-      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}});
+      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}, distance: nearest.bottom.area});
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.bottom) {
-      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}});
+      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}, distance: nearest.top.area});
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
@@ -2170,6 +2186,7 @@ navigator.mediaDevices.enumerateDevices()
     var stored = JSON.parse(JSON.stringify(clipOptions));
     for (const elm of stored) {
       delete elm.sI;
+      delete elm.distance;
     }
     return stored;
   }
@@ -2185,7 +2202,8 @@ navigator.mediaDevices.enumerateDevices()
   var checkedTiles = [];
   // checks if selected tiles collide tiles which are (connected to) tiles you want to clip to
   function selectedCollideOther(pClipIndex) {
-    for (const clipIndex of getConnectedTiles(pClipIndex, true)) {
+    var connected = getConnectedTiles(pClipIndex, true);
+    for (const clipIndex of connected) {
       for (const tile of selected.tiles) {
         if (collides(transformToObj(clipIndex, 3), transformToObj(tile, 3)).boolean) {
           return true;
