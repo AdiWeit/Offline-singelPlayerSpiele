@@ -29,10 +29,10 @@
 <input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, it will not count the completion time!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
 <button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
 <br>
-<select id="tabletPositionModeSelection">
-  <option>flat (most natural)</option>
-  <option>almost on end (slopes away from you a bit, best? for your posture)</option>
-  <option>on end (better for your posture)</option>
+<select onchange="tablePositionModeSelected();" id="tabletPositionModeSelection">
+  <option value="flat">flat (most natural)</option>
+  <option value="almost on end">almost on end (slopes away from you a bit, best? for your posture)</option>
+  <option value="on end">on end (better for your posture)</option>
 </select>
 <div id="ball">
   <style>
@@ -96,9 +96,10 @@
   }
   function normalSensibility() {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
+    else if (tabletPositionModeSelection.value != "flat") sensibility = {x: 5, y: 5};
     else if (!currentLevel.sensibility) sensibility = {x: 17, y: 17};
     else sensibility = currentLevel.sensibility;
-    document.getElementById('sensibility').value = sensibility;
+    document.getElementById('sensibility').value = sensibility.x;
     saveHighscores = true;
   }
   var canvas = textur.getContext('2d'); //Dimension
@@ -1198,6 +1199,9 @@ function checkpointSelected(value) {
   if (!value.includes(".")) level.checkpoint = 0;
   restartLevel();
 }
+function tablePositionModeSelected() {
+  normalSensibility();
+}
   var direction = "long";
   var Bild = new Image();
   // function scrollWindow(direction, achse, scrollXBefore, scrollYBefore) {
@@ -1219,11 +1223,12 @@ function checkpointSelected(value) {
   var sensibility = {x: 17, y: 17};
   if (window.DeviceMotionEvent != undefined || joyStick.coordinates) {
     window.ondevicemotion = function(e) {
-      if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
-      else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
+      if (tabletPositionModeSelection.value == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
+      else if (tabletPositionModeSelection.value == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
       else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibility.x);
-      if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibility.y;
-      else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
+      if (tabletPositionModeSelection.value == "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
+      else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibility.y;
+      // TODO: *1.88
     }
     setInterval(function() {
       if (!pause) { 
@@ -1232,10 +1237,10 @@ function checkpointSelected(value) {
       if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores"/* && !pause*/) {
         if (level.aktuell != "winnerScreen" && !currentLevel.rotating) Layout();
         if (joyStick && joyStick.coordinates) {
-          if (JSON.parse(document.getElementById('sensibility').value) < 12) document.getElementById('sensibility').value = 12
-          if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11), y: y1 + (mausy - joyStick.coordinates.y)/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11)};
-          else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11), y: y1 - (mausy - joyStick.coordinates.y)/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11)};
-          nextCoordinates = {x: nextCoordinates.x - scrollX/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11), y: nextCoordinates.y - scrollY/Math.abs(JSON.parse(document.getElementById('sensibility').value) - 11)}
+          // if (JSON.parse(document.getElementById('sensibility').value) < 12) document.getElementById('sensibility').value = 12
+          if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x - 11), y: y1 + (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y - 11)};
+          else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x - 11), y: y1 - (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y - 11)};
+          nextCoordinates = {x: nextCoordinates.x - scrollX/Math.abs(sensibility.x - 11), y: nextCoordinates.y - scrollY/Math.abs(sensibility.y - 11)};
         }
       }
       if (pause) newCoordinates = {x: ball.x, y: ball.y};
@@ -1478,6 +1483,7 @@ function checkpointSelected(value) {
     scrollingInterac.user = true;
     joyStickPlayP.style.display = "none";
     joyStickPlay.checked = true;
+    tabletPositionModeSelection.style.display = 'none';
   }
   var invisible = {directions: {left: 0, right: 0, up: 0, down: 0}, boolean: false};
   var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
@@ -1646,21 +1652,15 @@ function checkpointSelected(value) {
       var newCheckpoint = 0;
       checkpoint.forEach((pCheckpoint, i1) => {
         
-        // if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "ball" && i > 3) || (currentLevel.checkpointWhen_touches == "schieber" && i < 4)) && ((currentLevel.checkpointWhen_touches == "schieber" && ((((((pCheckpoint.schieber.y - y1 > 100 && level.mode != "magnet") || (pCheckpoint.schieber.y - y1 > 300 && level.mode == "magnet")) || ((y1 - pCheckpoint.schieber.y > 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - pCheckpoint.schieber.y > 300))))) || (((level.mode != "magnet" && pCheckpoint.schieber.x - x1 > 100) || (level.mode == "magnet" && pCheckpoint.schieber.x - x1 > 300)) || ((level.mode == "mode" && x1 - pCheckpoint.schieber.x > 300) || ((level.mode != "magnet" && x1 - pCheckpoint.schieber.x > 100)))))) || (currentLevel.checkpointWhen_touches == "ball" && ((level.mode == "magnet" && pCheckpoint.ball.x - ball.x > 300) || (level.mode != "magnet" && pCheckpoint.ball.x - ball.x > 100)) || ((level.mode == "magnet" && ball.x - pCheckpoint.ball.x > 300) || (level.mode != "magnet" && ball.x - pCheckpoint.ball.x > 100))) ||
-        // (((level.mode != "magnet" && pCheckpoint.ball.y - ball.y > 100) || (level.mode == "magnet" && pCheckpoint.ball.y - ball.y > 300)) || ((level.mode == "magnet" && ball.y - pCheckpoint.ball.y > 300) || (level.mode != "magnet" && ball.y - pCheckpoint.ball.y > 100)))))) {
       if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) > 100 && Math.abs(pCheckpoint.schieber.y - y1) > 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) > 100 && Math.abs(pCheckpoint.ball.y - ball.y) > 100)))) {
         newCheckpoint++;
       }
-      // if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "ball" && i > 3) || (currentLevel.checkpointWhen_touches == "schieber" && i < 4)) && ((currentLevel.checkpointWhen_touches == "schieber" && ((((((pCheckpoint.schieber.y - y1 < 100 && level.mode != "magnet") || (pCheckpoint.schieber.y - y1 < 300 && level.mode == "magnet")) || ((y1 - pCheckpoint.schieber.y < 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - pCheckpoint.schieber.y < 300))))) || (((level.mode != "magnet" && pCheckpoint.schieber.x - x1 < 100) || (level.mode == "magnet" && pCheckpoint.schieber.x - x1 < 300)) || ((level.mode == "mode" && x1 - pCheckpoint.schieber.x < 300) || ((level.mode != "magnet" && x1 - pCheckpoint.schieber.x < 100)))))) || (currentLevel.checkpointWhen_touches == "ball" && ((level.mode == "magnet" && pCheckpoint.ball.x - ball.x < 300) || (level.mode != "magnet" && pCheckpoint.ball.x - ball.x < 100)) || ((level.mode == "magnet" && ball.x - pCheckpoint.ball.x < 300) || (level.mode != "magnet" && ball.x - pCheckpoint.ball.x < 100))) ||
-      // (((level.mode != "magnet" && pCheckpoint.ball.y - ball.y < 100) || (level.mode == "magnet" && pCheckpoint.ball.y - ball.y < 300)) || ((level.mode == "magnet" && ball.y - pCheckpoint.ball.y < 300) || (level.mode != "magnet" && ball.y - pCheckpoint.ball.y < 100)))))) {
         if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 100 && Math.abs(pCheckpoint.schieber.y - y1) < 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 100 && Math.abs(pCheckpoint.ball.y - ball.y) < 100)))) {
         if (i1) checkpointSelection.value = i1 + '. checkpoint';
         else checkpointSelection.value = 'start';
         level.checkpoint = i1;
       }
       });
-      // for (const pCheckpoint of checkpoint) {
-      // }
       if (newCheckpoint == checkpoint.length) {
         console.log("checkpoint!!!");
         if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
@@ -1687,8 +1687,27 @@ function checkpointSelected(value) {
     sphere.ball.style.left = ball.x + "px";
     sphere.ball.style.top = ball.y + "px";
   }
-  function setHighscores(nextLevel) {
-      addToHighscore(nextLevel);
+  function setHighscores(pNextLevel) {
+    if (saveHighscores) {
+    if (oppositeCheck.checked) level.mode += ' opposite';
+    if (easyMaps.checked) level.mode += ' easy maps';
+    if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
+    if (!joyStickPlay.checked) level.mode += ' (' + tabletPositionModeSelection.value + ')'; 
+    if (!highscores[level.mode]) highscores[level.mode] = {};
+    if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
+    if (!highscores[level.mode][level.aktuell] || highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) {
+      if (Object.keys(highscores[level.mode][level.aktuell]).length && highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
+      highscores[level.mode][level.aktuell] = mins + ":" + secs + ":" + "0" + tenths;
+    }
+    goalReached = false;
+    localStorage.setItem('highscoresTransportTheBall', JSON.stringify(highscores));
+    level.mode = level.mode.replace(' opposite', '');
+    level.mode = level.mode.replace(' easy maps', '');
+    level.mode = level.mode.replace(' (joystick)', '');
+    level.mode = level.mode.replace(' (' + tabletPositionModeSelection.value + ')', '');
+    if (pNextLevel) nextLevel();
+    else winnerScreen();
+  }
   }
   function onTeleporter() {
     var onTeleporterObj = {schieber: false, ball: false, checkpoint: false}
@@ -1700,24 +1719,6 @@ function checkpointSelected(value) {
     return onTeleporterObj;
   }
   var goalReached = false;
-  function addToHighscore(pNextLevel) {
-    if (oppositeCheck.checked) level.mode += ' opposite';
-    if (easyMaps.checked) level.mode += ' easy maps';
-    if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
-    if (!highscores[level.mode]) highscores[level.mode] = {};
-    if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
-    if (!highscores[level.mode][level.aktuell] || highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) {
-      if (Object.keys(highscores[level.mode][level.aktuell]).length && highscores[level.mode][level.aktuell] > mins + ":" + secs + ":" + "0" + tenths) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
-      highscores[level.mode][level.aktuell] = mins + ":" + secs + ":" + "0" + tenths;
-    }
-    goalReached = false;
-      localStorage.setItem('highscoresTransportTheBall', JSON.stringify(highscores));
-    level.mode = level.mode.replace(' opposite', '');
-    level.mode = level.mode.replace(' easy maps', '');
-    level.mode = level.mode.replace(' (joystick)', '');
-    if (pNextLevel) nextLevel();
-    else winnerScreen();
-  }
   function removeCheckpoint() {
     if (checkpoint.length > 1 && level.checkpoint && confirm('Are you sure you want to delete the selected checkpoint (' + level.checkpoint + '.) ?')) {
       checkpoint.splice(level.checkpoint, 1);
@@ -1928,6 +1929,7 @@ function checkpointSelected(value) {
   function setupLevel(direction) {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
     else if (saveHighscores) sensibility = {x: 17, y: 17};
+    else if (tabletPositionModeSelection.value != "flat") sensibility = {x: 5, y: 5};
     sensibility.value = sensibility.x;
     level.checkpoint = 0;
     if (!direction) checkpoint = [{schieber: {x: currentLevel.spawnPoint.schieber.x, y: currentLevel.spawnPoint.schieber.y}, ball: {x: currentLevel.spawnPoint.ball.x, y: currentLevel.spawnPoint.ball.y}}];
