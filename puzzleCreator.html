@@ -183,7 +183,7 @@
   <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
   </a>
   <br>
-  <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout();"> <font size="5"> zeige Ränder</font>
+  <input type="checkbox" id="raender" onchange="if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
   <p id="randSettings">
     <br>
     <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
@@ -703,7 +703,7 @@
             if (i1) positions.right[i*pAnzahlX + i1 - 1].original.right = {x: newTile.original.x, y: newTile.original.y};
           }
           else {
-            positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i}})
+            positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}})
           }
           positions.right[positions.right.length - 1].border = [];
           if (i1 == 0) positions.right[positions.right.length - 1].border.push("left");
@@ -1463,7 +1463,8 @@ navigator.mediaDevices.enumerateDevices()
     pCanvas.fillStyle = "rgba(0, 0, 255, 0.35)";
     if (raender.checked) {
       pCanvas.save();
-      pCanvas.translate(position.edit.x, position.edit.y);
+      if (modeSelection.value == "traditional" && !state.removeTile) pCanvas.translate(position.edit.x, position.edit.y);
+      else pCanvas.translate(position.edit.x + (lengthPerTeil.edit.x)/2, position.edit.y + (lengthPerTeil.edit.y)/2);
       pCanvas.rotate((position.original.degree)*Math.PI/180);
       // if (position.borderincludes("right")) pCanvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
       // if (position.borderincludes("left")) pCanvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
