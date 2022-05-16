@@ -20,7 +20,7 @@
 </select>
 <button name="button" onclick="removeCheckpoint();">remove this checkpoint</button>
 <br>
-<button type="button" onclick="scrollingInterac.user = false; scrollToPlayer = true;" name="button">autoscroll again</button>
+<button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
 <br>
 <h3>sensibility</h3>
@@ -1242,27 +1242,30 @@ function checkpointSelected(value) {
       if (level.aktuell == "winnerScreen") sphere.schieber.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
       else/* if (!scrollingByUser)*/ {
         if (currentLevel) {
-          while (scrollToPlayer) {
-            if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width- 150) {
+          scrolling = true;
+          while (scrolling) {
+            var scrolledBefore = {x: scrollX, y: scrollY};
+            if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width- window.innerWidth/5.4) {
               window.scroll(scrollX + 3, scrollY);
-              registerAutoScrolling();
+              registerAutoScrolling({x: 3, y: 0});
             }
-            else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- 150) {
+            else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- window.innerHeight/5.4) {
               window.scroll(scrollX, scrollY + 3);
-              registerAutoScrolling();
+              registerAutoScrolling({x: 0, y: 3});
             }
-            else if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + 150) && scrollX > 2) {
+            else if (!scrollingInterac.user && x1 - scrollX < (window.innerWidth/5.4) && scrollX > 2) {
               window.scroll(scrollX - 3, scrollY);
-              registerAutoScrolling();
+              registerAutoScrolling({x: -3, y: 0});
             }
-            else if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + 150) && scrollY > 2) {
+            else if (!scrollingInterac.user && y1 - scrollY < (window.innerHeight/5.4) && scrollY > 2) {
               window.scroll(scrollX, scrollY - 3);
-              registerAutoScrolling();
+              registerAutoScrolling({x: 0, y: -1});
             }
             else {
               scrollingInterac.PC = false;
-              scrollToPlayer = false;
+              scrolling = false;
             }
+            if (scrollX == scrolledBefore.x && scrollY == scrolledBefore.y) scrolling = false;
           }
         }
       }
@@ -1435,7 +1438,7 @@ function checkpointSelected(value) {
       sphere.ball.style.left = ball.x + "px";
       sphere.ball.style.top = ball.y + "px";
       checkColourCollisions();
-      if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
+      if (joyStick && joyStick.coordinates && joyStickPlay.checked && level.aktuell != "winnerScreen") {
         canvas.fillStyle = "blue";
         canvas.beginPath();
         canvas.arc(joyStick.coordinates.x + scrollX, joyStick.coordinates.y + scrollY, 10, 0, Math.PI*2, false);
@@ -1531,7 +1534,7 @@ function checkpointSelected(value) {
    }
   }
   window.onscroll = function (e) {
-    if (gerät == "PC" && !scrollingInterac.PC && (scrollingInterac.pos.x != scrollX || textur.width < window.innerWidth) && (scrollingInterac.pos.y != scrollY || textur.height < window.innerHeight)) {
+    if (gerät == "PC" && !scrollingInterac.PC && ((scrollingInterac.pos.x != scrollX || textur.width < window.innerWidth) && (scrollingInterac.pos.y != scrollY || textur.height < window.innerHeight))) {
       scrollingInterac.user = true;
     }
     if (scrollY  < 5 && document.getElementById('gameModeSelection').value != "showScores"/*== 0 && scrollX == 0*/) scrollingInterac.user = false;
@@ -1812,29 +1815,32 @@ function checkpointSelected(value) {
       sphere.schieber.style.height = checkpoint[level.checkpoint].schieber.height + "px";
     }
     // for (var i = 0; i < Bild.width; i++) {
-      if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width*5) {
-        window.scroll(scrollX + 3, scrollY);
-        registerAutoScrolling();
-      }
-      else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height*5) {
-        window.scroll(scrollX, scrollY + 3);
-        registerAutoScrolling();
-      }
-      else if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + currentLevel.sizes.ball.width*5) && scrollX > 2) {
-        window.scroll(scrollX - 3, scrollY);
-        registerAutoScrolling();
-      }
-      else if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + currentLevel.sizes.ball.height*5) && scrollY > 2) {
-        window.scroll(scrollX, scrollY - 3);
-        registerAutoScrolling();
-      }
-      else {
-        scrollingInterac.PC = false;
-      }
+      // if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width*5) {
+      //   window.scroll(scrollX + 3, scrollY);
+      //   registerAutoScrolling();
+      // }
+      // else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height*5) {
+      //   window.scroll(scrollX, scrollY + 3);
+      //   registerAutoScrolling();
+      // }
+      // else if (!scrollingInterac.user && x1 - scrollX < (currentLevel.sizes.schieber.width + currentLevel.sizes.ball.width*5) && scrollX > 2) {
+      //   window.scroll(scrollX - 3, scrollY);
+      //   registerAutoScrolling();
+      // }
+      // else if (!scrollingInterac.user && y1 - scrollY < (currentLevel.sizes.schieber.height + currentLevel.sizes.ball.height*5) && scrollY > 2) {
+      //   window.scroll(scrollX, scrollY - 3);
+      //   registerAutoScrolling();
+      // }
+      // else {
+      //   scrollingInterac.PC = false;
+      // }
     // }
   }
-  var scrollToPlayer = false;
-  function registerAutoScrolling() {
+  var scrolling = false;
+  function registerAutoScrolling(direction) {
+    window.scroll(scrollX + direction.x, scrollY + direction.y);
+    mausx += direction.x*2;
+    mausy += direction.y*2;
     scrollingInterac.PC = true;
     scrollingInterac.pos = {x: scrollX, y: scrollY};
     // setTimeout(function () {
@@ -2127,7 +2133,7 @@ var mins = 0;
 var secs = 0;
 var tenths = 0;
 function increment() {
-if (running == 1) {
+if (running == 1 && !pause) {
 setTimeout(function () {
   time++;
   mins = Math.floor(time/10/60);
@@ -2158,8 +2164,7 @@ function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
     fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
     strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
 }
-
-
+var myReq;
 function renderLoop(time) {
     //canvas.clearRect(0, 0, textur.width, textur.height);
     checkColourCollisions();
@@ -2192,7 +2197,7 @@ function renderLoop(time) {
     // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
 
     canvas.setTransform(1, 0, 0, 1, 0, 0);
-    if (currentLevel.rotating) requestAnimationFrame(renderLoop);
+    if (currentLevel.rotating && level.aktuell != "winnerScreen" && !pause) myReq = requestAnimationFrame(renderLoop);
 }
 
 
@@ -2253,6 +2258,13 @@ var pause = false;
 document.onkeydown = function(event) {
   if (event.key == "p") {
     pause = !pause;
+    if (pause) {
+      cancelAnimationFrame(myReq);
+    }
+    else {
+      requestAnimationFrame(renderLoop);
+      increment();
+    }
   }
 }
 getDatabase();
