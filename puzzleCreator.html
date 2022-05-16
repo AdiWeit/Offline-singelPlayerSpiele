@@ -248,9 +248,7 @@
 </a>
 <br>
 <br>
-<hr class="canvasMarker">
-<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
-<hr class="canvasMarker">
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <br>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div id="backToBarButtons">
@@ -283,10 +281,6 @@
 
   .backToTileB {
     position: fixed;
-  }
-  .canvasMarker {
-    margin: 0px;
-    display: none;
   }
 </style>
 <style name="bubbleStyle">
@@ -979,9 +973,6 @@ swipeTitle.style.display = "none";
   emptyTileBar.style.display = "none";
   if (modeSelection.value == "traditional") {
     traditionalModeMobileControls.style.display = 'inline';
-    for (const elm of document.getElementsByClassName('canvasMarker')) {
-      elm.style.display = "block";
-    }
   }
   canvas = textur.getContext('2d');
   layout(true, true);

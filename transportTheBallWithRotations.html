@@ -1,0 +1,1249 @@
+<title>transport the ball</title>
+<meta charset="utf-8">
+<canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
+<h1 id="nameEingeloggt" onclick='name = prompt ("Mit welchem Namen wollen sie sich eingloggen?"); nameEingeloggt.innerHTML = "als " + name + " eingeloggt"; getDatabase();'></h1>
+<script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
+  <option id="normalSelection" value="normal">normal</option>
+  <option id="magnetSelection" value="magnet">magnet</option>
+  <option id="allDirectionsSelection" value="allDirections">all directions</option>
+  <option id="slideSelection" value="slide">slide</option>
+  <option id="oppositeSelection" value="opposite">opposite</option>
+  <option value="showScores">show scores</option>
+</select>
+<br>
+<select name="course" id="levelSelector" value="normal" onchange="levelSelected(value);"></select>
+<button name="button" onclick="removeCheckpoint();">spawn one spawnpoint before</button>
+<div id="ball">
+  <style>
+    .shape {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      -webkit-radius: 50px;
+      margin: 0;
+      width padding: 0;
+    }
+
+    #sphere1 {
+      border-radius: 50px;
+      background-color: blue;
+    }
+
+    #sphere2 {
+      border-radius: 50px;
+      background-color: red;
+    }
+  </style>
+</div>
+<div id="content">
+  <div class="shape" id="sphere1"></div>
+</div>
+<div id="content">
+  <div class="shape" id="sphere2"></div>
+</div>
+<table id="scores"></table>
+
+<script>
+  var canvas = textur.getContext('2d'); //Dimension
+  var highscores = {};
+  var checkpoints = {};
+  if (!localStorage.getItem("storedName")) var name = prompt("Bitte geben sie ihren (spitz) Namen ein, um ihre Highscores speichern zu können");
+  else var name = localStorage.getItem("storedName");
+localStorage.setItem("storedName", name);
+  nameEingeloggt.innerHTML = "als " + name + " eingeloggt"
+  var x1 = 10,
+    y1 = 177; //window.innerHeight - 150 + 3,
+  x2 = 0, y2 = 0,
+    vx1 = 0, vy1 = 0,
+    vx2 = 0, vy2 = 0,
+    ax1 = 0, ay1 = 0;
+
+  var sphere = {
+    schieber: document.getElementById("sphere1"),
+    ball: document.getElementById("sphere2")
+  };
+  sphere.schieber.style.width = "50px";
+  sphere.schieber.style.height = "50px";
+  sphere.schieber.style.ball = "50px";
+  sphere.schieber.style.ball = "50px";
+  var level = {
+    aktuell: 0,
+    mode: "normal",
+    normal: {
+      1: {
+
+      },
+      2: {
+        ballTeleporter: [{
+          ballSide: {
+            x: 150,
+            y: 250,
+            width: 100,
+            height: 100
+          },
+          ballTeleportedSide: {
+            x: 833,
+            y: 377
+          },
+          schieberSide: {
+            x: 777,
+            y: 444,
+            width: 50,
+            height: 50
+          }
+        }]
+      },
+      3: {
+        checkpointWhen_touches: "schieber"
+      },
+      4: {
+        heart: {
+          ball: {
+            min: 17,
+            max: 44,
+            pixelPerFunctionCall: 3,
+            waitBeforeDirectionSwitchInSec: {
+              min: 1,
+              max: 2
+            }
+          },
+          schieber: {
+            min: 37,
+            max: 47,
+            pixelPerFunctionCall: 3,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2,
+              max: 1
+            }
+          }
+        }
+      },
+      5: {
+        invisible: {
+          timeUntilInvisible: 3,
+          timeUntilVisivleAgain: 3,
+          anyOtherSide: true,
+          amStück: {
+            unvisible: true,
+            visible: true
+          }
+        }
+      },
+      6: {
+        sizes: {
+          ball: {
+            width: 200,
+            height: 55
+          },
+          schieber: {
+            width: 44,
+            height: 88
+          }
+        },
+        spawnPoint: {
+          schieber: {
+            x: 155,
+            y: 160
+          },
+          ball: {
+            x: 155,
+            y: 250
+          }
+        }
+        /*
+        schieber: {
+          x: 155,
+          y: 200
+        },
+        ball: {
+          x: 155,
+          y: 250
+        }
+        */
+      },
+      7: {
+        sizes: {
+          ball: {
+            width: 17,
+            height: 17
+          },
+          schieber: {
+            width: 17,
+            height: 17
+          }
+        },
+        spawnPoint: {
+          schieber: {
+            x: 83,
+            y: 143
+          },
+          ball: {
+            x: 97,
+            y: 237
+          }
+        }
+      }
+    },
+    magnet: {
+      // 1. normale Level übernommen
+      2: {
+
+      },
+      3: {
+
+      },
+      4: {},
+      5: {
+
+      }
+    },
+    allDirections: {
+      1: {
+
+      },
+      2: {
+        spawnPoint: {
+          schieber: {
+            x: 50,
+            y: 333
+          },
+          ball: {
+            x: 100,
+            y: 333
+          }
+        }
+      },
+      3: {
+        spawnPoint: {
+          schieber: {
+            x: 30,
+            y: 50
+          },
+          ball: {
+            x: 60,
+            y: 150
+          }
+        }
+      }
+    },
+    slide: {
+      2: {
+
+        slidestop: 44
+      },
+      4: {
+
+        ballTeleporter: [{
+          ballSide: {
+            x: 1200,
+            y: 600 - 50,
+            width: 100,
+            height: 100
+          },
+          ballTeleportedSide: {
+            x: 1200,
+            y: 211
+          },
+          schieberSide: {
+            x: 1000,
+            y: 290 - 50,
+            width: 100,
+            height: 100,
+          }//,
+          //checkpoint: true
+        }]
+      },
+      5: {
+
+      },
+      6: {
+        ballTeleporter: [{
+          ballSide: {
+            x: 1111,
+            y: 550,
+            width: 100,
+            height: 100
+          },
+          ballTeleportedSide: {
+            x: 600,
+            y: 250
+          },
+          schieberSide: {
+            x: 1111 - 277,
+            y: 555,
+            width: 233,
+            height: 100
+          }
+        }]
+      },
+      7: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 22,
+            pixelPerFunctionCall: 1,
+            waitBeforeDirectionSwitchInSec: {
+              min: 1.5,
+              max: 0
+            }
+          },
+        }
+      },
+      8: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          },
+        }
+      },
+      9: {
+        heart: {
+          ball: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          },
+          schieber: {
+            min: 13,
+            max: 55,
+            pixelPerFunctionCall: 1.7,
+            waitBeforeDirectionSwitchInSec: {
+              min: 2.2,
+              max: 0
+            }
+          }
+        },
+        sizes: {
+          ball: {
+            width: 15,
+            height: 15
+          },
+          schieber: {
+            width: 53,
+            height: 53
+          }
+        }
+      }
+    }
+
+  };
+  level.magnet[1] = level.normal[1];
+  level.slide[1] = level.normal[1];
+  level.slide[3] = JSON.parse(JSON.stringify(level.slide[4]));
+  level.slide[3].ballTeleporter[0].checkpoint = true;
+  level.opposite = level.normal;
+  for (var i = 1; i < Object.keys(level.slide).length + 1; i++) {
+    if (!level.slide[i].slideStop) level.slide[i].slideStop = 44;
+    if (!level.slide[i].slideLength) level.slide[i].slideLength = 20;
+  }
+  for (var i = 0; i < Object.keys(level).length; i++) {
+    if (!(["aktuell", "mode"].includes(Object.keys(level)[i]))) {
+      for (var i1 = 1; i1 < Object.keys(level[Object.keys(level)[i]]).length + 1; i1++) {
+        if (!level[Object.keys(level)[i]][i1].sizes) level[Object.keys(level)[i]][i1].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
+        if (!level[Object.keys(level)[i]][i1].bounceUpDown) level[Object.keys(level)[i]][i1].bounceUpDown = 5;
+        if (!level[Object.keys(level)[i]][i1].bounceleftRight) level[Object.keys(level)[i]][i1].bounceleftRight = 2;
+        if (!level[Object.keys(level)[i]][i1].checkpointWhen_touches) level[Object.keys(level)[i]][i1].checkpointWhen_touches = "ball";
+        if (!level[Object.keys(level)[i]][i1].spawnPoint) level[Object.keys(level)[i]][i1].spawnPoint =     {
+                    schieber: {
+                      x: 155,
+                      y: 200
+                    },
+                    ball: {
+                      x: 155,
+                      y: 250
+                    }
+                  }
+      }
+    }
+  }
+  level.slide[1].slidestop = 16;
+  getDatabase();
+function getDatabase() {
+  dbGet("transportTheBall", "highscores").then(result => {
+    highscores = JSON.parse(result);
+    for (var i = 0; i < Object.keys(level).length; i++) {
+      if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
+    }
+    modeSelected("normal");
+  }).catch(function(e) {
+    for (var i = 0; i < Object.keys(level).length; i++) {
+      if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
+    }
+    levelSelector.style.display = "none";
+    modeSelected("normal");
+  });
+  dbGet("transportTheBall", "checkpoints " + name).then(result => {
+    checkpoints = JSON.parse(result)
+  }).catch(function(e) {
+      console.log(e);
+  });
+}
+
+  var Bild = new Image();
+  // function scrollWindow(direction, achse, scrollXBefore, scrollYBefore) {
+  //   scrolling = true;
+  //   if (achse == "right") window.scroll(scrollX + direction, scrollY);
+  //   else window.scroll(scrollX, scrollY + direction);
+  //   var scroll = {aktuell: {x: scrollX, y: scrollY}, max: {x: 0, y: 0}};
+  //   window.scroll(Bild.width, Bild.height);
+  //   scroll.max.x = scrollX;
+  //   scroll.max.y = scrollY;
+  //   window.scroll(scroll.aktuell.x, scroll.aktuell.y);
+  //   if (((achse == "right" && direction == 1 && scrollX != scroll.max.x) || (achse == "right" && direction == -1 && scrollX != 0) || (achse == "down" && direction == 1 && scrollY != scroll.max.y) || (achse == "down" && direction == -1 && scrollY != 0)) &&  ((Bild.width > window.innerWidth && achse == "right") || (Bild.height > window.screen.height && achse != "right") && ((achse == "right" && scrollX < window.innerWidth - level[level.mode][level.aktuell].sizes.schieber.width*2 + scrollXBefore) || (achse != "right" && scrollY < window.innerHeight - level[level.mode][level.aktuell].sizes.schieber.height*2 + scrollYBefore)))) {
+  //     setTimeout(function () {
+  //       scrollWindow(direction, achse, scrollXBefore, scrollYBefore);
+  //     }, 1);
+  //   }
+  //   else scrolling = false;
+  // }
+  if (window.DeviceMotionEvent != undefined) {
+    window.ondevicemotion = function(e) {
+      ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * 17;
+      ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 17;
+    }
+    setInterval(function() {
+      // zoom: window.parent.document.body.style.zoom = 1.5;
+      // scroll when at bootom
+      if (level.aktuell == "winnerScreen") sphere.schieber.style.backgroundColor = "rgba(" + Math.round(Math.random()*255) + ", " + Math.round(Math.random()*255) + ", "+ Math.round(Math.random()*255) + ",1)";
+      else/* if (!scrollingByUser)*/ {
+        scrollingInterac.PC = true;
+        if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
+        if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
+        if (!scrollingInterac.user && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+        if (!scrollingInterac.user && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+        setTimeout(function () {
+          scrollingInterac.PC = false;
+        }, 1);
+      }
+      // scroll all the way down when at bottom
+      // if (scrollX != Bild.width - window.screen.width && !scrolling && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*2) scrollWindow(1, "right", scrollX, scrollY);
+      // if (scrollY != Bild.height - window.screen.height && !scrolling && y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*2) scrollWindow(1, "down", scrollX, scrollY);
+      // if (scrollX != 0 && !scrolling && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*2) && scrollX > 2) scrollWindow(-1, "right", scrollX, scrollY);
+      // if (scrollY != 0 && !scrolling && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*2) && scrollY > 2) scrollWindow(-1, "down", scrollX, scrollY);
+
+      var landscapeOrientation = window.innerWidth / Bild.width > 1;
+      if (landscapeOrientation) {
+        vx1 = vx1 + ay1;
+        vy1 = vy1 + ax1;
+        vx2 = vx2 + ay1;
+        vy2 = vy2 + ax1;
+      } else {
+        vy1 = vy1 - ay1;
+        vx1 = vx1 + ax1;
+        vy2 = vy2 - ay1;
+        vx2 = vx2 + ax1;
+      }
+      vx1 = vx1 * 0.98;
+      vy1 = vy1 * 0.98;
+      ball.x = JSON.parse(sphere.ball.style.left.replace("px", ""));
+      ball.y = JSON.parse(sphere.ball.style.top.replace("px", ""));
+      coordinatesBefore = {x1: x1, y1: y1}
+      if (!level[level.mode][level.aktuell] || !level[level.mode][level.aktuell].invisible || invisible.boolean == false) {
+      // allDirections
+      if (level.mode == "allDirections") {
+      var collision = isCollide({x: /*parseInt(x1 + vx1 / 50)*/x1, y: /*parseInt(y1 + vy1 / 50)*/y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball);
+      while (collision && !((parseInt(y1 + vy1 / 50) - y1) == 0 && (y1 - parseInt(y1 + vy1 / 50)) == 0 && (y1 - parseInt(y1 + vy1 / 50)) == 0 && (parseInt(y1 + vy1 / 50) - y1) == 0 && (parseInt(y1 + vy1 / 50) - y1) == 0 && (x1 - parseInt(x1 + vx1 / 50)) == 0 && (parseInt(x1 + vx1 / 50) - x1) == 0 && (parseInt(x1 + vx1 / 50) - x1) == 0 && (x1 - parseInt(x1 + vx1 / 50)) == 0)) {
+        collision = isCollide({x: parseInt(x1 + vx1 / 50), y: parseInt(y1 + vy1 / 50), width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball);
+        if (collision && parseInt(y1 + vy1 / 50) < ball.y) {
+          // setTimeout(function () {
+            if (parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)//3; // down
+            else ball.y += (y1 - parseInt(y1 + vy1 / 50))
+          // }, 1);
+        }
+        if (collision && parseInt(y1 + vy1 / 50) > ball.y)  {
+          // setTimeout(function () {
+            if (y1 > parseInt(y1 + vy1 / 50)) ball.y -= (y1 - parseInt(y1 + vy1 / 50))//3; // up
+            else ball.y -= (parseInt(y1 + vy1 / 50) - y1)//3; // up
+          // }, 1);
+        }
+        if (collision && parseInt(x1 + vx1 / 50) > ball.x) {
+          // setTimeout(function () {
+            if (x1 > parseInt(x1 + vx1 / 50)) ball.x -=  (x1 - parseInt(x1 + vx1 / 50))//3; // left
+            else ball.x -= (parseInt(x1 + vx1 / 50) - x1)
+          // }, 1);
+          }
+        if (collision && parseInt(x1 + vx1 / 50) < ball.x) {
+          // setTimeout(function () {
+            if (parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)//3;// right
+            else ball.x += (x1 - parseInt(x1 + vx1 / 50))
+          // }, 1);
+        }
+    }
+    }
+
+      // magnet
+      if (level.mode == "magnet") {
+      if (parseInt(y1 + vy1 / 50) + 30 > ball.y) {
+        // setTimeout(function () {
+        ball.y += (parseInt(y1 + vy1 / 50) - y1) / 10 + timeDirection.down; // down
+        // }, 1);
+        timeDirection.down += 0.1 //1
+      }
+      // else if (timeDirection.over.down < 50) {
+      //   timeDirection.over.down++;
+      //   ball.y += (parseInt(y1 + vy1 / 50) - y1)/10; // down
+      // }
+      else {
+        timeDirection.down = 0;
+        timeDirection.over.down = 0;
+      }
+      if (parseInt(y1 + vy1 / 50) < ball.y + 30) {
+        // setTimeout(function () {
+        ball.y -= (y1 - parseInt(y1 + vy1 / 50)) / 10 + timeDirection.up; // up
+        // }, 1);
+        timeDirection.up += 0.1 //1
+      }
+      // else if (timeDirection.over.up < 50) {
+      //   timeDirection.over.up++;
+      //   ball.y -= (y1 - parseInt(y1 + vy1 / 50))/10; // up
+      // }
+      else {
+        timeDirection.up = 0;
+        timeDirection.over.up = 0;
+      }
+      if (parseInt(x1 + vx1 / 50) < ball.x + 30) {
+        // setTimeout(function () {
+        ball.x -= (x1 - parseInt(x1 + vx1 / 50)) / 10 + timeDirection.left; // left
+        // }, 1);
+        timeDirection.left += 0.1 //1
+      }
+      // else if (timeDirection.over.left < 50) {
+      //   timeDirection.over.left++;
+      //   ball.x -=  (x1 - parseInt(x1 + vx1 / 50))/10; // left
+      // }
+      else {
+        timeDirection.left = 0;
+        timeDirection.over.left = 0;
+      }
+      if (parseInt(x1 + vx1 / 50) + 30 > ball.x) {
+        // setTimeout(function () {
+        ball.x += (parseInt(x1 + vx1 / 50) - x1) / 10 + timeDirection.right; // right
+        // }, 1);
+        timeDirection.right += 0.1 //1
+      }
+      // else if (timeDirection.over.right < 50) {
+      //   timeDirection.over.right++;
+      //   ball.x += (parseInt(x1 + vx1 / 50) - x1)/10; // right
+      // }
+      else {
+        timeDirection.right = 0;
+        timeDirection.over.right = 0;
+      }
+    }
+      if (level.mode == "slide" && isCollide({x: parseInt(x1 + vx1 / 50), y:  parseInt(y1 + vy1 / 50), width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && zaehler == 0) moveDirection(directionBefore);
+      invisibleDirectionCheck();
+      // normal mode
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere./*schieber*/ball.style.height)//-= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+    }
+    else {
+      invisibleDirectionCheck();
+    }
+      if (level[level.mode][level.aktuell] && level[level.mode][level.aktuell].invisible) {
+        invisible.directions[invisible.direction] += 25;
+      if (!invisible.boolean && invisible.directions[invisible.direction]/1000 > level[level.mode][level.aktuell].invisible.timeUntilInvisible) {
+        invisible.mainDirection = invisible.direction;
+        for (var i = 0; i < 4; i++) {
+          /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+        }
+        invisible.boolean = true;
+      }
+      var totalTime = 0;
+      for (var i = 0; i < 4; i++) {
+        if (Object.keys(invisible.directions)[i] != invisible.mainDirection) totalTime += invisible.directions[Object.keys(invisible.directions)[i]];
+      }
+      if ((((level[level.mode][level.aktuell].invisible.anyOtherSide) && totalTime/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain) || ((!level[level.mode][level.aktuell].invisible.anyOtherSide && (invisible.directions.right/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.left/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.up/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain || invisible.directions.down/1000 > level[level.mode][level.aktuell].invisible.timeUntilVisivleAgain)))) && invisible.mainDirection != undefined) {
+        for (var i = 0; i < 4; i++) {
+          invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+        }
+        invisible.boolean = false;
+        invisible.mainDirection = undefined;
+      }
+      if (invisible.boolean) sphere.ball.style.display = "none";
+      else sphere.ball.style.display = "inline";
+    }
+      sphere.ball.style.left = ball.x + "px";
+      sphere.ball.style.top = ball.y + "px";
+      checkColourCollisions();
+    }, 25);
+  }
+  var scrollingInterac = {user: false, PC: false}
+  var invisible = {directions: {left: 0, right: 0, up: 0, down: 0}, boolean: false};
+  var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
+  var timeDirection = {
+    right: 0,
+    left: 0,
+    up: 0,
+    down: 0,
+    over: {
+      right: 0,
+      left: 0,
+      up: 0,
+      down: 0
+    }
+  };
+  var zaehler = 0;
+  var geteiltDurch = 0.5;
+  var coordinatesBefore;
+  var bounceCoordinates;
+  var scrolling = false;
+  function invisibleDirectionCheck() {
+    var invisibleDirection = invisible.direction;
+    invisible.direction = {};
+    if (x1 > parseInt(x1 + vx1 / 50)) invisible.direction.left = x1 - parseInt(x1 + vx1 / 50);// = "left";
+    if (x1 < parseInt(x1 + vx1 / 50)) invisible.direction.right = parseInt(x1 + vx1 / 50) - x1;// = "right";
+    if (y1 > parseInt(y1 + vy1 / 50)) invisible.direction.up = y1 - parseInt(y1 + vy1 / 50);// = "up";
+    if (y1 < parseInt(y1 + vy1 / 50)) invisible.direction.down = parseInt(y1 + vy1 / 50) - y1;// = "down";
+    var highestDirection = {number: 0};
+    for (var i = 0; i < Object.keys(invisible.direction).length; i++) {
+      if (invisible.direction[Object.keys(invisible.direction)[i]] > highestDirection.number && Object.keys(invisible.direction)[i] != invisible.mainDirection) {highestDirection.number = invisible.direction[Object.keys(invisible.direction)[i]]; highestDirection.string = Object.keys(invisible.direction)[i];}
+    }
+    if (level[level.mode][level.aktuell] != undefined && invisibleDirection != undefined && highestDirection.string != undefined && level[level.mode][level.aktuell].invisible && level[level.mode][level.aktuell].invisible.amStück && invisibleDirection != highestDirection.string && ((invisible.boolean == true && level[level.mode][level.aktuell].invisible.amStück.invisible == true) || (invisible.boolean == false && level[level.mode][level.aktuell].invisible.amStück.visible == true))) {
+      for (var i = 0; i < 4; i++) {
+        /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+      }
+    }
+    invisible.direction = highestDirection.string;
+    y1 = parseInt(y1 + vy1 / 50);
+    x1 = parseInt(x1 + vx1 / 50);
+
+    vx2 = vx2 * 0.98;
+    vy2 = vy2 * 0.98;
+    y2 = parseInt(y2 + vy2 / 30);
+    x2 = parseInt(x2 + vx2 / 30);
+    boundingBoxCheck();
+    sphere.schieber.style.top = y1 + "px";
+    sphere.schieber.style.left = x1 + "px";
+  }
+  window.onscroll = function (e) {
+    if (!scrollingInterac.PC) {
+      scrollingInterac.user = true;
+      console.log("please debug");
+    }
+    if (scrollY == 0 && scrollX == 0) scrollingInterac.user = false;
+  }
+  function moveDirection(pDirectionBefore) {
+    if (zaehler != "newLevel") {
+    if (pDirectionBefore.includes( "right") && parseInt(x1 + vx1 / 50) > x1) ball.x += (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (pDirectionBefore.includes( "right")) ball.x += (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (pDirectionBefore.includes( "left") && parseInt(x1 + vx1 / 50) > x1) ball.x -= (parseInt(x1 + vx1 / 50) - x1)/geteiltDurch;
+    else if (pDirectionBefore.includes( "left")) ball.x -= (x1 - parseInt(x1 + vx1 / 50))/geteiltDurch;
+    if (pDirectionBefore.includes( "down") && parseInt(y1 + vy1 / 50) > y1) ball.y += (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (pDirectionBefore.includes( "down")) ball.y += (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    if (pDirectionBefore.includes( "up") && parseInt(y1 + vy1 / 50) > y1) ball.y -= (parseInt(y1 + vy1 / 50) - y1)/geteiltDurch;
+    else if (pDirectionBefore.includes( "up")) ball.y -= (y1 - parseInt(y1 + vy1 / 50))/geteiltDurch;
+    zaehler++;
+    sphere.ball.style.top = ball.y + "px";
+    sphere.ball.style.left = ball.x + "px";
+    checkColourCollisions();
+    if (zaehler < /*20*/(level.slide[level.aktuell].slideLength) || (geteiltDurch < level.slide[level.aktuell].slidestop)) {
+      if (zaehler > (level.slide[level.aktuell].slideLength - 1)/*19*/) geteiltDurch++;
+      setTimeout(function () {
+        moveDirection(pDirectionBefore);
+      }, 10);
+    }
+    else {
+      geteiltDurch = 0.5;
+      zaehler = 0;
+    }
+  }
+  }
+  var directionBeforeScrolling = {x: 0, y: 0};
+  function checkColourCollisions() {
+    // scrollWithBall
+    // if (directionBeforeScrolling.x > x1 && (x1 > window.innerWidth/2 - 17 && x1 < window.innerWidth/2 + 17) || (scrollX > 0)) window.scroll(scrollX - (directionBeforeScrolling.x - x1), scrollY);
+    // if (directionBeforeScrolling.x < x1 && (x1 > window.innerWidth/2 - 17 && x1 < window.innerWidth/2 + 17) || (scrollX > 0)) window.scroll(scrollX +  (x1 - directionBeforeScrolling.x), scrollY);
+    // if (directionBeforeScrolling.y > y1 && (y1 > window.innerHeight/2 - 17 && y1 < window.innerHeight/2 + 17) || (scrollY > 0)) window.scroll(scrollX, scrollY - (directionBeforeScrolling.y - y1));
+    // if (directionBeforeScrolling.y < y1 && (y1 > window.innerHeight/2 - 17 && y1 < window.innerHeight/2 + 17) || (scrollY > 0)) window.scroll(scrollX, scrollY +  (y1 - directionBeforeScrolling.y));
+    // directionBeforeScrolling = {x: x1, y: y1};
+    var numbers = [
+      [x1 + cssToNumber(sphere.schieber.style.width) - 7, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 - 8],
+      [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1 + cssToNumber(sphere.schieber.style.height) - 7],
+      [x1 - 10, y1 + cssToNumber(sphere.schieber.style.height) / 2],
+
+      [ball.x + cssToNumber(sphere.ball.style.width) - 7, ball.y + cssToNumber(sphere.ball.style.height) / 2],
+      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y - 8],
+      [ball.x + cssToNumber(sphere.ball.style.width) / 2, ball.y + cssToNumber(sphere.ball.style.height) - 7],
+      [ball.x - 10, ball.y + cssToNumber(sphere.ball.style.height) / 2]
+    ]
+    for (var i = 0; i < 8; i++) {
+      // canvas.fillStyle = "red";
+      // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
+      try {
+        data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+        red = data.data[0];
+        green = data.data[1];
+        blue = data.data[2];
+        alpha = data.data[3];
+      } catch (e) {
+        console.log("Das ist ein Fehler :( )");
+      }
+      if (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4)) {
+        console.log("Fail!");
+        time = 0;
+        if (checkpoint.length > 1) time = checkpoint[checkpoint.length - 1].timeNeededToReach;
+        zaehler = "newLevel";
+        setTimeout(function () {
+          zaehler = 0;
+        }, 500);
+        restartLevel();
+      }
+      if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1] && level.aktuell != "winnerScreen") {
+        console.log("goal reached (yellow)");
+          i = 8;
+          sphere.ball.style.top = "0px";
+          sphere.ball.style.left = "0px";
+          ball.x = 0;
+          ball.y = 0;
+          //restartLevel();
+          setHighscores(true);
+      }
+      else if (!(sphere.ball.style.top == "0px" && sphere.ball.style.left == "0px") && red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level.aktuell != "winnerScreen") {
+        i = 8;
+        sphere.ball.style.top = "0px";
+        sphere.ball.style.left = "0px";
+        ball.x = 0;
+        ball.y = 0;
+        alert("Das war leider das letzte Level :(  Du kannst aber noch die anderen modi ausprobieren, wenn du das noch nicht getan hast.");
+        setHighscores();
+        zaehler = "newLevel";
+        setTimeout(function () {
+          zaehler = 0;
+        }, 500);
+      }
+      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((level[level.mode][level.aktuell].checkpointWhen_touches == "ball" && i > 3) || (level[level.mode][level.aktuell].checkpointWhen_touches == "schieber" && i < 4)) && ((level[level.mode][level.aktuell].checkpointWhen_touches == "schieber" && ((((((checkpoint[checkpoint.length - 1].schieber.y - y1 > 100 && level.mode != "magnet") || (checkpoint[checkpoint.length - 1].schieber.y - y1 > 300 && level.mode == "magnet")) || ((y1 - checkpoint[checkpoint.length - 1].schieber.y > 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - checkpoint[checkpoint.length - 1].schieber.y > 300))))) || (((level.mode != "magnet" && checkpoint[checkpoint.length - 1].schieber.x - x1 > 100) || (level.mode == "magnet" && checkpoint[checkpoint.length - 1].schieber.x - x1 > 300)) || ((level.mode == "mode" && x1 - checkpoint[checkpoint.length - 1].schieber.x > 300) || ((level.mode != "magnet" && x1 - checkpoint[checkpoint.length - 1].schieber.x > 100)))))) || (level[level.mode][level.aktuell].checkpointWhen_touches == "ball" && ((level.mode == "magnet" && checkpoint[checkpoint.length - 1].ball.x - ball.x > 300) || (level.mode != "magnet" && checkpoint[checkpoint.length - 1].ball.x - ball.x > 100)) || ((level.mode == "magnet" && ball.x - checkpoint[checkpoint.length - 1].ball.x > 300) || (level.mode != "magnet" && ball.x - checkpoint[checkpoint.length - 1].ball.x > 100))) ||
+      (((level.mode != "magnet" && checkpoint[checkpoint.length - 1].ball.y - ball.y > 100) || (level.mode == "magnet" && checkpoint[checkpoint.length - 1].ball.y - ball.y > 300)) || ((level.mode == "magnet" && ball.y - checkpoint[checkpoint.length - 1].ball.y > 300) || (level.mode != "magnet" && ball.y - checkpoint[checkpoint.length - 1].ball.y > 100)))))) {
+        console.log("checkpoint!!!");
+        if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
+        checkpoint.push({schieber: {x: x1, y: y1}, ball: {x: ball.x, y: ball.y}, timeNeededToReach: time})
+        checkpoints[level.mode][level.aktuell] = checkpoint;
+        if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+      }
+    }
+     numbers = [
+      [ball.x, ball.y],
+      [ball.x + ball.width, ball.y],
+      [ball.x, ball.y + ball.height],
+      [ball.x + ball.width, ball.y + ball.height]
+    ]
+    for (var i = 0; i < 4; i++) {
+      data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+      red = data.data[0];
+      green = data.data[1];
+      blue = data.data[2];
+      alpha = data.data[3];
+      if (red = 255 && green == 126 && blue == 0) {
+        console.log("bouncing");
+        bounceCoordinates = {x1: x1, y1: y1}
+        if (x1 - coordinatesBefore.x1 > -3 && x1 - coordinatesBefore.x1 < 3) bounceCoordinates.x1 = coordinatesBefore.x1 + 3;
+        zaehler = "bouncing";
+        if (i == 0) {bounceBall(["down", "right"], 0);}
+        if (i == 1) {bounceBall(["down", "left"], 0);}
+        if (i == 2) {bounceBall(["up", "right"], 0);}
+        if (i == 3) {bounceBall(["up", "left"], 0);}
+      }
+    }
+    for (var i = 0; level[level.mode][level.aktuell] && level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
+      if (x1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x && x1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width && y1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y && y1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height &&
+         ball.x > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x && ball.x < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width && ball.y > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y && ball.y < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height)
+         {
+           ball.x = level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x;
+           ball.y = level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y;
+         }
+    }
+    sphere.ball.style.left = ball.x + "px";
+    sphere.ball.style.top = ball.y + "px";
+  }
+  function setHighscores(nextLevel) {
+    dbGet("transportTheBall", "highscores").then(result => {
+      highscores = JSON.parse(result);
+      addToHighscore(nextLevel);
+    }).catch(function(e) {
+      addToHighscore(nextLevel);
+    });
+  if (checkpoint.length > 1 /*checkpoint[checkpoint.length - 1].schieber.x != level[level.mode][level.aktuell].spawnPoint.schieber.x || checkpoint[checkpoint.length - 1].schieber.y != level[level.mode][level.aktuell].spawnPoint.schieber.y || checkpoint[checkpoint.length - 1].ball.x != level[level.mode][level.aktuell].spawnPoint.ball.x || checkpoint[checkpoint.length - 1].ball.y != level[level.mode][level.aktuell].spawnPoint.ball.y*/) {
+    checkpoints[level.mode].splice(level.aktuell, 1);
+    setTimeout(function () {
+      if (name != "allLevel") dbSetWarteschlange.push({tag: "checkpoints " + name, data: JSON.stringify(checkpoints)});//dbSet("transportTheBall", "checkpoints " + name, JSON.stringify(checkpoints));
+    }, 1000);
+  }
+  }
+  function onTeleporter() {
+    var onTeleporterObj = {schieber: false, ball: false, checkpoint: false}
+    for (var i = 0; level[level.mode][level.aktuell] && level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
+      if (x1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x && x1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width && y1 > level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y && y1 < level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height) onTeleporterObj.schieber = true;
+      if (ball.x > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x && ball.x < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width && ball.y > level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y && ball.y < level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height) onTeleporterObj.ball = true;
+      if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) onTeleporterObj.checkpoint = true;
+    }
+    return onTeleporterObj;
+  }
+  function addToHighscore(pNextLevel) {
+    if (modeSelection.value == "opposite") level.mode = "opposite";
+    if (!highscores[level.mode]) highscores[level.mode] = {};
+    if (!highscores[level.mode][level.aktuell]) highscores[level.mode][level.aktuell] = {};
+    if (!highscores[level.mode][level.aktuell] || !highscores[level.mode][level.aktuell][name] || highscores[level.mode][level.aktuell][name] > mins + ":" + secs + ":" + "0" + tenths) highscores[level.mode][level.aktuell][name] = mins + ":" + secs + ":" + "0" + tenths;
+    setTimeout(function () {
+      if (name != "allLevel") dbSetWarteschlange.push({tag: "highscores", data: JSON.stringify(highscores)});//dbSet("transportTheBall", "highscores", JSON.stringify(highscores));
+      for (var i = 0; i < Object.keys(level).length; i++) {
+        if (highscores[Object.keys(level)[i]] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length] && highscores[Object.keys(level)[i]][Object.keys(level[Object.keys(level)[i]]).length][name]) document.getElementById(Object.keys(level)[i] + "Selection").innerHTML = "✅" + Object.keys(level)[i];
+      }
+    }, 1000);
+    if (pNextLevel) nextLevel();
+    else winnerScreen();
+    if (level.mode == "opposite") level.mode = "normal";
+  }
+  var dbSetWarteschlange = [];
+  setInterval(function () {
+    if (dbSetWarteschlange.length > 0) {
+      dbSet("transportTheBall", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
+      dbSetWarteschlange.shift();
+    }
+  }, 2222);
+  function bounceBall(direction, time) {
+    console.log("boundce " + direction);
+    if (zaehler != "newLevel") {
+    if (direction.includes("right") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x += (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    else if (direction.includes("right")) ball.x += (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    if (direction.includes("left") && bounceCoordinates.x1 > coordinatesBefore.x1) ball.x -= (bounceCoordinates.x1- coordinatesBefore.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    else if (direction.includes("left")) ball.x -= (coordinatesBefore.x1 - bounceCoordinates.x1)*level[level.mode][level.aktuell].bounceleftRight;
+    if (direction.includes("down") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y += (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    else if (direction.includes("down")) ball.y += (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    if (direction.includes("up") && bounceCoordinates.y1 > coordinatesBefore.y1) ball.y -= (bounceCoordinates.y1 - coordinatesBefore.y1)/level[level.mode][level.aktuell].bounceUpDown;
+    else if (direction.includes("up")) ball.y -= (coordinatesBefore.y1 - bounceCoordinates.y1)/level[level.mode][level.aktuell].bounceUpDown;
+
+  }
+  else {
+    time = 32;
+  }
+    time++;
+    sphere.ball.style.left = ball.x + "px";
+    sphere.ball.style.top = ball.y + "px";
+    if (time < 33) {
+      setTimeout(function () {
+        bounceBall(direction, time + 1);
+      }, 27);
+    }
+    else {
+      zaehler = 0;
+    }
+  }
+  function removeCheckpoint() {
+    if (checkpoint.length > 1) {
+     sphere.ball.style.left = checkpoint[checkpoint.length - 2].ball.x + "px";
+     sphere.ball.style.top = checkpoint[checkpoint.length - 2].ball.y + "px";
+     checkpoint.pop();
+   }
+  }
+  function boundingBoxCheck() {
+    Layout();
+    if (x1 < 0) {
+      x1 = 0;
+      vx1 = -vx1;
+    }
+    if (y1 < 0) {
+      y1 = 0;
+      vy1 = -vy1;
+    }
+    if (x1 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
+      x1 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
+      vx1 = -vx1;
+    }
+    if (y1 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
+      y1 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
+      vy1 = -vy1;
+    }
+    if (x2 < 0) {
+      x2 = 0;
+      vx2 = -vx2;
+    }
+    if (y2 < 0) {
+      y2 = 0;
+      vy2 = -vy2;
+    }
+    if (x2 > Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2) {
+      x2 = Bild.width - JSON.parse(sphere.schieber.style.width.toString().split('px')[0]) / 2;
+      vx2 = -vx2;
+    }
+    if (y2 > Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2) {
+      y2 = Bild.height - JSON.parse(sphere.schieber.style.height.toString().split('px')[0]) / 2;
+      vy2 = -vy2;
+    }
+  }
+
+  function Layout() {
+    if (level.aktuell != "winnerScreen") {
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
+    textur.width = Bild.width;
+    textur.height = Bild.height;
+    canvas.drawImage(Bild, 0, 0);
+    for (var i = 0; level[level.mode][level.aktuell].ballTeleporter && i < level[level.mode][level.aktuell].ballTeleporter.length; i++) {
+      /*if (level[level.mode][level.aktuell].ballTeleporter[i].checkpoint) canvas.fillStyle = "rgba(168, 230, 29, 1)";
+      else */canvas.fillStyle = "blue";
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height);
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x, level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y, cssToNumber(ball.width), ball.height);
+      canvas.fillStyle = "red";
+      canvas.fillRect(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height);
+      canvas.beginPath();
+      canvas.moveTo(level[level.mode][level.aktuell].ballTeleporter[i].ballSide.x + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.width/2, level[level.mode][level.aktuell].ballTeleporter[i].ballSide.y + level[level.mode][level.aktuell].ballTeleporter[i].ballSide.height/2);
+      canvas.lineTo(level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.x + cssToNumber(ball.width/2), level[level.mode][level.aktuell].ballTeleporter[i].ballTeleportedSide.y + ball.height/2);
+      canvas.lineTo(level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.x + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.width/2, level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.y + level[level.mode][level.aktuell].ballTeleporter[i].schieberSide.height/2);
+      canvas.stroke();
+    }
+  }
+  }
+  var ball = {
+    x: 0,
+    y: 0,
+    width: 50,
+    height: 50
+  };
+
+  function restartLevel() {
+    x1 = checkpoint[checkpoint.length - 1].schieber.x;
+    y1 = checkpoint[checkpoint.length - 1].schieber.y;
+    ball.x = checkpoint[checkpoint.length - 1].ball.x;
+    ball.y = checkpoint[checkpoint.length - 1].ball.y;
+    sphere.ball.style.top = ball.x + "px";
+    sphere.ball.style.left = ball.y + "px";
+    scrollingInterac.PC = true;
+    for (var i = 0; i < Bild.width; i++) {
+      if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - level[level.mode][level.aktuell].sizes.schieber.width*5) window.scroll(scrollX + 3, scrollY);
+      if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - level[level.mode][level.aktuell].sizes.schieber.height*5) window.scroll(scrollX, scrollY + 3);
+      if (!scrollingInterac.user && x1 - scrollX < (level[level.mode][level.aktuell].sizes.schieber.width + level[level.mode][level.aktuell].sizes.ball.width*5) && scrollX > 2) window.scroll(scrollX - 3, scrollY);
+      if (!scrollingInterac.user && y1 - scrollY < (level[level.mode][level.aktuell].sizes.schieber.height + level[level.mode][level.aktuell].sizes.ball.height*5) && scrollY > 2) window.scroll(scrollX, scrollY - 3);
+    }
+    setTimeout(function () {
+      scrollingInterac.PC = false;
+    }, 1);
+  }
+
+  function nextLevel() {
+    level.aktuell++;
+    zaehler = "newLevel";
+    setTimeout(function () {
+      zaehler = 0;
+    }, 500);
+    setupLevel();
+    levelSelected(level.aktuell + ". level");
+  }
+  var heartBeatInt
+  function heartBeatFunc() {
+    if (level[level.mode][level.aktuell].heart.ball && sphere.ball.heartBeatAction != false) {
+      /*sphere.*/sphere.ball.style.width = cssToNumber(sphere.ball.style.width) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
+      /*sphere.*/sphere.ball.style.height = cssToNumber(sphere.ball.style.height) + level[level.mode][level.aktuell].heart.ball.pixelPerFunctionCall*/*sphere.*/ball.direction + "px";
+    }
+    if (level[level.mode][level.aktuell].heart.schieber && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.style.width = cssToNumber(sphere.schieber.style.width) + level[level.mode][level.aktuell].heart.schieber.pixelPerFunctionCall*sphere.schieber.direction + "px";
+      sphere.schieber.style.height = cssToNumber(sphere.schieber.style.height) + level[level.mode][level.aktuell].heart.schieber.pixelPerFunctionCall*sphere.schieber.direction + "px";
+    }
+    if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) > level[level.mode][level.aktuell].heart.ball.max && sphere.ball.heartBeatAction != false) {
+      ball.direction = -1;
+      heartBeatStop("ball", "max");
+    }
+    if (level[level.mode][level.aktuell].heart.ball && cssToNumber(sphere.ball.style.width) < level[level.mode][level.aktuell].heart.ball.min && sphere.ball.heartBeatAction != false) {
+      ball.direction =  1;
+      heartBeatStop("ball", "min");
+    }
+    // if (ball.height > level[level.mode][level.aktuell].heart.ball.max) ball.direction = -1;
+    // if (ball.height < level[level.mode][level.aktuell].heart.ball.min) ball.direction =  1;
+    if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) > level[level.mode][level.aktuell].heart.schieber.max && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.direction = -1;
+      heartBeatStop("schieber", "max");
+    }
+    if (level[level.mode][level.aktuell].heart.schieber && cssToNumber(sphere.schieber.style.width) < level[level.mode][level.aktuell].heart.schieber.min && sphere.schieber.heartBeatAction != false) {
+      sphere.schieber.direction =  1;
+      heartBeatStop("schieber", "min");
+    }
+    if (level[level.mode][level.aktuell].heart != undefined) {
+      setTimeout(function () {
+        heartBeatFunc();
+      }, 100);
+    }
+    ball.width = cssToNumber(sphere.ball.style.width);
+    ball.height = cssToNumber(sphere.ball.style.height);
+  }
+  function heartBeatStop(component, extrempunt) {
+    if (level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]) {
+      sphere[component].heartBeatAction = false;
+      setTimeout(function () {
+        sphere[component].heartBeatAction = true;
+      }, level[level.mode][level.aktuell].heart[component].waitBeforeDirectionSwitchInSec[extrempunt]*1000);
+    }
+  }
+  function setupLevel() {
+    checkpoint = [{schieber: {x: level[level.mode][level.aktuell].spawnPoint.schieber.x, y: level[level.mode][level.aktuell].spawnPoint.schieber.y}, ball: {x: level[level.mode][level.aktuell].spawnPoint.ball.x, y: level[level.mode][level.aktuell].spawnPoint.ball.y}}];
+    restartLevel();
+    ball.width = level[level.mode][level.aktuell].sizes.ball.width;
+    ball.height = level[level.mode][level.aktuell].sizes.ball.height;
+    sphere.schieber.style.width = level[level.mode][level.aktuell].sizes.schieber.width + "px";
+    sphere.schieber.style.height = level[level.mode][level.aktuell].sizes.schieber.height + "px";
+    sphere.ball.style.width = ball.width + "px";
+    sphere.ball.style.height = ball.height + "px";
+    if (level[level.mode][level.aktuell].heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc();}
+  }
+  var directionBefore = [];
+
+  function isCollide(a, b) {
+    if ((level.mode == "slide" && (!(
+      ((a.y + a.height) < (b.y)) ||
+      (a.y > (b.y + b.height)) ||
+      ((a.x + a.width) < b.x) ||
+      (a.x > (b.x + b.width))
+    ) || zaehler == 0)) || level.mode != "slide") {
+    if (((a.y + a.height) < (b.y)) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "down";
+    // else if (((a.y + a.height) < (b.y))) directionBefore.push("down");
+    // else if ((
+    //     (a.y > (b.y + b.height)) ||
+    //     ((a.x + a.width) < b.x) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("down");
+    if (((a.y > (b.y + b.height))) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "up";
+    // else if (((a.y > (b.y + b.height)))) directionBefore.push("up");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     ((a.x + a.width) < b.x) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("up");
+    if ((((a.x + a.width) < b.x)) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "right";
+    // else if ((((a.x + a.width) < b.x))) directionBefore.push("right");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     (a.y > (b.y + b.height)) ||
+    //     (a.x > (b.x + b.width))
+    //   )) removeDirection("right");
+    if (((a.x > (b.x + b.width))) /* && level.mode != "allDirections"*/ ) directionBefore[0] = "left";
+    // else if (((a.x > (b.x + b.width)))) directionBefore.push("left");
+    // else if ((
+    //     ((a.y + a.height) < (b.y)) ||
+    //     (a.y > (b.y + b.height)) ||
+    //     ((a.x + a.width) < b.x)
+    //   )) removeDirection("left");
+    // if (!(
+    //     ((a.y + a.height) < (b.y)) ||
+    //     (a.y > (b.y + b.height)) ||
+    //     ((a.x + a.width) < b.x) ||
+    //     (a.x > (b.x + b.width))
+    //   )) {}
+    }
+    return !(
+      ((a.y + a.height) < (b.y)) ||
+      (a.y > (b.y + b.height)) ||
+      ((a.x + a.width) < b.x) ||
+      (a.x > (b.x + b.width))
+    );
+  }
+  var inOrAgainstDirection = 1;
+
+  function winnerScreen() {
+    level.aktuell = "winnerScreen";
+    Bild = new Image();
+    Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gewinnerbildschirm.jpeg";
+    canvas.drawImage(Bild, 0, 0);
+    setTimeout(function () {
+      canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight);
+    }, 500);
+  }
+  function levelSelected(value) {
+    sphere.schieber.backgroundColor = "blue";
+    if (value == "winnerScreen") {
+      winnerScreen();
+    }
+    else {
+    levelSelector.value = value;
+    level.aktuell = JSON.parse(value.toString().split('. level')[0]);
+    if (running == 0) startPause();
+    else time = 0;
+    setupLevel();
+    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {checkpoint = checkpoints[level.mode][level.aktuell]; time = checkpoint[checkpoint.length - 1].timeNeededToReach;}
+  }
+  }
+  function modeSelected(mode) {
+    if (mode != "showScores") {
+      textur.style.display = "inline";
+      levelSelector.style.display = "inline";
+      sphere.schieber.style.display = "inline";
+      sphere.ball.style.display = "inline";
+    level.mode = mode;
+    while (document.getElementById('levelSelector').options.length > 0) {
+      document.getElementById('levelSelector').options[0] = undefined;
+    }
+    var mapsFinished = 0;
+    for (var i = 0; highscores[mode] && i < Object.keys(highscores[mode]).length; i++) {
+      if (Object.keys(highscores[mode][Object.keys(highscores[mode])[0]]).includes(name)) mapsFinished++;
+    }
+    if (name == "allLevel") mapsFinished = Object.keys(level[mode]).length;
+    for (var i = 0; ((mapsFinished == 0 && i < 1) || (mapsFinished == Object.keys(level[mode]).length && i < mapsFinished) || (highscores[mode] && mapsFinished != Object.keys(level[mode]).length && i < mapsFinished + 1)); i++) {
+      if ( mapsFinished > 0) {
+      opt = document.createElement("option");
+      document.getElementById("levelSelector").options.add(opt);
+      // opt.setAttribute("id", i);
+      opt.text = (i + 1) + ". level";
+    }
+    else if (i == 0) {
+      levelSelector.style.display = "none";
+    }
+    }
+    if (mapsFinished == Object.keys(level[mode]).length) {
+      opt = document.createElement("option");
+      document.getElementById("levelSelector").options.add(opt);
+      // opt.setAttribute("id", i);
+      opt.text = "winnerScreen";
+      levelSelected(/*"1. level"*/mapsFinished + ". level");
+  }
+    else levelSelected(/*"1. level"*/(mapsFinished + 1) + ". level");
+    if (mode == "opposite") {inOrAgainstDirection = -1; level.mode = "normal";}
+    else inOrAgainstDirection = 1;
+}
+  else {
+    showScores(highscores);
+  }
+  }
+  var highscoresDisplayedBefore = {};
+  function showScores(highscores) {
+    scores.style.display = "inline";
+     textur.style.display = "none";
+     sphere.schieber.style.display = "none";
+     sphere.ball.style.display = "none";
+    for (var i = 0; i < 100; i++) {
+      try {
+        document.getElementById("scores").deleteRow(0);
+      } catch (e) {
+        console.log("wanted to delete too many elements of table");
+      }
+    }
+    highscoresDisplayedBefore = highscores;
+    console.log("highScores: " + highscores);
+    var cell = [ /*row.insertCell(0)*/ ];
+    var player = []
+    var mostLevel = 0;
+    for (var i2 = 0; i2 < Object.keys(highscores).length; i2++) {
+
+      for (var i = 1; i < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i++) {
+        for (var i1 = 0; i1 < Object.keys(highscores[Object.keys(highscores)[i2]][i]).length; i1++) {
+          if (!(player.includes(Object.keys(highscores[Object.keys(highscores)[i2]][i])[i1]))) player.push(Object.keys(highscores[Object.keys(highscores)[i2]][i])[i1]);
+        }
+      }
+      if (mostLevel < Object.keys(highscores[Object.keys(highscores)[i2]]).length) mostLevel = Object.keys(highscores[Object.keys(highscores)[i2]]).length;
+    for (var i = 0; i < player.length; i++) {
+      // if (!(Object.keys(highscores)[i] == "allMaps")) {
+     // if (player[i] != "allLevel") {
+        var table = document.getElementById("scores");
+        var row = table.insertRow(i); // row geht nach unten (Spalt)
+        cell.push(row.insertCell(0)); // cell geht nach rechts (Zeit))
+        cell.push(row.insertCell(1));
+        cell[cell.length - 1].innerHTML = player[i];
+      // }
+      //  var cell = [/*row.insertCell(0)*/];
+        cell[cell.length - 2] = row.insertCell(1);
+      for (var i1 = 1; highscores[Object.keys(highscores)[i2]] && i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1; i1++) {
+        // if (!(Object.keys(highscores[Object.keys(highscores)[i2]])[i] == "allMaps")) {
+          if (i1 < Object.keys(highscores[Object.keys(highscores)[i2]]).length + 1) {
+            cell[cell.length] = row.insertCell(i1 + 2);
+            // if (level[level.mode].levelType == "worldWideLevel" && i1 == 0) {
+            //   i1--;
+            // }
+            if (highscores[Object.keys(highscores)[i2]][i1][player[i]]) cell[cell.length - 1].innerHTML = highscores[Object.keys(highscores)[i2]][i1][player[i]]
+            if (highscores[Object.keys(highscores)[i2]][i1][player[i]] < highscores[Object.keys(highscores)[i2]][i1][name]) cell[cell.length - 1].style.color = "red";
+            else if (highscores[Object.keys(highscores)[i2]][i1][player[i]] > highscores[Object.keys(highscores)[i2]][i1][name]) cell[cell.length - 1].style.color = "green";
+            else if (name == player[i]) cell[cell.length - 1].style.color = "blue";
+            else cell[cell.length - 1].style.color = "black";
+
+          } else {
+            cell[cell.length - 1] = row.insertCell(i1 + 1);
+            //  cell[cell.length - 2].innerHTML = "unmade";
+            //  cell[cell.length - 2].style.color = "black";
+          }
+        // }
+      }
+      var row = table.insertRow(i);
+      //  var row = table.insertRow(i+1);
+      // var row = table.insertRow(i + 1);
+    //}
+  }
+    var row = table.insertRow(/*i2*/0);
+    cell[0] = row.insertCell(0);
+    cell[0].innerHTML = "";
+    cell[0] = row.insertCell(0);
+    cell[0].innerHTML = Object.keys(highscores)[i2];
+  }
+    //  var row = table.insertRow(0);
+    //  var cell = [/*row.insertCell(0)*/];
+    // cell.push(row.insertCell(0));
+    // cell[cell.length - 1].innerHTML = "name";
+    var row = table.insertRow(0);
+    cell.push(row.insertCell(0));
+    for (var i1 = 0; i1 < mostLevel + 1; i1++) {
+      cell.push(row.insertCell(i1));
+      if (i1 == 0) cell[cell.length - 1].innerHTML = "mode";
+      else cell[cell.length - 1].innerHTML = (i1) + ". level";
+    }
+    cell.push(row.insertCell(1));
+    cell.push(row.insertCell(2));
+    cell[cell.length - 1].innerHTML = "name"
+  }
+  // function removeDirection(direction) {
+  //   for (var i = 0; i < directionBefore.length; i++) {
+  //     if (directionBefore[i] == direction) {
+  //       directionBefore.splice(i, 1);
+  //       i--;
+  //     }
+  //   }
+  // }
+
+  function cssToNumber(cssStyle) {
+    return JSON.parse(cssStyle.toString().split('px')[0])
+  }
+  var time = 0;
+  var running = 0;
+
+function startPause() {
+if (running == 0) {
+  running = 1;
+  time = 0;
+  increment();
+}
+else {
+  running = 0;
+}
+}
+function reset() {
+running = 0;
+timer = 0;
+}
+var mins = 0;
+var secs = 0;
+var tenths = 0;
+function increment() {
+if (running == 1) {
+setTimeout(function () {
+  time++;
+  mins = Math.floor(time/10/60);
+  secs = Math.floor(time/10);
+      secs -= 60*mins;
+  tenths = time % 10;
+  if (mins < 10) {
+    mins = "0" + mins
+  }
+  if (secs < 10) {
+    secs = "0" + secs;
+  }
+  increment();
+}, 100);
+}
+}
+startPause();
+</script>
