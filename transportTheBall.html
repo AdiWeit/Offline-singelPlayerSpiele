@@ -18,11 +18,13 @@
 <select id="checkpointSelection" onchange="checkpointSelected(value);">
 
 </select>
-<button name="button" onclick="removeCheckpoint();">remove this checkpoint</button>
+<button name="button" id="removeCheckpointB" onclick="removeCheckpoint();">remove this checkpoint</button>
 <br>
 <button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
 <br>
+<!-- <button onclick="joyStick = 'place';">move joystick position</button>
+<br> -->
 <h3>sensibility</h3>
 <input type="range" min="1" onchange="if (confirm('As long as you play with changed sensibility, it will not count the completion time!')) {saveHighscores = false; sensibility = {x: value, y: value};} value = sensibility.x" max="35" value="17" class="slider" id="sensibility">
 <button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
@@ -1249,23 +1251,24 @@ function checkpointSelected(value) {
               window.scroll(scrollX + 3, scrollY);
               registerAutoScrolling({x: 3, y: 0});
             }
-            else if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- window.innerHeight/5.4) {
+            if (!scrollingInterac.user && y1 > window.innerHeight + scrollY - currentLevel.sizes.schieber.height- window.innerHeight/5.4) {
               window.scroll(scrollX, scrollY + 3);
               registerAutoScrolling({x: 0, y: 3});
             }
-            else if (!scrollingInterac.user && x1 - scrollX < (window.innerWidth/5.4) && scrollX > 2) {
+            if (!scrollingInterac.user && x1 - scrollX < (window.innerWidth/5.4) && scrollX > 2) {
               window.scroll(scrollX - 3, scrollY);
               registerAutoScrolling({x: -3, y: 0});
             }
-            else if (!scrollingInterac.user && y1 - scrollY < (window.innerHeight/5.4) && scrollY > 2) {
+            if (!scrollingInterac.user && y1 - scrollY < (window.innerHeight/5.4) && scrollY > 2) {
               window.scroll(scrollX, scrollY - 3);
               registerAutoScrolling({x: 0, y: -1});
             }
             else {
-              scrollingInterac.PC = false;
-              scrolling = false;
             }
-            if (scrollX == scrolledBefore.x && scrollY == scrolledBefore.y) scrolling = false;
+            if (scrollX == scrolledBefore.x && scrollY == scrolledBefore.y) {
+              scrolling = false;
+              scrollingInterac.PC = false;
+            }
           }
         }
       }
@@ -1641,12 +1644,23 @@ function checkpointSelected(value) {
         }, 500);
       }
       var newCheckpoint = 0;
-      for (const pCheckpoint of checkpoint) {
-          if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "ball" && i > 3) || (currentLevel.checkpointWhen_touches == "schieber" && i < 4)) && ((currentLevel.checkpointWhen_touches == "schieber" && ((((((pCheckpoint.schieber.y - y1 > 100 && level.mode != "magnet") || (pCheckpoint.schieber.y - y1 > 300 && level.mode == "magnet")) || ((y1 - pCheckpoint.schieber.y > 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - pCheckpoint.schieber.y > 300))))) || (((level.mode != "magnet" && pCheckpoint.schieber.x - x1 > 100) || (level.mode == "magnet" && pCheckpoint.schieber.x - x1 > 300)) || ((level.mode == "mode" && x1 - pCheckpoint.schieber.x > 300) || ((level.mode != "magnet" && x1 - pCheckpoint.schieber.x > 100)))))) || (currentLevel.checkpointWhen_touches == "ball" && ((level.mode == "magnet" && pCheckpoint.ball.x - ball.x > 300) || (level.mode != "magnet" && pCheckpoint.ball.x - ball.x > 100)) || ((level.mode == "magnet" && ball.x - pCheckpoint.ball.x > 300) || (level.mode != "magnet" && ball.x - pCheckpoint.ball.x > 100))) ||
-        (((level.mode != "magnet" && pCheckpoint.ball.y - ball.y > 100) || (level.mode == "magnet" && pCheckpoint.ball.y - ball.y > 300)) || ((level.mode == "magnet" && ball.y - pCheckpoint.ball.y > 300) || (level.mode != "magnet" && ball.y - pCheckpoint.ball.y > 100)))))) {
-          newCheckpoint++;
-        }
+      checkpoint.forEach((pCheckpoint, i1) => {
+        
+        // if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "ball" && i > 3) || (currentLevel.checkpointWhen_touches == "schieber" && i < 4)) && ((currentLevel.checkpointWhen_touches == "schieber" && ((((((pCheckpoint.schieber.y - y1 > 100 && level.mode != "magnet") || (pCheckpoint.schieber.y - y1 > 300 && level.mode == "magnet")) || ((y1 - pCheckpoint.schieber.y > 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - pCheckpoint.schieber.y > 300))))) || (((level.mode != "magnet" && pCheckpoint.schieber.x - x1 > 100) || (level.mode == "magnet" && pCheckpoint.schieber.x - x1 > 300)) || ((level.mode == "mode" && x1 - pCheckpoint.schieber.x > 300) || ((level.mode != "magnet" && x1 - pCheckpoint.schieber.x > 100)))))) || (currentLevel.checkpointWhen_touches == "ball" && ((level.mode == "magnet" && pCheckpoint.ball.x - ball.x > 300) || (level.mode != "magnet" && pCheckpoint.ball.x - ball.x > 100)) || ((level.mode == "magnet" && ball.x - pCheckpoint.ball.x > 300) || (level.mode != "magnet" && ball.x - pCheckpoint.ball.x > 100))) ||
+        // (((level.mode != "magnet" && pCheckpoint.ball.y - ball.y > 100) || (level.mode == "magnet" && pCheckpoint.ball.y - ball.y > 300)) || ((level.mode == "magnet" && ball.y - pCheckpoint.ball.y > 300) || (level.mode != "magnet" && ball.y - pCheckpoint.ball.y > 100)))))) {
+      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) > 100 && Math.abs(pCheckpoint.schieber.y - y1) > 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) > 100 && Math.abs(pCheckpoint.ball.y - ball.y) > 100)))) {
+        newCheckpoint++;
       }
+      // if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "ball" && i > 3) || (currentLevel.checkpointWhen_touches == "schieber" && i < 4)) && ((currentLevel.checkpointWhen_touches == "schieber" && ((((((pCheckpoint.schieber.y - y1 < 100 && level.mode != "magnet") || (pCheckpoint.schieber.y - y1 < 300 && level.mode == "magnet")) || ((y1 - pCheckpoint.schieber.y < 100 && level.mode != "magnet") || (level.mode == "magnet" && y1 - pCheckpoint.schieber.y < 300))))) || (((level.mode != "magnet" && pCheckpoint.schieber.x - x1 < 100) || (level.mode == "magnet" && pCheckpoint.schieber.x - x1 < 300)) || ((level.mode == "mode" && x1 - pCheckpoint.schieber.x < 300) || ((level.mode != "magnet" && x1 - pCheckpoint.schieber.x < 100)))))) || (currentLevel.checkpointWhen_touches == "ball" && ((level.mode == "magnet" && pCheckpoint.ball.x - ball.x < 300) || (level.mode != "magnet" && pCheckpoint.ball.x - ball.x < 100)) || ((level.mode == "magnet" && ball.x - pCheckpoint.ball.x < 300) || (level.mode != "magnet" && ball.x - pCheckpoint.ball.x < 100))) ||
+      // (((level.mode != "magnet" && pCheckpoint.ball.y - ball.y < 100) || (level.mode == "magnet" && pCheckpoint.ball.y - ball.y < 300)) || ((level.mode == "magnet" && ball.y - pCheckpoint.ball.y < 300) || (level.mode != "magnet" && ball.y - pCheckpoint.ball.y < 100)))))) {
+        if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 100 && Math.abs(pCheckpoint.schieber.y - y1) < 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 100 && Math.abs(pCheckpoint.ball.y - ball.y) < 100)))) {
+        if (i1) checkpointSelection.value = i1 + '. checkpoint';
+        else checkpointSelection.value = 'start';
+        level.checkpoint = i1;
+      }
+      });
+      // for (const pCheckpoint of checkpoint) {
+      // }
       if (newCheckpoint == checkpoint.length) {
         console.log("checkpoint!!!");
         if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
@@ -1705,13 +1719,15 @@ function checkpointSelected(value) {
     else winnerScreen();
   }
   function removeCheckpoint() {
-    if (checkpoint.length > 1 && confirm('Are you sure you want to delete the selected checkpoint (' + level.checkpoint + '.) ?')) {
+    if (checkpoint.length > 1 && level.checkpoint && confirm('Are you sure you want to delete the selected checkpoint (' + level.checkpoint + '.) ?')) {
       checkpoint.splice(level.checkpoint, 1);
       level.checkpoint--;
       checkpoints[level.mode][level.aktuell] = checkpoint;
       localStorage.setItem('checkpointsTransportTheBall', JSON.stringify(checkpoints));
       // sphere.ball.style.left = checkpoint[level.checkpoint].ball.x + "px";
       // sphere.ball.style.top = checkpoint[level.checkpoint].ball.y + "px";
+      if (level.checkpoint) checkpointSelection.value = level.checkpoint + '. checkpoint';
+      else checkpointSelection.value = level.checkpoint = "start";
       restartLevel();
    }
   }
@@ -1796,8 +1812,14 @@ function checkpointSelected(value) {
     }
     checkpointSelection.value = valueBefore;
     // TODO: why highscore checks?
-    if (document.getElementById('checkpointSelection').options.length > 0/* && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length]*/) checkpointSelection.style.display = 'inline';
-    else checkpointSelection.style.display = 'none';
+    if (document.getElementById('checkpointSelection').options.length > 0/* && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length]*/) {
+      checkpointSelection.style.display = 'inline';
+      removeCheckpointB.style.display = 'inline';
+    }
+    else {
+      checkpointSelection.style.display = 'none';
+      removeCheckpointB.style.display = 'none';
+    }
     x1 = checkpoint[level.checkpoint].schieber.x;
     y1 = checkpoint[level.checkpoint].schieber.y;
     ball.x = checkpoint[level.checkpoint].ball.x;
@@ -2003,7 +2025,7 @@ function checkpointSelected(value) {
     if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {
       checkpoint = JSON.parse(JSON.stringify(checkpoints[level.mode][level.aktuell])); 
       level.checkpoint = checkpoint.length - 1;
-      if (!level.checkpoint) level.checkpoint = "start";
+      if (!level.checkpoint) level.checkpoint = 0;
       else checkpointSelection.value = level.checkpoint + '. checkpoint';
       restartLevel();
       time = checkpoint[level.checkpoint].timeNeededToReach;
@@ -2218,10 +2240,11 @@ function createPath(...points) {
     return path;
 }
 
-if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
+if (gerät == "PC") alert("please click to place a joy-stick!"); 
+joyStick = "place";
 function canvasClicked() {
-  if (joyStick == "place" && gerät == "PC") {
-    joyStick = {coordinates : {x: mausx, y: mausy}};
+  if (/*joyStick == "place" && */gerät == "PC") {
+    joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
   }
 }
 document.addEventListener('touchmove', touch);
