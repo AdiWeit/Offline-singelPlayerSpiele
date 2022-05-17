@@ -1198,7 +1198,6 @@ function getTimeString(pTime) {
 }
 // draw changes in the video on the canvas and changes the current position in the video
 function updateVideo(){
-  if (sourceIsVideo.checked) { 
     videoPosition.value = video.currentTime;
     timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
     canvas.clearRect(0, 0, textur.width, textur.height);
@@ -1219,9 +1218,8 @@ function updateVideo(){
       if (stopAtEnd.checked) playPauseVideo('pause');
       else if(video.currentTime >= video.duration) playVideo.innerHTML = 'play';
     }
-    requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
-  }
-  else video.pause();
+    if (sourceIsVideo.checked) requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
+    else video.pause();
 }
 // section 3.1: live camera
 // Prefer camera resolution nearest to 1280x720.
