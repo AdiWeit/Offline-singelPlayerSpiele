@@ -173,6 +173,16 @@
     <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle nach <input type="text" id="anzahlVerboten" value="3" style="width: 25px;"> Malen verboten (einfacher, weil immer direkt nebeneinander)</font>
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
+  <a style="display: none;" id="turnsHistoryS">
+    <br>
+    <b>zu vorherigen Zug zurückkehren:</b>
+    <br>
+    <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
+    <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
+    <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
+    <br>
+    <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
+  </a>
   <h2>allgemeine Einstellungen: </h2>
   <input type="checkbox" onchange="if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
   <!-- <h3>general</h3> -->
@@ -442,7 +452,8 @@
     else {
       settings.style.display = 'none';
       canvas = textur.getContext('2d');
-      if (wrongPosition) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
+      if (wrongPosition && !state.changedPos) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
+      state.changedPos = false; 
     }
     texturTop = textur.getBoundingClientRect().top;
   }
@@ -920,6 +931,7 @@ modeHeadline.style.display = 'none';
   shuffleStyle.style.display = 'none';
   tileStatusOptions.style.display = 'none';
   textur.style.touchAction = "none";
+  if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   texturTop = textur.getBoundingClientRect().top;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionBar.height = lengthPerTeil.edit.y + 10;
@@ -1035,6 +1047,7 @@ function canvasClicked(calledBy) {
     }
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
+  var userMovement = {index: 0, moves: []};
   function movementStepsChanged(checked, doNotSetChecked) {
     if (!doNotSetChecked)  distinctMovement.checked = checked;
     if (checked) playerMovement = distinctMoves;
@@ -1074,18 +1087,34 @@ function canvasClicked(calledBy) {
     else return JSON.parse(movementPosition.value);
   }
   var wrongPosition;
-  function playMovementPos(position, pReturn, doNotChangeVal) {
+  function playMovementPos(position, pReturn, doNotChangeVal, pPlayerMovement) {
+    var isUserMovement = pPlayerMovement != undefined;
+    if (!pPlayerMovement) pPlayerMovement = playerMovement;
+    else {
+      if (goBackAsTurns.checked) stats.turns += Math.abs(position - playerMovementSlider.value);
+      playerMovementSlider.value = position;
+      state.changedPos = true;
+      userMovement.index = position;
+      setTimeout(() => {
+        movement.playerPosition = positions.wrong;
+      }, 100);
+    }
     if (position < 0) position = 0;
-    if (position > playerMovement.length) position = playerMovement.length;
+    if (position > pPlayerMovement.length) position = pPlayerMovement.length;
     if (!doNotChangeVal) movementPosition.value = position;
-    positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
-    for (let i = playerMovement.length - 1; i >= position; i--) {
-      positions.wrong[playerMovement[i].tile].edit.x += playerMovement[i].x;
-      positions.wrong[playerMovement[i].tile].edit.y += playerMovement[i].y;
+    if (!isUserMovement) positions.wrong = JSON.parse(JSON.stringify(movement.startPosition));
+    else positions.wrong = JSON.parse(JSON.stringify(userMovement.startPosition));
+    for (let i = pPlayerMovement.length - 1; i >= position; i--) {
+      if (isUserMovement) missing[pPlayerMovement[i].i1] = positions.wrong[pPlayerMovement[i].tile].edit.x + ' - ' + positions.wrong[pPlayerMovement[i].tile].edit.y;
+      positions.wrong[pPlayerMovement[i].tile].edit.x += pPlayerMovement[i].x;
+      positions.wrong[pPlayerMovement[i].tile].edit.y += pPlayerMovement[i].y;
     }
     if (pReturn) return positions.wrong;
-    canvas = movementPlayerTextur.getContext('2d');
-    objMovementPlayer.position = JSON.parse(position);
+    // PC movement player
+    if (!isUserMovement) {
+      canvas = movementPlayerTextur.getContext('2d');
+      objMovementPlayer.position = JSON.parse(position);
+    }
     layout(true, true);
   }
   // end section 2.1
@@ -1202,6 +1231,7 @@ function updateVideo(){
     timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
     canvas.clearRect(0, 0, textur.width, textur.height);
     for (var i1 = 0; aufgebenId.style.display == "inline" && i1 < positions.wrong?.length; i1++) {
+      var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       if (shuffleStyle.value == "listTiles" && tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
       else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
@@ -1484,10 +1514,18 @@ navigator.mediaDevices.enumerateDevices()
     pMissing = missing[i1];
     stats.turns++;
     var ablage = JSON.parse(JSON.stringify(positions.wrong[i]));
+    if (userMovement.index < userMovement.moves.length - 1) {
+      userMovement.moves.splice(userMovement.index, userMovement.moves.length - userMovement.index);
+    }
+    userMovement.moves.push({x: -(JSON.parse(pMissing.split(' - ')[0]) - positions.wrong[i].edit.x), y: -(JSON.parse(pMissing.split(' - ')[1]) - positions.wrong[i].edit.y), tile: i, i1: i1});
+    userMovement.index++;
+    playerMovementSlider.max = userMovement.moves.length;
+    playerMovementSlider.value = userMovement.index + 1;
     positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
     missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
     selected.boolean = false;
     movement.playerPosition = positions.wrong;
+    userMovement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
   }
   var doNotChange = [];
   var possibleMissing = [];
