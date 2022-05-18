@@ -252,6 +252,12 @@
     <a id="timeText"></a>
   </div>
 </div>
+<p id="showOriginalP" style="display:none">
+  <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
+  <br>
+  <img style="display: none;" id="preview">
+  <canvas style="display: none;" id="videoPreview"></canvas>
+</p>
 </a2>
 </div>
 <br>
@@ -262,8 +268,10 @@
 </a>
 <br>
 <br>
+<button onclick="expandSide('top');" class="expandButtons" id="expandTop">+</button>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <button onclick="expandSide('right');" class="expandButtons" id="expandRight">+</button>
+<button onclick="expandSide('left');" class="expandButtons" id="expandLeft">+</button>
 <br>
 <button class="expandButtons" onclick="expandSide('bottom');" id="expandBottom">+</button>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
@@ -386,12 +394,6 @@
   body { padding-bottom: 100px; }
   
   </style>
-<p id="showOriginalP" style="display:none">
-  <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
-  <br>
-  <img style="display: none;" id="preview">
-  <canvas style="display: none;" id="videoPreview"></canvas>
-</p>
 <script>
     window.onbeforeunload = function(){
     console.log("Leave Website");
@@ -566,12 +568,23 @@
     }
   }
   function expandSide(side) {
-    if (side == "right") textur.width += lengthPerTeil.edit.x*3;
-    else textur.height += lengthPerTeil.edit.y*3;
+    if (['right', 'left'].includes(side)) textur.width += lengthPerTeil.edit.x*3;
+    if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
     expandRight.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
     expandBottom.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
-    expandBottom.style.width = textur.width + 6;
+    expandBottom.style.width = textur.getBoundingClientRect().right + scrollX;
+    // expandLeft.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
+    expandTop.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
+    expandTop.style.width = textur.getBoundingClientRect().right +scrollX;
     expandRight.style.height = textur.height + 6; 
+    expandLeft.style.height = textur.height + 6; 
+    if (['top', 'left'.includes(side)]) {
+      var moveDirection = "x";
+      if (side == "top") moveDirection = "y";
+      for (const position of positions.wrong) {
+        position.edit[moveDirection] += lengthPerTeil.edit[moveDirection]*3;
+      }
+    }
     layout(true, true);
   }
   function showCurrentStats(mode) {
@@ -951,14 +964,30 @@ modeHeadline.style.display = 'none';
   tileStatusOptions.style.display = 'none';
   textur.style.touchAction = "none";
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
+  // expand textur buttons
+  if (modeSelection.value == "traditional") { 
+  expandBottom.style.height = '6vh';
+  expandBottom.style.height = '6vh';
+  expandBottom.style.width = textur.width + 6; 
+  expandTop.style.width = textur.width + 6;  
+  expandTop.style.height = '6vh';
+  expandTop.style.position = "static";  
+  for (const elm of document.getElementsByClassName('expandButtons')) {
+    elm.style.display = 'inline';
+  }
   texturTop = textur.getBoundingClientRect().top;
+  expandBottom.style.top = texturTop + scrollY + textur.height + 6 + 'px'; 
+  textur.style.position = "absolute";
   expandRight.style.top = texturTop;
   expandRight.style.height = textur.height + 6;  
   expandRight.style.width = '3vw';  
-  expandRight.style.display = 'inline';  
-  expandBottom.style.width = textur.width + 6;  
-  expandBottom.style.display = 'inline';  
-  expandBottom.style.height = '6vh';
+  expandRight.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
+  expandLeft.style.top = texturTop;
+  expandLeft.style.height = textur.height + 6;  
+  expandLeft.style.width = '3vw';
+  textur.style.left = expandLeft.getBoundingClientRect().right + 'px';
+}
+  texturLeft = textur.getBoundingClientRect().left;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionBar.height = lengthPerTeil.edit.y + 10;
   tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
