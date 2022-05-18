@@ -175,21 +175,49 @@
   </p>
   <a style="display: none;" id="turnsHistoryS">
     <br>
-    <b>zu vorherigen Zug zurückkehren:</b>
-    <br>
-    <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
-    <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
-    <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
-    <br>
-    <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
+    <div id="movementPlayer" style="display: none;">
+      <input onchange="changeMovementPlayerVis(checked);" type="checkbox"><b>Züge des PCs ansehen</b>
+      <div id="innerMovementPlayer" style="display: none;">
+        <br>
+        <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung
+        <br>
+        <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
+        <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
+        <button id="movementPlayButton" onclick="playPauseMovement();">play</button>
+        <button onclick="playMovementPos(0);">⟲</button>
+        <button onclick="playMovementPos(objMovementPlayer.position + 1);">></button>
+        <button id="movementDirectionRight" style="background-color: hsla(180, 100%, 50%, 1);" onclick="changeMovementDirection(1);">>></button>
+        <br>
+        <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
+        <button onclick="playMovementPos(getPlayerPosition());">zu Ihrer Positionierung (falls vorhanden)</button>
+        <br>
+        <b>Geschwindigkeit</b>
+        <br>
+        schnell <input min="155" value="500" max="1000" id="movementPlayerSpeed" type="range"> langsam
+        <button onclick="movementPlayerSpeed.value = 500;">zurücksetzen</button>
+        <br>
+        <canvas id="movementPlayerTextur"></canvas>
+      </div>
+      <br>
+    </div>
+    <input onchange="if (checked) {userMovementPlayer.style.display = 'inline'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalSettings.style.display = 'inline';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
+    <a style="display: none;" id="userMovementPlayer">
+      <br>
+      <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
+      <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
+      <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
+      <br>
+      <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
+    </a>
   </a>
+  <a2 id="generalSettings">
   <h2>allgemeine Einstellungen: </h2>
-  <input type="checkbox" onchange="if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
-  <!-- <h3>general</h3> -->
-  <a id="rightMarkerSettings">
-  <br>
-  <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
-  <br>
+    <input type="checkbox" onchange="if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
+    <!-- <h3>general</h3> -->
+    <a id="rightMarkerSettings">
+      <br>
+      <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
+      <br>
   <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
   </a>
   <br>
@@ -204,32 +232,6 @@
   <!-- <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
   <br>
   <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
-  <br>
-  <br>
-  <div id="movementPlayer" style="display: none;">
-    <input onchange="changeMovementPlayerVis(checked);" type="checkbox">Züge des PCs ansehen
-    <br>
-    <div id="innerMovementPlayer" style="display: none;">
-      <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung
-      <br>
-      <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
-      <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
-      <button id="movementPlayButton" onclick="playPauseMovement();">play</button>
-      <button onclick="playMovementPos(0);">⟲</button>
-      <button onclick="playMovementPos(objMovementPlayer.position + 1);">></button>
-      <button id="movementDirectionRight" style="background-color: hsla(180, 100%, 50%, 1);" onclick="changeMovementDirection(1);">>></button>
-      <br>
-      <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
-      <button onclick="playMovementPos(getPlayerPosition());">zu Ihrer Positionierung (falls vorhanden)</button>
-      <br>
-      <b>Geschwindigkeit</b>
-      <br>
-      schnell <input min="155" value="500" max="1000" id="movementPlayerSpeed" type="range"> langsam
-      <button onclick="movementPlayerSpeed.value = 500;">zurücksetzen</button>
-      <br>
-      <canvas id="movementPlayerTextur"></canvas>
-    </div>
-  </div>
   <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
@@ -248,8 +250,9 @@
     <button onclick="video.currentTime += 10;">>></button>
     <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
     <a id="timeText"></a>
-    </div>
   </div>
+</div>
+</a2>
 </div>
 <br>
 <button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">Fertig</button>
@@ -476,6 +479,7 @@
     else {
       innerMovementPlayer.style.display = 'none';
       texturTop = textur.getBoundingClientRect().top;
+      canvas = textur.getContext('2d');
     }
   }
   // change size of + buttons for backToBar
