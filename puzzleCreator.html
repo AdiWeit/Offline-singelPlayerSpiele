@@ -585,11 +585,6 @@
       }
     }
     layout(true, true);
-  //   setTimeout(() => {
-  //     state.sideExpanded = false;
-  //   }, 1000);
-  // }
-  //   state.sideExpanded = true;
   }
   function showCurrentStats(mode) {
     if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
@@ -784,7 +779,7 @@
 if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.innerWidth && selected.tiles?.length) {
       window.scroll(scrollX + 3, scrollY);
     }
-      if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.innerWidth + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.innerWidth - 10))) && (modeSelection.value !=
+if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.visualViewport.width + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.visualViewport.width - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX + 3, scrollY);
         mausx += 3;
@@ -800,7 +795,7 @@ if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX
 // down
 var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.innerHeight + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.innerHeight - 10))) && (modeSelection.value !=
+      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.visualViewport.height + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.visualViewport.height - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         window.scroll(scrollX, scrollY + 3);
         mausy += 3;
@@ -1920,6 +1915,7 @@ navigator.mediaDevices.enumerateDevices()
         // });
       }
       if (selected.tiles.length) {
+        // TODO: optimieren
         positions.wrong.forEach((pos, i) => {
           if (selected.tiles.includes(i)) {
             pos.edit.x += mausx - selected.position.x;
