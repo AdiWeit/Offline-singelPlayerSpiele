@@ -36,7 +36,7 @@
 <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
-<p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px;" id="mobileControls">
+<p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <a style="display: none;" id="traditionalModeMobileControls">
       <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
@@ -268,12 +268,12 @@
 </a>
 <br>
 <br>
-<button onclick="expandSide('top');" class="expandButtons" id="expandTop">+</button>
+<button onclick="expandSide('top');" style="height: 3vw;" class="expandButtons" id="expandTop">+</button>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
-<button onclick="expandSide('right');" class="expandButtons" id="expandRight">+</button>
-<button onclick="expandSide('left');" class="expandButtons" id="expandLeft">+</button>
+<button onclick="expandSide('right');" style="width: 3vw;" class="expandButtons" id="expandRight">+</button>
+<button onclick="expandSide('left');" style="width: 3vw;" class="expandButtons" id="expandLeft">+</button>
 <br>
-<button class="expandButtons" onclick="expandSide('bottom');" id="expandBottom">+</button>
+<button class="expandButtons" style="height: 3vw;" onclick="expandSide('bottom');" id="expandBottom">+</button>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div class="expandButtons" id="backToBarButtons">
 </div>
@@ -570,12 +570,12 @@
   function expandSide(side) {
     if (['right', 'left'].includes(side)) textur.width += lengthPerTeil.edit.x*3;
     if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
-    expandRight.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
-    expandBottom.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
-    expandBottom.style.width = textur.getBoundingClientRect().right + scrollX;
+    expandRight.style.left = textur.getBoundingClientRect().right + scrollX + 'px';
+    expandBottom.style.top = textur.getBoundingClientRect().bottom + scrollY; + 'px';
+    expandBottom.style.width = textur.getBoundingClientRect().right - textur.getBoundingClientRect().left + scrollX;
     // expandLeft.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
-    expandTop.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
-    expandTop.style.width = textur.getBoundingClientRect().right +scrollX;
+    // expandTop.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
+    expandTop.style.width = textur.getBoundingClientRect().right - textur.getBoundingClientRect().left + scrollX;
     expandRight.style.height = textur.height + 6; 
     expandLeft.style.height = textur.height + 6; 
     if (['top', 'left'.includes(side)]) {
@@ -949,16 +949,16 @@ modeHeadline.style.display = 'none';
         } while (doNotChange.includes(j) && j != i && doNotChange.length != positions.wrong.length);
         x = positions.wrong[i].edit;
         if (!doNotChange.includes(i)) {
-        positions.wrong[i].edit = positions.wrong[j].edit;
-        positions.wrong[j].edit = x;
-      }
+          positions.wrong[i].edit = positions.wrong[j].edit;
+          positions.wrong[j].edit = x;
+        }
       }
       stats.preOrdered = "pending";
-  }
-  if (shuffleStyle.value == "nextToEachOther") tilesGapS.style.display = "none";
-  shuffleStyle.value = shuffleStyleBefore;
-  doNotChange = [];
-  aufgebenId.style.display = "inline";
+    }
+    if (shuffleStyle.value == "nextToEachOther") tilesGapS.style.display = "none";
+    shuffleStyle.value = shuffleStyleBefore;
+    doNotChange = [];
+    aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
   shuffleStyle.style.display = 'none';
   tileStatusOptions.style.display = 'none';
@@ -966,28 +966,27 @@ modeHeadline.style.display = 'none';
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   // expand textur buttons
   if (modeSelection.value == "traditional") { 
-  expandBottom.style.height = '6vh';
-  expandBottom.style.height = '6vh';
+  textur.style.position = "absolute";
   expandBottom.style.width = textur.width + 6; 
   expandTop.style.width = textur.width + 6;  
-  expandTop.style.height = '6vh';
-  expandTop.style.position = "static";  
+  // expandTop.style.position = "static";  
   for (const elm of document.getElementsByClassName('expandButtons')) {
     elm.style.display = 'inline';
   }
-  texturTop = textur.getBoundingClientRect().top;
-  expandBottom.style.top = texturTop + scrollY + textur.height + 6 + 'px'; 
-  textur.style.position = "absolute";
+  textur.style.top = expandTop.getBoundingClientRect().bottom + scrollY + 'px';
+  texturTop = textur.getBoundingClientRect().top + scrollY;
+  expandLeft.style.left = '0px';
+  expandLeft.style.height = textur.height + 6;  
+  expandLeft.style.top = textur.getBoundingClientRect().top + scrollY// texturTop;
+  textur.style.left = expandLeft.getBoundingClientRect().right + scrollX + 'px';
+  expandTop.style.left = textur.getBoundingClientRect().left + scrollX + 'px';
+  expandBottom.style.left = textur.getBoundingClientRect().left + scrollX + 'px';
   expandRight.style.top = texturTop;
   expandRight.style.height = textur.height + 6;  
-  expandRight.style.width = '3vw';  
-  expandRight.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
-  expandLeft.style.top = texturTop;
-  expandLeft.style.height = textur.height + 6;  
-  expandLeft.style.width = '3vw';
-  textur.style.left = expandLeft.getBoundingClientRect().right + 'px';
+  expandRight.style.left = textur.getBoundingClientRect().right + scrollX// textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
+  expandBottom.style.top = textur.getBoundingClientRect().bottom + scrollY;// texturTop + scrollY + textur.height + 6 + 'px'; 
 }
-  texturLeft = textur.getBoundingClientRect().left;
+  texturLeft = textur.getBoundingClientRect().left + scrollX;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionBar.height = lengthPerTeil.edit.y + 10;
   tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
