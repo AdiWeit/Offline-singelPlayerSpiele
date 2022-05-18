@@ -263,10 +263,11 @@
 <br>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+<button onclick="expandSide('right');" class="expandButtons" id="expandRight">+</button>
 <br>
+<button class="expandButtons" onclick="expandSide('bottom');" id="expandBottom">+</button>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
-<div id="backToBarButtons">
-
+<div class="expandButtons" id="backToBarButtons">
 </div>
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
@@ -295,6 +296,11 @@
 
   .backToTileB {
     position: fixed;
+  }
+  .expandButtons {
+    display: none;
+    font-size: 55px;
+    position: absolute;
   }
 </style>
 <style name="bubbleStyle">
@@ -558,6 +564,15 @@
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
     }
+  }
+  function expandSide(side) {
+    if (side == "right") textur.width += lengthPerTeil.edit.x*3;
+    else textur.height += lengthPerTeil.edit.y*3;
+    expandRight.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
+    expandBottom.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
+    expandBottom.style.width = textur.width + 6;
+    expandRight.style.height = textur.height + 6; 
+    layout(true, true);
   }
   function showCurrentStats(mode) {
     if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
@@ -937,6 +952,13 @@ modeHeadline.style.display = 'none';
   textur.style.touchAction = "none";
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   texturTop = textur.getBoundingClientRect().top;
+  expandRight.style.top = texturTop;
+  expandRight.style.height = textur.height + 6;  
+  expandRight.style.width = '3vw';  
+  expandRight.style.display = 'inline';  
+  expandBottom.style.width = textur.width + 6;  
+  expandBottom.style.display = 'inline';  
+  expandBottom.style.height = '6vh';
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileSelectionBar.height = lengthPerTeil.edit.y + 10;
   tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
