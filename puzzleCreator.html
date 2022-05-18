@@ -776,7 +776,7 @@
     mausy -= 3;
 }
 // right 
-if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.innerWidth && selected.tiles?.length) {
+if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.visualViewport - texturLeft && selected.tiles?.length) {
       window.scroll(scrollX + 3, scrollY);
     }
 if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.visualViewport.width + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.visualViewport.width - 10))) && (modeSelection.value !=
