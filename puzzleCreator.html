@@ -876,11 +876,11 @@ modeHeadline.style.display = 'none';
         textur.height += 500;
         positions.wrong.forEach((position, i) => {
           if (shuffleStyle.value != "listTiles" || emptyTileBar.checked) {
-            position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y))};
+            position.edit = {x: Math.round(Math.random()*(textur.width - lengthPerTeil.edit.x)), y: Math.round(Math.random()*(textur.height - lengthPerTeil.edit.y)), degree: 0};
             if (emptyTileBar.checked) tileSelectionBar.tiles.push(i);
           }
           else {
-            position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2};
+            position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2, degree: 0};
             tileSelectionBar.tiles.push(i);
           }
           position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, -90][Math.round(Math.random()*3)]};
@@ -901,7 +901,7 @@ modeHeadline.style.display = 'none';
         if (isNaN(tilesXTileGap.value) || tilesXTileGap.value == '') tilesXTileGap.value = anzahlX.value;
         var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
         for (let i = 0; i < positions.wrong.length; i++) {
-          positions.wrong[i].edit = {x: pos.x, y: pos.y};
+          positions.wrong[i].edit = {x: pos.x, y: pos.y, degree: 0};
           pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
           if ((pos.x + lengthPerTeil.edit.x/2 > window.innerWidth && fillScreenTileGap.checked) || (!fillScreenTileGap.checked && pos.x > lengthPerTeil.edit.x + (lengthPerTeil.edit.x + JSON.parse(tilesGap.value))*(parseInt(tilesXTileGap.value) - 1))) {
             pos.x = lengthPerTeil.edit.x/2;
@@ -1074,7 +1074,9 @@ function canvasClicked(calledBy) {
   var objMovementPlayer = {pause: false, position: 0, direc: 1};
   function getPlayerPosition(backToBeginningIfNeeded, easySteps) {
     for (let i = 0; i < playerMovement.length; i++) {
-      if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) return i;
+      if (JSON.stringify(playMovementPos(i, true, true)) == JSON.stringify(movement.playerPosition)) {
+        return i;
+      }
     }
     if (easySteps != undefined) {
       movementStepsChanged(easySteps);
@@ -1462,7 +1464,7 @@ navigator.mediaDevices.enumerateDevices()
     if (i1 == undefined) i1 = tileSelectionBar.getTilePosition(i);
     if (!pCanvas) pCanvas = canvas;
     else if (!state.modelEmptybar) {
-      position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2};
+      position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2, degree: 0};
     }
     pCanvas.save();
     if (modeSelection.value == "traditional" && !removeTilesScreen) pCanvas.translate(position.edit.x, position.edit.y);
@@ -1521,7 +1523,7 @@ navigator.mediaDevices.enumerateDevices()
     userMovement.index++;
     playerMovementSlider.max = userMovement.moves.length;
     playerMovementSlider.value = userMovement.index + 1;
-    positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])};//.splice(side, 1);
+    positions.wrong[i].edit = {x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1]), degree: 0};//.splice(side, 1);
     missing[i1] = ablage.edit.x + ' - ' + ablage.edit.y;
     selected.boolean = false;
     movement.playerPosition = positions.wrong;
@@ -1599,7 +1601,7 @@ navigator.mediaDevices.enumerateDevices()
       var ablage = JSON.parse(JSON.stringify(positions.wrong[side]));
       movement.move.unshift({x: (pMissing.split(' - ')[0] - ablage.edit.x), y: (pMissing.split(' - ')[1] - ablage.edit.y), tile: side});
       // movement.missing.unshift(JSON.parse(JSON.stringify(missingArray)));
-      positions.wrong[side].edit = JSON.parse(JSON.stringify({x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1])}));//.splice(side, 1);
+      positions.wrong[side].edit = JSON.parse(JSON.stringify({x: JSON.parse(pMissing.split(' - ')[0]), y: JSON.parse(pMissing.split(' - ')[1]), degree: 0}));//.splice(side, 1);
       textur.width = textur.width;
       layout(true);
       // for (var i1 = 0; difficultSchieben.checked && i1 < movement.positions.length; i1++) {
@@ -1770,7 +1772,7 @@ navigator.mediaDevices.enumerateDevices()
             }, 10);
           }
         }
-          positions.wrong[i.tileI].edit = {x: mausx, y: mausy};
+          positions.wrong[i.tileI].edit = {x: mausx, y: mausy, degree: 0};
         state.placeTile = true;
         scrollTileSelection(0);
       }
