@@ -568,6 +568,7 @@
     }
   }
   function expandSide(side) {
+    // if (!state.sideExpanded && aufgebenId.style.display == 'inline') {
     if (['right', 'left'].includes(side)) textur.width += lengthPerTeil.edit.x*3;
     if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
     expandRight.style.left = textur.getBoundingClientRect().right + scrollX + 'px';
@@ -576,7 +577,7 @@
     expandTop.style.width = (textur.getBoundingClientRect().right + scrollX) - (textur.getBoundingClientRect().left + scrollX);
     expandRight.style.height = textur.height + 6; 
     expandLeft.style.height = textur.height + 6; 
-    if (['top', 'left'.includes(side)]) {
+    if (['top', 'left'].includes(side)) {
       var moveDirection = "x";
       if (side == "top") moveDirection = "y";
       for (const position of positions.wrong) {
@@ -584,6 +585,11 @@
       }
     }
     layout(true, true);
+  //   setTimeout(() => {
+  //     state.sideExpanded = false;
+  //   }, 1000);
+  // }
+  //   state.sideExpanded = true;
   }
   function showCurrentStats(mode) {
     if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
@@ -1890,9 +1896,9 @@ navigator.mediaDevices.enumerateDevices()
       for (var tile of selected.tiles) {
         var objTile = positions.wrong[tile];
         if (gerät == "PC") {
-        if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0 && selected.tiles.length) textur.width += 15;
-        if (!mirrorInput.checked && objTile.edit.x + lengthPerTeil.edit.x > textur.width) textur.width += lengthPerTeil.edit.x;
-        if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) textur.height += lengthPerTeil.edit.y;
+        if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0 && selected.tiles.length) expandSide('right');// textur.width += 15;
+        if (!mirrorInput.checked && objTile.edit.x + lengthPerTeil.edit.x > textur.width) expandSide('right'); // textur.width += lengthPerTeil.edit.x;
+        if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) expandSide('bottom'); // textur.height += lengthPerTeil.edit.y;
       }
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
