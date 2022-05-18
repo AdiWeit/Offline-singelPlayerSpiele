@@ -572,10 +572,8 @@
     if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
     expandRight.style.left = textur.getBoundingClientRect().right + scrollX + 'px';
     expandBottom.style.top = textur.getBoundingClientRect().bottom + scrollY; + 'px';
-    expandBottom.style.width = textur.getBoundingClientRect().right - textur.getBoundingClientRect().left + scrollX;
-    // expandLeft.style.left = textur.getBoundingClientRect().x + scrollX + textur.width + 6 + 'px';
-    // expandTop.style.top = textur.getBoundingClientRect().top + scrollY + textur.height + 6 + 'px';
-    expandTop.style.width = textur.getBoundingClientRect().right - textur.getBoundingClientRect().left + scrollX;
+    expandBottom.style.width = (textur.getBoundingClientRect().right + scrollX) - (textur.getBoundingClientRect().left + scrollX);
+    expandTop.style.width = (textur.getBoundingClientRect().right + scrollX) - (textur.getBoundingClientRect().left + scrollX);
     expandRight.style.height = textur.height + 6; 
     expandLeft.style.height = textur.height + 6; 
     if (['top', 'left'.includes(side)]) {
@@ -1937,12 +1935,23 @@ navigator.mediaDevices.enumerateDevices()
   // deletes clip options that apply to the same tile but are further away
   function deleteFurtherClipOptions() {
     nearestTile = {};
+    if (selected.clip.length > 1) {
+      console.log('debug');
+    }
     selected.clip.forEach((clip, i1) => {
       if (!nearestTile[clip.i] || clip.distance < nearestTile[clip.i].clip.distance) {
         if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
         nearestTile[clip.i] = {clip: clip, i: i1};
       }
       else if (clip.distance > nearestTile[clip.i].clip.distance) {
+        selected.clip.splice(i1, 1);
+      }
+      // sI
+      if (!nearestTile[clip.sI] || clip.distance < nearestTile[clip.sI].clip.distance) {
+        if (nearestTile[clip.sI]) selected.clip.splice(nearestTile[clip.sI].i, 1);
+        nearestTile[clip.sI] = {clip: clip, i: i1};
+      }
+      else if (clip.distance > nearestTile[clip.sI].clip.distance) {
         selected.clip.splice(i1, 1);
       }
     });
