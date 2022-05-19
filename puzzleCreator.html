@@ -2009,9 +2009,6 @@ navigator.mediaDevices.enumerateDevices()
   // deletes clip options that apply to the same tile but are further away
   function deleteFurtherClipOptions() {
     nearestTile = {};
-    if (selected.clip.length > 1) {
-      console.log('debug');
-    }
     selected.clip.forEach((clip, i1) => {
       if (!nearestTile[clip.i] || clip.distance < nearestTile[clip.i].clip.distance) {
         if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
@@ -2037,7 +2034,10 @@ navigator.mediaDevices.enumerateDevices()
   function mouseUp() {
     state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
-    if (modeSelection.value == "traditional" && !state.rotated) {
+    if (modeSelection.value == "traditional" && (!state.rotated || gerät == "PC")) {
+      if (!selected.clip.length) {
+        console.log('no clipping option');
+      }
       state.newTileSelected = false;
       state.oldTileSelected = false;
       var bClipped = false;
