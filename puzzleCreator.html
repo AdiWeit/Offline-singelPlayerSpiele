@@ -777,7 +777,7 @@
     mausy -= 3;
 }
 // right 
-if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.visualViewport - texturLeft && selected.tiles?.length) {
+if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.visualViewport.width - texturLeft && selected.tiles?.length) {
       window.scroll(scrollX + 3, scrollY);
     }
 if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.visualViewport.width + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.visualViewport.width - 10))) && (modeSelection.value !=
@@ -1047,7 +1047,9 @@ ScaleMetaViewport(scaleFactor);
     rotateControls.style.display = "inline";
   }
   selected.boolean = false;
+  try {
   preventAutomaticZoom.content = "";
+  } catch (err) {}
   window.scroll(0, 0);
   }
 
@@ -1071,6 +1073,9 @@ ScaleMetaViewport(scaleFactor);
   canvas = textur.getContext('2d');
   layout(true, true);
   startPause('completionTime');
+  setTimeout(() => {
+    adaptMobileControlsPosition();
+  }, 100);
 }
 // #importantUserInputs
 // select tiles to remove and move tiles or exchange them depending on the mode
@@ -1728,7 +1733,21 @@ navigator.mediaDevices.enumerateDevices()
   window.addEventListener('scroll',()=>{
     if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
     else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
+    adaptMobileControlsPosition();
   });
+  function adaptMobileControlsPosition() {
+    mobileControls.style.top = (visualViewport.offsetTop - 7) + 'px';
+    mobileControls.style.left = (visualViewport.offsetLeft + 377/visualViewport.scale) + 'px';
+    mobileControls.style.fontSize =  (5/visualViewport.scale) + 'vh';
+    for (const elm of document.getElementsByClassName('mobileControlsElm')) {
+      elm.style.width = 44/(visualViewport.scale); 
+      elm.style.height = 44/(visualViewport.scale); 
+    }
+    var pos = {x: visualViewport.offsetLeft, y: visualViewport.offsetTop};
+    setTimeout(() => {
+      if (pos.x != visualViewport.offsetLeft || pos.y != visualViewport.offsetTop) adaptMobileControlsPosition();
+    }, 40);
+  }
   // #importantUserInputs
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft;
@@ -1807,6 +1826,7 @@ navigator.mediaDevices.enumerateDevices()
       if (scrollable.checked) textur.style.touchAction = '';
     }
     if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
+    adaptMobileControlsPosition();
   }
   // }
   function tileSelected() {
