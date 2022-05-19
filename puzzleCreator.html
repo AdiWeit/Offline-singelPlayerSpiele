@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 <meta name="viewport" id="preventAutomaticZoom">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <p id="imageSettings">
 <input type="text" value="4" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile je x-Achse">
@@ -1009,8 +1010,31 @@ modeHeadline.style.display = 'none';
     scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
     selectBackToBarB.style.fontSize = '5vh';
-    if (shuffleStyle.value == "listTiles") alert('bitte aktivieren Sie "scroll" und zoomen Sie komplett raus, damit das Layout funktioniert wie gedacht.');
-    else alert('Sie können durch aktivieren von "scroll" wahrscheinlich noch weiter rauszoomen!');
+    try {
+      // try zooming out completely
+    function ScaleMetaViewport(initialScale) {
+    $('meta[name=viewport]').remove();
+    $('head').append('<meta name="viewport" content=""/>');
+    var viewport = $("meta[name='viewport']");
+    var original = viewport.attr("content");
+    var forceScale='';
+    if (initialScale) forceScale += "initial-scale=" + initialScale;
+    viewport.attr("content", forceScale);
+    setTimeout(function()
+    {
+      viewport.attr("content", original);
+    }, 100);
+}
+
+//Setting the scaleFactor as follows causes the viewport to zoom out
+//as far as possible
+var scaleFactor = 1 / window.devicePixelRatio;
+ScaleMetaViewport(scaleFactor);
+    } catch (err) {
+      console.log('jquery not working as intendet');
+      if (shuffleStyle.value == "listTiles") alert('bitte aktivieren Sie "scroll" und zoomen Sie komplett raus, damit das Layout funktioniert wie gedacht.');
+      else alert('Sie können durch aktivieren von "scroll" wahrscheinlich noch weiter rauszoomen!');
+    }
   }
   if (shuffleStyle.value == "listTiles") {
     scrollTileSelection(0);
