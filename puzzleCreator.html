@@ -1520,12 +1520,11 @@ navigator.mediaDevices.enumerateDevices()
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (stats.preOrdered == "pending") stats.preOrdered = richtige;
-    if (richtige == positions.wrong?.length && !removeTilesScreen) {
+    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished) {
       stopClock.completionTime.running = 0;
       richtige = 0;
-      finished = true;
-      layout(true);
       if(!withoutAlert) {
+        finished = true;
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
@@ -1537,6 +1536,7 @@ navigator.mediaDevices.enumerateDevices()
           }, 3000);
         }
         else alert("Bitte laden Sie die Seite neu, wenn Sie ein weiteres Puzzle erstellen wollen!");
+        layout(true);
     }
   }
 }
@@ -2037,6 +2037,7 @@ navigator.mediaDevices.enumerateDevices()
       // selectMultiple.checked = false;
       state.shift = false;
       selected.tiles = [];
+      layout(false, true);
     }
     selected.clip = [];
     if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
