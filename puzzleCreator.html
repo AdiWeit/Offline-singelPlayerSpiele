@@ -1525,7 +1525,6 @@ navigator.mediaDevices.enumerateDevices()
       richtige = 0;
       finished = true;
       layout(true);
-      finished = false;
       if(!withoutAlert) {
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
@@ -1993,13 +1992,15 @@ navigator.mediaDevices.enumerateDevices()
         selected.clip.splice(i1, 1);
       }
       // sI
-      if (!nearestTile[clip.sI] || clip.distance < nearestTile[clip.sI].clip.distance) {
+      if (!getConnectedTiles(clip.i, true).includes(nearestTile[clip.sI]?.clip.i)) {
+      if (!nearestTile[clip.sI] || (clip.distance < nearestTile[clip.sI].clip.distance)) {
         if (nearestTile[clip.sI]) selected.clip.splice(nearestTile[clip.sI].i, 1);
         nearestTile[clip.sI] = {clip: clip, i: i1};
       }
       else if (clip.distance > nearestTile[clip.sI].clip.distance) {
         selected.clip.splice(i1, 1);
       }
+    }
     });
   }
   var nearestTile = {};
