@@ -2014,7 +2014,7 @@ navigator.mediaDevices.enumerateDevices()
         if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
         nearestTile[clip.i] = {clip: clip, i: i1};
       }
-      else if (clip.distance > nearestTile[clip.i].clip.distance) {
+      else if (clip.distance >= nearestTile[clip.i].clip.distance) {
         selected.clip.splice(i1, 1);
       }
       // sI
@@ -2028,6 +2028,12 @@ navigator.mediaDevices.enumerateDevices()
       }
     }
     });
+    for (let i1 = 0; i1 < selected.clip.length; i1++) {
+      if (selected.clip[i1 + 1] && !getConnectedTiles(selected.clip[i1].i, true).includes(selected.clip[i1 + 1].i)) {
+        if (selected.clip[i1].distance <= selected.clip[i1 + 1].distance) selected.clip.splice(i1 + 1, 1);
+        else selected.clip.splice(i1, 1);
+      }
+    }
   }
   var nearestTile = {};
   // #importantUserImput
