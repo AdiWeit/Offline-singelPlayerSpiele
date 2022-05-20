@@ -1081,21 +1081,7 @@ ScaleMetaViewport(scaleFactor);
   } catch (err) {}
   window.scroll(0, 0);
   }
-
-  rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().bottom + 20;
-  rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().bottom + 20;
-  selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().bottom + 20;
-  rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left + rotateLeftSymbol.getBoundingClientRect().width/2 - rotateLeftTitle.getBoundingClientRect().width/2;
-  rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left + rotateRightSymbol.getBoundingClientRect().width/2 - rotateRightTitle.getBoundingClientRect().width/2;
-  selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left + selectMultipleSymbol.getBoundingClientRect().width/2 - selectMultipleTitle.getBoundingClientRect().width/2;
-  rotateLeftTitle.style.display = "none";
-  rotateRightTitle.style.display = "none";
-  selectMultipleTitle.style.display = "none";
-  swipeTitle.style.display = "inline";
-  swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
-  swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
-  swipeTitle.style.display = "none";
-  emptyTileBar.style.display = "none";
+  adaptTitlesPosition();
   if (modeSelection.value == "traditional") {
     traditionalModeMobileControls.style.display = 'inline';
   }
@@ -1763,9 +1749,28 @@ navigator.mediaDevices.enumerateDevices()
     else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
   });
+  function adaptTitlesPosition() {
+    rotateLeftTitle.style.display = "inline";
+    rotateRightTitle.style.display = "inline";
+    selectMultipleTitle.style.display = "inline";
+    rotateLeftTitle.style.top = rotateLeftSymbol.getBoundingClientRect().bottom + 20;
+    rotateRightTitle.style.top = rotateRightSymbol.getBoundingClientRect().bottom + 20;
+    selectMultipleTitle.style.top = selectMultipleSymbol.getBoundingClientRect().bottom + 20;
+    rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left + rotateLeftSymbol.getBoundingClientRect().width/2 - rotateLeftTitle.getBoundingClientRect().width/2;
+    rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left + rotateRightSymbol.getBoundingClientRect().width/2 - rotateRightTitle.getBoundingClientRect().width/2;
+    selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left + selectMultipleSymbol.getBoundingClientRect().width/2 - selectMultipleTitle.getBoundingClientRect().width/2;
+    rotateLeftTitle.style.display = "none";
+    rotateRightTitle.style.display = "none";
+    selectMultipleTitle.style.display = "none";
+    swipeTitle.style.display = "inline";
+    swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
+    swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
+    swipeTitle.style.display = "none";
+    emptyTileBar.style.display = "none";
+  }
   function adaptMobileControlsPosition() {
     mobileControls.style.top = (visualViewport.offsetTop - 7) + 'px';
-    mobileControls.style.left = (visualViewport.offsetLeft + 377/visualViewport.scale) + 'px';
+    mobileControls.style.left = (visualViewport.offsetLeft + 300/visualViewport.scale) + 'px';
     mobileControls.style.fontSize =  (5/visualViewport.scale) + 'vh';
     for (const elm of document.getElementsByClassName('mobileControlsElm')) {
       elm.style.width = 44/(visualViewport.scale); 
@@ -1774,6 +1779,14 @@ navigator.mediaDevices.enumerateDevices()
     var pos = {x: visualViewport.offsetLeft, y: visualViewport.offsetTop};
     setTimeout(() => {
       if (pos.x != visualViewport.offsetLeft || pos.y != visualViewport.offsetTop) adaptMobileControlsPosition();
+      else {
+        for (const elm of document.getElementsByClassName('speech')) {
+          elm.style.fontSize = 25/visualViewport.scale + 'px';
+          elm.style.maxWidth = visualViewport.width/4 + 'px';
+          elm.style.padding = 20/visualViewport.scale + 'px';
+        }
+        adaptTitlesPosition();
+      }
     }, 40);
   }
   // #importantUserInputs
@@ -1840,7 +1853,7 @@ navigator.mediaDevices.enumerateDevices()
         if (textur.style.touchAction != 'none') {
         setTimeout(function () {
           window.scroll(0, /*96 50*/32);
-          textur.style.touchAction = 'none';
+          if (!ev.touches[2]) textur.style.touchAction = 'none';
           selected.position = {x: checkSelected().x, y: checkSelected().y};
           selected.boolean = true;
         }, 3000);
