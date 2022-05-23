@@ -2,38 +2,45 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<p id="imageSettings">
+<div id="imageSettings">
 <input type="text" value="4" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile je x-Achse">
 <br>
 <input type="text" value="4" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile je y-Achse">
 <br>
-<input type="file" onchange="readImg(this);">
+<h1>Quelle auswählen</h1>
+<input type="file"onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
+<input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
 <br>
-<input type="text" style="height: 50px;" height="100px" placeholder="URL (drag and drop möglich)" id="sourceURL">
-<button type="button" onclick="useURL();" name="button">nutzen (als Quelle)</button>
+<input onchange="useURL();" id="useURLCheck" type="radio" name="source">
+<input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="URL (drag and drop möglich)" id="sourceURL">
 <br>
-<select id="cameraSelection" onchange="changeCamera(value);"></select>
-<button id="useLiveCam" onclick="changeCamera(cameraSelection.value);">nutze live Kamera</button>
-<a style="display: none;" id="sourceCheckboxes">
-<br>
-  <input id="sourceIsPicture" checked="true" name="mediaType" type="radio">Bild
-  <input id="sourceIsVideo" name="mediaType" type="radio">Video
+<p id="URLInfo" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
+  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren!
+  <br>
+</p>
+<a style="display: none; border-radius: 3px; border-style: double; background-color: darkorange; width: max-content; height: max-content;" id="sourceCheckboxes">
+  <input id="sourceIsPicture" onchange="state.userSource = 'Picture';" checked="true" name="mediaType" type="radio">Bild
+  <input id="sourceIsVideo" onchange="state.userSource = 'Video';" name="mediaType" type="radio">Video
+  <br>
 </a>
+<input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze live Kamera</a></button>
+<select id="cameraSelection" onchange="changeCamera(value);"></select>
+<h2>Bild bearbeiten</h2>
+<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
 <br>
-<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Input spiegeln
+<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
 <br>
 <input type="range" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
 <input type="range" onchange="adaptTileAmount();" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
+<button type="button" onclick="resetImageSize();" name="button">⟲zurücksetzen</button>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
-<button type="button" onclick="zuOptimalerBildschirmgröße();" name="button">Größenverhältnis optimieren</button>
-<br>
-<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
+<button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
 <button type="button" style="font-size: 33px;" onclick="create();" name="button">erstelle Puzzle</button>
-</p>
+</div>
 <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
 <button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
@@ -77,7 +84,19 @@
     <option value="schieben">nur schieben</option>
   </select>
   <br>
-  <b style="font-size: 25px;" id="modeSettingsHeading"><br>modusspezifische Einstellungen: </b>
+  <p id="traditionalDescription">Die Puzzleteile werden verteilt. Nun müssen Sie die Teile wieder zusammensetzen. 
+    <br>
+    Wo die Teile zusammengesetzt werden ist egal.
+  </p>
+  <p style="display: none;" id="exchangeDescription">
+    Die Positionen der Puzzleteile wird ausgetauscht. Danach haben Sie die Aufgabe, durch Klicken auf zwei Teile diese auszutauschen.
+  </p>
+  <p style="display: none;" id="schiebenDescription">
+    Mindestens ein Puzzleteil muss gelöscht werden. Danach vermischt das Programm die Teile durch Schieben.
+    <br>
+    Ist dies geschehen, können Sie die Teile durch Klicken auf das zu verschiebende Teil (und unter Umständen die gewünschte Zielposition) so verschieben, dass wieder das Originalbild entsteht.
+  </p>
+  <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: </b>
   <div id="traditionalSettings">
     <br>
     <input id="clipOptionsSound" checked="true" type="checkbox"> akustisches Feedback (Audio bei Verbindungsmöglichkeiten)
@@ -627,6 +646,11 @@
     größeAnpassenY.value = window.innerHeight;
     zeigeGröße();
   }
+  function resetImageSize() {
+    größeAnpassenX.value = preview.naturalWidth;
+    größeAnpassenY.value = preview.naturalHeight;
+    zeigeGröße();
+  }
   // Seitenverhältnisse des Bildes anpassen
   function zuAngepassterBildschirmgröße(noShowing, storeBefore) {
     if (storeBefore) {
@@ -691,6 +715,10 @@
     }
   }
   function modeSelected(value) {
+    traditionalDescription.style.display = 'none';
+    exchangeDescription.style.display = 'none';
+    schiebenDescription.style.display = 'none';
+    document.getElementById(value + 'Description').style.display = 'block';
     if (value == "traditional") zeigeGröße();
     if (value == "exchange") modeSettingsHeading.style.display = 'none';
     else modeSettingsHeading.style.display = 'inline';
@@ -712,7 +740,7 @@
     // create the puzzle
     function create() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
-    else {
+    else if (!state.removeTile) {
       if (modeSelection.value != "traditional") shuffleStyle.value = "none";
       if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
       if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
@@ -753,8 +781,8 @@
       originalSize.height = preview.height;
       preview.width = größeAnpassenX.value;
       preview.height = größeAnpassenY.value;
-      textur.width = preview.width// + 111;
-      textur.height = preview.height// + 111;
+      textur.width = preview.width + 3*(anzahlX.value - 1) - 1// + 111;
+      textur.height = preview.height + 3*(anzahlY.value - 1) - 1// + 111;
       videoPreview.width = größeAnpassenX.value;
       videoPreview.height = größeAnpassenY.value;
       var pAnzahlX = anzahlX.value;
@@ -781,9 +809,17 @@
           if (i1 == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
           if (i == 0) positions.right[positions.right.length - 1].border.push("top");
           if (i == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
+          positions.right[i*pAnzahlX + i1].x = i1;
+          positions.right[i*pAnzahlX + i1].y = i;
         }
       }
       positions.wrong = JSON.parse(JSON.stringify(positions.right));
+      for (var i = 0; i < pAnzahlY; i++) {
+        for (var i1 = 0; i1 < pAnzahlX; i1++) {
+          positions.wrong[i*pAnzahlX + i1].edit.x += 3*i1;
+          positions.wrong[i*pAnzahlX + i1].edit.y += 3*i;
+        }
+      }
       //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
       window.scroll(0, /*96 50*/32);
       if (modeSelection.value == "schieben") {
@@ -838,6 +874,14 @@ modeHeadline.style.display = 'none';
   shuffleHeadline.style.display = 'none';
   }
   function shufflePuzzle() {
+    for (var i = 0; i < anzahlY.value; i++) {
+      for (var i1 = 0; i1 < anzahlX.value; i1++) {
+        positions.wrong[i*anzahlX.value + i1].edit.x -= 3*i1;
+        positions.wrong[i*anzahlX.value + i1].edit.y -= 3*i;
+      }
+    }
+    textur.width -= 3*(anzahlX.value - 1);
+    textur.height -= 3*(anzahlY.value - 1);
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked) {
       shuffleStyle.value = shuffleStyleBar.value;
@@ -1134,9 +1178,9 @@ function canvasClicked(calledBy) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
-    if (checkSelected() && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected()) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected())))) {
+    if (checkSelected(true) && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected(true)) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected(true))))) {
       removeTile(null, calledBy);
-      lastCoord = checkSelected();
+      lastCoord = checkSelected(true);
     }
     else {
       if (aufgebenId.style.display == "none") layout(true, true);
@@ -1232,6 +1276,7 @@ function canvasClicked(calledBy) {
   // section 2.2: handle input data (picture, video, URL)
   // load selected file
   function readImg(input) {
+    sourceCheckboxes.style.display = 'none';
     var reader = new FileReader();
     stopLiveFeed();
     reader.onload = function (e) {
@@ -1250,7 +1295,14 @@ function canvasClicked(calledBy) {
   }
   var video = document.createElement("video");
   function useURL() {
+    useURLCheck.checked = true;
+    sourceCheckboxes.style.display = 'none';
     if (sourceURL.value.includes('.mp4') || sourceURL.value.includes('.move')) sourceIsVideo.checked = true;
+    else if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
+    else {
+     document.getElementById('sourceIs' + state.userSource).checked = true;
+     sourceCheckboxes.style.display = 'block';
+  }
     if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
     stopLiveFeed();
     if (sourceIsPicture.checked) {
@@ -1272,13 +1324,18 @@ function canvasClicked(calledBy) {
   var originalSize = {};
   function loadImage(width, height) {
     setTimeout(function () {
+      URLInfo.style.display = 'none';
       // videoPosition.style.width = window.innerWidth - 33 - timeText.getBoundingClientRect().width - 126.234375*2;
       if (!width) {
         width = preview.width;
         height = preview.height;
       }
       originalSize = {width: width, height: height};
-       canvas.drawImage(document.getElementById('preview'), 0, 0);
+      try {
+        canvas.drawImage(document.getElementById('preview'), 0, 0);
+      } catch (err) {
+        URLInfo.style.display = 'block';
+      }
        if (adaptImgSize.checked && modeSelection.value == "traditional" && rotateTiles.checked) state.loadImage = true;
        changeAdaptedSizeMax(width, height);
     }, 500);
@@ -1366,6 +1423,7 @@ function stopLiveFeed() {
 }
 // changes camera source
 async function changeCamera(index) {
+  sourceCheckboxes.style.display = 'none';
   sourceIsVideo.checked = true;
   stopLiveFeed();
   var Test = await navigator.mediaDevices.enumerateDevices();
@@ -1502,7 +1560,7 @@ navigator.mediaDevices.enumerateDevices()
       showSelectedTile(tile, "rgba(0, 76, 255, 0.3)");
     }
   }
-  function showClippingOptions(params) {
+  function showClippingOptions() {
     for (var clip of selected.clip) {
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
       if (markWrong.checked && (JSON.stringify(positions.right[clip.i].original[convertDirection(clip.direction, positions.wrong[clip.sI].original.degree)]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y}) || positions.wrong[clip.sI].original.degree != positions.wrong[clip.i].original.degree)) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
@@ -1523,7 +1581,7 @@ navigator.mediaDevices.enumerateDevices()
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
-      if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
+      if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, null, null, true);
     }
     for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
       var i = tileSelectionBar.tiles[i1];
@@ -1556,8 +1614,13 @@ navigator.mediaDevices.enumerateDevices()
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
+  function drawPictureSegment(pPosition, segmentPosition, removeTilesScreen, i, pCanvas, i1, layoutCalled) {
+    var position = JSON.parse(JSON.stringify(pPosition));
     if (i1 == undefined) i1 = tileSelectionBar.getTilePosition(i);
+    // if (state.removeTile) {
+    //   position.edit.x += 3*(i - ((Math.floor(i/anzahlX.value)))*anzahlX.value);
+    //   position.edit.y += 3*((Math.floor(i/anzahlX.value)));
+    // }
     if (!pCanvas) pCanvas = canvas;
     else if (!state.modelEmptybar) {
       position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2, degree: 0};
@@ -1635,7 +1698,7 @@ navigator.mediaDevices.enumerateDevices()
         state.tileRemoved = false;
       }, 133);
     positions.wrong.forEach((position, i) => {
-      if (position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+      if (position.x == checkSelected(true).x && position.y == checkSelected(true).y/*position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y*/) {
         if (pRemoveTile.checked && !selected.tiles.includes(i)) {
           selected.tiles.push(i);
           selected.objTiles.push(JSON.stringify(position.edit));
@@ -1846,9 +1909,6 @@ navigator.mediaDevices.enumerateDevices()
       folgenMouseMove("touchmove");
     }
   }
-    if (!ev.touches[0]) {
-      console.log(":((()))");
-    }
       if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
         if (textur.style.touchAction != 'none') {
         setTimeout(function () {
@@ -1886,7 +1946,7 @@ navigator.mediaDevices.enumerateDevices()
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
     if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
-    state.coord = checkSelected();
+    state.coord = checkSelected(true);
     if (modeSelection.value == "traditional") {
       if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
         var i = tileSelectionBar.selectedTile;
@@ -2054,9 +2114,6 @@ navigator.mediaDevices.enumerateDevices()
     state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (modeSelection.value == "traditional" && (!state.rotated || gerät == "PC")) {
-      if (!selected.clip.length) {
-        console.log('no clipping option');
-      }
       state.newTileSelected = false;
       state.oldTileSelected = false;
       var bClipped = false;
@@ -2317,7 +2374,7 @@ navigator.mediaDevices.enumerateDevices()
       }
     }
     var acceptedI = getConnectedTiles(nearest.overAll.i, true);
-    var screenObj = {x: scrollX, y: scrollY, width: window.visualViewport.width - 22, height: window.visualViewport.height};
+    var screenObj = {x: visualViewport.pageLeft, y: visualViewport.pageTop, width: window.visualViewport.width - 22, height: window.visualViewport.height};
     if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.innerWidth, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
     canvas.fillStyle = "blue";
     // canvas.fillRect(textur.width - scrollX - window.innerWidth, scrollY, window.innerWidth, window.innerHeight);
@@ -2453,13 +2510,14 @@ navigator.mediaDevices.enumerateDevices()
     if (positions.wrong[i1].edit == undefined) positions.wrong.splice(i1, 1);
   }
   // returns the coordinates of a selected tile (schieben and exchange mode)
-  function checkSelected() {
+  function checkSelected(removeTile) {
     try {
-    for (var i = 0; i < anzahlX.value; i++) {
-      for (var i1 = 0; i1 < anzahlY.value; i1++) {
-        if (mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
-      }
-    }
+        for (var i = 0; i < anzahlX.value; i++) {
+          for (var i1 = 0; i1 < anzahlY.value; i1++) {
+            if (removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*i && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*i1) return {x: i, y: i1};
+            if (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
+          }
+        }
   } catch (e) {
     console.log("pleaseDebug :)");
   }
