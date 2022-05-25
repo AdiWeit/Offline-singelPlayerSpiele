@@ -828,7 +828,7 @@
       }
       else removeTile(true);
       // else layout();
-      if (sourceIsVideo.checked) canvas.clearRect(0, 0, textur.width, textur.height);
+      if (sourceIsVideo.checked) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
       showSettings.scrollIntoView();
       textur.style.touchAction = "none";
       window.scroll(0, 0);
@@ -836,34 +836,42 @@
     }
     autoScroll = setInterval(function () {
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (mausy - scrollY < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
-    window.scroll(scrollX, scrollY - 3);
-    mausy -= 3;
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (/*mausy - scrollY < 50*/mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    // window.scroll(scrollX, scrollY - 3);
+    // mausy -= 3;
+    fAutoScroll({x: 0, y: -3});
 }
 // right 
-if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > window.visualViewport.width - texturLeft && selected.tiles?.length) {
-      window.scroll(scrollX + 3, scrollY);
+if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width/* - texturLeft*/ && selected.tiles?.length) {
+      // window.scroll(scrollX + 3, scrollY);
+      fAutoScroll({x: 3, y: 0});
     }
-if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.y/2 > window.visualViewport.width + scrollX) || (modeSelection.value != "traditional" && mausx - scrollX > window.visualViewport.width - 10))) && (modeSelection.value !=
+if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx - scrollX > visualViewport.pageLeft + window.visualViewport.width - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
-        window.scroll(scrollX + 3, scrollY);
-        mausx += 3;
+        // window.scroll(scrollX + 3, scrollY);
+        // mausx += 3;
+        fAutoScroll({x: 3, y: 0});
       }
       // left
       if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit?.x/2 < 0 && selected.tiles.length) {
-      window.scroll(scrollX - 3, scrollY);
+      // window.scroll(scrollX - 3, scrollY);
+      fAutoScroll({x: -3, y: 0});
     }
-  if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && (mausx - scrollX < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
-    window.scroll(scrollX - 3, scrollY);
-    mausx -= 3;
+  if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && (mausx - visualViewport.pageLeft - state.rightScroll < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+    // window.scroll(scrollX - 3, scrollY);
+    // mausx -= 3;
+    fAutoScroll({x: -3, y: 0});
 }
 // down
 var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
-      if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > window.visualViewport.height + pScrollY - texturTop) || (modeSelection.value != "traditional" && mausy - pScrollY > window.visualViewport.height - 10))) && (modeSelection.value !=
+    var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
+    if (ptexturTop < 0) ptexturTop = 0;
+    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy - pScrollY > visualViewport.pageTop + window.visualViewport.height - 10))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
-        window.scroll(scrollX, scrollY + 3);
-        mausy += 3;
+        // window.scroll(scrollX, scrollY + 3);
+        // mausy += 3;
+        fAutoScroll({x: 0, y: +3});
       }
 });
 swipeTitle.style.display = "inline";
@@ -872,6 +880,25 @@ swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.g
 swipeTitle.style.display = "none";
 modeHeadline.style.display = 'none';
   shuffleHeadline.style.display = 'none';
+  }
+  function fAutoScroll(direction) {
+    var scrollYBefore = scrollY;
+    if (!positions.wrong[selected.tiles[0]] || positions.wrong[selected.tiles[0]].edit.y > 0) window.scrollBy(direction.x, direction.y);
+    mausx += direction.x;
+    mausy += direction.y;
+    if (gerät == "Handy") {
+      if (direction.x && (positions.wrong[selected.tiles[0]].edit.x < textur.width/*state.rightScroll < textur.width - visualViewport.width*/ && direction.x > 0) || (direction.x < 0 && positions.wrong[selected.tiles[0]].edit.x > 0/*state.rightScroll > 0*/)) {
+        state.rightScroll += direction.x;
+        canvas.translate(-direction.x, 0);
+        layout(true, true);
+      }
+      if (direction.y && scrollY == scrollYBefore && (positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0)) {
+        state.upScroll += direction.y;
+        canvas.translate(0, -direction.y);
+        layout(true, true);
+        folgenMouseMove();
+      }
+    }
   }
   function shufflePuzzle() {
     for (var i = 0; i < anzahlY.value; i++) {
@@ -1178,6 +1205,7 @@ function canvasClicked(calledBy) {
       selected.position = {x: checkSelected().x, y: checkSelected().y};
       selected.boolean = true;
     }
+    console.log(checkSelected(true));
     if (checkSelected(true) && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected(true)) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected(true))))) {
       removeTile(null, calledBy);
       lastCoord = checkSelected(true);
@@ -1303,7 +1331,6 @@ function canvasClicked(calledBy) {
      document.getElementById('sourceIs' + state.userSource).checked = true;
      sourceCheckboxes.style.display = 'block';
   }
-    if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
     stopLiveFeed();
     if (sourceIsPicture.checked) {
     preview.src = sourceURL.value;
@@ -1385,7 +1412,7 @@ function getTimeString(pTime) {
 function updateVideo(){
     videoPosition.value = video.currentTime;
     timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
-    canvas.clearRect(0, 0, textur.width, textur.height);
+    canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
     for (var i1 = 0; aufgebenId.style.display == "inline" && i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
@@ -1573,7 +1600,7 @@ navigator.mediaDevices.enumerateDevices()
   }
   function layout(withoutAlert, clear, pReturn, removeTilesScreen) {
     if (state.removeTile) removeTilesScreen = true;
-    if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(0, 0, 10000, 10000);
+    if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
     if (lengthPerTeil.sizeAdapted) tileSelectionCanvas.width = positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.edit.x/lengthPerTeil.sizeAdapted.x));
     else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.innerWidth) tileSelectionBar.scrollX = 0;
@@ -1581,7 +1608,7 @@ navigator.mediaDevices.enumerateDevices()
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
-      if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, null, null, true);
+      if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
     for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
       var i = tileSelectionBar.tiles[i1];
@@ -1614,13 +1641,8 @@ navigator.mediaDevices.enumerateDevices()
   }
 }
   var richtige = 0;
-  function drawPictureSegment(pPosition, segmentPosition, removeTilesScreen, i, pCanvas, i1, layoutCalled) {
-    var position = JSON.parse(JSON.stringify(pPosition));
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
     if (i1 == undefined) i1 = tileSelectionBar.getTilePosition(i);
-    // if (state.removeTile) {
-    //   position.edit.x += 3*(i - ((Math.floor(i/anzahlX.value)))*anzahlX.value);
-    //   position.edit.y += 3*((Math.floor(i/anzahlX.value)));
-    // }
     if (!pCanvas) pCanvas = canvas;
     else if (!state.modelEmptybar) {
       position.edit = {x: 5 + (lengthPerTeil.edit.x + 5)*i1 + lengthPerTeil.edit.x/2,y: 5 + lengthPerTeil.edit.y/2, degree: 0};
@@ -1701,9 +1723,13 @@ navigator.mediaDevices.enumerateDevices()
       if (position.x == checkSelected(true).x && position.y == checkSelected(true).y/*position.edit.x/lengthPerTeil.edit.x == checkSelected().x && position.edit.y/lengthPerTeil.edit.y == checkSelected().y*/) {
         if (pRemoveTile.checked && !selected.tiles.includes(i)) {
           selected.tiles.push(i);
+          doNotChange = doNotChange.filter(x => x != i);
           selected.objTiles.push(JSON.stringify(position.edit));
         }
-        else if (doNotMoveTile.checked && !doNotChange.includes(i)) doNotChange.push(i);
+        else if (doNotMoveTile.checked && !doNotChange.includes(i)) {
+          doNotChange.push(i);
+          selected.tiles = selected.tiles.filter(x => x != i);
+        }
         else if (pRemoveTile.checked && selected.tiles.includes(i)) {
           for (var i1 = 0; i1 < selected.tiles.length; i1++) {
             if (selected.tiles[i1] == i) {
@@ -1854,8 +1880,8 @@ navigator.mediaDevices.enumerateDevices()
   }
   // #importantUserInputs
   function readMouseMove(e) {
-    mausx = e.clientX + scrollX - texturLeft;
-    mausy = e.clientY + scrollY - texturTop;
+    mausx = e.clientX + scrollX - texturLeft + state.rightScroll;
+    mausy = e.clientY + scrollY - texturTop + state.upScroll;
     originalMausX = e.clientX;
     if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
@@ -1864,7 +1890,7 @@ navigator.mediaDevices.enumerateDevices()
   }
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top;
-  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false};
+  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false, rightScroll: 0, upScroll: 0, userSource: 'Picture'};
   var texturLeft = textur.getBoundingClientRect().left;
   // #importantUserInputs
   // if (gerät == "Handy") {
@@ -1890,8 +1916,10 @@ navigator.mediaDevices.enumerateDevices()
       canvasClicked();
     }
     else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
-      mausx = ev.touches[0]["pageX"] - textur.getBoundingClientRect().left;// + scrollX;
-      mausy = ev.touches[0]["pageY"] - texturTop;// - 32// + scrollY;
+      var pTexturLeft = textur.getBoundingClientRect().left;
+      if (pTexturLeft < 0) pTexturLeft = 0;
+      mausx = ev.touches[0]["pageX"] - pTexturLeft + state.rightScroll;
+      mausy = ev.touches[0]["pageY"] - texturTop + state.upScroll;// - 32;
       if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
     }
     if (!scrollable.checked) {
@@ -2511,16 +2539,19 @@ navigator.mediaDevices.enumerateDevices()
   }
   // returns the coordinates of a selected tile (schieben and exchange mode)
   function checkSelected(removeTile) {
-    try {
+    // try {
         for (var i = 0; i < anzahlX.value; i++) {
           for (var i1 = 0; i1 < anzahlY.value; i1++) {
-            if (removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*i && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*i1) return {x: i, y: i1};
-            if (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
+            if ((removeTile && mausx > lengthPerTeil.edit.x*i + 3*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*(i + 1) && mausy > lengthPerTeil.edit.y*i1 + 3*(i1) && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*(i1 + 1)) || (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1))) {
+              console.log('return now');
+              return {x: i, y: i1};
+            }
+            // if (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
           }
         }
-  } catch (e) {
-    console.log("pleaseDebug :)");
-  }
+  // } catch (e) {
+  //   console.log("pleaseDebug :)");
+  // }
   }
 
 // section 7: stop clock:
