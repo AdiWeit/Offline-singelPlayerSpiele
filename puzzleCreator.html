@@ -441,6 +441,8 @@
   ) {
     var gerät = "Handy"
     console.log("Handy");
+    automaticTileSelectionReset.checked = true;
+    automaticTileSelectionReset.style.display = 'none';
     // tileSelectionCanvas.style.position = "fixed";
   } else {
     var gerät = "PC"
@@ -481,6 +483,10 @@
   }
   function showTitle(id, display) {
     id = id.replace('Symbol', 'Title');
+    if (id != "rotateLeftTitle") rotateLeftTitle.style.display = 'none'; 
+    if (id != "rotateRightTitle") rotateRightTitle.style.display = 'none'; 
+    if (id != "selectMultipleTitle") selectMultipleTitle.style.display = 'none'; 
+    if (id != "swipeTitle") swipeTitle.style.display = 'none'; 
     if (document.getElementById(id).style.display == "inline") document.getElementById(id).style.display = "none";
     else {
       document.getElementById(id).style.display = "inline";
@@ -1153,6 +1159,7 @@ ScaleMetaViewport(scaleFactor);
   window.scroll(0, 0);
   }
   adaptTitlesPosition();
+  emptyTileBar.style.display = "none";
   if (modeSelection.value == "traditional") {
     traditionalModeMobileControls.style.display = 'inline';
   }
@@ -1842,6 +1849,7 @@ navigator.mediaDevices.enumerateDevices()
     adaptMobileControlsPosition();
   });
   function adaptTitlesPosition() {
+    var vis = {rotateLeft: rotateLeftTitle.style.display, rotateRight: rotateRightTitle.style.display, selectMultiple: selectMultipleTitle.style.display, swipe: swipeTitle.style.display};
     rotateLeftTitle.style.display = "inline";
     rotateRightTitle.style.display = "inline";
     selectMultipleTitle.style.display = "inline";
@@ -1851,14 +1859,13 @@ navigator.mediaDevices.enumerateDevices()
     rotateLeftTitle.style.left = rotateLeftSymbol.getBoundingClientRect().left + rotateLeftSymbol.getBoundingClientRect().width/2 - rotateLeftTitle.getBoundingClientRect().width/2;
     rotateRightTitle.style.left = rotateRightSymbol.getBoundingClientRect().left + rotateRightSymbol.getBoundingClientRect().width/2 - rotateRightTitle.getBoundingClientRect().width/2;
     selectMultipleTitle.style.left = selectMultipleSymbol.getBoundingClientRect().left + selectMultipleSymbol.getBoundingClientRect().width/2 - selectMultipleTitle.getBoundingClientRect().width/2;
-    rotateLeftTitle.style.display = "none";
-    rotateRightTitle.style.display = "none";
-    selectMultipleTitle.style.display = "none";
     swipeTitle.style.display = "inline";
     swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
     swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
-    swipeTitle.style.display = "none";
-    emptyTileBar.style.display = "none";
+    rotateLeftTitle.style.display = vis.rotateLeft;
+    rotateRightTitle.style.display = vis.rotateRight;
+    selectMultipleTitle.style.display = vis.selectMultiple;
+    swipeTitle.style.display = vis.swipe;
   }
   function adaptMobileControlsPosition() {
     mobileControls.style.top = (visualViewport.offsetTop - 7) + 'px';
@@ -2022,9 +2029,9 @@ navigator.mediaDevices.enumerateDevices()
           if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height) {
             state.oldTileSelected = true;
           }
-          if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
+          if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && (!selected.tiles.includes(i) || (gerät == "Handy" && (rotatesLeft.checked || rotatesRight.checked))) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
             if (!state.placeTile) {
-              selected.tiles.push(i);
+              if (!selected.tiles.includes(i)) selected.tiles.push(i);
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
               if (!elmCalled && !touchStart) {
