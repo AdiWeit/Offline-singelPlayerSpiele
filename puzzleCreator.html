@@ -2181,37 +2181,13 @@ navigator.mediaDevices.enumerateDevices()
       // selectMultiple.checked = false;
       state.shift = false;
       selected.tiles = [];
-      layout(false, true);
+    }
     }
     selected.clip = [];
   }
   if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
   delete state.rotated;
-  }
-    // #importantUserInputs
-  document.onkeydown = function(event) {
-    if (event.shiftKey) {
-      state.shift = true;
-      selected.tiles = [];
-    }
-    var collidesTilesBar = tileSelectionBar.collidesMouse();
-    if (event.key == "ArrowRight") {
-      if (collidesTilesBar) scrollTileSelection(1);
-      else rotateSelected(90);
-    }
-    if (event.key == "ArrowLeft") {
-      if (collidesTilesBar) scrollTileSelection(-1);
-      else rotateSelected(-90);
-    }
-    if (event.key?.includes("Arrow")) layout(true);
-    if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && ((selected.tiles.length && rotateTiles.checked) || collidesTilesBar)) return false;
-  }
-  function rotateSelected(direction) {
-    if (!state.removeTile) {
-      state.rotated = [];
-      rotateAround(selected.tiles[0], direction);
-      layout(true, true);
-    }
+layout(false, true);
   }
   function rotateTile(tile, direction) {
     if (mirrorInput.checked) direction *= -1;
@@ -2267,12 +2243,13 @@ navigator.mediaDevices.enumerateDevices()
     if (event.key == "Escape") {
       selected.tiles = [];
     }
+    layout();
   }
   // end section 5
   // section 6: rotate tile(s)
     // #importantUserInputs
     document.onkeydown = function(event) {
-    if (event.shiftKey) {
+    if (event.key == "Shift") {
       state.shift = true;
       state.shiftBefore = true;
       selected.tiles = [];
@@ -2557,8 +2534,7 @@ navigator.mediaDevices.enumerateDevices()
     // try {
         for (var i = 0; i < anzahlX.value; i++) {
           for (var i1 = 0; i1 < anzahlY.value; i1++) {
-            if ((removeTile && mausx > lengthPerTeil.edit.x*i + 3*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*(i + 1) && mausy > lengthPerTeil.edit.y*i1 + 3*(i1) && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*(i1 + 1)) || (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1))) {
-              console.log('return now');
+            if ((removeTile && mausx > lengthPerTeil.edit.x*i + 3*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*(i + 1) && mausy > lengthPerTeil.edit.y*i1 + 3*(i1) && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*(i1 + 1)) || (lengthPerTeil.edit && !removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1))) {
               return {x: i, y: i1};
             }
             // if (!removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1)) return {x: i, y: i1};
