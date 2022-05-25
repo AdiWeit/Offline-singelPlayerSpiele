@@ -2099,13 +2099,10 @@ navigator.mediaDevices.enumerateDevices()
         //   }
         // });
       }
-      if (selected.tiles.length) {
-        // TODO: optimieren
-        positions.wrong.forEach((pos, i) => {
-          if (selected.tiles.includes(i)) {
-            pos.edit.x += mausx - selected.position.x;
-            pos.edit.y += mausy - selected.position.y;
-          }
+      if (selected.tiles.length && (automaticTileSelectionReset.checked || !state.shift)) {
+        selected.tiles.forEach((tile, i) => {
+          positions.wrong[tile].edit.x += mausx - selected.position.x;
+          positions.wrong[tile].edit.y += mausy - selected.position.y;
         });
         // check clicking
         selected.clip = [];
