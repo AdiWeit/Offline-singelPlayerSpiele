@@ -105,7 +105,7 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" checked="true" type="checkbox"> automatisch Teile abwählen
+    <input id="automaticTileSelectionReset" type="checkbox"> automatisch Teile abwählen
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'inline'; größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
@@ -1973,6 +1973,12 @@ navigator.mediaDevices.enumerateDevices()
     delete state.rorated;
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
+    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked) {
+      mouseUp(true);
+      selected.tiles = [];
+      state.shiftBefore = false;
+    }
+    else {
     if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
     state.coord = checkSelected(true);
     if (modeSelection.value == "traditional") {
@@ -2054,6 +2060,7 @@ navigator.mediaDevices.enumerateDevices()
     }
     else if (state.removeTile) folgenMouseMove("mouseDown");
   }
+  }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
@@ -2070,14 +2077,14 @@ navigator.mediaDevices.enumerateDevices()
       }
         for (var clipp of clipped) {
           var newTile = clipp.split(' - ').filter(x => !selected.tiles.includes(JSON.parse(x)))[0];
-          if (!state.shift && clipp.split(' - ').includes(tile + "") && newTile) {
+          if (!state.shift && !state.shiftBefore && clipp.split(' - ').includes(tile + "") && newTile) {
             selected.tiles.push(JSON.parse(newTile));
             positions.layoutOrder = positions.layoutOrder.filter(x => x != JSON.parse(newTile));
             positions.layoutOrder.push(JSON.parse(newTile));
           }
         }
         // unclipp
-        if (state.shift && calledBy != "mouseDown") {
+        if (((state.shift && automaticTileSelectionReset.checked) || (!automaticTileSelectionReset.checked && !state.shift && state.shiftBefore)) && calledBy != "mouseDown") {
           unclipp(tile);
           state.shiftBySwipe = false;
         }
@@ -2138,12 +2145,14 @@ navigator.mediaDevices.enumerateDevices()
   }
   var nearestTile = {};
   // #importantUserImput
-  function mouseUp() {
-    state.mouse = "up";
+  function mouseUp(byUnselection) {
+    if (automaticTileSelectionReset.checked || !selected.tiles.length) state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
+    if (automaticTileSelectionReset.checked) state.shiftBefore = false;
     if (modeSelection.value == "traditional" && (!state.rotated || gerät == "PC")) {
       state.newTileSelected = false;
       state.oldTileSelected = false;
+      if (automaticTileSelectionReset.checked || byUnselection) {
       var bClipped = false;
       for (var clip of selected.clip) {
         if (!tileSelectionBar.tiles.includes(clip.i)) {
@@ -2249,9 +2258,12 @@ navigator.mediaDevices.enumerateDevices()
     }
   }
   document.onkeyup = function(event) {
-    if (!event.shiftKey && state.shift) {
+    if (event.key == "Shift" && state.shift) {
       state.shift = false;
       if (automaticTileSelectionReset.checked) selected.tiles = [];
+    }
+    if (event.key == "Escape") {
+      selected.tiles = [];
     }
   }
   // end section 5
@@ -2260,6 +2272,7 @@ navigator.mediaDevices.enumerateDevices()
     document.onkeydown = function(event) {
     if (event.shiftKey) {
       state.shift = true;
+      state.shiftBefore = true;
       selected.tiles = [];
     }
     var collidesTilesBar = tileSelectionBar.collidesMouse();
