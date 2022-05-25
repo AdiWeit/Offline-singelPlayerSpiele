@@ -1166,13 +1166,15 @@ ScaleMetaViewport(scaleFactor);
 // #importantUserInputs
 // select tiles to remove and move tiles or exchange them depending on the mode
 function canvasClicked(calledBy) {
+  selected.tile = checkSelected();
+  if (!(state.removeTile)) { 
     if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
-    if (checkSelected() && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
+    if (selected.tile && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
-        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+        if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.position.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.position.y) {
-              console.log("vertausche " + checkSelected().x + "-" + checkSelected().y + " mit " + selected.position.x + "-" + selected.position.y);
+            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.coord.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.coord.y) {
+              console.log("vertausche " + selected.tile.x + "-" + selected.tile.y + " mit " + selected.coord.x + "-" + selected.coord.y);
               stats.turns++;
               vertauscheZwei(i, i1);
               i = positions.wrong.length;
@@ -1183,16 +1185,16 @@ function canvasClicked(calledBy) {
       }
       selected.boolean = false;
     }
-    else if (modeSelection.value == "schieben" && checkSelected()/* && selected.boolean*/ && missing.length && !state.removeTile) {
+    else if (modeSelection.value == "schieben" && selected.tile/* && selected.boolean*/ && missing.length && !state.removeTile) {
       for (var i1 = 0; i1 < missing.length; i1++) {
         pMissing = missing[i1];
-        if (possibleMissing.length && pMissing == (checkSelected().x)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) {
+        if (possibleMissing.length && pMissing == (selected.tile.x)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y) {
           moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
         }
         else {
-        if ((pMissing == (checkSelected().x + 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(checkSelected().x - 1)*lengthPerTeil.edit.x + ' - ' + checkSelected().y*lengthPerTeil.edit.y)/*left*/ || (pMissing == checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (checkSelected().x*lengthPerTeil.edit.x + ' - ' + (checkSelected().y - 1)*lengthPerTeil.edit.y)/*up*/)) {
+        if ((pMissing == (selected.tile.x + 1)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(selected.tile.x - 1)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y)/*left*/ || (pMissing == selected.tile.x*lengthPerTeil.edit.x + ' - ' + (selected.tile.y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (selected.tile.x*lengthPerTeil.edit.x + ' - ' + (selected.tile.y - 1)*lengthPerTeil.edit.y)/*up*/)) {
           for (var i = 0; i < positions.wrong.length; i++) {
-            if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == checkSelected().x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == checkSelected().y) {
+            if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
               possibleMissing.push({i: i, i1: i1});
             }
           }
@@ -1201,19 +1203,20 @@ function canvasClicked(calledBy) {
   }
   if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
-    else if (checkSelected() && (modeSelection.value != "schieben"/* || missing*/)) {
-      selected.position = {x: checkSelected().x, y: checkSelected().y};
+    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/)) {
+      selected.coord = {x: selected.tile.x, y: selected.tile.y};
       selected.boolean = true;
     }
-    console.log(checkSelected(true));
-    if (checkSelected(true) && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(checkSelected(true)) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(checkSelected(true))))) {
+  }
+    selected.tile = checkSelected(true);
+    if (selected.tile && ((!missing.length && modeSelection.value == "schieben") || state.removeTile) && (!lastCoord || JSON.stringify(lastCoord) != JSON.stringify(selected.tile) || (((state.mouse == "up" && calledBy != "elm") || calledBy == "mouseDown") && JSON.stringify(state.coord) == JSON.stringify(selected.tile)))) {
       removeTile(null, calledBy);
-      lastCoord = checkSelected(true);
+      lastCoord = selected.tile;
     }
     else {
-      if (aufgebenId.style.display == "none") layout(true, true);
-      else layout(false, true);
+      if (aufgebenId.style.display == "inline") layout(false, true);
     }
+    selected.tile = checkSelected();
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
   var userMovement = {index: 0, moves: []};
@@ -1942,12 +1945,12 @@ navigator.mediaDevices.enumerateDevices()
         setTimeout(function () {
           window.scroll(0, /*96 50*/32);
           if (!ev.touches[2]) textur.style.touchAction = 'none';
-          selected.position = {x: checkSelected().x, y: checkSelected().y};
+          selected.coord = {x: checkSelected().x, y: checkSelected().y};
           selected.boolean = true;
         }, 3000);
       }
       else {
-        selected.position = {x: checkSelected().x, y: checkSelected().y};
+        selected.coord = {x: checkSelected().x, y: checkSelected().y};
         selected.boolean = true;
       }
 
@@ -1970,6 +1973,7 @@ navigator.mediaDevices.enumerateDevices()
     }
   }
   function mouseDown(elmCalled, touchStart) {
+    selected.tile = checkSelected();
     delete state.rorated;
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
@@ -2063,6 +2067,7 @@ navigator.mediaDevices.enumerateDevices()
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
+    selected.tile = checkSelected();
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     positionBackToTileBarButtons(true);
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
