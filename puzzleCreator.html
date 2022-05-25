@@ -2269,7 +2269,12 @@ layout(false, true);
   function rotateSelected(direction) {
     if (!state.removeTile) {
       state.rotated = [];
-      rotateAround(selected.tiles[0], direction);
+      if (!state.shift) rotateAround(selected.tiles[0], direction);
+      else {
+        for (const tile of selected.tiles) {
+          rotateTile(tile, direction);
+        }
+      }
       layout(true, true);
     }
   }
