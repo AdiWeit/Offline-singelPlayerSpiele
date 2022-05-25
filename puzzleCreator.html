@@ -741,6 +741,7 @@
           positions.layoutOrder[i] = i;
         }
       }
+      automaticTileSelectionReset.checked = true;
       removeTilesFinishedB.style.display = 'inline';
       if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
       showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
@@ -1086,6 +1087,7 @@ modeHeadline.style.display = 'none';
   backToBarBHeight.max = lengthPerTeil.edit.y;
   backToBarBWidth.value = lengthPerTeil.edit.x/7;
   backToBarBHeight.value = lengthPerTeil.edit.y/7;
+  if (gerät == "PC") automaticTileSelectionReset.checked = false;
   if (shuffleStyle.value == "listTiles") {
     selectBackToBarB.style.display = 'inline';
     listTilesS.style.display = 'inline';
@@ -1963,13 +1965,16 @@ navigator.mediaDevices.enumerateDevices()
     selected.tile = checkSelected();
     delete state.rorated;
     tileSelectionBar.swipePosition = mausx;
-    state.mouse = "down";
-    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && !state.removeTile) {
+    if (state.mouse == "up" && !automaticTileSelectionReset.checked && state.removeTile) state.mouse = "downNow";
+    if (state.mouse != "downNow") state.mouse = "down";
+    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
       mouseUp(true);
-      selected.tiles = [];
+      if (!state.removeTile) selected.tiles = [];
+      else state.mouse = "up";
       state.shiftBefore = false;
     }
     else {
+      if (state.mouse = "downNow") state.mouse = "down";
       if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
       state.coord = checkSelected(true);
       if (modeSelection.value == "traditional") {
@@ -2135,7 +2140,7 @@ navigator.mediaDevices.enumerateDevices()
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
-    if (automaticTileSelectionReset.checked || !selected.tiles.length || state.removeTile) state.mouse = "up";
+    if (automaticTileSelectionReset.checked || !selected.tiles.length || (state.removeTile && automaticTileSelectionReset.checked)) state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (automaticTileSelectionReset.checked) state.shiftBefore = false;
     if (modeSelection.value == "traditional" && (!state.rotated || gerät == "PC")) {
