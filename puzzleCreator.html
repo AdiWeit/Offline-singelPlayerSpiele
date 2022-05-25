@@ -30,15 +30,20 @@
 <br>
 <p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
 <br>
-<input type="range" onchange="adaptTileAmount();" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
+<input type="range" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
-<input type="range" onchange="adaptTileAmount();" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
+<input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="resetImageSize();" name="button">⟲zurücksetzen</button>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
+<a id="rotateTilesAdaptionSettings">
+  <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
+    und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 25px;" value="16" type="text"> Teile erstellt werden.
+  <br>
+</a>
 <button type="button" style="font-size: 33px;" onclick="create();" name="button">erstelle Puzzle</button>
 </div>
 <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
@@ -105,21 +110,10 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" type="checkbox"> automatisch Teile abwählen
+    <input id="automaticTileSelectionReset" type="checkbox"> automatisch Teile/Auswahl abwählen
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'inline'; größeAnpassenX.value = sizeBefore.x; größeAnpassenY.value = sizeBefore.y}" checked="true" type="checkbox"> drehe Teile
-    <a id="rotateTilesAdaptionSettings">
-      <br>
-      <input type="radio" id="bAdaptAmount" onchange="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen
-      <a style="display: none;" id="adaptAmountSettings">
-        <br>
-        <input id="minTileAmount" oninput="adaptTileAmount();" value="16" placeholder="min. Anzahl" type="text">
-        <br>
-      </a>
-      <br>
-      <input type="radio" id="adaptImgSize" onchange="if (checked) zuAngepassterBildschirmgröße(false, true);" checked="true" name="adaptionStyle"> Größe Bild anpassen
-    </a>
+    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'inline';}" checked="true" type="checkbox"> drehe Teile
     </p>
     <input id="markWrong" style="accent-color: red;" type="checkbox" > markiere nicht passende
     <a id="shuffleStyleLable">
@@ -658,13 +652,7 @@
     zeigeGröße();
   }
   // Seitenverhältnisse des Bildes anpassen
-  function zuAngepassterBildschirmgröße(noShowing, storeBefore) {
-    if (storeBefore) {
-      sizeBefore = {x: größeAnpassenX.value, y: größeAnpassenY.value};
-      anzahlX.value = amountBefore.x; 
-      anzahlY.value = amountBefore.y;
-      adaptAmountSettings.style.display = 'none';
-    }
+  function zuAngepassterBildschirmgröße(noShowing) {
     var referenceSize = originalSize;
     if (!screenIsMax.checked) referenceSize = {width: JSON.parse(JSON.stringify(größeAnpassenX.value)), height: größeAnpassenY.value};
     else referenceSize = {width: window.innerWidth + 1, height: window.innerHeight + 1};
@@ -695,10 +683,6 @@
     if (größeAnpassenX.value != größeAnpassenY.value && !state.loadImage) bAdaptAmount.checked = true;
     if (state.loadImage && !adapted) zuAngepassterBildschirmgröße();
     delete state.loadImage;
-    if (bAdaptAmount.checked && !adapted && !onInput) {
-      adaptTileAmount();
-      if (!getSizeTileAmoutAdaption()) adaptImgSize.checked = true;
-    }
     textur.width = größeAnpassenX.value;
     textur.height = größeAnpassenY.value
     // canvas.clearRect(0, 0, textur.width, textur.height);
@@ -1020,7 +1004,7 @@ modeHeadline.style.display = 'none';
             position.edit = {x: i*(lengthPerTeil.edit.x + 5) + lengthPerTeil.edit.x/2, y: 5 + lengthPerTeil.edit.y/2, degree: 0};
             tileSelectionBar.tiles.push(i);
           }
-          position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, -90][Math.round(Math.random()*3)]};
+          position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
           stats.minimumRotations += Math.abs(position.original.degree/90);
           if (!rotateTiles.checked) position.original.degree = 0;
       });
@@ -1373,7 +1357,6 @@ function canvasClicked(calledBy) {
       } catch (err) {
         URLInfo.style.display = 'block';
       }
-       if (adaptImgSize.checked && modeSelection.value == "traditional" && rotateTiles.checked) state.loadImage = true;
        changeAdaptedSizeMax(width, height);
     }, 500);
   }
@@ -1535,18 +1518,9 @@ navigator.mediaDevices.enumerateDevices()
       }
     }
   }
-  var sizeBefore;
-  var amountBefore;
   // adapt amount of tiles on x and y-axis to equal width and height
   function adaptTileAmount(adaptionStyleChanged) {
     if (modeSelection.value == 'traditional' && rotateTiles.checked) {
-      adaptAmountSettings.style.display = 'inline';
-      amountBefore = {x: anzahlX.value, y: anzahlY.value};
-      if (sizeBefore && adaptionStyleChanged) {
-        größeAnpassenX.value = sizeBefore.x; 
-        größeAnpassenY.value = sizeBefore.y;
-        zeigeGröße(true);
-      }
       var data = getSizeTileAmoutAdaption();
       if (data) {
         anzahlX.value = data.x;
@@ -1599,12 +1573,17 @@ navigator.mediaDevices.enumerateDevices()
   }
   function showClippingOptions() {
     for (var clip of selected.clip) {
+      pLengthPerTeil = JSON.parse(JSON.stringify(lengthPerTeil));
+      if ([90, 270].includes(positions.wrong[clip.sI].original.degree)) {
+        pLengthPerTeil.edit.x = lengthPerTeil.edit.y;
+        pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
+      }
       canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
       if (markWrong.checked && (JSON.stringify(positions.right[clip.i].original[convertDirection(clip.direction, positions.wrong[clip.sI].original.degree)]) != JSON.stringify({x: positions.wrong[clip.sI].original.x, y: positions.wrong[clip.sI].original.y}) || positions.wrong[clip.sI].original.degree != positions.wrong[clip.i].original.degree)) canvas.fillStyle = 'rgba(255, 0, 0, 0.83)';
       canvas.save();
       canvas.translate(clip.x, clip.y);
       // canvas.rotate((positions.wrong[clip.sI].original.degree + 180)*Math.PI/180);
-      if (!tileSelectionBar.tiles.includes(clip.i)) canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), clip.width, clip.height);
+      if (!tileSelectionBar.tiles.includes(clip.i)) canvas.fillRect(-((pLengthPerTeil.edit.x)/2), -((pLengthPerTeil.edit.y)/2), clip.width, clip.height);
       canvas.restore();
     }
   }
@@ -1634,6 +1613,7 @@ navigator.mediaDevices.enumerateDevices()
       stopClock.completionTime.running = 0;
       richtige = 0;
       if(!withoutAlert) {
+        selected.tiles = [];
         finished = true;
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
@@ -1734,7 +1714,7 @@ navigator.mediaDevices.enumerateDevices()
         if (pRemoveTile.checked && !selected.tiles.includes(i)) {
           selected.tiles.push(i);
           doNotChange = doNotChange.filter(x => x != i);
-          selected.objTiles.push(JSON.stringify(position.edit));
+          selected.objTiles.push(JSON.stringify({x: position.edit.x - 3*position.x, y: position.edit.y - 3*position.y, degree: 0}));
         }
         else if (doNotMoveTile.checked && !doNotChange.includes(i)) {
           doNotChange.push(i);
@@ -1984,7 +1964,7 @@ navigator.mediaDevices.enumerateDevices()
     delete state.rorated;
     tileSelectionBar.swipePosition = mausx;
     state.mouse = "down";
-    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked) {
+    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && !state.removeTile) {
       mouseUp(true);
       selected.tiles = [];
       state.shiftBefore = false;
@@ -2058,7 +2038,7 @@ navigator.mediaDevices.enumerateDevices()
             state.newTileSelected = true;
           }
         }
-        if (!state.newTileSelected && !state.oldTileSelected && !automaticTileSelectionReset.checked) selected.tiles = [];
+        if (!state.newTileSelected && !state.oldTileSelected && !automaticTileSelectionReset.checked && !state.removeTile) selected.tiles = [];
         state.placeTile = false;
         tileSelectionBar.tiles.forEach((tileI, i) => {
           var tile = positions.wrong[tileI];
@@ -2155,7 +2135,7 @@ navigator.mediaDevices.enumerateDevices()
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
-    if (automaticTileSelectionReset.checked || !selected.tiles.length) state.mouse = "up";
+    if (automaticTileSelectionReset.checked || !selected.tiles.length || state.removeTile) state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (automaticTileSelectionReset.checked) state.shiftBefore = false;
     if (modeSelection.value == "traditional" && (!state.rotated || gerät == "PC")) {
@@ -2198,10 +2178,14 @@ layout(false, true);
   }
   function rotateTile(tile, direction) {
     if (mirrorInput.checked) direction *= -1;
-    positions.wrong[tile].original.degree += direction;
-    if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
-    else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
+    positions.wrong[tile].original.degree = getDegreeAfterRotation(positions.wrong[tile].original.degree, direction);
     stats.rotated++;
+  }
+  function getDegreeAfterRotation(degree, direction) {
+    degree += direction;
+    if (degree < 0) degree = 270;
+    if (degree > 270) degree = 0;
+    return degree;
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
     state.rotated.push(tile);
@@ -2276,7 +2260,13 @@ layout(false, true);
   function rotateSelected(direction) {
     if (!state.removeTile) {
       state.rotated = [];
-      if (!state.shift) rotateAround(selected.tiles[0], direction);
+      if (!state.shift) {
+        rotateAround(selected.tiles[0], direction);
+        if (lengthPerTeil.edit.x != lengthPerTeil.edit.y && getConnectedTiles(selected.tiles[0], true).length > 1) {
+          state.rotated = [];
+          rotateAround(selected.tiles[0], direction);
+        }
+      }
       else {
         for (const tile of selected.tiles) {
           rotateTile(tile, direction);
@@ -2284,13 +2274,6 @@ layout(false, true);
       }
       layout(true, true);
     }
-  }
-  function rotateTile(tile, direction) {
-    if (mirrorInput.checked) direction *= -1;
-    positions.wrong[tile].original.degree += direction;
-    if (positions.wrong[tile].original.degree < -90) positions.wrong[tile].original.degree = 180;
-    else if (positions.wrong[tile].original.degree >= 270) positions.wrong[tile].original.degree = -90;
-    stats.rotated++;
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
     state.rotated.push(tile);
@@ -2373,21 +2356,26 @@ layout(false, true);
     if (unclipped) stats.unclipped++;
   }
   function checkPossibleClipping(tile, afterClipping) {
+    pLengthPerTeil = JSON.parse(JSON.stringify(lengthPerTeil));
+    if ([90, 270].includes(positions.wrong[tile].original.degree)) {
+      pLengthPerTeil.edit.x = lengthPerTeil.edit.y;
+      pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
+    }
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
     positions.wrong.forEach((pos, i) => {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
       var selectedObj = {
-        right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-        left: {x: obj.slc.x + lengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: lengthPerTeil.edit.y - 2},
-        bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: lengthPerTeil.edit.x - 2, height: 10},
-        top: {x: obj.slc.x + 1, y: obj.slc.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}
+        right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2},
+        left: {x: obj.slc.x + pLengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2},
+        bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: pLengthPerTeil.edit.x - 2, height: 10},
+        top: {x: obj.slc.x + 1, y: obj.slc.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x - 2, height: 10}
       };
       if (!clipped.includes(i + ' - ' + tile) && !clipped.includes(tile + ' - ' + i)) {
         var nearTile = {
-          right: collides(selectedObj.right, {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
-          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: lengthPerTeil.edit.y - 2}),
-          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x - 2, height: 10}),
-          top: collides(selectedObj.top, {x: obj.all.x + 1, y: obj.all.y - 10, width: lengthPerTeil.edit.x - 2, height: 10})
+          right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2}),
+          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2}),
+          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x - 2, height: 10}),
+          top: collides(selectedObj.top, {x: obj.all.x + 1, y: obj.all.y - 10, width: pLengthPerTeil.edit.x - 2, height: 10})
         };
         for (var side of Object.keys(nearTile)) {
           if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
@@ -2413,23 +2401,24 @@ layout(false, true);
     var clipLength = selected.clip.length;
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.left) {
-      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x + lengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
+      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.right) {
-      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: lengthPerTeil.edit.y, selected: {x: obj.all.x - lengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
+      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.top) {
-      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y, width: lengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + lengthPerTeil.edit.y}, distance: nearest.bottom.area});
+      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}, distance: nearest.bottom.area});
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.bottom) {
-      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: lengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - lengthPerTeil.edit.y}, distance: nearest.top.area});
+      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: pLengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}, distance: nearest.top.area});
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
-      if (selected.clip.length > clipLength && (tileSelectionBar.tiles.includes(selected.clip[selected.clip.length - 1 - i].i) || ((selectedCollidesOthers(selected.clip[selected.clip.length - 1 - i], tile) || !collides(addTolerance(selected.clip[selected.clip.length - 1 - i], 3), screenObj).boolean || selectedCollideOther(selected.clip[selected.clip.length - 1 - i].i) || !acceptedI.includes(selected.clip[selected.clip.length - 1 - i].i)) && !afterClipping))) {
+      var clip = selected.clip[selected.clip.length - 1 - i];
+      if (selected.clip.length > clipLength && ((positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((selectedCollidesOthers(clip, tile) || !collides(addTolerance(clip, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
@@ -2520,9 +2509,14 @@ layout(false, true);
   }
   // transforms index of tile into an obj that can be used for collision checks (tolerance can be added)
   function transformToObj(i, tolerance) {
+    pLengthPerTeil = JSON.parse(JSON.stringify(lengthPerTeil));
+    if ([90, 270].includes(positions.wrong[i].original.degree)) {
+      pLengthPerTeil.edit.x = lengthPerTeil.edit.y;
+      pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
+    }
     var obj =  positions.wrong[i].edit;
     if (!tolerance) tolerance = 0;
-    return {x: obj.x + tolerance, y: obj.y + tolerance, width: lengthPerTeil.edit.x - tolerance*2, height: lengthPerTeil.edit.y - tolerance*2};
+    return {x: obj.x + tolerance, y: obj.y + tolerance, width: pLengthPerTeil.edit.x - tolerance*2, height: pLengthPerTeil.edit.y - tolerance*2};
   }
   // adds tolerance by decreacing the size of the entered hitbox (obj)
   function addTolerance(obj, tolerance) {
