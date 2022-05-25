@@ -1983,87 +1983,87 @@ navigator.mediaDevices.enumerateDevices()
       state.shiftBefore = false;
     }
     else {
-    if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
-    state.coord = checkSelected(true);
-    if (modeSelection.value == "traditional") {
-      if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
-        var i = tileSelectionBar.selectedTile;
-        selected.tiles.push(i.tileI);
-        positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
-        positions.layoutOrder.push(i.tileI);
-        tileSelectionBar.tiles.splice(i.i, 1);
-        // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
-        if (!autoSelectTileBar.checked) tileSelectionBar.selectedTile = undefined;
-          else {
-          if (!tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
-          else {
-            setTimeout(function () {
-              tileSelectionBar.selectedTile.byUser = false;
-              tileSelectionBar.selectedTile.tileI++;
-              if (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) tileSelectionBar.selectedTile.i--;
-              while (tileSelectionBar.selectedTile.tileI >= 0 && tileSelectionBar.tiles.length > 0 && (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2)) {
-                tileSelectionBar.selectedTile.tileI--;
-              }
-              layout();
-            }, 10);
-          }
-        }
-          positions.wrong[i.tileI].edit = {x: mausx, y: mausy, degree: 0};
-        state.placeTile = true;
-        scrollTileSelection(0);
-      }
-      // selected.tiles = [];
-      selected.position = {x: mausx, y: mausy};
-      for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
-        var i = positions.layoutOrder[i1];
-        var coord = positions.wrong[i].edit;
-        var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
-        if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
-        if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height) {
-          state.oldTileSelected = true;
-        }
-        if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
-          if (!state.placeTile) {
-            selected.tiles.push(i);
-            positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
-            positions.layoutOrder.push(i);
-            if (!elmCalled && !touchStart) {
-              if (rotatesRight.checked) rotateSelected(90);
-              if (rotatesLeft.checked) rotateSelected(-90);
-            }
-          }
-          if (state.backToBar !== false) {
-            // tileSelectionBar.tiles.push(i);
-            tileSelectionBar.tiles.splice(state.backToBar, 0, i);
-            if (autoSelectTileBar.checked && tileSelectionBar.tiles.length == 1) {
-              state.setSelected = {i: state.backToBar, tileI: i};
-              setTimeout(function() {
-                tileSelectionBar.selectedTile = state.setSelected;
+      if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
+      state.coord = checkSelected(true);
+      if (modeSelection.value == "traditional") {
+        if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
+          var i = tileSelectionBar.selectedTile;
+          selected.tiles.push(i.tileI);
+          positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
+          positions.layoutOrder.push(i.tileI);
+          tileSelectionBar.tiles.splice(i.i, 1);
+          // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
+          if (!autoSelectTileBar.checked) tileSelectionBar.selectedTile = undefined;
+            else {
+            if (!tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
+            else {
+              setTimeout(function () {
+                tileSelectionBar.selectedTile.byUser = false;
+                tileSelectionBar.selectedTile.tileI++;
+                if (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) tileSelectionBar.selectedTile.i--;
+                while (tileSelectionBar.selectedTile.tileI >= 0 && tileSelectionBar.tiles.length > 0 && (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2)) {
+                  tileSelectionBar.selectedTile.tileI--;
+                }
+                layout();
               }, 10);
             }
-            document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
-            selectBackToBarB.style.backgroundColor = '';
-            state.backToBar = false;
-            unclipp(i);
-            mouseDown();
           }
-          layout(true);
-          state.newTileSelected = true;
+            positions.wrong[i.tileI].edit = {x: mausx, y: mausy, degree: 0};
+          state.placeTile = true;
+          scrollTileSelection(0);
         }
+        // selected.tiles = [];
+        selected.position = {x: mausx, y: mausy};
+        for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
+          var i = positions.layoutOrder[i1];
+          var coord = positions.wrong[i].edit;
+          var rotated = {x: coord.x - ((lengthPerTeil.edit.x)/2), y: coord.y - ((lengthPerTeil.edit.y)/2), width: lengthPerTeil.edit.x, height: lengthPerTeil.edit.y};
+          if ([270, 90].includes(positions.wrong[i].original.degree)) rotated = {width: rotated.height, height: rotated.width + 1, x: coord.x - ((lengthPerTeil.edit.y)/2), y: coord.y - ((lengthPerTeil.edit.x)/2)};
+          if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height) {
+            state.oldTileSelected = true;
+          }
+          if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && !selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
+            if (!state.placeTile) {
+              selected.tiles.push(i);
+              positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
+              positions.layoutOrder.push(i);
+              if (!elmCalled && !touchStart) {
+                if (rotatesRight.checked) rotateSelected(90);
+                if (rotatesLeft.checked) rotateSelected(-90);
+              }
+            }
+            if (state.backToBar !== false) {
+              // tileSelectionBar.tiles.push(i);
+              tileSelectionBar.tiles.splice(state.backToBar, 0, i);
+              if (autoSelectTileBar.checked && tileSelectionBar.tiles.length == 1) {
+                state.setSelected = {i: state.backToBar, tileI: i};
+                setTimeout(function() {
+                  tileSelectionBar.selectedTile = state.setSelected;
+                }, 10);
+              }
+              document.getElementsByClassName('backToTileB')[state.backToBar].style.backgroundColor = '';
+              selectBackToBarB.style.backgroundColor = '';
+              state.backToBar = false;
+              unclipp(i);
+              mouseDown();
+            }
+            layout(true);
+            state.newTileSelected = true;
+          }
+        }
+        if (!state.newTileSelected && !state.oldTileSelected && !automaticTileSelectionReset.checked) selected.tiles = [];
+        state.placeTile = false;
+        tileSelectionBar.tiles.forEach((tileI, i) => {
+          var tile = positions.wrong[tileI];
+          if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
+            tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
+            layout();
+          }
+        });
+        folgenMouseMove("mouseDown");
       }
-      if (!state.newTileSelected && !state.oldTileSelected && !automaticTileSelectionReset.checked) selected.tiles = [];
-      state.placeTile = false;
-      tileSelectionBar.tiles.forEach((tileI, i) => {
-        var tile = positions.wrong[tileI];
-        if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
-          tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
-          layout();
-        }
-      });
-      folgenMouseMove("mouseDown");
+      else if (state.removeTile) folgenMouseMove("mouseDown");
     }
-    else if (state.removeTile) folgenMouseMove("mouseDown");
-  }
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
@@ -2182,11 +2182,11 @@ navigator.mediaDevices.enumerateDevices()
       state.shift = false;
       selected.tiles = [];
     }
-    }
-    selected.clip = [];
   }
-  if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
-  delete state.rotated;
+  selected.clip = [];
+}
+if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
+delete state.rotated;
 layout(false, true);
   }
   function rotateTile(tile, direction) {
