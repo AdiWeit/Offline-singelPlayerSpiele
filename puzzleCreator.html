@@ -30,13 +30,15 @@
 <br>
 <p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
 <br>
+<input id="percentSizeAdaption" oninput="größeAnpassenX.value = größeAnpassenX.max*value; größeAnpassenY.value = größeAnpassenY.max*value; zeigeGröße(true);" min="0.01" step="0.01" max="1" type="range"> Breite und Höhe prozentual anpassen
+<br>
 <input type="range" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
 <br>
 <input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
 <button type="button" onclick="resetImageSize();" name="button">⟲zurücksetzen</button>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
-<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen</button>
+<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
 <a id="rotateTilesAdaptionSettings">
@@ -1360,6 +1362,7 @@ function canvasClicked(calledBy) {
         URLInfo.style.display = 'block';
       }
        changeAdaptedSizeMax(width, height);
+       zuAngepassterBildschirmgröße();
     }, 500);
   }
   // end section 2
@@ -2277,7 +2280,8 @@ layout(false, true);
           rotateTile(tile, direction);
         }
       }
-      layout(true, true);
+      // layout(true, true);
+      folgenMouseMove();
     }
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
@@ -2423,7 +2427,7 @@ layout(false, true);
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
       var clip = selected.clip[selected.clip.length - 1 - i];
-      if (selected.clip.length > clipLength && ((positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((selectedCollidesOthers(clip, tile) || !collides(addTolerance(clip, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
+      if (selected.clip.length > clipLength && ((state.rotated && gerät == "Handy") || (positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((selectedCollidesOthers(clip, tile) || !collides(addTolerance(clip, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
