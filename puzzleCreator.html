@@ -3,9 +3,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <div id="imageSettings">
-<input type="text" value="4" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile je x-Achse">
+<input type="text" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile x-Achse"> Teile x-Achse
 <br>
-<input type="text" value="4" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile je y-Achse">
+<input type="text" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile y-Achse"> Teile y-Achse
 <br>
 <h1>Quelle auswählen</h1>
 <input type="file"onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
@@ -829,7 +829,7 @@
     }
     autoScroll = setInterval(function () {
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (/*mausy - scrollY < 50*/mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (/*mausy - scrollY < 50*/mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy") && selected.tiles.length)/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
@@ -1654,7 +1654,7 @@ navigator.mediaDevices.enumerateDevices()
     if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // pCanvas.restore();
-    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original))) && !removeTilesScreen && !finished)) {
+    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !finished)) {
       pCanvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
       if (richtigPlazierte.checked) {
         // pCanvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
@@ -1684,6 +1684,15 @@ navigator.mediaDevices.enumerateDevices()
     }
   }
   // end section 4
+  function connectedTilesRotationRight(positionOriginal) {
+    for (const direc of ['right', 'bottom', 'left', 'top']) {
+      if (positionOriginal[direc]) {
+        var connectedTile = getTile(positionOriginal[direc]);
+        if (connectedTile != undefined && positions.wrong[connectedTile].original.degree) return false;
+      }
+    }
+    return true;
+  }
   var selected = {boolean: false, position: {x: 0, y: 0}, tiles: [], objTiles: [], clip: []};
   var lastCoord;
   function moveTile(i, i1) {
@@ -1894,7 +1903,7 @@ navigator.mediaDevices.enumerateDevices()
     document.addEventListener('touchend', touch);
     function touch(ev) {
     if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
-    if (ev.touches[2]) {
+    if (ev.touches[2] && !scrollable.checked) {
       textur.style.touchAction = '';
     }
     else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
@@ -2115,12 +2124,14 @@ navigator.mediaDevices.enumerateDevices()
   function deleteFurtherClipOptions() {
     nearestTile = {};
     selected.clip.forEach((clip, i1) => {
-      if (!nearestTile[clip.i] || clip.distance < nearestTile[clip.i].clip.distance) {
-        if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
-        nearestTile[clip.i] = {clip: clip, i: i1};
-      }
-      else if (clip.distance >= nearestTile[clip.i].clip.distance) {
-        selected.clip.splice(i1, 1);
+      if (!getConnectedTiles(clip.sI, true).includes(nearestTile[clip.i]?.clip.sI)) {
+        if (!nearestTile[clip.i] || clip.distance < nearestTile[clip.i].clip.distance) {
+          if (nearestTile[clip.i]) selected.clip.splice(nearestTile[clip.i].i, 1);
+          nearestTile[clip.i] = {clip: clip, i: i1};
+        }
+        else if (clip.distance >= nearestTile[clip.i].clip.distance) {
+          selected.clip.splice(i1, 1);
+        }
       }
       // sI
       if (!getConnectedTiles(clip.i, true).includes(nearestTile[clip.sI]?.clip.i)) {
@@ -2163,10 +2174,12 @@ navigator.mediaDevices.enumerateDevices()
           positions.wrong[tile].edit.y += differ.y;
         }
         clipped.push(clip.i + ' - ' + clip.sI);
-        // do more clipping if needed
-        checkPossibleClipping(clip.sI, true);
-        deleteFurtherClipOptions();
         bClipped = true;
+        for (var tile of selected.tiles) {
+        // do more clipping if needed
+        checkPossibleClipping(tile, true);
+      }
+      deleteFurtherClipOptions();
       }
     }
     if (selected.clip.length && bClipped) {
@@ -2408,26 +2421,30 @@ layout(false, true);
     canvas.fillStyle = "blue";
     // canvas.fillRect(textur.width - scrollX - window.innerWidth, scrollY, window.innerWidth, window.innerHeight);
     var clipLength = selected.clip.length;
+    var filteredClip = JSON.stringify(filter(selected.clip, false, true));
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.left) {
+    if (obj.all && !positions.wrong[tile].original.left && !filteredClip.includes(JSON.stringify({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}}))) {
       selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.right) {
+    if (obj.all && !positions.wrong[tile].original.right && !filteredClip.includes(JSON.stringify({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}}))) {
       selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.top) {
+    if (obj.all && !positions.wrong[tile].original.top && !filteredClip.includes(JSON.stringify({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}}))) {
       selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}, distance: nearest.bottom.area});
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
-    if (obj.all && !positions.wrong[tile].original.bottom) {
+    if (obj.all && !positions.wrong[tile].original.bottom && !filteredClip.includes(JSON.stringify({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: pLengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}}))) {
       selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: pLengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}, distance: nearest.top.area});
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
       var clip = selected.clip[selected.clip.length - 1 - i];
-      if (selected.clip.length > clipLength && ((state.rotated && gerät == "Handy") || (positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((selectedCollidesOthers(clip, tile) || !collides(addTolerance(clip, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
+      var clipCollider = JSON.parse(JSON.stringify(clip));
+      clipCollider.x -= state.rightScroll;
+      clipCollider.y -= state.upScroll;
+      if (selected.clip.length > clipLength && ((selected.clip[selected.clip.length - 1 - i - 1] && angular.equals(clip, selected.clip[selected.clip.length - 1 - i - 1])) ||  (state.rotated && gerät == "Handy") || (positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((/*selectedCollidesOthers(clip, tile) || */!collides(addTolerance(clipCollider, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
@@ -2446,17 +2463,17 @@ layout(false, true);
   function playClippingSound() {
     for (const option of selected.clip) {
       // new option
-      if (!clipOptionsBefore || !JSON.stringify(clipOptionsBefore).includes(JSON.stringify(filterSI([option])[0]))) {
+      if (!clipOptionsBefore || !JSON.stringify(clipOptionsBefore).includes(JSON.stringify(filter([option], true, true)[0]))) {
         if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseDown%20(click)_V3.mp3').play();
-        clipOptionsBefore = (filterSI(selected.clip));
+        clipOptionsBefore = (filter(selected.clip, true, true));
         if (vibrate.checked) window.navigator.vibrate(33);
       }
     }
     if (clipOptionsBefore) {
       for (const option of clipOptionsBefore) {
-        if (!JSON.stringify(filterSI(selected.clip)).includes(JSON.stringify(option))) {
+        if (!JSON.stringify(filter(selected.clip, true, true)).includes(JSON.stringify(option))) {
           if (clipOptionsSound.checked) new Audio('https://adi.nicolaiweitkemper.de/Sounds/mouseUp%20(click).mp3').play();
-          clipOptionsBefore = (filterSI(selected.clip));
+          clipOptionsBefore = (filter(selected.clip, true, true));
           if (vibrate.checked) {
             setTimeout(function () {
               window.navigator.vibrate(27);
@@ -2467,11 +2484,11 @@ layout(false, true);
     }
   }
   // remove sI out of the entered obj
-  function filterSI(clipOptions) {
+  function filter(clipOptions, sI, distance) {
     var stored = JSON.parse(JSON.stringify(clipOptions));
     for (const elm of stored) {
-      delete elm.sI;
-      delete elm.distance;
+      if (sI) delete elm.sI;
+      if (distance) delete elm.distance;
     }
     return stored;
   }
