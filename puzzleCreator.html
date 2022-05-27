@@ -518,7 +518,7 @@
       if (wrongPosition && !state.changedPos) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
       state.changedPos = false; 
     }
-    adaptExpandButtonPosition();
+    if (modeSelection.value == "traditional") adaptExpandButtonPosition();
   }
   function adaptExpandButtonPosition() {
     setTimeout(() => {
@@ -833,7 +833,8 @@
       window.scroll(0, /*96 50*/32);
       if (modeSelection.value == "schieben") {
         alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
-        layout(true);
+        state.removeTile = true;
+        layout(true, false, false, true);
       }
       else removeTile(true);
       // else layout();
@@ -889,6 +890,7 @@ swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.g
 swipeTitle.style.display = "none";
 modeHeadline.style.display = 'none';
   shuffleHeadline.style.display = 'none';
+  texturTop = textur.getBoundingClientRect().top;
   futurePuzzleManager.appendChild(storePuzzleManager);
   }
   function fAutoScroll(direction) {
@@ -911,14 +913,6 @@ modeHeadline.style.display = 'none';
     }
   }
   function shufflePuzzle() {
-    for (var i = 0; i < anzahlY.value; i++) {
-      for (var i1 = 0; i1 < anzahlX.value; i1++) {
-        positions.wrong[i*anzahlX.value + i1].edit.x -= 3*i1;
-        positions.wrong[i*anzahlX.value + i1].edit.y -= 3*i;
-      }
-    }
-    textur.width -= 3*(anzahlX.value - 1);
-    textur.height -= 3*(anzahlY.value - 1);
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked) {
       shuffleStyle.value = shuffleStyleBar.value;
@@ -926,6 +920,14 @@ modeHeadline.style.display = 'none';
     }
     if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
+      for (var i = 0; i < anzahlY.value; i++) {
+      for (var i1 = 0; i1 < anzahlX.value; i1++) {
+        positions.wrong[i*anzahlX.value + i1].edit.x -= 3*i1;
+        positions.wrong[i*anzahlX.value + i1].edit.y -= 3*i;
+      }
+    }
+    textur.width -= 3*(anzahlX.value - 1);
+    textur.height -= 3*(anzahlY.value - 1);
       var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
       for (var i of selected.tiles) {
         missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
@@ -1341,7 +1343,7 @@ function canvasClicked(calledBy) {
     if (input.files[0].type.includes('video')) sourceIsVideo.checked = true;
     else sourceIsPicture.checked = true;
     for (const puzzle of Object.keys(puzzles)) {
-      if (!state.restorePuzzle && puzzles[puzzle].fileName == input.files[0].name && confirm('Sie haben bereits ein Puzzle mit dieser Datei begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+      if (!state.restorePuzzle && puzzles[puzzle].fileName == input.files[0].name && confirm('Sie haben bereits ein Puzzle mit dieser Datei im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
         restorePuzzleSource(puzzle, true);
         break;
       }
@@ -1362,7 +1364,7 @@ function canvasClicked(calledBy) {
   }
     stopLiveFeed();
     for (const puzzle of Object.keys(puzzles)) {
-      if (!state.restorePuzzle && sourceURL.value == puzzles[puzzle].URL && confirm('Sie haben bereits ein Puzzle mit diesem Link/dieser URL begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+      if (!state.restorePuzzle && sourceURL.value == puzzles[puzzle].URL && confirm('Sie haben bereits ein Puzzle mit diesem Link/dieser URL im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
         restorePuzzleSource(puzzle, true);
         break;
       }
@@ -1498,7 +1500,7 @@ function stopLiveFeed() {
 // changes camera source
 async function changeCamera(index) {
   for (const puzzle of Object.keys(puzzles)) {
-    if (!state.restorePuzzle && index == puzzles[puzzle].liveCam && confirm('Sie haben bereits ein Puzzle mit dieser Kamera begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+    if (!state.restorePuzzle && index == puzzles[puzzle].liveCam && confirm('Sie haben bereits ein Puzzle mit dieser Kamera im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
       restorePuzzleSource(puzzle, true);
       break;
     }
@@ -1788,13 +1790,9 @@ var puzzles = {};
     if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // pCanvas.restore();
-    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !finished)) {
+    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !state.removeTile && !finished)) {
       pCanvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
       if (richtigPlazierte.checked) {
-        // pCanvas.fillRect(position.edit.x + lengthPerTeil.edit.x/2 - (lengthPerTeil.edit.x*rightMarkerRadius.value)/2, position.edit.y + lengthPerTeil.edit.y/2 - (lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
-        // pCanvas.save();
-        // pCanvas.translate(position.edit.x, position.edit.y);
-        // pCanvas.rotate(position.original.degree*Math.PI/180);
         pCanvas.fillRect(-(lengthPerTeil.edit.x*rightMarkerRadius.value)/2, -(lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
       }
       richtige++;
@@ -1806,10 +1804,6 @@ var puzzles = {};
       if (modeSelection.value == "traditional" && !state.removeTile) pCanvas.translate(position.edit.x, position.edit.y);
       else pCanvas.translate(position.edit.x + (lengthPerTeil.edit.x)/2, position.edit.y + (lengthPerTeil.edit.y)/2);
       pCanvas.rotate((position.original.degree)*Math.PI/180);
-      // if (position.borderincludes("right")) pCanvas.fillRect(position.edit.x - JSON.parse(breiteRand.value) + lengthPerTeil.edit.x - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
-      // if (position.borderincludes("left")) pCanvas.fillRect(position.edit.x + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.x)/2), position.edit.y - ((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y, position.original.degree);
-      // if (position.borderincludes("top")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y + JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
-      // if (position.borderincludes("bottom")) pCanvas.fillRect(position.edit.x - ((lengthPerTeil.edit.x)/2), position.edit.y - JSON.parse(breiteRand.value) + lengthPerTeil.edit.y - JSON.parse(randPosition.value) - ((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, JSON.parse(breiteRand.value), position.original.degree);
       if (position.border.includes("right")) pCanvas.fillRect((lengthPerTeil.edit.x)/2 - JSON.parse(breiteRand.value) - JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
       if (position.border.includes("left")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2) + JSON.parse(randPosition.value), -((lengthPerTeil.edit.y)/2), JSON.parse(breiteRand.value), lengthPerTeil.edit.y);
       if (position.border.includes("top")) pCanvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2) + JSON.parse(randPosition.value), lengthPerTeil.edit.x, JSON.parse(breiteRand.value));
