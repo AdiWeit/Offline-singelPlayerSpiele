@@ -1398,7 +1398,7 @@ function canvasClicked(calledBy) {
       } catch (err) {
         URLInfo.style.display = 'block';
       }
-      if (!aufgebenId.style.display == "inline") {
+      if (aufgebenId.style.display != "inline") {
         changeAdaptedSizeMax(width, height);
         zuAngepassterBildschirmgröße();
       } 
