@@ -7,8 +7,22 @@
 <br>
 <input type="text" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile y-Achse"> Teile y-Achse
 <br>
+<a id="puzzleManager">
+  <h1>Puzzle verwalten</h1>
+  <li id="puzzleSelection"></li>
+  <br>
+  <a id="storePuzzleManager">
+    <input id="doStorePuzzle" type="checkbox"> im Folgenden erstellte Puzzle unter dem Namen 
+    <input oninput="if (Object.keys(puzzles).includes(value)) puzzleNameWarning.style.display = 'inline'; else puzzleNameWarning.style.display = 'none'; doStorePuzzle.checked = true;" id="puzzleName" type="text"> 
+    automatisch speichern
+    <br>
+  </a>
+  <p id="puzzleNameWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
+    Sie haben ein Puzzle bereits so benannt. Bitte wählen Sie einen anderen Namen! Andernfalls wird das Puzzle das bisher so hieß überschrieben bzw. gelöscht!!!
+  </p>
+</a>
 <h1>Quelle auswählen</h1>
-<input type="file"onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
+<input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
 <br>
 <input onchange="useURL();" id="useURLCheck" type="radio" name="source">
@@ -233,6 +247,8 @@
   </a>
   <a2 id="generalSettings">
   <h2>allgemeine Einstellungen: </h2>
+  <a id="futurePuzzleManager">
+  </a>
     <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
     <!-- <h3>general</h3> -->
     <a id="rightMarkerSettings">
@@ -637,11 +653,11 @@
     layout(true, true);
   }
   function showCurrentStats(mode) {
-    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht.`);
+    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} Mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} Mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} Mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} Mal ein Teil gedreht.`);
     if (mode == "exchange") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?)");
     if (mode == "schieben") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + distinctMoves.length + "Zügen oder weniger möglich! Werden Sie es wohl schaffen?)");
     if (mode != "traditional" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
-    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
+    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
     größeAnpassenX.value = window.innerWidth;
@@ -873,6 +889,7 @@ swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.g
 swipeTitle.style.display = "none";
 modeHeadline.style.display = 'none';
   shuffleHeadline.style.display = 'none';
+  futurePuzzleManager.appendChild(storePuzzleManager);
   }
   function fAutoScroll(direction) {
     var scrollYBefore = scrollY;
@@ -1302,23 +1319,37 @@ function canvasClicked(calledBy) {
   // section 2.2: handle input data (picture, video, URL)
   // load selected file
   function readImg(input) {
+    var cancelLoading = false;
     sourceCheckboxes.style.display = 'none';
     var reader = new FileReader();
     stopLiveFeed();
-    reader.onload = function (e) {
-      if (sourceIsPicture.checked) document.getElementById('preview').setAttribute("src", e.target.result);
-      else {
-        video.setAttribute("src", e.target.result);
-        setTimeout(function () {
-          loadImage(video.videoWidth, video.videoHeight);
-        }, 1000);
+    if (!state.restorePuzzle || state.restorePuzzle.fileName == input.files[0].name || confirm("Sie haben wohl das falsche Puzzle ausgewählt. Wenn Sie trotzdem fortfahren wollen, klicken Sie auf OK o.ä. (andernfalls klicken Sie auf abbrechen o.ä. und erneut auf den Namen des Bildes, um das rictige Bild auszuwählen. )")) {
+      reader.onload = function (e) {
+        if (sourceIsPicture.checked) document.getElementById('preview').setAttribute("src", e.target.result);
+        else {
+          video.setAttribute("src", e.target.result);
+          setTimeout(function () {
+            loadImage(video.videoWidth, video.videoHeight);
+          }, 1000);
+        }
+      };
+    }
+      else if (state.restorePuzzle) {
+        cancelLoading = true;
       }
-    };
     reader.readAsDataURL(input.files[0]);
     if (input.files[0].type.includes('video')) sourceIsVideo.checked = true;
     else sourceIsPicture.checked = true;
-    loadImage();
+    for (const puzzle of Object.keys(puzzles)) {
+      if (!state.restorePuzzle && puzzles[puzzle].fileName == input.files[0].name && confirm('Sie haben bereits ein Puzzle mit dieser Datei begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+        restorePuzzleSource(puzzle, true);
+        break;
+      }
+    }
+    if (!cancelLoading && sourceIsPicture.checked) loadImage();
+    fileName = input.files[0].name;
   }
+  var fileName;
   var video = document.createElement("video");
   function useURL() {
     useURLCheck.checked = true;
@@ -1330,6 +1361,12 @@ function canvasClicked(calledBy) {
      sourceCheckboxes.style.display = 'block';
   }
     stopLiveFeed();
+    for (const puzzle of Object.keys(puzzles)) {
+      if (!state.restorePuzzle && sourceURL.value == puzzles[puzzle].URL && confirm('Sie haben bereits ein Puzzle mit diesem Link/dieser URL begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+        restorePuzzleSource(puzzle, true);
+        break;
+      }
+    }
     if (sourceIsPicture.checked) {
     preview.src = sourceURL.value;
     loadImage();
@@ -1361,8 +1398,20 @@ function canvasClicked(calledBy) {
       } catch (err) {
         URLInfo.style.display = 'block';
       }
-       changeAdaptedSizeMax(width, height);
-       zuAngepassterBildschirmgröße();
+      if (!aufgebenId.style.display == "inline") {
+        changeAdaptedSizeMax(width, height);
+        zuAngepassterBildschirmgröße();
+      } 
+       if (state.restorePuzzle) {
+        größeAnpassenX.value = state.restorePuzzle.width;
+        größeAnpassenY.value = state.restorePuzzle.height;
+        if (state.restorePuzzle.tileBarTiles) shuffleStyle.value = "listTiles";
+        else shuffleStyle.value = "nextToEachOther";
+        create();
+        shufflePuzzle();
+        restorePuzzle(state.restorePuzzle);
+        delete state.restorePuzzle;
+       }
     }, 500);
   }
   // end section 2
@@ -1448,6 +1497,12 @@ function stopLiveFeed() {
 }
 // changes camera source
 async function changeCamera(index) {
+  for (const puzzle of Object.keys(puzzles)) {
+    if (!state.restorePuzzle && index == puzzles[puzzle].liveCam && confirm('Sie haben bereits ein Puzzle mit dieser Kamera begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+      restorePuzzleSource(puzzle, true);
+      break;
+    }
+  }
   sourceCheckboxes.style.display = 'none';
   sourceIsVideo.checked = true;
   stopLiveFeed();
@@ -1476,6 +1531,81 @@ navigator.mediaDevices.enumerateDevices()
   if (!cameraSelection.options.length) useLiveCam.style.display = 'none';
 })
 // end section 3
+var puzzles = {};
+  getPuzzles();
+  function getPuzzles() {
+    while (puzzleSelection.getElementsByTagName('li').length) {
+      puzzleSelection.getElementsByTagName('li')[0].remove();
+    }
+    puzzles = JSON.parse(localStorage.getItem('puzzleCreatorPuzzles'));
+    for (const puzzle of Object.keys(puzzles)) {
+      var option = document.createElement('li');
+      option.innerHTML = puzzle;
+      option.value = puzzle;
+      option.onclick = () => {
+        restorePuzzleSource(puzzle);
+      };
+      puzzleSelection.appendChild(option);
+    }
+  }
+  function restorePuzzleSource(name, sourceLoaded) {
+    var puzzle = puzzles[name];
+    state.restorePuzzle = true;
+    if (!sourceLoaded) {
+      if (puzzle.fileName) {
+        alert('Bitte wählen Sie die von Ihnen genutzte Datei mit dem Namen "' + puzzle.fileName + '" aus.');
+        fileB.click();
+      }
+      if (puzzle.URL) {
+        sourceURL.value = puzzle.URL;
+        useURL();
+      }
+      if (puzzle.liveCam) {
+        cameraSelection.value = puzzle.liveCam;
+        changeCamera(puzzle.liveCam);
+      }
+    }
+    state.restorePuzzle = puzzle;
+    puzzleName.value = name;
+    doStorePuzzle.checked = true;
+  }
+  function restorePuzzle(puzzle) {
+    positions = puzzle.positions;
+    stats = puzzle.stats;
+    modeSelection.value = puzzle.mode;
+    if (puzzle.mode == "schieben") {
+      movement = puzzle.movement;
+      missing = puzzle.missing;
+    }
+    if (puzzle.mode == "traditional") {
+      rotateTiles.checked = puzzle.settings.rotateTiles;
+      if (puzzle.tileBarTiles) tileSelectionBar.tiles = puzzle.tileBarTiles;
+      mirrorInput.checked = puzzle.settings.mirrorInput;
+      mirrorCanvas(mirrorInput.checked);
+      restoreClipped();
+      setTimeout(() => {
+        while (positions.wrong.filter(x => x.edit.x < -lengthPerTeil.edit.x/2).length) {
+          expandSide('left');
+        }
+        while (positions.wrong.filter(x => x.edit.x > textur.width + lengthPerTeil.edit.x/2).length) {
+          expandSide('right');
+        }
+        while (positions.wrong.filter(x => x.edit.y < -lengthPerTeil.edit.y/2).length) {
+          expandSide('top');
+        }
+        while (positions.wrong.filter(x => x.edit.y > textur.height + lengthPerTeil.edit.y/2).length) {
+          expandSide('bottom');
+        }
+      }, 500);
+    }
+    stopClock.completionTime.time = puzzle.completionTime;
+    stopClock.viewOriginal.time = puzzle.viewOriginalTime;
+  }
+  function restoreClipped() {
+    for (let i = 0; i < positions.wrong.length; i++) {
+      getConnectedTiles(i, true, null, true);
+    }
+  }
   // scroll TileSelectionBar (translate)
   function scrollTileSelection(direc) {
     var screenScrollX = window.visualViewport.width/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
@@ -1615,6 +1745,10 @@ navigator.mediaDevices.enumerateDevices()
     }
     if (stats.preOrdered == "pending") stats.preOrdered = richtige;
     if (richtige == positions.wrong?.length && !removeTilesScreen && !finished) {
+      if (doStorePuzzle.checked) {
+        delete puzzles[puzzleName.value];
+        localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
+      }
       stopClock.completionTime.running = 0;
       richtige = 0;
       if(!withoutAlert) {
@@ -1623,8 +1757,8 @@ navigator.mediaDevices.enumerateDevices()
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
-        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} mal Teile verbunden (man schafft es mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} mal drehen schaffen können. `);
-        alert(`Zudem haben Sie ${stats.viewOriginal.times} mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
+        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} Mal Teile verbunden (man schafft es mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} Mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} Mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} Mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} Mal drehen schaffen können. `);
+        alert(`Zudem haben Sie ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -1752,7 +1886,7 @@ navigator.mediaDevices.enumerateDevices()
         }
     });
   }
-  if (first && modeSelection.value != "schieben") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
+  if (first && modeSelection.value != "schieben" && !state.restorePuzzle) alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
@@ -2031,7 +2165,7 @@ navigator.mediaDevices.enumerateDevices()
               if (!selected.tiles.includes(i)) selected.tiles.push(i);
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
-              if (!elmCalled && !touchStart) {
+              if (!elmCalled && !touchStart && rotateTiles.checked) {
                 if (rotatesRight.checked) rotateSelected(90);
                 if (rotatesLeft.checked) rotateSelected(-90);
               }
@@ -2196,7 +2330,8 @@ navigator.mediaDevices.enumerateDevices()
 if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
 delete state.rotated;
 layout(false, true);
-  }
+  if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
+}
   function rotateTile(tile, direction) {
     if (mirrorInput.checked) direction *= -1;
     positions.wrong[tile].original.degree = getDegreeAfterRotation(positions.wrong[tile].original.degree, direction);
@@ -2267,13 +2402,15 @@ layout(false, true);
       selected.tiles = [];
     }
     var collidesTilesBar = tileSelectionBar.collidesMouse();
-    if (event.key == "ArrowRight") {
-      if (collidesTilesBar) scrollTileSelection(1);
-      else rotateSelected(90);
-    }
-    if (event.key == "ArrowLeft") {
-      if (collidesTilesBar) scrollTileSelection(-1);
-      else rotateSelected(-90);
+    if (rotateTiles.checked) {
+      if (event.key == "ArrowRight") {
+        if (collidesTilesBar) scrollTileSelection(1);
+        else rotateSelected(90);
+      }
+      if (event.key == "ArrowLeft") {
+        if (collidesTilesBar) scrollTileSelection(-1);
+        else rotateSelected(-90);
+      }
     }
     if (event.key?.includes("Arrow")) layout(true);
     if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && ((selected.tiles.length && rotateTiles.checked) || collidesTilesBar)) return false;
@@ -2337,6 +2474,38 @@ layout(false, true);
     }
   }
   // end section 6
+  function storePuzzle() {
+    var puzzle = puzzles[puzzleName.value];
+    if (!puzzle) puzzle = {};
+    puzzle.settings = {};
+    puzzle.positions = positions;
+    puzzle.stats = stats;
+    puzzle.mode = modeSelection.value;
+    if (modeSelection.value == "schieben") {
+      puzzle.movement = movement;
+      puzzle.missing = missing;
+    }
+    if (modeSelection.value == "traditional") {
+      puzzle.settings.rotateTiles = rotateTiles.checked;
+      if (shuffleStyle.value == "listTiles") puzzle.tileBarTiles = tileSelectionBar.tiles;
+    }
+    puzzle.settings.mirrorInput = mirrorInput.checked;
+    if (sourceIsFile.checked) {
+      puzzle.fileName = fileName;
+    }
+    if (useURLCheck.checked) {
+      puzzle.URL = sourceURL.value;
+    }
+    if (useLiveCam.checked) {
+      puzzle.liveCam = cameraSelection.options[cameraSelection.value - 1].value;
+    }
+    puzzle.width = größeAnpassenX.value;
+    puzzle.height = größeAnpassenY.value;
+    puzzle.completionTime = stopClock.completionTime.time;
+    puzzle.viewOriginalTime = stopClock.viewOriginal.time;
+    puzzles[puzzleName.value] = puzzle;
+    localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
+  }
   // returns pixel as a number
   function convertStyle(value) {
     return JSON.parse(value.replace('px', ''));
@@ -2451,12 +2620,17 @@ layout(false, true);
     }
   }
   // returns a list with the indizes (plural index) of all tiles the entered tile ('tile') is connected to
-  function getConnectedTiles(tile, firstCall, connectedTiles) {
+  function getConnectedTiles(tile, firstCall, connectedTiles, restoreClipped) {
     if (!connectedTiles) connectedTiles = [];
     connectedTiles.push(tile);
     var tileObj = positions.wrong[tile];
     for (const side of ['left', 'top', 'right', 'bottom']) {
-      if (tileObj && tileObj.original[side] && !connectedTiles.includes(getTile(tileObj.original[side]))) getConnectedTiles(getTile(tileObj.original[side]), false, connectedTiles);
+      if (tileObj && tileObj.original[side] && !connectedTiles.includes(getTile(tileObj.original[side]))) {
+        if (restoreClipped && !clipped.includes(tile + ' - ' + getTile(tileObj.original[side])) && !clipped.includes(getTile(tileObj.original[side]) + ' - ' + tile)) {
+          clipped.push(tile + ' - ' + getTile(tileObj.original[side]));
+        }
+        getConnectedTiles(getTile(tileObj.original[side]), false, connectedTiles, restoreClipped);
+      }
     };
     if (firstCall) return connectedTiles;
   }
