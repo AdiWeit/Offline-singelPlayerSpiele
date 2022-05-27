@@ -7,9 +7,15 @@
 <br>
 <input type="text" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile y-Achse"> Teile y-Achse
 <br>
-<a id="puzzleManager">
+<div id="puzzleManager">
   <h1>Puzzle verwalten</h1>
   <li id="puzzleSelection"></li>
+  <div style="display: none;" onmouseout="checkOut();"  class="dropdown-content" id="editPuzzleManager">
+    <a onclick="restorePuzzleSource(selected.puzzle);">öffnen/fortfahren</a>
+    <a onclick="editPuzzleName();">Name bearbeiten</a>
+    <a onclick="deletePuzzle();">löschen</a>
+    <a onclick="showInformation();">mehr Informationen</a>
+  </div>
   <br>
   <a id="storePuzzleManager">
     <input id="doStorePuzzle" type="checkbox"> im Folgenden erstellte Puzzle unter dem Namen 
@@ -20,7 +26,7 @@
   <p id="puzzleNameWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
     Sie haben ein Puzzle bereits so benannt. Bitte wählen Sie einen anderen Namen! Andernfalls wird das Puzzle das bisher so hieß überschrieben bzw. gelöscht!!!
   </p>
-</a>
+</div>
 <h1>Quelle auswählen</h1>
 <input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
@@ -317,6 +323,30 @@
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
 <style>
+  .dropdown {
+position: relative;
+display: inline-block;
+}
+
+.dropdown-content {
+display: none;
+position: absolute;
+background-color: #f1f1f1;
+min-width: 160px;
+box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+z-index: 1;
+}
+
+.dropdown-content a {
+color: black;
+padding: 12px 16px;
+text-decoration: none;
+display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+</style>
+<style>
   #tileSelectionCanvas {
     /* position: -webkit-sticky; */
     position: fixed;
@@ -475,6 +505,13 @@
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
   // section 1: mainly change element style and visibility
+  function checkOut(closeAnyway) {
+    var stillIn = false;
+      for (var elm of document.getElementsByClassName('dropdown-content')[0].children) {
+        if (window.getComputedStyle(elm).backgroundColor == "rgb(221, 221, 221)") stillIn = true;
+      }
+    if (!stillIn || closeAnyway) document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
+  }
   function shuffleStyleVisibilities(value) {
     if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
     else tilesGapS.style.display = 'none';
@@ -614,6 +651,29 @@
     adaptExpandButtonPosition();
   }
   // section 2: actions followed by element change/user input
+  function showInformation() {
+    var puzzle = puzzles[selected.puzzle];
+    alert(`Dieses Puzzle nutzt den Modus "${puzzle.mode}". Sie haben bereits ${getTimeString(puzzle.completionTime)} Minuten mit dem Puzzle verbracht. Das Puzzle enthält ${puzzle.positions.wrong.length} Teile. `);
+    document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
+  }
+  function editPuzzleName() {
+    var newName = prompt("Bitte geben Sie hier den neuen Namen ein.", selected.puzzle);
+    if (newName && newName != selected.puzzle) {
+      getPuzzles();
+      puzzles[newName] = puzzles[selected.puzzle];
+      delete puzzles[selected.puzzle];
+      localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
+      getPuzzles();
+    }
+    document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
+  }
+  function deletePuzzle() {
+    getPuzzles();
+    delete puzzles[selected.puzzle]; 
+    localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
+    getPuzzles();
+    document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
+  }
   function changeAdaptedSizeMax(width, height) {
     textur.width = width// + 111;
     textur.height = height// + 111;
@@ -1544,8 +1604,11 @@ var puzzles = {};
       var option = document.createElement('li');
       option.innerHTML = puzzle;
       option.value = puzzle;
+      option.id = 'select ' + puzzle;
       option.onclick = () => {
-        restorePuzzleSource(puzzle);
+        selected.puzzle = puzzle;
+        editPuzzleManager.style.display = "inline";
+        editPuzzleManager.style.top = document.getElementById('select ' + puzzle).getBoundingClientRect().bottom;
       };
       puzzleSelection.appendChild(option);
     }
@@ -2469,6 +2532,7 @@ layout(false, true);
   }
   // end section 6
   function storePuzzle() {
+    getPuzzles();
     var puzzle = puzzles[puzzleName.value];
     if (!puzzle) puzzle = {};
     puzzle.settings = {};
