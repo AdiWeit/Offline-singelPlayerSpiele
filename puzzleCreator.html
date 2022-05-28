@@ -93,7 +93,7 @@
     Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählen Teile
   </div>
   <div id="swipeTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
-    Scrollen nach einmal swipen ermöglichen (bis nicht mehr aktiviert und einmal geswiped)
+    Scrollen ermöglichen
   </div>
 </div>
 <style>
@@ -198,7 +198,7 @@
         <br>
       </a>
     </div>
-    <input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b>
+    <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
     <a id="tileColliderSettings" style="display: none;">
       <br>
       Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
@@ -210,7 +210,7 @@
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings" style="display: none">
-  <p id="swipeSteuerungP"><i:nput type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
   <p id="schiebenSettings">
     <br>
@@ -571,7 +571,7 @@ display: block;
       if (settings.style.display == "inline") expandTop.style.top = settings.getBoundingClientRect().bottom + scrollY + 17;
       else expandTop.style.top = showSettings.getBoundingClientRect().bottom + scrollY + 17;
       textur.style.top = expandTop.getBoundingClientRect().bottom + scrollY;
-      texturTop = textur.getBoundingClientRect().top;
+      texturTop = textur.getBoundingClientRect().top + scrollY;
       expandRight.style.top = textur.getBoundingClientRect().top + scrollY;
       expandLeft.style.top = textur.getBoundingClientRect().top + scrollY;
       expandBottom.style.top = textur.getBoundingClientRect().top + scrollY;
@@ -591,13 +591,13 @@ display: block;
     if (checked) {
       innerMovementPlayer.style.display = 'inline'; 
       playMovementPos(getPlayerPosition(true));
-      texturTop = textur.getBoundingClientRect().top;
+      texturTop = textur.getBoundingClientRect().top + scrollY;
       movementPlayer.scrollIntoView();
       window.scroll(0, scrollY);
     }
     else {
       innerMovementPlayer.style.display = 'none';
-      texturTop = textur.getBoundingClientRect().top;
+      texturTop = textur.getBoundingClientRect().top + scrollY;
       canvas = textur.getContext('2d');
     }
   }
@@ -737,7 +737,7 @@ display: block;
     if (mode == "exchange") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?)");
     if (mode == "schieben") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + distinctMoves.length + "Zügen oder weniger möglich! Werden Sie es wohl schaffen?)");
     if (mode != "traditional" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
-    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
+    alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} Minuten auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
     größeAnpassenX.value = window.innerWidth;
@@ -920,7 +920,6 @@ display: block;
       // else layout();
       if (sourceIsVideo.checked) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
       showSettings.scrollIntoView();
-      textur.style.touchAction = "none";
       window.scroll(0, 0);
       changeSettingsVis('none');
     }
@@ -970,7 +969,7 @@ swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.g
 swipeTitle.style.display = "none";
 modeHeadline.style.display = 'none';
   shuffleHeadline.style.display = 'none';
-  texturTop = textur.getBoundingClientRect().top;
+  texturTop = textur.getBoundingClientRect().top + scrollY;
   futurePuzzleManager.appendChild(storePuzzleManager);
   }
   function fAutoScroll(direction) {
@@ -1154,7 +1153,6 @@ modeHeadline.style.display = 'none';
   shuffleStyle.style.display = 'none';
   tileStatusOptions.style.display = 'none';
   shuffleStyleLable.style.display = 'none';
-  textur.style.touchAction = "none";
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   // expand textur buttons
   if (modeSelection.value == "traditional") { 
@@ -1188,6 +1186,7 @@ modeHeadline.style.display = 'none';
   backToBarBHeight.max = lengthPerTeil.edit.y;
   backToBarBWidth.value = lengthPerTeil.edit.x/7;
   backToBarBHeight.value = lengthPerTeil.edit.y/7;
+  hitboxCheckbox.style.display = "inline";
   hitboxWidth.max = lengthPerTeil.edit.x;
   hitboxWidth.value = lengthPerTeil.edit.x;
   hitboxHeight.max = lengthPerTeil.edit.y;
@@ -1626,6 +1625,7 @@ var puzzles = {};
       puzzleSelection.getElementsByTagName('li')[0].remove();
     }
     puzzles = JSON.parse(localStorage.getItem('puzzleCreatorPuzzles'));
+    if (!puzzles) puzzles = {};
     for (const puzzle of Object.keys(puzzles)) {
       var option = document.createElement('li');
       option.innerHTML = puzzle;
@@ -1633,7 +1633,8 @@ var puzzles = {};
       option.id = 'select ' + puzzle;
       option.onclick = () => {
         selected.puzzle = puzzle;
-        editPuzzleManager.style.display = "inline";
+        if (editPuzzleManager.style.display == "none") editPuzzleManager.style.display = "inline";
+        else editPuzzleManager.style.display = "none";
         editPuzzleManager.style.top = document.getElementById('select ' + puzzle).getBoundingClientRect().bottom;
       };
       puzzleSelection.appendChild(option);
@@ -1642,10 +1643,12 @@ var puzzles = {};
   function restorePuzzleSource(name, sourceLoaded) {
     var puzzle = puzzles[name];
     state.restorePuzzle = true;
+    anzahlX.value = puzzle.tileAmount.x;
+    anzahlY.value = puzzle.tileAmount.y;
     if (!sourceLoaded) {
       if (puzzle.fileName) {
-        alert('Bitte wählen Sie die von Ihnen genutzte Datei mit dem Namen "' + puzzle.fileName + '" aus.');
         fileB.click();
+        alert('Bitte wählen Sie die von Ihnen genutzte Datei mit dem Namen "' + puzzle.fileName + '" aus.');
       }
       if (puzzle.URL) {
         sourceURL.value = puzzle.URL;
@@ -1849,7 +1852,7 @@ var puzzles = {};
         if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
         if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
         if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} Mal Teile verbunden (man schafft es mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} Mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} Mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} Mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} Mal drehen schaffen können. `);
-        alert(`Zudem haben Sie ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} (Milli-) Sekunden auf das Originalbild geguckt.`.replace('undefined', '0'));
+        alert(`Zudem haben Sie ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} Minuten auf das Originalbild geguckt.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
@@ -2079,7 +2082,7 @@ var puzzles = {};
     swipeTitle.style.display = vis.swipe;
   }
   function adaptMobileControlsPosition() {
-    mobileControls.style.top = (visualViewport.offsetTop - 7) + 'px';
+    mobileControls.style.top = (visualViewport.offsetTop/* - 7*/ + 2) + 'px';
     mobileControls.style.left = (visualViewport.offsetLeft + 300/visualViewport.scale) + 'px';
     mobileControls.style.fontSize =  (5/visualViewport.scale) + 'vh';
     for (const elm of document.getElementsByClassName('mobileControlsElm')) {
@@ -2110,21 +2113,22 @@ var puzzles = {};
     if (gerät == "PC") folgenMouseMove("mousemove");
   }
   window.scroll(0, 0);
-  var texturTop = textur.getBoundingClientRect().top;
+  var texturTop = textur.getBoundingClientRect().top + scrollY;
   var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false, rightScroll: 0, upScroll: 0, userSource: 'Picture'};
   var texturLeft = textur.getBoundingClientRect().left;
   // #importantUserInputs
   // if (gerät == "Handy") {
-    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchmove', touch, {passive:false});
     document.addEventListener('touchstart', touch);
     document.addEventListener('touchend', touch);
     function touch(ev) {
-    if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
+      if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile)) {
+        ev.preventDefault();
+      }
+      if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
     if (ev.touches[2] && !scrollable.checked) {
-      textur.style.touchAction = '';
     }
     else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
-      textur.style.touchAction = 'none';
     }
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
       state.shift = true;
@@ -2132,8 +2136,10 @@ var puzzles = {};
       selected.tiles = [];
       mouseDown();
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && (textur.style.touchAction == 'none') && (swipeSteuerung.checked ))) {
-      // textur.style.touchAction = '';
+    if (ev.type == "touchend") {
+      console.log('touchEnd');
+    }
+    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) && mausy > texturTop) {
       canvasClicked();
     }
     else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
@@ -2144,7 +2150,6 @@ var puzzles = {};
       if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
     }
     if (!scrollable.checked) {
-      // if (aufgebenId.style.display == "inline") textur.style.touchAction = 'none';
     if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
       mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
     }
@@ -2158,24 +2163,11 @@ var puzzles = {};
       folgenMouseMove("touchmove");
     }
   }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && ev.touches[0]) {
-        if (textur.style.touchAction != 'none') {
-        setTimeout(function () {
-          window.scroll(0, /*96 50*/32);
-          if (!ev.touches[2]) textur.style.touchAction = 'none';
-          selected.coord = {x: checkSelected().x, y: checkSelected().y};
-          selected.boolean = true;
-        }, 3000);
-      }
-      else {
+      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !scrollable.checked) {
         selected.coord = {x: checkSelected().x, y: checkSelected().y};
         selected.boolean = true;
       }
-
-      }
-      if (scrollable.checked) textur.style.touchAction = '';
     }
-    if (!selected.tiles.length && ev.type == "touchmove" && scrollOnBlanc.checked) textur.style.touchAction = '';
     adaptMobileControlsPosition();
   }
   // }
@@ -2473,7 +2465,7 @@ layout(false, true);
     if (event.key == "Escape") {
       selected.tiles = [];
     }
-    layout();
+    if (aufgebenId.style.display == "none") layout();
   }
   // end section 5
   // section 6: rotate tile(s)
@@ -2562,6 +2554,7 @@ layout(false, true);
     var puzzle = puzzles[puzzleName.value];
     if (!puzzle) puzzle = {};
     puzzle.settings = {};
+    puzzle.tileAmount = {x: anzahlX.value, y: anzahlY.value};
     puzzle.positions = positions;
     puzzle.stats = stats;
     puzzle.mode = modeSelection.value;
@@ -2633,10 +2626,10 @@ layout(false, true);
   function checkPossibleClipping(tile, afterClipping) {
     pLengthPerTeil = JSON.parse(JSON.stringify(lengthPerTeil));
     pCollider = {width: parseInt(hitboxWidth.value), height: parseInt(hitboxHeight.value)};
-    if ([90, 270].includes(positions.wrong[tile].original.degree)) {
+    if ([90, 270].includes(positions.wrong[tile].original.degree) && lengthPerTeil.edit.x != lengthPerTeil.edit.y) {
+      pCollider = {width: parseInt(hitboxHeight.value), height: parseInt(hitboxWidth.value)};
       pLengthPerTeil.edit.x = lengthPerTeil.edit.y;
       pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
-      // pCollider = {width: parseInt(hitboxHeight.value), height: parseInt(hitboxWidth.value)};
     }
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
     positions.wrong.forEach((pos, i) => {
