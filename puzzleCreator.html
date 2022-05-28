@@ -198,10 +198,15 @@
         <br>
       </a>
     </div>
+    <a id="tileColliderSettings">
+      Hitbox Breite: <input type="range" id="hitboxWidth">
+      <br>
+      Hitbox Höhe: <input type="range" id="hitboxHeight">
+    </a>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings" style="display: none">
-  <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <p id="swipeSteuerungP"><i:nput type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
   <p id="schiebenSettings">
     <br>
@@ -1168,6 +1173,10 @@ modeHeadline.style.display = 'none';
   backToBarBHeight.max = lengthPerTeil.edit.y;
   backToBarBWidth.value = lengthPerTeil.edit.x/7;
   backToBarBHeight.value = lengthPerTeil.edit.y/7;
+  hitboxWidth.max = lengthPerTeil.edit.x;
+  hitboxWidth.value = lengthPerTeil.edit.x;
+  hitboxHeight.max = lengthPerTeil.edit.y;
+  hitboxHeight.value = lengthPerTeil.edit.y;
   if (gerät == "PC") automaticTileSelectionReset.checked = false;
   if (shuffleStyle.value == "listTiles") {
     selectBackToBarB.style.display = 'inline';
@@ -2606,25 +2615,27 @@ layout(false, true);
   }
   function checkPossibleClipping(tile, afterClipping) {
     pLengthPerTeil = JSON.parse(JSON.stringify(lengthPerTeil));
+    pCollider = {width: parseInt(hitboxWidth.value), height: parseInt(hitboxHeight.value)};
     if ([90, 270].includes(positions.wrong[tile].original.degree)) {
       pLengthPerTeil.edit.x = lengthPerTeil.edit.y;
       pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
+      // pCollider = {width: parseInt(hitboxHeight.value), height: parseInt(hitboxWidth.value)};
     }
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
     positions.wrong.forEach((pos, i) => {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
       var selectedObj = {
-        right: {x: obj.slc.x - 10, y: obj.slc.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2},
-        left: {x: obj.slc.x + pLengthPerTeil.edit.x, y: obj.slc.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2},
-        bottom: {x: obj.slc.x + 1, y: obj.slc.y - 10, width: pLengthPerTeil.edit.x - 2, height: 10},
-        top: {x: obj.slc.x + 1, y: obj.slc.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x - 2, height: 10}
+        right: {x: obj.slc.x - 10, y: obj.slc.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2},
+        left: {x: obj.slc.x + pLengthPerTeil.edit.x, y: obj.slc.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2},
+        bottom: {x: obj.slc.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.slc.y - 10, width: pCollider.width - 2, height: 10},
+        top: {x: obj.slc.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.slc.y + pLengthPerTeil.edit.y, width: pCollider.width - 2, height: 10}
       };
       if (!clipped.includes(i + ' - ' + tile) && !clipped.includes(tile + ' - ' + i)) {
         var nearTile = {
-          right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2}),
-          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1, width: 10, height: pLengthPerTeil.edit.y - 2}),
-          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x - 2, height: 10}),
-          top: collides(selectedObj.top, {x: obj.all.x + 1, y: obj.all.y - 10, width: pLengthPerTeil.edit.x - 2, height: 10})
+          right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
+          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
+          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y + pLengthPerTeil.edit.y, width: pCollider.width - 2, height: 10}),
+          top: collides(selectedObj.top, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y - 10, width: pCollider.width - 2, height: 10})
         };
         for (var side of Object.keys(nearTile)) {
           if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
@@ -2651,19 +2662,19 @@ layout(false, true);
     var filteredClip = JSON.stringify(filter(selected.clip, false, true));
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.left && !filteredClip.includes(JSON.stringify({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}}))) {
-      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
+      selected.clip.push({i: nearest.right.i, sI: tile, direction: 'right', x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height, selected: {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.right.area});
     }
     obj = {all: positions.wrong[nearest?.left.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.right && !filteredClip.includes(JSON.stringify({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}}))) {
-      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y, width: 10, height: pLengthPerTeil.edit.y, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
+      selected.clip.push({i: nearest.left.i, sI: tile, direction: 'left', x: obj.all.x - 10, y: obj.all.y + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height, selected: {x: obj.all.x - pLengthPerTeil.edit.x, y: obj.all.y}, distance: nearest.left.area});
     }
     obj = {all: positions.wrong[nearest?.bottom.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.top && !filteredClip.includes(JSON.stringify({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}}))) {
-      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y, width: pLengthPerTeil.edit.x, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}, distance: nearest.bottom.area});
+      selected.clip.push({i: nearest.bottom.i, sI: tile, direction: 'bottom', x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y + pLengthPerTeil.edit.y, width: pCollider.width, height: 10, selected: { x: obj.all.x, y: obj.all.y + pLengthPerTeil.edit.y}, distance: nearest.bottom.area});
     }
     obj = {all: positions.wrong[nearest?.top.i]?.edit, slc: positions.wrong[tile].edit};
     if (obj.all && !positions.wrong[tile].original.bottom && !filteredClip.includes(JSON.stringify({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: pLengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}}))) {
-      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x, y: obj.all.y - 10, width: pLengthPerTeil.edit.x, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}, distance: nearest.top.area});
+      selected.clip.push({i: nearest.top.i, sI: tile, direction: 'top', x: obj.all.x + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y - 10, width: pCollider.width, height: 10, selected: {x: obj.all.x, y: obj.all.y - pLengthPerTeil.edit.y}, distance: nearest.top.area});
     }
     checkedTiles = [];
     for (var i = 0; i < selected.clip.length - clipLength; i++) {
