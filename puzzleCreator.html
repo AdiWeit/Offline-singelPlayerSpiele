@@ -198,10 +198,14 @@
         <br>
       </a>
     </div>
-    <a id="tileColliderSettings">
-      Hitbox Breite: <input type="range" id="hitboxWidth">
+    <input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b>
+    <a id="tileColliderSettings" style="display: none;">
       <br>
-      Hitbox Höhe: <input type="range" id="hitboxHeight">
+      Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
+      <br>
+      Hitbox Höhe: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
+      <br>
+      <canvas id="hitboxTextur"></canvas>
     </a>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
@@ -678,6 +682,17 @@ display: block;
     localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
     getPuzzles();
     document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
+  }
+  function showHitboxes() {
+    var canvas = hitboxTextur.getContext('2d');
+    canvas.clearRect(0, 0, hitboxTextur.width, hitboxTextur.height);
+    canvas.fillStyle = "red";
+    canvas.fillRect(0, 0, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.fillRect(lengthPerTeil.edit.x + 11, 0, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.fillRect(0, lengthPerTeil.edit.y + 11, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
+    canvas.fillRect(lengthPerTeil.edit.x, lengthPerTeil.edit.y/2 - hitboxHeight.value/2, 10, hitboxHeight.value);
+    canvas.fillRect(lengthPerTeil.edit.x/2 - hitboxWidth.value/2, lengthPerTeil.edit.y, hitboxWidth.value, 10);
   }
   function changeAdaptedSizeMax(width, height) {
     textur.width = width// + 111;
@@ -1177,6 +1192,8 @@ modeHeadline.style.display = 'none';
   hitboxWidth.value = lengthPerTeil.edit.x;
   hitboxHeight.max = lengthPerTeil.edit.y;
   hitboxHeight.value = lengthPerTeil.edit.y;
+  hitboxTextur.width = lengthPerTeil.edit.x*2 + 33;
+  hitboxTextur.height = lengthPerTeil.edit.y*2 + 33;
   if (gerät == "PC") automaticTileSelectionReset.checked = false;
   if (shuffleStyle.value == "listTiles") {
     selectBackToBarB.style.display = 'inline';
