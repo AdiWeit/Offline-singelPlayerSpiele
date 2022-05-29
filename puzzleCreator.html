@@ -320,12 +320,12 @@
 </a>
 <br>
 <br>
-<button onclick="expandSide('top');" style="height: 3vw;" class="expandButtons" id="expandTop">+</button>
+<button onclick="expandSide('top');" style="height: 55px;" class="expandButtons" id="expandTop">+</button>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
-<button onclick="expandSide('right');" style="width: 3vw;" class="expandButtons" id="expandRight">+</button>
-<button onclick="expandSide('left');" style="width: 3vw;" class="expandButtons" id="expandLeft">+</button>
+<button onclick="expandSide('right');" style="width: 55px;" class="expandButtons" id="expandRight">+</button>
+<button onclick="expandSide('left');" style="width: 55px;" class="expandButtons" id="expandLeft">+</button>
 <br>
-<button class="expandButtons" style="height: 3vw;" onclick="expandSide('bottom');" id="expandBottom">+</button>
+<button class="expandButtons" style="height: 55px;" onclick="expandSide('bottom');" id="expandBottom">+</button>
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div class="expandButtons" id="backToBarButtons">
 </div>
@@ -503,6 +503,10 @@ display: block;
     vibrateA.style.display = "none";
   }
   gapSizeChanged(tilesGap.value);
+  expandBottom.style.height = window.innerWidth/29;
+  expandTop.style.height = window.innerWidth/29;
+  expandLeft.style.width = window.innerWidth/29;
+  expandRight.style.width = window.innerWidth/29;
   mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
   anzahlVerschieben.value = anzahlX.value*anzahlY.value;
@@ -578,6 +582,7 @@ display: block;
       expandBottom.style.top = textur.getBoundingClientRect().top + scrollY;
       // update canvas and expand buttons position
       expandSide();
+      textur.style.left = expandLeft.getBoundingClientRect().right + scrollX + 'px';
     }, 10);
   }
   function mirrorCanvas(checked) {
