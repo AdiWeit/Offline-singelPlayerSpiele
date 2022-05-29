@@ -1377,6 +1377,7 @@ function canvasClicked(calledBy) {
       userMovement.index = position;
       setTimeout(() => {
         movement.playerPosition = positions.wrong;
+        storePuzzle();
       }, 100);
     }
     if (position < 0) position = 0;
@@ -1684,6 +1685,7 @@ var puzzles = {};
           userMovement.index++;
           playerMovementSlider.max = userMovement.moves.length;
           playerMovementSlider.value = userMovement.index + 1;
+          playMovementPos(puzzle.movementPlayerPosition, null, null, userMovement.moves);
         }
         if (puzzle.mode == "traditional") {
           rotateTiles.checked = puzzle.settings.rotateTiles;
@@ -2574,9 +2576,11 @@ layout(false, true);
     puzzle.stats = stats;
     puzzle.mode = modeSelection.value;
     if (modeSelection.value == "schieben") {
-      puzzle.movement = movement;
+      puzzle.movement = JSON.parse(JSON.stringify(movement));
+      delete puzzle.movement.playerPosition;
       puzzle.missing = missing;
       puzzle.userMovement = userMovement;
+      puzzle.movementPlayerPosition = playerMovementSlider.value;
     }
     if (modeSelection.value == "traditional") {
       puzzle.settings.rotateTiles = rotateTiles.checked;
