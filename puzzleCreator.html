@@ -1566,7 +1566,18 @@ function updateVideo(){
       if (shuffleStyle.value == "listTiles" && tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], false, i, tileSelectionBar.canvas);
       else drawPictureSegment(positions.wrong[i], positions.right[i], false, i);
     }
-    if (aufgebenId.style.display != "inline") canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
+    if (aufgebenId.style.display != "inline") {
+      if (state.removeTile) {
+        for (let i = 0; i < anzahlX.value; i++) {
+          for (let i1 = 0; i1 < anzahlY.value; i1++) {
+            canvas.drawImage(video, positions.wrong[i1*anzahlX.value + i].original.x, positions.wrong[i1*anzahlX.value + i].original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, i*lengthPerTeil.edit.x + 3*i, i1*lengthPerTeil.edit.y + 3*i1, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+          }
+        }
+      }
+      else {
+        canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
+      }
+    }
     videoPreview.getContext('2d').drawImage(video, 0, 0, größeAnpassenX.value, größeAnpassenY.value);
     showSelected();
     showClippingOptions();
@@ -1618,13 +1629,16 @@ async function changeCamera(index) {
 // gets available cameras
 navigator.mediaDevices.enumerateDevices()
 .then(function(devices) {
+  var option = 0;
   devices.forEach( (device, i) => {
     console.log(device.kind + ": " + device.label + " id = " + device.deviceId);
     if (device.kind == "videoinput") {
+      option++;
       opt = document.createElement("option");
-      document.getElementById("cameraSelection").options.add(opt);
       opt.text = device.label;
+      if (opt.text == "") opt.text = "option " + option;
       opt.value = i;
+      document.getElementById("cameraSelection").options.add(opt);
     }
   });
   if (cameraSelection.options.length < 2) cameraSelection.style.display = 'none';
