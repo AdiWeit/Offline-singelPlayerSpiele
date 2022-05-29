@@ -565,6 +565,7 @@ display: block;
       state.changedPos = false; 
     }
     if (modeSelection.value == "traditional") adaptExpandButtonPosition();
+    texturTop = textur.getBoundingClientRect().top + scrollY;
   }
   function adaptExpandButtonPosition() {
     setTimeout(() => {
@@ -803,6 +804,7 @@ display: block;
     }
   }
   function modeSelected(value) {
+    modeSelection.value = value;
     traditionalDescription.style.display = 'none';
     exchangeDescription.style.display = 'none';
     schiebenDescription.style.display = 'none';
@@ -912,7 +914,7 @@ display: block;
       //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
       window.scroll(0, /*96 50*/32);
       if (modeSelection.value == "schieben") {
-        alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
+        if (!state.restorePuzzle) alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
         state.removeTile = true;
         layout(true, false, false, true);
       }
@@ -922,6 +924,14 @@ display: block;
       showSettings.scrollIntoView();
       window.scroll(0, 0);
       changeSettingsVis('none');
+      swipeTitle.style.display = "inline";
+      swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
+      swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
+      swipeTitle.style.display = "none";
+      modeHeadline.style.display = 'none';
+      shuffleHeadline.style.display = 'none';
+      texturTop = textur.getBoundingClientRect().top + scrollY;
+      futurePuzzleManager.appendChild(storePuzzleManager);
     }
     autoScroll = setInterval(function () {
   // up
@@ -963,14 +973,6 @@ var pScrollY = scrollY;
         fAutoScroll({x: 0, y: +3});
       }
 });
-swipeTitle.style.display = "inline";
-swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
-swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
-swipeTitle.style.display = "none";
-modeHeadline.style.display = 'none';
-  shuffleHeadline.style.display = 'none';
-  texturTop = textur.getBoundingClientRect().top + scrollY;
-  futurePuzzleManager.appendChild(storePuzzleManager);
   }
   function fAutoScroll(direction) {
     var scrollYBefore = scrollY;
@@ -997,7 +999,7 @@ modeHeadline.style.display = 'none';
       shuffleStyle.value = shuffleStyleBar.value;
       autoSelectTileBar.checked = false;
     }
-    if (modeSelection.value == "schieben" && !selected.tiles.length) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
+    if (modeSelection.value == "schieben" && !selected.tiles.length && !state.restorePuzzle) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
       for (var i = 0; i < anzahlY.value; i++) {
       for (var i1 = 0; i1 < anzahlX.value; i1++) {
@@ -1049,48 +1051,7 @@ modeHeadline.style.display = 'none';
       removeTilesFinishedB.style.display = 'none';
       state.removeTile = false;
       if (modeSelection.value == "schieben") {
-        movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
-        verschiebenPC();
-        wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
-        setTimeout(function () {
-          // create misstingDistinct
-          distinctMoves = JSON.parse(JSON.stringify(movement.move));
-          var distinctPositions = [];
-          var change;
-          var firstRunThrough = true;
-          playerMovement = movement.move;
-          do {
-            change = false;
-            var leftBeginning = 1;
-            for (let i = 0; i < movement.move.length; i++) {
-              var move = JSON.stringify(playMovementPos(i, true, true));
-            if (distinctPositions.includes(move) || JSON.stringify(movement.startPosition) == move) {
-              for (let i1 = leftBeginning; i1 < /*movement.move.length*/i; i1++) {
-                if (JSON.stringify(playMovementPos(i1, true, true)) == move && distinctMoves[i1] != undefined && distinctMoves[i] != undefined) {
-                  distinctPositions.splice(i1, (i - i1));
-                  // distinctMoves.splice(i1, (i - i1));
-                  // console.log('lösche ' + i1 + ' bis ' + (i-1));
-                  distinctMoves.fill(undefined, i1, i);
-                  leftBeginning = i1 + (i - i1);
-                  // i1 = i1 + (i - i1);
-                  change = true;
-                  break;
-                }
-              }
-              }
-              if (firstRunThrough) distinctPositions.push(move);
-            }
-            firstRunThrough = false;
-          } while (change)
-          distinctMoves = distinctMoves.filter(x => x != undefined);
-          if ((Math.abs(distinctMoves[0].x) == Math.abs(distinctMoves[1].x) || Math.abs(distinctMoves[0].y) == Math.abs(distinctMoves[1].y)) && distinctMoves[0].tile == distinctMoves[1].tile) distinctMoves.splice(0, 2);
-          positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
-          movementStepsChanged(distinctMovement.checked);
-          state.redoI1 = undefined;
-        }, 500);
-        movementPlayer.style.display = 'inline';
-        movementPlayerTextur.width = textur.width;
-        movementPlayerTextur.height = textur.height;
+        getShortestPCMovement();
       }
       else {
       if (modeSelection.value == "traditional") {
@@ -1188,9 +1149,9 @@ modeHeadline.style.display = 'none';
   backToBarBHeight.value = lengthPerTeil.edit.y/7;
   hitboxCheckbox.style.display = "inline";
   hitboxWidth.max = lengthPerTeil.edit.x;
-  hitboxWidth.value = lengthPerTeil.edit.x;
+  hitboxWidth.value = lengthPerTeil.edit.x/4;
   hitboxHeight.max = lengthPerTeil.edit.y;
-  hitboxHeight.value = lengthPerTeil.edit.y;
+  hitboxHeight.value = lengthPerTeil.edit.y/4;
   hitboxTextur.width = lengthPerTeil.edit.x*2 + 33;
   hitboxTextur.height = lengthPerTeil.edit.y*2 + 33;
   if (gerät == "PC") automaticTileSelectionReset.checked = false;
@@ -1223,7 +1184,6 @@ modeHeadline.style.display = 'none';
       viewport.attr("content", original);
     }, 100);
 }
-
 //Setting the scaleFactor as follows causes the viewport to zoom out
 //as far as possible
 var scaleFactor = 1 / window.devicePixelRatio;
@@ -1278,6 +1238,7 @@ function canvasClicked(calledBy) {
               vertauscheZwei(i, i1);
               i = positions.wrong.length;
               i1 = positions.wrong.length;
+              if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
             }
           }
         }
@@ -1318,6 +1279,52 @@ function canvasClicked(calledBy) {
     selected.tile = checkSelected();
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
+  function getShortestPCMovement(restorePuzzle) {
+  if (!state.restorePuzzle && !restorePuzzle) {
+    movement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
+    verschiebenPC();
+  }
+  wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
+  setTimeout(function () {
+    // create misstingDistinct
+    distinctMoves = JSON.parse(JSON.stringify(movement.move));
+    var distinctPositions = [];
+    var change;
+    var firstRunThrough = true;
+    playerMovement = movement.move;
+    do {
+      change = false;
+      var leftBeginning = 1;
+      for (let i = 0; i < movement.move.length; i++) {
+        var move = JSON.stringify(playMovementPos(i, true, true));
+      if (distinctPositions.includes(move) || JSON.stringify(movement.startPosition) == move) {
+        for (let i1 = leftBeginning; i1 < /*movement.move.length*/i; i1++) {
+          if (JSON.stringify(playMovementPos(i1, true, true)) == move && distinctMoves[i1] != undefined && distinctMoves[i] != undefined) {
+            distinctPositions.splice(i1, (i - i1));
+            // distinctMoves.splice(i1, (i - i1));
+            // console.log('lösche ' + i1 + ' bis ' + (i-1));
+            distinctMoves.fill(undefined, i1, i);
+            leftBeginning = i1 + (i - i1);
+            // i1 = i1 + (i - i1);
+            change = true;
+            break;
+          }
+        }
+        }
+        if (firstRunThrough) distinctPositions.push(move);
+      }
+      firstRunThrough = false;
+    } while (change)
+    distinctMoves = distinctMoves.filter(x => x != undefined);
+    if (distinctMoves[0] && ((Math.abs(distinctMoves[0].x) == Math.abs(distinctMoves[1].x) || Math.abs(distinctMoves[0].y) == Math.abs(distinctMoves[1].y)) && distinctMoves[0].tile == distinctMoves[1].tile)) distinctMoves.splice(0, 2);
+    positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
+    movementStepsChanged(distinctMovement.checked);
+    state.redoI1 = undefined;
+  }, 500);
+  movementPlayer.style.display = 'inline';
+  movementPlayerTextur.width = textur.width;
+  movementPlayerTextur.height = textur.height;
+}
   var userMovement = {index: 0, moves: []};
   function movementStepsChanged(checked, doNotSetChecked) {
     if (!doNotSetChecked)  distinctMovement.checked = checked;
@@ -1645,6 +1652,7 @@ var puzzles = {};
     state.restorePuzzle = true;
     anzahlX.value = puzzle.tileAmount.x;
     anzahlY.value = puzzle.tileAmount.y;
+    modeSelected(puzzle.mode);
     if (!sourceLoaded) {
       if (puzzle.fileName) {
         fileB.click();
@@ -1664,20 +1672,25 @@ var puzzles = {};
     doStorePuzzle.checked = true;
   }
   function restorePuzzle(puzzle) {
-    positions = puzzle.positions;
-    stats = puzzle.stats;
-    modeSelection.value = puzzle.mode;
-    if (puzzle.mode == "schieben") {
-      movement = puzzle.movement;
-      missing = puzzle.missing;
-    }
-    if (puzzle.mode == "traditional") {
-      rotateTiles.checked = puzzle.settings.rotateTiles;
-      if (puzzle.tileBarTiles) tileSelectionBar.tiles = puzzle.tileBarTiles;
-      mirrorInput.checked = puzzle.settings.mirrorInput;
-      mirrorCanvas(mirrorInput.checked);
-      restoreClipped();
-      setTimeout(() => {
+    setTimeout(() => {
+        positions = puzzle.positions;
+        stats = puzzle.stats;
+        if (puzzle.mode == "schieben") {
+          movement = puzzle.movement;
+          missing = puzzle.missing;
+          getShortestPCMovement(true);
+          movement.playerPosition = positions.wrong;
+          userMovement = puzzle.userMovement;
+          userMovement.index++;
+          playerMovementSlider.max = userMovement.moves.length;
+          playerMovementSlider.value = userMovement.index + 1;
+        }
+        if (puzzle.mode == "traditional") {
+          rotateTiles.checked = puzzle.settings.rotateTiles;
+          if (puzzle.tileBarTiles) tileSelectionBar.tiles = puzzle.tileBarTiles;
+          mirrorInput.checked = puzzle.settings.mirrorInput;
+          mirrorCanvas(mirrorInput.checked);
+          restoreClipped();
         while (positions.wrong.filter(x => x.edit.x < -lengthPerTeil.edit.x/2).length) {
           expandSide('left');
         }
@@ -1690,8 +1703,9 @@ var puzzles = {};
         while (positions.wrong.filter(x => x.edit.y > textur.height + lengthPerTeil.edit.y/2).length) {
           expandSide('bottom');
         }
-      }, 500);
-    }
+      }
+      layout(true, true);
+    }, 500);
     stopClock.completionTime.time = puzzle.completionTime;
     stopClock.viewOriginal.time = puzzle.viewOriginalTime;
   }
@@ -1838,8 +1852,8 @@ var puzzles = {};
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (stats.preOrdered == "pending") stats.preOrdered = richtige;
-    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished) {
-      if (doStorePuzzle.checked) {
+    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished && !state.restorePuzzle) {
+      if (doStorePuzzle.checked && settings.style.display != "inline") {
         delete puzzles[puzzleName.value];
         localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
       }
@@ -1933,6 +1947,7 @@ var puzzles = {};
     selected.boolean = false;
     movement.playerPosition = positions.wrong;
     userMovement.startPosition = JSON.parse(JSON.stringify(positions.wrong));
+    if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
   }
   var doNotChange = [];
   var possibleMissing = [];
@@ -2561,6 +2576,7 @@ layout(false, true);
     if (modeSelection.value == "schieben") {
       puzzle.movement = movement;
       puzzle.missing = missing;
+      puzzle.userMovement = userMovement;
     }
     if (modeSelection.value == "traditional") {
       puzzle.settings.rotateTiles = rotateTiles.checked;
