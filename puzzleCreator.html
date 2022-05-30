@@ -2327,7 +2327,7 @@ var puzzles = {};
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
-    selected.tile = checkSelected();
+    selected.clip = [];
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     positionBackToTileBarButtons(true);
     if (state.mouse == "down" && !state.removeTile && modeSelection.value == "traditional") {
@@ -2336,7 +2336,7 @@ var puzzles = {};
       for (var tile of selected.tiles) {
         var objTile = positions.wrong[tile];
         if (gerät == "PC") {
-        if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0 && selected.tiles.length) expandSide('right');// textur.width += 15;
+        if (mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0) expandSide('right');// textur.width += 15;
         if (!mirrorInput.checked && objTile.edit.x + lengthPerTeil.edit.x > textur.width) expandSide('right'); // textur.width += lengthPerTeil.edit.x;
         if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) expandSide('bottom'); // textur.height += lengthPerTeil.edit.y;
       }
@@ -2358,17 +2358,16 @@ var puzzles = {};
         //     selected.tiles.push(i);
         //   }
         // });
-      }
-      if (selected.tiles.length && (automaticTileSelectionReset.checked || !state.shift)) {
-        selected.tiles.forEach((tile, i) => {
+        if ((automaticTileSelectionReset.checked || !state.shift)) {
+        // selected.tiles.forEach((tile, i) => {
           positions.wrong[tile].edit.x += mausx - selected.position.x;
           positions.wrong[tile].edit.y += mausy - selected.position.y;
-        });
-        // check clicking
-        selected.clip = [];
-        for (var tile of selected.tiles) {
+          // check clicking
           checkPossibleClipping(tile);
-        }
+        // });
+       }
+      }
+      if ((automaticTileSelectionReset.checked || !state.shift)) {
         deleteFurtherClipOptions();
         playClippingSound();
         selected.position = {x: mausx, y: mausy};
@@ -2682,7 +2681,11 @@ layout(false, true);
       pLengthPerTeil.edit.y = lengthPerTeil.edit.x;
     }
     var nearest = {left: {area: 1000}, top: {area: 1000}, right: {area: 1000}, bottom: {area: 1000}, overAll: {area: 1000, i: -1}};
-    positions.wrong.forEach((pos, i) => {
+    for (let i = 0; i < positions.wrong.length; i++) {
+      positions.wrong[i].tempI = i;
+    }
+    var possiblePositions = positions.wrong.filter(x => Math.abs(x.edit.x - positions.wrong[tile].edit.x) < lengthPerTeil.edit.x + 11 && Math.abs(x.edit.y - positions.wrong[tile].edit.y) < lengthPerTeil.edit.y + 11);
+    for (const pos of possiblePositions) {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
       var selectedObj = {
         right: {x: obj.slc.x - 10, y: obj.slc.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2},
@@ -2690,7 +2693,7 @@ layout(false, true);
         bottom: {x: obj.slc.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.slc.y - 10, width: pCollider.width - 2, height: 10},
         top: {x: obj.slc.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.slc.y + pLengthPerTeil.edit.y, width: pCollider.width - 2, height: 10}
       };
-      if (!clipped.includes(i + ' - ' + tile) && !clipped.includes(tile + ' - ' + i)) {
+      if (!clipped.includes(pos.tempI + ' - ' + tile) && !clipped.includes(tile + ' - ' + pos.tempI)) {
         var nearTile = {
           right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
           left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
@@ -2699,11 +2702,11 @@ layout(false, true);
         };
         for (var side of Object.keys(nearTile)) {
           if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
-            nearest[side] = {area: nearTile[side].area, i: i};
+            nearest[side] = {area: nearTile[side].area, i: pos.tempI};
           }
         }
       }
-    });
+    }
     if (nearest) {
       // console.log("new check");
       for (const near of Object.values(nearest)) {
