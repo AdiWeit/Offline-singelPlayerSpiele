@@ -1512,6 +1512,8 @@ function canvasClicked(calledBy) {
         zuAngepassterBildschirmgröße();
       } 
        if (state.restorePuzzle) {
+        größeAnpassenX.max =  state.restorePuzzle.width;
+        größeAnpassenY.max =  state.restorePuzzle.height;
         größeAnpassenX.value = state.restorePuzzle.width;
         größeAnpassenY.value = state.restorePuzzle.height;
         if (state.restorePuzzle.tileBarTiles) shuffleStyle.value = "listTiles";
