@@ -1706,6 +1706,11 @@ var puzzles = {};
     setTimeout(() => {
         positions = puzzle.positions;
         stats = puzzle.stats;
+        if (sourceIsVideo.checked) {
+          loopBeginning.value = puzzle.loopBeginning;
+          loopEnding.value = puzzle.loopEnding;
+          video.currentTime = convertTime(loopBeginning.value);
+        } 
         if (puzzle.mode == "schieben") {
           movement = puzzle.movement;
           missing = puzzle.missing;
@@ -2630,6 +2635,10 @@ layout(false, true);
     puzzle.completionTime = stopClock.completionTime.time;
     puzzle.viewOriginalTime = stopClock.viewOriginal.time;
     puzzles[puzzleName.value] = puzzle;
+    if (sourceIsVideo.checked) {
+      puzzle.loopBeginning = loopBeginning.value;
+      puzzle.loopEnding = loopEnding.value;
+    } 
     localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
   }
   // returns pixel as a number
