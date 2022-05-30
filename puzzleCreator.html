@@ -291,6 +291,8 @@
     <h3>video controls</h3>
     <a id="timeChangeDiv">
     <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
+    <br>
+    <input type="checkbox" onclick="video.muted = checked;">mute</input>
     <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
     <br>
     beginne bei <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
