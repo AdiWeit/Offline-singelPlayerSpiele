@@ -1827,7 +1827,7 @@ var puzzles = {};
     var directions = ['top', 'right', 'bottom', 'left'];
     var direcObj = {top: 0, right: 1, bottom: 2, left: 3};
     while (degr > 0) {
-      direc = directions[direcObj[direc] + 1];
+      direc = directions[direcObj[direc] - 1];
       if (!direc) direc = directions[0];
       degr -= 90;
     }
