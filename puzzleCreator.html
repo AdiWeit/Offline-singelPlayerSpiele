@@ -289,20 +289,27 @@
   <br>
   <div style="display: none;" id="videoControls">
     <h3>video controls</h3>
-    <div id="timeChangeDiv">
+    <a id="timeChangeDiv">
     <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
-    <a id="stopAtEndP"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
+    <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
     <br>
-    beginne bei <input type="text" id="loopBeginning"> <button onclick="loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button> und ende bei <input id="loopEnding" type="text"> <button onclick="loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100);">nimm aktuelle Zeit</button>
+    beginne bei <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
+    <button onclick="if (timeText.innerHTML.split(' / ')[0] < loopEnding.value || loopEnding.value == '') {loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button> 
+    und ende bei <input id="loopEnding" oninput="if (value < loopBeginning.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" type="text">
+     <button onclick="if (timeText.innerHTML.split(' / ')[0] > loopBeginning.value || loopBeginning.value == '') {loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button>
     <br>
+    <p id="timeSlotWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
+      Sie haben das Ende des Ausschnittes vor den Anfang gesetzt! Bitte setzen Sie den Startpunkt weiter vorne oder das Ende weiter hinten, damit Ihre Änderung übernommen wird.
+      <br>
+    </p>
     <button onclick="video.currentTime -= 10;"><<</button>
-    </div>
+    </a>
     <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
-    <div id="timeChangeDiv">
+    <a id="timeChangeDiv">
     <button onclick="video.currentTime += 10;">>></button>
     <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
     <a id="timeText"></a>
-  </div>
+    </a>
 </div>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
@@ -1542,7 +1549,7 @@ function getTimeString(pTime) {
   if (sec < 10) sec = sec[1];
   if (mins < 10) mins = mins[1];
   if (hours < 10) hours = hours[1];
-  if (value.split(':')[3]) time += JSON.parse(value.split(':')[3])/100;
+  if (value.split(':')[3]) time += parseInt(value.split(':')[3])/100;
     try {
       time += JSON.parse(sec);
       time += JSON.parse(mins)*60;
@@ -1583,7 +1590,7 @@ function updateVideo(){
     showClippingOptions();
     if (video.currentTime >= convertTime(loopEnding.value, 'loopEnding')  && loop.checked) {
       video.currentTime = convertTime(loopBeginning.value);
-      video.play();
+      if (loopEnding.value > loopBeginning.value || loopEnding.value == "" || loopBeginning.value == "") video.play();
     }
     else if (video.currentTime >= convertTime(loopEnding.value, 'loopEnding')) {
       if (stopAtEnd.checked) playPauseVideo('pause');
