@@ -3,9 +3,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <div id="imageSettings">
-<input type="text" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value" placeholder="Puzzle Teile x-Achse"> Teile x-Achse
+<input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2"> Teile x-Achse
 <br>
-<input type="text" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value" placeholder="Puzzle Teile y-Achse"> Teile y-Achse
+<input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2"> Teile y-Achse
 <br>
 <div id="puzzleManager">
   <h1>Puzzle verwalten</h1>
@@ -63,7 +63,7 @@
 <br>
 <a id="rotateTilesAdaptionSettings">
   <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
-    und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 25px;" value="16" type="text"> Teile erstellt werden.
+    und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
   <br>
 </a>
 <button type="button" style="font-size: 33px;" onclick="create();" name="button">erstelle Puzzle</button>
@@ -186,7 +186,7 @@
     </div>
     <div id="tilesGapS" style="display: none;">
       <br>
-      <input id="tilesGap" oninput="gapSizeChanged(value);" value="55" type="text">
+      Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
       <br>
       <br>
       <canvas id="gapCanvas"></canvas>
@@ -194,7 +194,7 @@
       <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm füllen
       <br>
       <a style="display: none" id="aScrollXTileGap">
-        <input id="tilesXTileGap" placeholder="Teile nebeneinander" type="text">
+        <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> Teile nebeneinander
         <br>
       </a>
     </div>
@@ -216,11 +216,11 @@
     <br>
     <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
     <br>
-    <input type="text" id="anzahlVerschieben" placeholder="Male PC verschieben">
+    Male PC verschieben: <input type="number" min="2" style="width: 55px;" id="anzahlVerschieben">
     <br>
-    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="text" style="width:25px;" id="anzahlRichtige" value="10"> an origineller Stelle
+    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="number" style="width:55px;" max="14" min="0" id="anzahlRichtige" value="10"> an origineller Stelle
     <br>
-    <input type="checkbox" id="zurrückVermeiden" onchange="if (checked) anzahlVerboten.style.display = 'inline'; else anzahlVerboten.style.display = 'none';" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle nach <input type="text" id="anzahlVerboten" value="3" style="width: 25px;"> Malen verboten (einfacher, weil immer direkt nebeneinander)</font>
+    <input type="checkbox" id="zurrückVermeiden" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle nach <input type="number" id="anzahlVerboten" value="3" style="width: 42px;"> Malen verboten (einfacher, weil immer direkt nebeneinander)</font>
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
   <a style="display: none;" id="turnsHistoryS">
@@ -541,6 +541,11 @@ display: block;
     else aEmptyTileBar.style.display = "none";
     if (value == "overlapTiles") shuffleHeadline.style.display = 'none';
     else shuffleHeadline.style.display = 'inline';
+    if (value == 'listTiles' && emptyTileBar.checked) {
+      emptyTileBarSettings.style.display = 'inline';  
+      if (shuffleStyleBar.value == "nextToEachOther") tilesGapS.style.display = 'inline';
+    }
+    else emptyTileBarSettings.style.display = 'none';
   }
   function backToBarVis(checked) {
     if (checked) {
