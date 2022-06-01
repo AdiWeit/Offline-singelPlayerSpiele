@@ -287,6 +287,8 @@
   <br>
   <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
   <br>
+  am Rand scrollen bis Teil abgewählt oder vom Rand entfernt<input id="keepScrolling" checked="true" type="checkbox">
+  <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
   <div style="display: none;" id="videoControls">
@@ -580,6 +582,7 @@ display: block;
     }
     else {
       settings.style.display = 'none';
+      originalDisplayChanged(false);
       canvas = textur.getContext('2d');
       if (wrongPosition && !state.changedPos) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
       state.changedPos = false; 
@@ -2120,6 +2123,7 @@ var puzzles = {};
     if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
     else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
+    if (keepScrolling.checked) folgenMouseMove();
   });
   function adaptTitlesPosition() {
     var vis = {rotateLeft: rotateLeftTitle.style.display, rotateRight: rotateRightTitle.style.display, selectMultiple: selectMultipleTitle.style.display, swipe: swipeTitle.style.display};
