@@ -207,6 +207,8 @@
       <br>
       <canvas id="hitboxTextur"></canvas>
     </a>
+    <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
+    <br>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings" style="display: none">
@@ -2759,7 +2761,7 @@ layout(false, true);
       var clipCollider = JSON.parse(JSON.stringify(clip));
       clipCollider.x -= state.rightScroll;
       clipCollider.y -= state.upScroll;
-      if (selected.clip.length > clipLength && ((selected.clip[selected.clip.length - 1 - i - 1] && angular.equals(clip, selected.clip[selected.clip.length - 1 - i - 1])) ||  (state.rotated && gerät == "Handy") || (positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((/*selectedCollidesOthers(clip, tile) || */!collides(addTolerance(clipCollider, 3), screenObj).boolean || selectedCollideOther(clip.i) || !acceptedI.includes(clip.i)) && !afterClipping))) {
+      if (selected.clip.length > clipLength && ((selected.clip[selected.clip.length - 1 - i - 1] && angular.equals(clip, selected.clip[selected.clip.length - 1 - i - 1])) ||  (state.rotated && gerät == "Handy") || (positions.wrong[clip.i].original.degree != positions.wrong[clip.sI].original.degree && getDegreeAfterRotation(getDegreeAfterRotation(positions.wrong[clip.i].original.degree, 90), 90) /*total: 180°*/ != positions.wrong[clip.sI].original.degree && pLengthPerTeil.edit.x != pLengthPerTeil.edit.y) || tileSelectionBar.tiles.includes(clip.i) || ((/*selectedCollidesOthers(clip, tile) || */!collides(addTolerance(clipCollider, 3), screenObj).boolean || selectedCollideOther(clip.i) || clipCollidesLowerTile(clip) || !acceptedI.includes(clip.i)) && !afterClipping))) {
         selected.clip.pop();
         i--;
       }
@@ -2830,6 +2832,16 @@ layout(false, true);
         if (collides(transformToObj(clipIndex, 3), transformToObj(tile, 3)).boolean) {
           return true;
         }
+      }
+    }
+  }
+  // checks collision between clip marker and tiles on top of c.clipI (tile you want to clip to)
+  function clipCollidesLowerTile(clip) {
+    var clipIReached = false;
+    for (const position of positions.layoutOrder.filter(x => !selected.tiles.includes(x))) {
+      if (position == clip.i) clipIReached = true;
+      else if (clipIReached && collides(clip, transformToObj(position, 3)).boolean && collideClip.checked) {
+        return true;
       }
     }
   }
