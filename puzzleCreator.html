@@ -289,7 +289,7 @@
   <br>
   <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
   <br>
-  am Rand scrollen bis Teil abgewählt oder vom Rand entfernt<input id="keepScrolling" checked="true" type="checkbox">
+  <input id="keepScrolling" checked="true" type="checkbox"> am Rand scrollen bis Teil abgewählt oder vom Rand entfernt
   <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
@@ -336,7 +336,7 @@
 <br>
 <br>
 <button onclick="expandSide('top');" style="height: 55px;" class="expandButtons" id="expandTop">+</button>
-<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <button onclick="expandSide('right');" style="width: 55px;" class="expandButtons" id="expandRight">+</button>
 <button onclick="expandSide('left');" style="width: 55px;" class="expandButtons" id="expandLeft">+</button>
 <br>
@@ -2214,6 +2214,8 @@ var puzzles = {};
       mausx = ev.touches[0]["pageX"] - pTexturLeft + state.rightScroll;
       mausy = ev.touches[0]["pageY"] - texturTop + state.upScroll;// - 32;
       if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
+      // TODO: if statement needed?
+      if (tileSelectionBar.collidesMouse()) originalMausX = ev.touches[0]["pageX"];
     }
     if (!scrollable.checked) {
     if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
@@ -2251,7 +2253,7 @@ var puzzles = {};
   function mouseDown(elmCalled, touchStart) {
     selected.tile = checkSelected();
     delete state.rorated;
-    tileSelectionBar.swipePosition = mausx;
+    tileSelectionBar.swipePosition = originalMausX;
     if (state.mouse == "up" && !automaticTileSelectionReset.checked && state.removeTile) state.mouse = "downNow";
     if (state.mouse != "downNow") state.mouse = "down";
     if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
