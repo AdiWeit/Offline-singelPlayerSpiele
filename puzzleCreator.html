@@ -178,8 +178,9 @@
         <input id="backToBarBHeight" oninput="changeBackToBarB('height', value)" type="range"> Höhe der Buttons
       </div>
       <br>
-      <input type="range" oninput="changeTileBarHeight(value);" min="25" id="tileBarHeight"> <a id="tileBarHeightText">Höhe der Leiste</a>
+      <a id="tileBarHeightText">Höhe der Leiste</a>
       <button onclick="changeTileBarHeight(lengthPerTeil.edit.y + 10);" id="resetBarSize">reset</button>
+      <input type="range" oninput="changeTileBarHeight(value);" min="25" id="tileBarHeight">
       <div id="autoSelectTileBarP">
         <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
       </div>
@@ -207,6 +208,7 @@
       <br>
       <canvas id="hitboxTextur"></canvas>
     </a>
+    <br>
     <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
     <br>
     <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
@@ -644,6 +646,7 @@ display: block;
     else movementDirectionRight.style.backgroundColor = 'hsla(180, 100%, 50%, 1)';
   }
   function changeTileBarHeight(value) {
+    tileBarHeight.value = value;
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
     // TODO: handle sides seperately
     tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
@@ -2343,6 +2346,7 @@ var puzzles = {};
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
+    if (tileSelectionBar.collidesMouse()) mausx = originalMausX;
     selected.clip = [];
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
     positionBackToTileBarButtons(true);
