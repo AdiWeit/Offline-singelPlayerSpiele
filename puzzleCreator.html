@@ -513,7 +513,7 @@ display: block;
   } else {
     var gerät = "PC"
     console.log("PC");
-    swipeSteuerungP.style.display = "none";
+    swipeSteuerungP.innerHTML = swipeSteuerungP.innerHTML.replace('beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen', 'drücken Sie die Maustaste runter oder vollführen Sie einen Doppelklick beim ersten Teil und lassen Sie beim 2. Teil los. ');
     scrollOnBlancP.style.display = "none";
     vibrateA.style.display = "none";
   }
@@ -2213,10 +2213,7 @@ var puzzles = {};
     if (ev.type == "touchend") {
       console.log('touchEnd');
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected())/* && mausy > texturTop*/) {
-      canvasClicked();
-    }
-    else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
+    if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
       var pTexturLeft = textur.getBoundingClientRect().left;
       if (pTexturLeft < 0) pTexturLeft = 0;
       mausx = ev.touches[0]["pageX"] - pTexturLeft + state.rightScroll;
@@ -2239,10 +2236,6 @@ var puzzles = {};
       folgenMouseMove("touchmove");
     }
   }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !selected.boolean.click && !scrollable.checked) {
-        selected.coord = {x: checkSelected().x, y: checkSelected().y};
-        selected.boolean.swipe = true;
-      }
     }
     adaptMobileControlsPosition();
   }
@@ -2259,6 +2252,10 @@ var puzzles = {};
     }
   }
   function mouseDown(elmCalled, touchStart) {
+    if (swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !selected.boolean.click && !scrollable.checked) {
+      selected.coord = {x: checkSelected().x, y: checkSelected().y};
+      selected.boolean.swipe = true;
+    }
     selected.tile = checkSelected();
     delete state.rorated;
     tileSelectionBar.swipePosition = originalMausX;
@@ -2439,6 +2436,9 @@ var puzzles = {};
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
+    if (swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) {
+      canvasClicked();
+    }
     if (automaticTileSelectionReset.checked || !selected.tiles.length || (state.removeTile && automaticTileSelectionReset.checked)) state.mouse = "up";
     if (gerät == "Handy" && !selectMultiple.checked && !state.shiftBySwipe) state.shift = false;
     if (automaticTileSelectionReset.checked) state.shiftBefore = false;
