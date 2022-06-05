@@ -1231,7 +1231,7 @@ ScaleMetaViewport(scaleFactor);
     mobileControls.style.display = 'inline';
     rotateControls.style.display = "inline";
   }
-  selected.boolean = false;
+  selected.boolean = {click: false, swipe: false};
   try {
   preventAutomaticZoom.content = "";
   } catch (err) {}
@@ -1252,10 +1252,11 @@ ScaleMetaViewport(scaleFactor);
 // #importantUserInputs
 // select tiles to remove and move tiles or exchange them depending on the mode
 function canvasClicked(calledBy) {
+  if (calledBy == "elm") selected.boolean.swipe = false;
   selected.tile = checkSelected();
-  if (!(state.removeTile)) { 
+  if (!state.removeTile && !scrollable.checked && !finished) { 
     if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
-    if (selected.tile && selected.boolean && modeSelection.value == "exchange" && !state.removeTile) {
+    if (selected.tile && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile && selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
           for (var i1 = 0; i1 < positions.wrong.length; i1++) {
@@ -1266,11 +1267,15 @@ function canvasClicked(calledBy) {
               i = positions.wrong.length;
               i1 = positions.wrong.length;
               if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
+              state.exchangedTiles = true;
+              setTimeout(() => {
+                state.exchangedTiles = false;
+              }, 500);
             }
           }
         }
       }
-      selected.boolean = false;
+      selected.boolean = {click: false, swipe: false};
     }
     else if (modeSelection.value == "schieben" && selected.tile/* && selected.boolean*/ && missing.length && !state.removeTile) {
       for (var i1 = 0; i1 < missing.length; i1++) {
@@ -1290,9 +1295,9 @@ function canvasClicked(calledBy) {
   }
   if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
-    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/)) {
+    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/) && !state.exchangedTiles) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
-      selected.boolean = true;
+      selected.boolean.click = true;
     }
   }
     selected.tile = checkSelected(true);
@@ -2184,9 +2189,12 @@ var puzzles = {};
   var texturLeft = textur.getBoundingClientRect().left;
   // #importantUserInputs
   // if (gerät == "Handy") {
-    document.addEventListener('touchmove', touch, {passive:false});
-    document.addEventListener('touchstart', touch);
-    document.addEventListener('touchend', touch);
+    textur.addEventListener('touchmove', touch, {passive:false});
+    textur.addEventListener('touchstart', touch);
+    textur.addEventListener('touchend', touch);
+    tileSelectionCanvas.addEventListener('touchmove', touch, {passive:false});
+    tileSelectionCanvas.addEventListener('touchstart', touch);
+    tileSelectionCanvas.addEventListener('touchend', touch);
     function touch(ev) {
       if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile)) {
         ev.preventDefault();
@@ -2205,7 +2213,7 @@ var puzzles = {};
     if (ev.type == "touchend") {
       console.log('touchEnd');
     }
-    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) && mausy > texturTop) {
+    if ((ev.type == "touchend" && swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected())/* && mausy > texturTop*/) {
       canvasClicked();
     }
     else if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
@@ -2231,9 +2239,9 @@ var puzzles = {};
       folgenMouseMove("touchmove");
     }
   }
-      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !scrollable.checked) {
+      if (ev.type == "touchstart" && swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !selected.boolean.click && !scrollable.checked) {
         selected.coord = {x: checkSelected().x, y: checkSelected().y};
-        selected.boolean = true;
+        selected.boolean.swipe = true;
       }
     }
     adaptMobileControlsPosition();
