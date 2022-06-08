@@ -1197,27 +1197,19 @@ var pScrollY = scrollY;
     selectBackToBarB.style.fontSize = '5vh';
     try {
       // try zooming out completely
-    function ScaleMetaViewport(initialScale) {
-    $('meta[name=viewport]').remove();
-    $('head').append('<meta name="viewport" content=""/>');
-    var viewport = $("meta[name='viewport']");
-    var original = viewport.attr("content");
-    var forceScale='';
-    if (initialScale) forceScale += "initial-scale=" + initialScale;
-    viewport.attr("content", forceScale);
-    setTimeout(function()
-    {
-      viewport.attr("content", original);
-    }, 100);
-}
+    console.log(debug);
+    $('meta[id="zoomLevelControler"]').remove();
+    $('head').append('<meta name="viewport" id="zoomLevelControler" content="initial-scale=0.25"/>');
 //Setting the scaleFactor as follows causes the viewport to zoom out
 //as far as possible
-var scaleFactor = 1 / window.devicePixelRatio;
-ScaleMetaViewport(scaleFactor);
     } catch (err) {
       console.log('jquery not working as intendet');
-      if (shuffleStyle.value == "listTiles") alert('bitte aktivieren Sie "scroll" und zoomen Sie komplett raus, damit das Layout funktioniert wie gedacht.');
-      else alert('Sie können durch aktivieren von "scroll" wahrscheinlich noch weiter rauszoomen!');
+      // done with pure JS: 
+      var newElm = document.createElement('meta');
+      newElm.name = "viewport";
+      newElm.id = "zoomLevelControler";
+      newElm.content = "initial-scale=0.25";
+      document.getElementsByTagName('head')[0].appendChild(newElm);
     }
   }
   if (shuffleStyle.value == "listTiles") {
