@@ -993,7 +993,7 @@ var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
     var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
     if (ptexturTop < 0) ptexturTop = 0;
-    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && state.mouse == "down")) {
+    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
         // window.scroll(scrollX, scrollY + 3);
         // mausy += 3;
         fAutoScroll({x: 0, y: +3});
@@ -2194,7 +2194,8 @@ var puzzles = {};
     if (ev.type == "touchend") {
       console.log('touchEnd');
     }
-    if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value == "traditional") && modeSelection.value != "schieben")) && ev.touches[0]) {
+    // #potentialErrorCause
+    if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value != "exchange"))) && ev.touches[0]) {
       var pTexturLeft = textur.getBoundingClientRect().left;
       if (pTexturLeft < 0) pTexturLeft = 0;
       mausx = ev.touches[0]["pageX"] - pTexturLeft + state.rightScroll;
