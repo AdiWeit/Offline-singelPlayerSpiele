@@ -962,7 +962,7 @@ display: block;
     }
     autoScroll = setInterval(function () {
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 50)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
@@ -972,7 +972,7 @@ if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX
       // window.scroll(scrollX + 3, scrollY);
       fAutoScroll({x: 3, y: 0});
     }
-if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width - 30))) && (modeSelection.value !=
+if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         // window.scroll(scrollX + 3, scrollY);
         // mausx += 3;
@@ -993,7 +993,7 @@ var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
     var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
     if (ptexturTop < 0) ptexturTop = 0;
-    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height - 30))) && state.mouse == "down")) {
+    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && state.mouse == "down")) {
         // window.scroll(scrollX, scrollY + 3);
         // mausy += 3;
         fAutoScroll({x: 0, y: +3});
@@ -1195,22 +1195,12 @@ var pScrollY = scrollY;
     scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
     selectBackToBarB.style.fontSize = '5vh';
-    try {
-      // try zooming out completely
-    console.log(debug);
-    $('meta[id="zoomLevelControler"]').remove();
-    $('head').append('<meta name="viewport" id="zoomLevelControler" content="initial-scale=0.25"/>');
-//Setting the scaleFactor as follows causes the viewport to zoom out
-//as far as possible
-    } catch (err) {
-      console.log('jquery not working as intendet');
-      // done with pure JS: 
-      var newElm = document.createElement('meta');
+    // zoom out: 
+    var newElm = document.createElement('meta');
       newElm.name = "viewport";
       newElm.id = "zoomLevelControler";
       newElm.content = "initial-scale=0.25";
       document.getElementsByTagName('head')[0].appendChild(newElm);
-    }
   }
   if (shuffleStyle.value == "listTiles") {
     scrollTileSelection(0);
@@ -2218,10 +2208,11 @@ var puzzles = {};
       mouseDown(null, ev.touches[0] == undefined && collides({x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"], width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean);
     }
     if (ev.type == "touchend") {
-      setTimeout(function () {
+      // #potentialErrorCause
+      // setTimeout(function () {
         mouseUp();
         layout(true, true);
-      }, 100);
+      // }, 100);
     }
     if (ev.type == "touchmove" && (modeSelection.value == "traditional" || state.removeTile)) {
       folgenMouseMove("touchmove");
@@ -2250,6 +2241,7 @@ var puzzles = {};
     selected.tile = checkSelected();
     delete state.rorated;
     tileSelectionBar.swipePosition = originalMausX;
+    if (modeSelection.value == "traditional") {
     if (state.mouse == "up" && !automaticTileSelectionReset.checked && state.removeTile) state.mouse = "downNow";
     if (state.mouse != "downNow") state.mouse = "down";
     if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
@@ -2341,6 +2333,8 @@ var puzzles = {};
       }
       else if (state.removeTile) folgenMouseMove("mouseDown");
     }
+  }
+  else state.mouse = "down";
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
