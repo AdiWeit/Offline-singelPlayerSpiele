@@ -1820,7 +1820,7 @@ var puzzles = {};
       }
     }
   var lengthPerTeil = {};
-  var positions = {right: []};
+  var positions = {right: [], wrong: []};
   var finished = false;
   var missing = [];
   var distinctMoves = [];
@@ -2116,6 +2116,51 @@ var puzzles = {};
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
   });
+  window.visualViewport.addEventListener("resize", resized);
+  function resized (event) {
+    // TODO: TRANSLATE
+    if (state.rightScroll < 0 && collides(visualViewport, {x: positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll < acc ? val.edit.x - state.rightScroll : acc, textur.width), y: mausy, width: 1, height: 1}).boolean) {
+      var distance = (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width));
+      state.rightScroll += distance;
+      canvas.translate(-distance, 0);
+    }
+    if (state.rightScroll > 0 && (visualViewport.pageLeft + visualViewport.width - texturLeft/*textur.width + state.rightScroll*/) > positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x - state.rightScroll > acc ? val.edit.x + lengthPerTeil.edit.x - state.rightScroll : acc, 0)/* && collides(visualViewport, {x: positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll < acc ? val.edit.x - state.rightScroll : acc, textur.width), y: mausy, width: 1, height: 1}).boolean*/) {
+      var distance = (visualViewport.pageLeft + visualViewport.width - texturLeft/*textur.width + state.rightScroll*/) - positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x - state.rightScroll > acc ? val.edit.x + lengthPerTeil.edit.x - state.rightScroll : acc, 0)// (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width));
+      state.rightScroll -= distance;
+      canvas.translate(distance, 0);
+    }
+    if (state.upScroll < 0 && collides(visualViewport, {x: positions.wrong.reduce((acc, val) => val.edit.y - state.upScroll < acc ? val.edit.y - state.upScroll : acc, textur.height), y: mausy, width: 1, height: 1}).boolean) {
+      var distance = (positions.wrong.reduce((acc, val) => val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 < acc ? val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 : acc, textur.height));
+      state.upScroll += distance;
+      canvas.translate(0, -distance);
+    }
+    if (state.upScroll > 0 && (visualViewport.pageTop + visualViewport.height - texturTop/*textur.width + state.rightScroll*/) > positions.wrong.reduce((acc, val) => val.edit.y + lengthPerTeil.edit.y - state.upScroll > acc ? val.edit.y + lengthPerTeil.edit.y - state.upScroll : acc, 0)/* && collides(visualViewport, {x: positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll < acc ? val.edit.x - state.rightScroll : acc, textur.width), y: mausy, width: 1, height: 1}).boolean*/) {
+      var distance = (visualViewport.pageTop + visualViewport.height - texturTop/*textur.width + state.rightScroll*/) - positions.wrong.reduce((acc, val) => val.edit.y + lengthPerTeil.edit.y - state.upScroll > acc ? val.edit.y + lengthPerTeil.edit.y - state.upScroll : acc, 0)// (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width));
+      state.upScroll -= distance;
+      canvas.translate(0, distance);
+    }
+    layout(true, true);
+    // if (state.rightScroll < 0) {
+    //   state.rightScroll += positions.wrong.reduce((acc, val) => val.edit.x < acc ? val.edit.x : acc, textur.width);
+    //   // canvas.translate(positions.wrong.reduce((acc, val) => val.edit.x < acc ? val.edit.x : acc, textur.width), 0);
+    //   if (state.rightScroll > 0) state.rightScroll = 0;
+    // }
+    // else {
+    //   state.rightScroll -= (textur.width + state.upScroll) - positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x > acc ? val.edit.x + lengthPerTeil.edit.x : acc, 0);
+    //   // canvas.translate(-((textur.width + state.upScroll) - positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x > acc ? val.edit.x + lengthPerTeil.edit.x : acc, 0)), 0);
+    //   if (state.rightScroll < 0) state.rightScroll = 0;
+    // }
+    // if (state.upScroll < 0) {
+    //   state.upScroll -= positions.wrong.reduce((acc, val) => val.edit.y < acc ? val.edit.y : acc, textur.width);
+    //   // canvas.translate(0, -positions.wrong.reduce((acc, val) => val.edit.y < acc ? val.edit.y : acc, textur.width));
+    //   if (state.upScroll > 0) state.upScroll = 0;
+    // }
+    // else {
+    //   state.upScroll -= positions.wrong.reduce((acc, val) => val.edit.y + lengthPerTeil.edit.y > acc ? val.edit.y + lengthPerTeil.edit.y : acc, 0);
+    //   // canvas.translate(0, -positions.wrong.reduce((acc, val) => val.edit.y + lengthPerTeil.edit.y > acc ? val.edit.y + lengthPerTeil.edit.y : acc, 0));
+    //   if (state.upScroll < 0) state.upScroll = 0;
+    // }
+  }
   function adaptTitlesPosition() {
     var vis = {rotateLeft: rotateLeftTitle.style.display, rotateRight: rotateRightTitle.style.display, selectMultiple: selectMultipleTitle.style.display, swipe: swipeTitle.style.display};
     rotateLeftTitle.style.display = "inline";
