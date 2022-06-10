@@ -93,7 +93,7 @@
     Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählen Teile
   </div>
   <div id="swipeTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
-    Scrollen ermöglichen
+    Scrollen und Zoomen ermöglichen
   </div>
 </div>
 <style>
@@ -758,6 +758,8 @@ display: block;
         position.edit[moveDirection] += lengthPerTeil.edit[moveDirection]*3;
       }
     }
+    state.rightScroll = 0;
+    state.upScroll = 0;
     layout(true, true);
   }
   function showCurrentStats(mode) {
