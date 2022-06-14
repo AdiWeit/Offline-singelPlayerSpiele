@@ -494,18 +494,37 @@ display: block;
   </style>
   <style>
     #tutorial {
-      background-color: gray;
+      background-color: rgba(205, 218, 199, 0.77);;
       position: absolute;
       right: 0px;
       top: 0px;
+      width: 47%;
+      box-shadow: 2px 2px 20px #855d5d;
+    }
+    .tutorialCard {
+      box-shadow: 2px 2px 10px #855d5d;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      margin-top: 7px;
+      margin-bottom: 7px;
+    }
+    .tutorialGeneral {
+      border-radius: 10px;
+      padding-left: 10px;
     }
   </style>
-  <div id="tutorial">
-    <div id="moveTutorial">
+  <div id="tutorial" class="tutorialGeneral">
+    <div class="tutorialCard tutorialGeneral" id="moveTutorial">
       <h3>Teile bewegen und drehen</h3>
-      <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial'; automaticTileSelectionReset.checked = !checked;}" name="moveStyle"> Standard
-      <br>
-      <div id="moveStandardPC">
+      <div class="tutorialCard tutorialGeneral">
+        <b>Informationen zum Teile drehen</b>
+        <br>
+        Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+        <br>
+      </div>
+      <div class="tutorialCard tutorialGeneral" id="moveStandardPC">
+        <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial'; automaticTileSelectionReset.checked = !checked;}" name="moveStyle"> Standard
+        <br>
         <input type="checkbox" id="tileClickMoveTutorial" onclick="checked = !checked"> Klicken Sie auf das gewünschte Teil. 
         <br>
         <input type="checkbox" id="moveMouseMoveTutorial" onclick="checked = !checked"> Bewegen Sie dann den Mauszeiger, um das Teil zu bewegen. 
@@ -514,7 +533,7 @@ display: block;
         <br>
         <input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> Durch einen erneuten Mausklick auf das Teil können Sie es wieder loslassen bzw. abwählen.
       </div>
-      <div id="moveAlternativePC">
+      <div class="tutorialCard tutorialGeneral" id="moveAlternativePC">
         <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial'; automaticTileSelectionReset.checked = checked;}" name="moveStyle"> Alternative
         <br>
         <input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Halten Sie die Maustaste gedrückt (oder doppelklicken Sie und lassen Sie Ihren Finger auf dem Touchpad).
@@ -527,9 +546,9 @@ display: block;
       </div>
       <input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern.
     </div>
-    <div id="clippTutorial">
+    <div class="tutorialCard tutorialGeneral" id="clippTutorial">
       <h3>Teile verbinden und lösen</h3>
-      <div id="connectTiles">
+      <div class="tutorialCard tutorialGeneral" id="connectTiles">
         <h4>Teile verbinden</h4>
         <input type="checkbox" id="selectTileConnectTileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an.
         <br>
@@ -538,7 +557,7 @@ display: block;
         <!-- TODO: hitbox and overlapping setting -->
         <input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab, wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. 
       </div>
-      <div id="disconnectTiles">
+      <div class="tutorialCard tutorialGeneral" id="disconnectTiles">
         <h4>Teile lösen</h4>
         <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;}" id="unclippStandard" name="unclippStyle"> Standard (verbunden mit Standard für Bewegen der Teile)
         <br>    
