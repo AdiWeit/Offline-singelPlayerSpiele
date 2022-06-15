@@ -1114,6 +1114,7 @@ display: block;
       futurePuzzleManager.appendChild(storePuzzleManager);
     }
     autoScroll = setInterval(function () {
+      if (!selected.position.manualScrolling) {
   // up
   if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
@@ -1141,6 +1142,7 @@ if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "
     // mausx -= 3;
     fAutoScroll({x: -3, y: 0});
 }
+  }
 // down
 var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
@@ -2272,11 +2274,16 @@ var puzzles = {};
   var scrollingInteraction = {PC: false, user: false};
   window.addEventListener('scroll',()=>{
     scrollingInteraction.user = !scrollingInteraction.PC;
-    if (scrollingInteraction.user && tutorial.state == "manuallyScrollingTutorial") goTutorialSteps(1);
+    if (scrollingInteraction.user) {
+      selected.position = {x: selected.position.x + (state.scrollX - scrollX), y: selected.position.y + (state.scrollY - scrollY), manualScrolling: true};
+      if (tutorial.state == "manuallyScrollingTutorial") goTutorialSteps(1);
+    } 
     if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
     else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
+    state.scrollX = scrollX;
+    state.scrollY = scrollY;
   });
   window.visualViewport.addEventListener("resize", resized);
   function resized (event) {
@@ -2346,6 +2353,10 @@ var puzzles = {};
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft + state.rightScroll;
     mausy = e.clientY + scrollY - texturTop + state.upScroll;
+    if (selected.position.manualScrolling) {
+      selected.position = {x: mausx, y: mausy};
+      selected.position.manualScrolling = false;
+    }
     originalMausX = e.clientX;
     if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
@@ -2354,7 +2365,7 @@ var puzzles = {};
   }
   window.scroll(0, 0);
   var texturTop = textur.getBoundingClientRect().top + scrollY;
-  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false, rightScroll: 0, upScroll: 0, userSource: 'Picture'};
+  var state = {mouse: "up", shift: false, newTileSelected: false, buttons: {}, coord: {x: 0, y: 0}, backToBar: false, rightScroll: 0, upScroll: 0, userSource: 'Picture', scrollX: 0, scrollY: 0};
   var texturLeft = textur.getBoundingClientRect().left;
   // #importantUserInputs
   // if (gerät == "Handy") {
@@ -2576,18 +2587,16 @@ var puzzles = {};
         //   }
         // });
         if ((automaticTileSelectionReset.checked || !state.shift)) {
-        // selected.tiles.forEach((tile, i) => {
           positions.wrong[tile].edit.x += mausx - selected.position.x;
           positions.wrong[tile].edit.y += mausy - selected.position.y;
           // check clicking
           checkPossibleClipping(tile);
-        // });
        }
       }
       if ((automaticTileSelectionReset.checked || !state.shift)) {
         deleteFurtherClipOptions();
         playClippingSound();
-        selected.position = {x: mausx, y: mausy};
+        selected.position = {x: mausx, y: mausy, manualScrolling: selected.position.manualScrolling};
         layout(false, true);
       }
     }
