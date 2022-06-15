@@ -70,7 +70,7 @@
 </div>
 <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
 <br>
-<button style="position: fixed; display: none;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
+<button style="position: fixed; display: none; z-index: 3;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <a style="display: none;" id="traditionalModeMobileControls">
@@ -344,8 +344,8 @@
 <canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div class="expandButtons" id="backToBarButtons">
 </div>
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1);">
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1);">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1, 'elm');">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1, 'elm');">
 <style>
   .dropdown {
 position: relative;
@@ -522,21 +522,21 @@ display: block;
   <div id="tutorial" class="tutorialGeneral">
     <div id="traditionalTutorial">
     <div class="tutorialCard tutorialGeneral" id="moveTutorial">
-      <h3>Teile bewegen und drehen</h3>
+      <h2>Teile bewegen und drehen</h2>
       <div class="tutorialCard tutorialGeneral">
         <b>Informationen zum Teile drehen</b>
         <br>
         Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
       </div>
       <div class="tutorialCard tutorialGeneral" id="moveStandardPC">
-        <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;}" name="moveStyle"> Standard
+        <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;}" name="moveStyle"> <b>Standard</b>
         <div id="tileClickMoveTutorialDiv"><input type="checkbox" id="tileClickMoveTutorial" onclick="checked = !checked"> Klicken Sie auf das gewünschte Teil. </div>
         <div id="moveMouseMoveTutorialDiv"><input type="checkbox" id="moveMouseMoveTutorial" onclick="checked = !checked"> Bewegen Sie dann den Mauszeiger, um das Teil zu bewegen. </div>
         <div id="rotateTileTutorialDiv"><input type="checkbox" id="rotateTileTutorial" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren.</div>
         <div id="clickUnselectMoveTutorialDiv"><input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> Durch einen erneuten Mausklick auf das Teil können Sie es wieder loslassen bzw. abwählen.</div>
       </div>
       <div class="tutorialCard tutorialGeneral" id="moveAlternativePC">
-        <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;}" name="moveStyle"> Alternative
+        <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;}" name="moveStyle"> <b>Alternative</b>
         <div id="holdMouseMoveTutorialDiv"><input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Halten Sie die Maustaste gedrückt (oder doppelklicken Sie und lassen Sie Ihren Finger auf dem Touchpad).</div>
         <div id="moveMouseMoveTutorialAlternativeDiv"><input type="checkbox" id="moveMouseMoveTutorialAlternative" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um das Teil zu bewegen. </div>
         <div id="rotateTileTutorialAlternativeDiv"><input type="checkbox" id="rotateTileTutorialAlternative" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren. </div>
@@ -545,9 +545,9 @@ display: block;
       <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern. </div>
     </div>
       <div class="tutorialCard tutorialGeneral" id="clippTutorial">
-      <h3>Teile verbinden und lösen</h3>
+      <h2>Teile verbinden und lösen</h2>
       <div class="tutorialCard tutorialGeneral" id="connectTiles">
-        <h4>Teile verbinden</h4>
+        <h3>Teile verbinden</h3>
         <!-- <div class="tutorialCard tutorialGeneral"> -->
           <!-- <b>Informationen zum Teile verbinden</b> -->
           <div class="tutorialCard tutorialGeneral">
@@ -566,19 +566,78 @@ display: block;
         <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab, wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
       </div>
       <div class="tutorialCard tutorialGeneral" id="disconnectTiles">
-        <h4>Teile lösen</h4>
-        <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;}" id="unclippStandard" name="unclippStyle"> Standard (verbunden mit Standard für Bewegen der Teile)    
+        <h3>Teile lösen</h3>
+        <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;}" id="unclippStandard" name="unclippStyle"><b> Standard (verbunden mit Standard für Bewegen der Teile) </b>
         <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
         <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich) </div>
         <div id="releaseShiftStandardUnclippTutorialDiv"><input type="checkbox" id="releaseShiftStandardUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
         <div id="unclippStandardTutorialDiv"><input type="checkbox" id="unclippStandardTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
         <div id="unselectUnclippStandardTutorialDiv"><input type="checkbox" id="unselectUnclippStandardTutorial" onclick="checked = !checked"> Klicken Sie, um die ausgewählen Teile abzuwählen. </div>
-        <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = checked;}" id="unclippAlternative" name="unclippStyle"> Alternative (verbunden mit Alternative für Bewegen der Teile)
+        <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = checked;}" id="unclippAlternative" name="unclippStyle"> <b>Alternative (verbunden mit Alternative für Bewegen der Teile)</b>
         <div id="pressShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="pressShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
         <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des UnclippTutorials beliebige Anzahl möglich, Maustaste drücken und halten oder Doppelklick auf Touchpad) </div>
         <div id="unclippTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="unclippTileAlternativeUnclippTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
         <div id="releaseShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="releaseShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
         <div id="unselectAlternativeUnclippTutorialDiv"><input type="checkbox" id="unselectAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie das Touchpad bzw. die Maustaste los, um das Teil abzuwählen. </div>
+      </div>
+    </div>
+    <div class="tutorialCard tutorialGeneral" id="generalSkills">
+      <h2>allgemeine Fertigkeiten</h2>
+      <div id="scrollTutorial" class="tutorialCard tutorialGeneral">
+        <b style="font-size: 21px;">scroling</b>
+        <br>
+        <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
+          <h3>manuell scrollen</h3>
+          <div id="selectTileScrollingTutorialDiv"><input type="checkbox" id="selectTileScrollingTutorial" onclick="checked = !checked">Teil anwählen (wenn Sie 2 Finger Geste nutzen wollen mit der linken Maustaste)</div> 
+          <div id="manuallyScrollingTutorialDiv"><input type="checkbox" id="manuallyScrollingTutorial" onclick="checked = !checked">scrollen (z.B. mit 2 Finger Geste auf dem Touchpad oder mit dem Mausrad)</div> 
+          <div id="unselectTileScrollingTutorialDiv"><input type="checkbox" id="unselectTileScrollingTutorial" onclick="checked = !checked">Teil abwählen</div> 
+        </div>
+        <div class="tutorialCard tutorialGeneral" id="autoScrollTutorial">
+          <h3>automatisch scrollen</h3>
+          <div id="selectTileAutomaticScrollingTutorialDiv"><input type="checkbox" id="selectTileAutomaticScrollingTutorial" onclick="checked = !checked">Teil anwählen</div> 
+          <div id="automaticScrollingTutorialDiv"><input type="checkbox" id="automaticScrollingTutorial" onclick="checked = !checked">Teil so weit nach unten schieben, dass mehr als die Hälfte des Teils den Bildschirm verlassen hat (außerhalb des tutorials alle Richtungen möglich)</div> 
+          <!-- TODO: vom Rand weg bewegen -->
+          <div id="stopScrollingAutomaticScrollingTutorialDiv"><input type="checkbox" id="stopScrollingAutomaticScrollingTutorial" onclick="checked = !checked">Teil abwählen oder vom Rand weg bewegen, um das Scrolling zu stoppen</div> 
+        </div>
+      </div>
+      <div class="tutorialCard tutorialGeneral" id="tile">
+        <h3>Die Teilliste</h3>
+        <div class="tutorialCard tutorialGeneral">
+          <b>Informationen zur aufbereitung der Teile (ink. Teilliste)</b>
+          <br>
+          In den Einstellungen können Sie auswählen, wie die Teile aufbereitet werden. Sie können verteil werden (mit Überlappen), in die Teilliste gebracht werden, um die es im Folgenden geht, oder auf dem Spielfeld nebeneinander gelegt werden. Zudem können Sie mit leerer Liste starten, sodass Sie die Teile sortiert dort ablegen oder auf dem Spielfeld behalten können. 
+        </div>
+        <div class="tutorialCard tutorialGeneral" id="controlTileBarScrollTutorial">
+          <h3>Scrolling in der Teilliste</h3>
+          <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten Pfeile an den Rändern des Bildschirms</div> 
+          <div class="tutorialCard tutorialGeneral" id="scrollWithMouse">
+            <h4>Scrollen mit der Maustaste</h4>
+            <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
+            <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Zeiger bewegen, um die Liste in die entsprechende Richtung zu bewegen </div> 
+            <div id="stopScrollingTileBarTutorialDiv"><input type="checkbox" id="stopScrollingTileBarTutorial" onclick="checked = !checked">Maustaste bzw. Touchpad loslassen</div> 
+          </div>
+          <div id="ScrollkeyTileBarTutorialDiv"><input type="checkbox" id="ScrollkeyTileBarTutorial" onclick="checked = !checked">Scrollen durch drücken der linken bzw. rechten Pfeiltaste (Mauszeiger muss auf Liste sein)</div> 
+        </div>
+        <div class="tutorialCard tutorialGeneral" id="leaveTileBarTutorial">
+          <h3>Teile auf "Spielfeld" bringen</h3>
+          <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil in der Liste, um es anzuwählen.</div> 
+          <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Klicken Sie auf das "Spielfeld", um das Teil dort "abzulegen". </div> 
+          <div id="unselecTileAfterTileBarTilePlacementTutorialDiv"><input type="checkbox" id="unselecTileAfterTileBarTilePlacementTutorial" onclick="checked = !checked">Wählen Sie das Teil ab.</div> 
+        </div>
+        <div class="tutorialCard tutorialGeneral" id="backToBarTutorial">
+          <h3>Teile zurück in Teilliste bringen</h3>
+          <div class="tutorialCard tutorialGeneral" id="backToBarPlusBTutoria">
+            <h4>mit "+"-Button</h4>
+            <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Klicken Sie auf einen der "+"-Bottons</div> 
+            <div id="backToTileBarPlusBTutorialDiv"><input type="checkbox" id="backToTileBarPlusBTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil, um es an der ausgewählen Stelle zurück in die Teilliste zu bringen. </div> 
+          </div>
+          <div class="tutorialCard tutorialGeneral" id="backToBarBTutorial">
+            <h4>mit "zurück in Leiste"-Button</h4>
+            <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählen Teil wird das neue Teil eingereiht werden. </div> 
+            <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton </div> 
+            <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -671,7 +730,7 @@ display: block;
   function changeSettingsVis(vis) {
     if ((settings.style.display == 'none' || vis == "inline") && vis != "none") {
       settings.style.display = 'inline'; 
-      wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
+      if (!state.removeTile && aufgebenId.style.display == "inline") wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
     }
     else {
       settings.style.display = 'none';
@@ -827,6 +886,7 @@ display: block;
     // back to bar to the right of the selected tile in the tileBar
     function generalBackToBar(elm) {
     if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
+      if (tutorial.state == "clickBackToBarBTurotial") goTutorialSteps(1);
       state.backToBar = tileSelectionBar.selectedTile.i + 1; 
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
@@ -1094,6 +1154,11 @@ var pScrollY = scrollY;
 }, 10);
   }
   function fAutoScroll(direction) {
+    scrollingInteraction.PC = true;
+    setTimeout(() => {
+      scrollingInteraction.PC = false;
+    }, 233);
+    if (tutorial.state == "automaticScrollingTutorial") goTutorialSteps(1);
     var scrollYBefore = scrollY;
     if (!positions.wrong[selected.tiles[0]] || positions.wrong[selected.tiles[0]].edit.y > 0) window.scrollBy(direction.x, direction.y);
     mausx += direction.x;
@@ -1507,6 +1572,7 @@ function canvasClicked(calledBy) {
   // end section 2.1
     // backTobar button clicked
     function posInBarSelected(i) {
+      if (tutorial.state == "BackToTileBarTutorial") goTutorialSteps(1);
     for (const elm of document.getElementsByClassName('backToTileB')) {
       elm.style.backgroundColor = '';
     }
@@ -1844,7 +1910,9 @@ var puzzles = {};
     }
   }
   // scroll TileSelectionBar (translate)
-  function scrollTileSelection(direc) {
+  function scrollTileSelection(direc, calledBy) {
+    if (tutorial.state == "scrollArrowTileBarTutorial" && calledBy == "elm") goTutorialSteps(1);
+    if (tutorial.state == "ScrollkeyTileBarTutorial" && calledBy == "arrowKey") goTutorialSteps(1);
     var screenScrollX = window.visualViewport.width/lengthPerTeil.sizeAdapted.x*lengthPerTeil.edit.x;
     if (screenScrollX/lengthPerTeil.edit.x > positions.wrong.length) screenScrollX = positions.wrong.length*lengthPerTeil.edit.x;
     tileSelectionBar.leftOffScreenTiles += direc;
@@ -1963,7 +2031,7 @@ var puzzles = {};
     if (state.removeTile) removeTilesScreen = true;
     if (clear && (aufgebenId.style.display == 'inline' || state.removeTile)) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
     if (lengthPerTeil.sizeAdapted) tileSelectionCanvas.width = positions.wrong.length*(lengthPerTeil.edit.x*(lengthPerTeil.edit.x/lengthPerTeil.sizeAdapted.x));
-    else tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
+    else if (positions.wrong.length) tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.innerWidth) tileSelectionBar.scrollX = 0;
     richtige = 0;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
@@ -2201,7 +2269,10 @@ var puzzles = {};
   document.onmousemove = readMouseMove
   var originalMausX;
   // section 5: most user inputs
+  var scrollingInteraction = {PC: false, user: false};
   window.addEventListener('scroll',()=>{
+    scrollingInteraction.user = !scrollingInteraction.PC;
+    if (scrollingInteraction.user && tutorial.state == "manuallyScrollingTutorial") goTutorialSteps(1);
     if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
     else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
@@ -2365,11 +2436,11 @@ var puzzles = {};
     if (state.mouse != "downNow") state.mouse = "down";
     if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
       mouseUp(true);
-      if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || tutorial.state == "unselectUnclippStandardTutorial") {
+      if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || ["unselectUnclippStandardTutorial", "unselecTileAfterTileBarTilePlacementTutorial"].includes(tutorial.state)) {
         goTutorialSteps(1);
         automaticTileSelectionReset.checked = true;
       }
-      if ( tutorial.state == "getClippingOptionConnectTileTutorial") goTutorialSteps(-1);
+      if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
       if (!state.removeTile) selected.tiles = [];
       else state.mouse = "up";
       state.shiftBefore = false;
@@ -2380,6 +2451,7 @@ var puzzles = {};
       state.coord = checkSelected(true);
       if (modeSelection.value == "traditional") {
         if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
+          if (tutorial.state == "placeTileOnFiledTutorial") goTutorialSteps(1);
           var i = tileSelectionBar.selectedTile;
           selected.tiles.push(i.tileI);
           positions.layoutOrder = positions.layoutOrder.filter(x => x != i.tileI);
@@ -2420,7 +2492,7 @@ var puzzles = {};
               if (!selected.tiles.includes(i)) selected.tiles.push(i);
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
-              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial"].includes(tutorial.state)) {
+              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial"].includes(tutorial.state)) {
                 goTutorialSteps(1);
               }
               if (!elmCalled && !touchStart && rotateTiles.checked) {
@@ -2429,6 +2501,7 @@ var puzzles = {};
               }
             }
             if (state.backToBar !== false) {
+              if (["backToTileBarPlusBTutorial", "selectBackToBarTileZurückInLeisteTutorial"].includes(tutorial.state)) goTutorialSteps(1);
               // tileSelectionBar.tiles.push(i);
               tileSelectionBar.tiles.splice(state.backToBar, 0, i);
               if (autoSelectTileBar.checked && tileSelectionBar.tiles.length == 1) {
@@ -2453,6 +2526,7 @@ var puzzles = {};
           var tile = positions.wrong[tileI];
           if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
             tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
+            if (["MouseDownScrollTileBarTutorial", "selectTileBarTileTutorial", "selectTileTileBarZurückInLeisteTutorial"].includes(tutorial.state)) goTutorialSteps(1);
             layout();
           }
         });
@@ -2465,9 +2539,10 @@ var puzzles = {};
   }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
-    if (["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial"].includes(tutorial.state) && calledBy == "mousemove") {
+    if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && calledBy == "mousemove") {
       goTutorialSteps(1);
     }
+    if (state.mouse == "down" && tileSelectionBar.collidesMouse() && tutorial.state == "MouseDownScrollTileBarTutorial" && calledBy != "mousedown") goTutorialSteps(1);
     if (tileSelectionBar.collidesMouse()) mausx = originalMausX;
     selected.clip = [];
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
@@ -2551,17 +2626,15 @@ var puzzles = {};
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
-    if (tutorial.state && tutorial.state == "moveMouseMoveTutorialAlternative") goTutorialSteps(-1);
+    if (["moveMouseMoveTutorialAlternative", "moveMouseScrollTileSelectionBarTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
     if (tutorial.state == "releaseMoveTutorial") {
       goTutorialSteps(1);
       if (moveStyleSettingChosen.checked) goTutorialSteps(1);
     }
-    if (tutorial.state == "getClippingOptionConnectTileTutorial" && automaticTileSelectionReset.checked) goTutorialSteps(-1);
-    if (tutorial.state == "unselectAlternativeUnclippTutorial") {
-      document.getElementById(tutorial.state).checked = true;
-      tutorial.state = "";
-      // TODO
-      }
+    if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state) && automaticTileSelectionReset.checked) goTutorialSteps(-1);
+    if (["unselectAlternativeUnclippTutorial", "unselectTileScrollingTutorial", "stopScrollingAutomaticScrollingTutorial", "stopScrollingTileBarTutorial"].includes(tutorial.state) || (automaticTileSelectionReset.checked && tutorial.state == "unselecTileAfterTileBarTilePlacementTutorial")) {
+      goTutorialSteps(1);
+    }
     if (swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) {
       canvasClicked();
     }
@@ -2678,16 +2751,16 @@ layout(false, true);
       if (tutorial.state == "releaseShiftStandardUnclippTutorial") goTutorialSteps(1);
       if (tutorial.state == "unclippTileAlternativeUnclippTutorial") goTutorialSteps(-2);
       if (tutorial.state == "releaseShiftAlternativeUnclippTutorial") {
-        document.getElementById(tutorial.state).checked = true;
-        tutorial.state = "unselectAlternativeUnclippTutorial";
-        // TODO: weiter
-        if (unselectAlternativeUnclippTutorial.checked) tutorial.state = "";
+        goTutorialSteps(1);
+        if (unselectAlternativeUnclippTutorial.checked) {
+          goTutorialSteps(1);
+        }
       }
     }
     if (event.key == "Escape") {
       selected.tiles = [];
     }
-    if (aufgebenId.style.display == "none") layout();
+    // if (aufgebenId.style.display == "none") layout();
   }
   // end section 5
   // section 6: rotate tile(s)
@@ -2702,11 +2775,13 @@ layout(false, true);
     var collidesTilesBar = tileSelectionBar.collidesMouse();
     if (rotateTiles.checked) {
       if (event.key == "ArrowRight") {
-        if (collidesTilesBar) scrollTileSelection(1);
+        if (collidesTilesBar) {
+          scrollTileSelection(1, "arrowKey");
+        }
         else rotateSelected(90);
       }
       if (event.key == "ArrowLeft") {
-        if (collidesTilesBar) scrollTileSelection(-1);
+        if (collidesTilesBar) scrollTileSelection(-1, "arrowKey");
         else rotateSelected(-90);
       }
     }
@@ -3124,19 +3199,24 @@ setTimeout(function () {
 goTutorialSteps(0);
 function goTutorialSteps(steps) {
   document.getElementById(tutorial.state + 'Div').className = "";
-  if (steps > 0)  {
-    for (let i = 0; i < steps; i++) {
-     document.getElementById(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[tutorial.index + i].id).checked = true;
-   }
-}
-if (steps < 0) {
-    for (let i = tutorial.index - 1; i > tutorial.index + steps - 1; i--) {
-     document.getElementById(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[i].id).checked = false;
-    }
+  try {
+    if (steps > 0)  {
+      for (let i = 0; i < steps; i++) {
+       document.getElementById(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[tutorial.index + i].id).checked = true;
+     }
   }
-  tutorial.index += steps;
-  tutorial.state = document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
-  document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
-  document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[tutorial.index];
+  if (steps < 0) {
+      for (let i = tutorial.index - 1; i > tutorial.index + steps - 1; i--) {
+       document.getElementById(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[i].id).checked = false;
+      }
+    }
+    tutorial.index += steps;
+    tutorial.state = document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
+    document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
+  }
+  catch (err) {
+    console.log('tutorial finished!');
+    tutorial.state = "finished";
+  }
 }
 </script>
