@@ -1139,7 +1139,7 @@ display: block;
     autoScroll = setInterval(function () {
       if (!selected.position.manualScrolling) {
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && mausy + texturTop - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y + lengthPerTeil.edit.y/3 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
