@@ -1179,10 +1179,7 @@ var pScrollY = scrollY;
 }, 10);
   }
   function fAutoScroll(direction) {
-    scrollingInteraction.PC = true;
-    setTimeout(() => {
-      scrollingInteraction.PC = false;
-    }, 233);
+    pcScrolls = true;
     if (tutorial.state == "automaticScrollingTutorial") goTutorialSteps(1);
     var scrollYBefore = scrollY;
     if (!positions.wrong[selected.tiles[0]] || positions.wrong[selected.tiles[0]].edit.y > 0) window.scrollBy(direction.x, direction.y);
@@ -2295,10 +2292,10 @@ var puzzles = {};
   document.onmousemove = readMouseMove
   var originalMausX;
   // section 5: most user inputs
-  var scrollingInteraction = {PC: false, user: false};
+  var pcScrolls = false;
   window.addEventListener('scroll',()=>{
-    scrollingInteraction.user = !scrollingInteraction.PC;
-    if (scrollingInteraction.user) {
+    if (pcScrolls) pcScrolls = false;
+    else {
       selected.position = {x: selected.position.x + (state.scrollX - scrollX), y: selected.position.y + (state.scrollY - scrollY), manualScrolling: true};
       if (tutorial.state == "manuallyScrollingTutorial") goTutorialSteps(1);
     } 
