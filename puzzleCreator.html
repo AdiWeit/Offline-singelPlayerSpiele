@@ -916,10 +916,12 @@ display: block;
       tileSelectionBar.selectedTile = undefined;
     }
   }
-  function expandSide(side) {
+  function expandSide(side, adaptButtonsOnly) {
     // if (!state.sideExpanded && aufgebenId.style.display == 'inline') {
-    if (['right', 'left'].includes(side)) textur.width += lengthPerTeil.edit.x*3;
-    if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
+    if (!adaptButtonsOnly) {
+      if (['right', 'left'].includes(side)) textur.width += lengthPerTeil.edit.x*3;
+      if (['bottom', 'top'].includes(side)) textur.height += lengthPerTeil.edit.y*3;
+    }
     expandRight.style.left = textur.getBoundingClientRect().right + scrollX + 'px';
     expandBottom.style.top = textur.getBoundingClientRect().bottom + scrollY; + 'px';
     expandBottom.style.width = (textur.getBoundingClientRect().right + scrollX) - (textur.getBoundingClientRect().left + scrollX);
@@ -1138,7 +1140,7 @@ display: block;
       futurePuzzleManager.appendChild(storePuzzleManager);
     }
     autoScroll = setInterval(function () {
-      if (!selected.position.manualScrolling) {
+      if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
   // up
   if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y + lengthPerTeil.edit.y/3 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
@@ -1146,9 +1148,9 @@ display: block;
     fAutoScroll({x: 0, y: -3});
 }
 // right 
-if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width/* - texturLeft*/ && selected.tiles?.length) {
+if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + scrollX + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width/* - texturLeft*/ && selected.tiles?.length) {
       // window.scroll(scrollX + 3, scrollY);
-      fAutoScroll({x: 3, y: 0});
+      fAutoScroll({x: 3, y: 0}, true);
     }
 if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
@@ -1157,9 +1159,9 @@ if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "
         fAutoScroll({x: 3, y: 0});
       }
       // left
-      if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit?.x/2 < 0 && selected.tiles.length) {
+      if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX - lengthPerTeil.edit?.x/2 < visualViewport.offsetLeft && selected.tiles.length) {
       // window.scroll(scrollX - 3, scrollY);
-      fAutoScroll({x: -3, y: 0});
+      fAutoScroll({x: -3, y: 0}, true);
     }
   if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && (mausx - visualViewport.pageLeft - state.rightScroll < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX - 3, scrollY);
@@ -1179,7 +1181,7 @@ var pScrollY = scrollY;
       }
 }, 10);
   }
-  function fAutoScroll(direction) {
+  function fAutoScroll(direction, mirrored) {
     pcScrolls = true;
     if (tutorial.state == "automaticScrollingTutorial") goTutorialSteps(1);
     var scrollYBefore = scrollY;
@@ -1187,9 +1189,10 @@ var pScrollY = scrollY;
     mausx += direction.x;
     mausy += direction.y;
     if (gerät == "Handy") {
-      if (direction.x && (positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.x < textur.width/*state.rightScroll < textur.width - visualViewport.width*/ && direction.x > 0) || (direction.x < 0 && positions.wrong[selected.tiles[0]].edit.x > 0/*state.rightScroll > 0*/)) {
+      if (direction.x && (positions.wrong[selected.tiles[0]] && ((positions.wrong[selected.tiles[0]].edit.x < textur.width && !mirrored) || (mausx > lengthPerTeil.edit.x/2 && mirrored))/*state.rightScroll < textur.width - visualViewport.width*/ && direction.x > 0) || (direction.x < 0 && ((positions.wrong[selected.tiles[0]].edit.x > 0 && !mirrored) || (mausx < textur.width - lengthPerTeil.edit.x/2 + texturLeft && mirrored))/*state.rightScroll > 0*/)) {
         state.rightScroll += direction.x;
-        canvas.translate(-direction.x, 0);
+        if (mirrored) canvas.translate(direction.x, 0);
+        else canvas.translate(-direction.x, 0);
         layout(true, true);
       }
       if (direction.y && scrollY == scrollYBefore && (positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0)) {
@@ -2312,12 +2315,14 @@ var puzzles = {};
     if (state.rightScroll < 0 && (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) > visualViewport.pageLeft) {
       var distance = (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) - visualViewport.pageLeft;
       state.rightScroll += distance;
-      canvas.translate(-distance, 0);
+      if (mirrorInput.checked) canvas.translate(distance, 0);
+      else canvas.translate(-distance, 0);
     }
     if (state.rightScroll > 0 && (visualViewport.pageLeft + visualViewport.width - texturLeft) > positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x - state.rightScroll > acc ? val.edit.x + lengthPerTeil.edit.x - state.rightScroll : acc, 0)) {
       var distance = (visualViewport.pageLeft + visualViewport.width - texturLeft) - positions.wrong.reduce((acc, val) => val.edit.x + lengthPerTeil.edit.x - state.rightScroll > acc ? val.edit.x + lengthPerTeil.edit.x - state.rightScroll : acc, 0)
       state.rightScroll -= distance;
-      canvas.translate(distance, 0);
+      if (mirrorInput.checked) canvas.translate(-distance, 0);
+      else canvas.translate(distance, 0);
     }
     if (state.upScroll < 0 && (positions.wrong.reduce((acc, val) => val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 < acc ? val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 : acc, textur.height)) > visualViewport.pageTop) {
       var distance = (positions.wrong.reduce((acc, val) => val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 < acc ? val.edit.y - state.upScroll - lengthPerTeil.edit.y/2 : acc, textur.height)) - visualViewport.pageTop;
@@ -2379,7 +2384,7 @@ var puzzles = {};
       selected.position = {x: mausx, y: mausy};
       selected.position.manualScrolling = false;
     }
-    originalMausX = e.clientX;
+    if (gerät != "Handy") originalMausX = e.clientX;
     if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
@@ -2419,7 +2424,8 @@ var puzzles = {};
       mausy = ev.touches[0]["pageY"] - texturTop + state.upScroll;// - 32;
       if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
       // TODO: if statement needed?
-      if (tileSelectionBar.collidesMouse()) originalMausX = ev.touches[0]["pageX"];
+      if (tileSelectionBar.collidesMouse() || gerät == "Handy") originalMausX = ev.touches[0]["pageX"];
+      console.log(mausx);
     }
     if (!scrollable.checked) {
     if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
@@ -2582,7 +2588,10 @@ var puzzles = {};
       for (var tile of selected.tiles) {
         var objTile = positions.wrong[tile];
         if (gerät == "PC") {
-        if (mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0) expandSide('right');// textur.width += 15;
+        if (mirrorInput.checked && originalMausX - lengthPerTeil.edit.x/2 < 0) {
+          textur.width += 15;
+          expandSide('right', true); 
+        }
         if (!mirrorInput.checked && objTile.edit.x + lengthPerTeil.edit.x > textur.width) expandSide('right'); // textur.width += lengthPerTeil.edit.x;
         if (objTile.edit.y + lengthPerTeil.edit.y > textur.height) expandSide('bottom'); // textur.height += lengthPerTeil.edit.y;
       }
