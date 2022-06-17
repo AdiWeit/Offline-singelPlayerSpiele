@@ -1171,7 +1171,7 @@ var pScrollY = scrollY;
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
     var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
     if (ptexturTop < 0) ptexturTop = 0;
-    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop/* + pScrollY - texturTop*/) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
+    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (shuffleStyle.value == "listTiles" && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - ptexturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
         // window.scroll(scrollX, scrollY + 3);
         // mausy += 3;
         fAutoScroll({x: 0, y: +3});
@@ -3257,6 +3257,7 @@ function startTutorial(mode) {
         elm.style.display = "none";
       }
       tileSelectionCanvas.style.display = "none";
+      selectBackToBarB.style.display = "none";
     }
   }, 500);
 }
@@ -3285,6 +3286,7 @@ function goTutorialSteps(steps) {
         elm.style.display = "inline";
       }
       tileSelectionCanvas.style.display = "inline";
+      selectBackToBarB.style.display = "inline";
       for (var i = 0; i < 16; i++) {
         tileSelectionBar.tiles.splice(0, 0, i);
         unclipp(i);
