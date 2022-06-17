@@ -753,6 +753,7 @@ display: block;
   function changeSettingsVis(vis) {
     if ((settings.style.display == 'none' || vis == "inline") && vis != "none") {
       settings.style.display = 'inline'; 
+      selectBackToBarB.style.display = 'none';
       if (!state.removeTile && aufgebenId.style.display == "inline") wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
     }
     else {
@@ -2299,8 +2300,8 @@ var puzzles = {};
       selected.position = {x: selected.position.x + (state.scrollX - scrollX), y: selected.position.y + (state.scrollY - scrollY), manualScrolling: true};
       if (tutorial.state == "manuallyScrollingTutorial") goTutorialSteps(1);
     } 
-    if (scrollY > 10 && scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
-    else if (aufgebenId.style.display == "inline" && shuffleStyle == "list") selectBackToBarB.style.display = 'inline';
+    if (scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
+    else if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
     state.scrollX = scrollX;
@@ -2397,14 +2398,10 @@ var puzzles = {};
     tileSelectionCanvas.addEventListener('touchstart', touch);
     tileSelectionCanvas.addEventListener('touchend', touch);
     function touch(ev) {
-      if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile)) {
+      if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile) && (!scrollOnBlanc.checked || selected.tiles.length)) {
         ev.preventDefault();
       }
       if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
-    if (ev.touches[2] && !scrollable.checked) {
-    }
-    else if (ev.type == "touchmove" && !scrollable.checked && (!scrollOnBlanc.checked || selected.tiles.length)) {
-    }
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
       state.shift = true;
       state.shiftBySwipe = true;
