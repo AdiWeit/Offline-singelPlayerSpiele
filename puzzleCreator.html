@@ -503,6 +503,8 @@ display: block;
       width: 47%;
       box-shadow: 2px 2px 20px #855d5d;
       display: none;
+      overflow-y: scroll;
+      scroll-behavior: smooth;
     }
     .tutorialCard {
       box-shadow: 2px 2px 10px #855d5d;
@@ -522,8 +524,28 @@ display: block;
       margin-top: 3px;
       margin-bottom: 3px;
     }
+    /* custom scrollbar */
+    ::-webkit-scrollbar {
+  width: 1vw;
+}
+::-webkit-scrollbar-track {
+  border-radius: 100vw;
+  background: hsla(0, 0%, 72%, 0.19);
+  margin-block: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: hsla(0, 0%, 72%, 0.55);
+  border-radius: 100vw;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: hsla(0, 0%, 65%, 0.55);
+}
+::-webkit-scrollbar-corner {
+  background: rgba(0,0,0,0);
+}
   </style>
   <div id="tutorial" class="tutorialGeneral">
+    <a id="scrollToTutorial"></a>
     <div id="traditionalTutorial">
     <div style="display: none;" id="traditionalTutorialPC">
     <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
@@ -741,61 +763,45 @@ display: block;
           </div>
           <div id="autoScrollMobileTutorial"></div>
         </div>
-        <div class="tutorialCard tutorialGeneral">
-          <h3>Zoomen</h3>
-          Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
-        </div>
       </div>
+      <!-- TODO: Zoomen -->
+      <!-- TODO: rotieren -->
       <div id="tileSelectionBarMobileTutorial"></div>
-        <!-- <div class="tutorialCard tutorialGeneral section" id="tileSelectionBarTutorial">
-          <h3>Die Teilliste</h3>
-          <div class="tutorialCard tutorialGeneral">
-            <b>Informationen zur aufbereitung der Teile (ink. Teilliste)</b>
-            <br>
-            In den Einstellungen können Sie auswählen, wie die Teile aufbereitet werden. Sie können verteil werden (mit Überlappen), in die Teilliste gebracht werden, um die es im Folgenden geht, oder auf dem Spielfeld nebeneinander gelegt werden. Zudem können Sie mit leerer Liste starten, sodass Sie die Teile sortiert dort ablegen oder auf dem Spielfeld behalten können. 
-          </div>
-          <div class="tutorialCard tutorialGeneral" id="controlTileBarScrollTutorial">
-            <h3>Scrolling in der Teilliste</h3>
-            <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten Pfeile an den Rändern des Bildschirms</div> 
-            <div class="tutorialCard tutorialGeneral" id="scrollWithMouse">
-              <h4>Scrollen mit der Maustaste</h4>
-              <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
-              <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Zeiger bewegen, um die Liste in die entsprechende Richtung zu bewegen </div> 
-              <div id="stopScrollingTileBarTutorialDiv"><input type="checkbox" id="stopScrollingTileBarTutorial" onclick="checked = !checked">Maustaste bzw. Touchpad loslassen</div> 
-            </div>
-            <div id="ScrollkeyTileBarTutorialDiv"><input type="checkbox" id="ScrollkeyTileBarTutorial" onclick="checked = !checked">Scrollen durch drücken der linken bzw. rechten Pfeiltaste (Mauszeiger muss auf Liste sein)</div> 
-          </div>
-          <div class="tutorialCard tutorialGeneral" id="leaveTileBarTutorial">
-            <h3>Teile auf "Spielfeld" bringen</h3>
-            <div class="tutorialCard tutorialGeneral" id="leaveTileBarTutorial">
-              <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil in der Liste, um es anzuwählen.</div> 
-              <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Klicken Sie auf das "Spielfeld", um das Teil dort "abzulegen". </div> 
-              <div id="unselecTileAfterTileBarTilePlacementTutorialDiv"><input type="checkbox" id="unselecTileAfterTileBarTilePlacementTutorial" onclick="checked = !checked">Wählen Sie das Teil ab.</div> 
-            </div>
-            <div id="SecondPlaceTileTutorialDiv"><input type="checkbox" id="SecondPlaceTileTutorial" onclick="checked = !checked">Legen Sie ein weiteres Teil auf dem Spielfeld ab.</div> 
-          </div>
-          <div class="tutorialCard tutorialGeneral" id="backToBarTutorial">
-            <h3>Teile zurück in Teilliste bringen</h3>
-            <div class="tutorialCard tutorialGeneral" id="backToBarPlusBTutoria">
-              <h4>mit "+"-Button</h4>
-              <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Klicken Sie auf einen der "+"-Bottons</div> 
-              <div id="backToTileBarPlusBTutorialDiv"><input type="checkbox" id="backToTileBarPlusBTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil, um es an der ausgewählten Stelle zurück in die Teilliste zu bringen. </div> 
-            </div>
-            <div class="tutorialCard tutorialGeneral" id="backToBarBTutorial">
-              <h4>mit "zurück in Leiste"-Button</h4>
-              <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählten Teil wird das neue Teil eingereiht werden. </div> 
-              <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton </div> 
-              <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
-            </div>
-          </div>
-      </div> -->
     </div>
     <div class="tutorialCard tutorialGeneral">
       <h3>Einstellungen</h3>
       Es gibt viele weitere Einstellungen, auf die in diesem Tutorial nicht eingegangen wurde, da diese selbsterklärend sein sollten. Gucken Sie doch einfach mal durch!
     </div>
   <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
+  <div id="finishedTasks" class="tutorialCard tutorialGeneral">
+    <h2>erfolgreich abgeschlossene Aufgaben:</h2>
+  </div>
 </div>
+<div id="finishedTasksCheckboxDiv" onclick="scrollTutorial(finishedtasksCheckbox.checked);" width="150" height="150"> 
+  <input onclick="checked = !checked" checked="true" id="finishedtasksCheckbox" type="checkbox" >
+</div>
+</div>
+<style>
+  #finishedTasksCheckbox {
+    width: 57px;
+    height: 32px;
+    bottom: 12px;
+    right: -1;
+    position: absolute;
+  }
+  #finishedTasksCheckboxDiv {
+    border-radius: 100%;
+    background-color: green;
+    position: fixed;
+    right: 27;
+    bottom: 11;
+    width: 60;
+    height: 60;
+  }
+  #finishedTasksCheckboxDiv:hover {
+    background-color: #0e550e;
+  }
+</style>
 <script>
     window.onbeforeunload = function(){
     console.log("Leave Website");
@@ -843,6 +849,17 @@ display: block;
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
   // section 1: mainly change element style and visibility
+  function scrollTutorial (checked) {
+    if (checked) {
+      finishedTasks.scrollIntoView();
+      finishedTasksCheckboxDiv.style.backgroundColor = "red";
+    }
+    else {
+      scrollToTutorial.scrollIntoView();
+      finishedTasksCheckboxDiv.style.backgroundColor = "green";
+    }
+    finishedtasksCheckbox.checked = !checked;
+  }
   function checkOut(closeAnyway) {
     var stillIn = false;
       for (var elm of document.getElementsByClassName('dropdown-content')[0].children) {
@@ -3388,7 +3405,7 @@ setTimeout(function () {
 }
 // end section 7
 function getSectionElm(elm) {
-  while (elm.className != "tutorialCard tutorialGeneral section") {
+  while (!elm.className.includes("section")) {
     elm = elm.parentElement;
   }
   return elm;
@@ -3413,10 +3430,14 @@ function startTutorial(mode) {
       }
       tileSelectionCanvas.style.display = "none";
       selectBackToBarB.style.display = "none";
+      if (gerät == "Handy") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
     }
+    document.getElementById('tutorial').style.maxHeight = window.innerHeight;
+    // max-height: 669;
   }, 500);
 }
 function goTutorialSteps(steps) {
+  // TODO: hide not needed space
   if (tutorial.state != "") document.getElementById(tutorial.state + 'Div').className = "";
   try {
     if (steps > 0)  {
@@ -3424,7 +3445,9 @@ function goTutorialSteps(steps) {
        document.getElementById(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + i].id).checked = true;
      }
      if (!angular.equals(getSectionElm(document.getElementById(tutorial.state + 'Div')), getSectionElm(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + steps]))) {
-      getSectionElm(document.getElementById(tutorial.state + 'Div')).style.display = "none";
+      tutorial.index -= getSectionElm(document.getElementById(tutorial.state + 'Div')).querySelectorAll('input[type="checkbox"]').length;
+      finishedTasks.appendChild(getSectionElm(document.getElementById(tutorial.state + 'Div'))).querySelectorAll('input[type="checkbox"]');
+      // getSectionElm(document.getElementById(tutorial.state + 'Div')).style.display = "none";
      }
   }
   if (steps < 0) {
