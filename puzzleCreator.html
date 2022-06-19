@@ -74,20 +74,20 @@
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <a style="display: none;" id="traditionalModeMobileControls">
-      <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false;" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
-      <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false;" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
+      <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false; if ((tutorial.state == 'activateRotateLeftTutorial' && checked)) goTutorialSteps(1); if (tutorial.state == 'rotateLeftMobileTutorial' && !checked) goTutorialSteps(-1);" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
+      <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false; if ((tutorial.state == 'activateRotateRightTutorial' && checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'rotateRightMobileTutorial' && !checked) goTutorialSteps(-1);" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
       <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
       <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true; if (['pressShiftMobileUnclippTutorial', 'pressShiftMobileMultipleUnclippTutorial'].includes(tutorial.state)) {goTutorialSteps(1); selectMultipleTitle.style.display = 'none';} if (['selectTileMobileShiftUnclippTutorial', 'selectTileMobileShiftMultipleUnclippTutorial'].includes(tutorial.state) && !checked) goTutorialSteps(-1);"><a1 onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a1>
     </a>
   </p>
-    <input class="mobileControlsElm" type="checkbox" id="scrollable" onclick=" if ((tutorial.state == 'selectScrollScrollingTutorial' && checked) || (tutorial.state == 'unselectScrollScrollingTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'scrollMobileScrollingTutorial' && !checked) goTutorialSteps(-1);" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
+    <input class="mobileControlsElm" type="checkbox" id="scrollable" onclick=" if ((tutorial.state == 'selectScrollScrollingTutorial' && checked) || (tutorial.state == 'unselectScrollScrollingTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'scrollMobileScrollingTutorial' && !checked) goTutorialSteps(-1); if (tutorial.state == 'zoomInTutorial' && !checked) goTutorialSteps(-2); if (tutorial.state == 'zoomOutTutorial' && !checked) goTutorialSteps(-3);" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
 </p2>
 <div id="tileElements">
   <div id="rotateLeftTitle" style="left: -143px; top: 30px; display: none;" class="speech top">
-    Teil pro klick um 90° nach links verschieben 
+    Teil pro klick um 90° nach links drehen 
   </div>
   <div id="rotateRightTitle" style="left: 1px; top: 30px; display: none;" class="speech top">
-    Teil pro klick um 90° nach rechts verschieben 
+    Teil pro klick um 90° nach rechts drehen 
   </div>
   <div id="selectMultipleTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
     Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählten Teile
@@ -547,6 +547,7 @@ display: block;
   <div id="tutorial" class="tutorialGeneral">
     <a id="scrollToTutorial"></a>
     <div id="traditionalTutorial">
+      <!-- PC -->
     <div style="display: none;" id="traditionalTutorialPC">
     <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
       <h2>Teile bewegen und drehen</h2>
@@ -682,7 +683,7 @@ display: block;
         </div>
       </div>
     </div>
-
+    <!-- Handy -->
     <div id="traditionalTutorialHandy" style="display: none;">
       <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
         <h2>Teile bewegen</h2>
@@ -748,10 +749,10 @@ display: block;
       <div class="tutorialCard tutorialGeneral section" id="generalSkills">
         <h2>allgemeine Fertigkeiten</h2>
         <div id="scrollTutorial" class="tutorialCard tutorialGeneral section">
-          <b style="font-size: 21px;">scroling</b>
+          <b style="font-size: 21px;">scrollen und zoomen</b>
           <br>
           <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
-            <h3>manuell scrollen</h3>
+            <h3>manuell scrollen und zoomen</h3>
             <div class="tutorialCard tutorialGeneral">
               <b style="font-size: 15px;">auf leerem Hintergrund</b>
               <br>
@@ -759,13 +760,22 @@ display: block;
             </div>
             <div id="selectScrollScrollingTutorialDiv"><input type="checkbox" id="selectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" an</div> 
             <div id="scrollMobileScrollingTutorialDiv"><input type="checkbox" id="scrollMobileScrollingTutorial" onclick="checked = !checked">Scrollen Sie</div> 
+            <div id="zoomInTutorialDiv"><input type="checkbox" id="zoomInTutorial" onclick="checked = !checked">zoomen Sie rein (ohne Haken bei "scroll nicht möglich")</div> 
+            <div id="zoomOutTutorialDiv"><input type="checkbox" id="zoomOutTutorial" onclick="checked = !checked">zoomen Sie so weit raus wie möglich (ohne Haken bei "scroll nicht möglich")</div> 
             <div id="unselectScrollScrollingTutorialDiv"><input type="checkbox" id="unselectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" ab</div> 
           </div>
           <div id="autoScrollMobileTutorial"></div>
+          <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
+            <h3>rotieren</h3>
+            <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Rotieren nach links aktivieren.</div>
+            <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
+            <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts aktivieren.</div>
+            <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
+            <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts deaktivieren.</div>
+          </div>
         </div>
       </div>
       <!-- TODO: Zoomen -->
-      <!-- TODO: rotieren -->
       <div id="tileSelectionBarMobileTutorial"></div>
     </div>
     <div class="tutorialCard tutorialGeneral">
@@ -1337,19 +1347,19 @@ var pScrollY = scrollY;
   }
   function fAutoScroll(direction, mirrored) {
     pcScrolls = true;
-    if (tutorial.state == "automaticScrollingTutorial") goTutorialSteps(1);
-    var scrollYBefore = scrollY;
+    if (tutorial.state == "automaticScrollingTutorial" && state.scrollY != scrollY) goTutorialSteps(1);
+    state.scrollY = scrollY;
     if (!positions.wrong[selected.tiles[0]] || positions.wrong[selected.tiles[0]].edit.y > 0) window.scrollBy(direction.x, direction.y);
     mausx += direction.x;
     mausy += direction.y;
     if (gerät == "Handy") {
-      if (direction.x && (positions.wrong[selected.tiles[0]] && ((positions.wrong[selected.tiles[0]].edit.x < textur.width && !mirrored) || (mausx > lengthPerTeil.edit.x/2 && mirrored))/*state.rightScroll < textur.width - visualViewport.width*/ && direction.x > 0) || (direction.x < 0 && ((positions.wrong[selected.tiles[0]].edit.x > 0 && !mirrored) || (mausx < textur.width - lengthPerTeil.edit.x/2 + texturLeft && mirrored))/*state.rightScroll > 0*/)) {
+      if (direction.x && (positions.wrong[selected.tiles[0]] && ((positions.wrong[selected.tiles[0]].edit.x < textur.width && !mirrored) || (mausx > lengthPerTeil.edit.x/2 && mirrored))/*state.rightScroll < textur.width - visualViewport.width*/ && direction.x > 0) || (direction.x < 0 && ((selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x > 0 && !mirrored) || (mausx < textur.width - lengthPerTeil.edit.x/2 + texturLeft && mirrored))/*state.rightScroll > 0*/)) {
         state.rightScroll += direction.x;
         if (mirrored) canvas.translate(direction.x, 0);
         else canvas.translate(-direction.x, 0);
         layout(true, true);
       }
-      if (direction.y && scrollY == scrollYBefore && (positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0)) {
+      if (direction.y && scrollY == state.scrollY && (positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0)) {
         state.upScroll += direction.y;
         canvas.translate(0, -direction.y);
         layout(true, true);
@@ -2465,7 +2475,10 @@ var puzzles = {};
     state.scrollY = scrollY;
   });
   window.visualViewport.addEventListener("resize", resized);
+  var scale = 1;
   function resized (event) {
+    if ((scale < visualViewport.scale && tutorial.state == "zoomInTutorial") || (scale > visualViewport.scale && tutorial.state == "zoomOutTutorial")) goTutorialSteps(1);
+    scale = visualViewport.scale;
     if (state.rightScroll < 0 && (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) > visualViewport.pageLeft) {
       var distance = (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) - visualViewport.pageLeft;
       state.rightScroll += distance;
@@ -2689,8 +2702,14 @@ var puzzles = {};
                 goTutorialSteps(1);
               }
               if (!elmCalled && !touchStart && rotateTiles.checked) {
-                if (rotatesRight.checked) rotateSelected(90);
-                if (rotatesLeft.checked) rotateSelected(-90);
+                if (rotatesRight.checked) {
+                  rotateSelected(90);
+                  if (tutorial.state == "rotateRightMobileTutorial") goTutorialSteps(1);
+                }
+                if (rotatesLeft.checked) {
+                  rotateSelected(-90);
+                  if (tutorial.state == "rotateLeftMobileTutorial") goTutorialSteps(1);
+                }
               }
             }
             if (state.backToBar !== false) {
@@ -3463,7 +3482,11 @@ function goTutorialSteps(steps) {
       selectMultipleTitle.innerHTML = "Shift Taste";
       selectMultipleTitle.style.display = "inline";
     }
-    if (steps < 0 && ["pressShiftMobileUnclippTutorial"].includes(tutorial.state)) {
+    if (tutorial.state == "activateRotateLeftTutorial") rotateLeftTitle.style.display = "inline";
+    else rotateLeftTitle.style.display = "none";
+    if (tutorial.state == "activateRotateRightTutorial") rotateRightTitle.style.display = "inline";
+    else rotateRightTitle.style.display = "none";
+    if (steps < 0 && ["pressShiftMobileUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state)) {
       selected.tiles = [];
       layout(true);
     }
@@ -3483,6 +3506,7 @@ function goTutorialSteps(steps) {
   }
   catch (err) {
     console.log('tutorial finished!');
+    console.error(err)
     tutorial.state = "finished";
   }
 }
