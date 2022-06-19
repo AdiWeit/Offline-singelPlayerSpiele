@@ -808,6 +808,24 @@ display: block;
       <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
     </div>
 </div>
+<div id="echangeTutorial" class="tutorialGeneral">
+  <div class="tutorialCard tutorialGeneral section">
+    <h3>Teile austauschen</h3>
+    <div class="tutorialCard tutorialGeneral">
+      <h2>Standard Steuerung</h2>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das selbe Teil an, um es wieder ab zu wählen.</div>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie ein anderes Teil an, um es anzuwählen.</div>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
+    </div>
+    <div class="tutorialCard tutorialGeneral">
+      <h2>Alternative Steuerung</h2>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Bewegen Sie die Maus zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
+      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Lassen Sie die Maustausche los.</div>
+    </div>
+  </div>
+</div>
 </div>
 <script>
     window.onbeforeunload = function(){
@@ -1588,26 +1606,32 @@ function canvasClicked(calledBy) {
   selected.tile = checkSelected();
   if (!state.removeTile && !scrollable.checked && !finished) { 
     if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
-    if (selected.tile && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile && selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
+    if (selected.tile && selected.tiles.length && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile) {
+        // var i = selected.tile.y*anzahlX.value + selected.tile.x;
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
-          for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.coord.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.coord.y) {
+          if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && !selected.boolean.swipe) {
+            selected.tiles = selected.tiles.filter(x => x != i);
+          }
+          else if (selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
+          // for (var i1 = 0; i1 < positions.wrong.length; i1++) {
+            // if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.coord.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.coord.y) {
               console.log("vertausche " + selected.tile.x + "-" + selected.tile.y + " mit " + selected.coord.x + "-" + selected.coord.y);
               stats.turns++;
-              vertauscheZwei(i, i1);
+              vertauscheZwei(i, selected.tiles[0]);
+              selected.tiles = [];
               i = positions.wrong.length;
-              i1 = positions.wrong.length;
+              // i1 = positions.wrong.length;
               if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
               state.exchangedTiles = true;
               setTimeout(() => {
                 state.exchangedTiles = false;
               }, 500);
-            }
+            // }
+            selected.boolean = {click: false, swipe: false};
           }
-        }
       }
-      selected.boolean = {click: false, swipe: false};
+    }
     }
     else if (modeSelection.value == "schieben" && selected.tile/* && selected.boolean*/ && missing.length && !state.removeTile) {
       for (var i1 = 0; i1 < missing.length; i1++) {
@@ -1629,6 +1653,7 @@ function canvasClicked(calledBy) {
 }
     else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/) && !state.exchangedTiles) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
+      selected.tiles = [getTileIByCoord(selected.tile)];
       selected.boolean.click = true;
     }
   }
@@ -1641,6 +1666,11 @@ function canvasClicked(calledBy) {
       if (aufgebenId.style.display == "inline") layout(false, true);
     }
     selected.tile = checkSelected();
+  }
+  function getTileIByCoord(coord) {
+    for (let i = 0; i < positions.wrong.length; i++) {
+      if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == coord.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == coord.y) return i;
+    }
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
   function getShortestPCMovement(restorePuzzle) {
@@ -2190,7 +2220,7 @@ var puzzles = {};
   function showSelectedTile(tile, color) {
     canvas.fillStyle = color;
     canvas.save();
-    if (state.removeTile/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
+    if (state.removeTile || (!state.removeTile && modeSelection.value == "exchange")/* && modeSelection.value != "schieben"*/) canvas.translate(positions.wrong[tile].edit.x + lengthPerTeil.edit.x/2, positions.wrong[tile].edit.y + lengthPerTeil.edit.y/2);
     else canvas.translate(positions.wrong[tile].edit.x, positions.wrong[tile].edit.y);
     canvas.rotate(positions.wrong[tile].original.degree*Math.PI/180);
     canvas.fillRect(-((lengthPerTeil.edit.x)/2), -((lengthPerTeil.edit.y)/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
@@ -2633,11 +2663,15 @@ var puzzles = {};
   var tutorial = {state: "", index: 0};
   function mouseDown(elmCalled, touchStart) {
     if (gerät == "PC" || !elmCalled) {
-    if (swipeSteuerung.checked && modeSelection.value != "schieben" && checkSelected() && !selected.boolean.click && !scrollable.checked) {
-      selected.coord = {x: checkSelected().x, y: checkSelected().y};
+      selected.tile = checkSelected();
+    if (swipeSteuerung.checked && modeSelection.value != "schieben" && selected.tile && !selected.boolean.click && !scrollable.checked) {
+      selected.coord = {x: selected.tile.x, y: selected.tile.y};
+      if (modeSelection.value == "exchange") {
+        selected.tiles = [getTileIByCoord(selected.tile)];
+        layout();
+      }
       selected.boolean.swipe = true;
     }
-    selected.tile = checkSelected();
     delete state.rorated;
     tileSelectionBar.swipePosition = originalMausX;
     if (modeSelection.value == "traditional") {
