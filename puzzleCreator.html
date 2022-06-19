@@ -74,8 +74,8 @@
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <a style="display: none;" id="traditionalModeMobileControls">
-      <input class="mobileControlsElm" type="checkbox" oninput="rotatesRight.checked = false; if ((tutorial.state == 'activateRotateLeftTutorial' && checked)) goTutorialSteps(1); if (tutorial.state == 'rotateLeftMobileTutorial' && !checked) goTutorialSteps(-1);" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
-      <input class="mobileControlsElm" type="checkbox" oninput="rotatesLeft.checked = false; if ((tutorial.state == 'activateRotateRightTutorial' && checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'rotateRightMobileTutorial' && !checked) goTutorialSteps(-1);" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
+      <input class="mobileControlsElm" type="radio" onclick="rotateLeftModeChanged();" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
+      <input class="mobileControlsElm" type="radio" onclick="rotateRightModeChanged();" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
       <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
       <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true; if (['pressShiftMobileUnclippTutorial', 'pressShiftMobileMultipleUnclippTutorial'].includes(tutorial.state)) {goTutorialSteps(1); selectMultipleTitle.style.display = 'none';} if (['selectTileMobileShiftUnclippTutorial', 'selectTileMobileShiftMultipleUnclippTutorial'].includes(tutorial.state) && !checked) goTutorialSteps(-1);"><a1 onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a1>
     </a>
@@ -101,6 +101,7 @@
     width: 44;
     height: 44;
     top: 7px;
+    padding: 100px;
   }
 </style>
 <div id="settings" style="display: none;">
@@ -869,6 +870,20 @@ display: block;
       finishedTasksCheckboxDiv.style.backgroundColor = "green";
     }
     finishedtasksCheckbox.checked = !checked;
+  }
+  function rotateLeftModeChanged() {
+    if (state.rotateLeft) rotatesLeft.checked = false; 
+    state.rotateLeft = JSON.parse(JSON.stringify(rotatesLeft.checked));
+    state.rotateRight = false;
+    if ((tutorial.state == 'activateRotateLeftTutorial' && rotateLeft.checked)) goTutorialSteps(1); 
+    if (tutorial.state == 'rotateLeftMobileTutorial' && !rotateLeft.checked) goTutorialSteps(-1);
+  }
+  function rotateRightModeChanged() {
+    if (state.rotateRight) rotatesRight.checked = false;
+    state.rotateRight = JSON.parse(JSON.stringify(rotatesRight.checked)); 
+    state.rotateLeft = false;
+    if ((tutorial.state == 'activateRotateRightTutorial' && rotateRight.checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !rotateRight.checked)) goTutorialSteps(1); 
+    if (tutorial.state == 'rotateRightMobileTutorial' && !rotateRight.checked) goTutorialSteps(-1);
   }
   function checkOut(closeAnyway) {
     var stillIn = false;
