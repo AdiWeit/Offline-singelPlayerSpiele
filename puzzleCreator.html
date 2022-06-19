@@ -84,10 +84,10 @@
 </p2>
 <div id="tileElements">
   <div id="rotateLeftTitle" style="left: -143px; top: 30px; display: none;" class="speech top">
-    Teil pro klick um 90° nach links drehen 
+    Teil pro Klick um 90° nach links drehen 
   </div>
   <div id="rotateRightTitle" style="left: 1px; top: 30px; display: none;" class="speech top">
-    Teil pro klick um 90° nach rechts drehen 
+    Teil pro Klick um 90° nach rechts drehen 
   </div>
   <div id="selectMultipleTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
     Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählten Teile
@@ -586,7 +586,7 @@ display: block;
     </div>
       <div class="tutorialCard tutorialGeneral section" id="clippTutorial">
       <h2>Teile verbinden und lösen</h2>
-      <div class="tutorialCard tutorialGeneral section" id="connectTiles">
+      <div class="tutorialCard tutorialGeneral" id="connectTiles">
         <h3>Teile verbinden</h3>
           <div id="clippingInfos">
             <div class="tutorialCard tutorialGeneral">
@@ -595,7 +595,7 @@ display: block;
               In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
             </div>
           <div class="tutorialCard tutorialGeneral">
-            <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden nicht angeboten</b>
+            <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden standardmäßig nicht angeboten</b>
             <br>
             Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
           </div>
@@ -641,6 +641,10 @@ display: block;
     </div>
     <div class="tutorialCard tutorialGeneral section" id="generalSkills">
       <h2>allgemeine Fertigkeiten</h2>
+      <div class="tutorialCard tutorialGeneral">
+        <h3>Zoomen</h3>
+        Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das Übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
+      </div>
       <div id="scrollTutorial" class="tutorialCard tutorialGeneral">
         <b style="font-size: 21px;">scroling</b>
         <br>
@@ -658,10 +662,6 @@ display: block;
           <div id="stopScrollingAutomaticScrollingTutorialDiv"><input type="checkbox" id="stopScrollingAutomaticScrollingTutorial" onclick="checked = !checked">Teil abwählen oder vom Rand weg bewegen, um das Scrolling zu stoppen</div> 
         </div>
       </div>
-      <div class="tutorialCard tutorialGeneral">
-        <h3>Zoomen</h3>
-        Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das Übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
-      </div>
     </div>
       <div class="tutorialCard tutorialGeneral section" id="tileSelectionBarTutorial">
         <h3>Die Teilliste</h3>
@@ -675,9 +675,9 @@ display: block;
           <br>
           Für die Teilliste gibt es zusätzliche Einstellungen, die Sie jetzt einsehen können. 
         </div>
-        <div class="tutorialCard tutorialGeneral section" id="controlTileBarScrollTutorial">
+        <div class="tutorialCard tutorialGeneral" id="controlTileBarScrollTutorial">
           <h3>Scrolling in der Teilliste</h3>
-          <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten Pfeile an den Rändern des Bildschirms</div> 
+          <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten (halbtransparenten) Pfeile an den Rändern des Bildschirms (werden sichtbarer, wenn man sie mit der Maus berührt)</div> 
           <div class="tutorialCard tutorialGeneral" id="scrollWithMouse">
             <h4>Scrollen mit der Maustaste</h4>
             <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
@@ -720,12 +720,6 @@ display: block;
     <div id="traditionalTutorialHandy" style="display: none;">
       <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
         <h2>Teile bewegen</h2>
-        <!-- TODO: nach unten -->
-        <div class="tutorialCard tutorialGeneral">
-          <b>Informationen zum Teile drehen</b>
-          <br>
-          Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
-        </div>
         <div class="tutorialCard tutorialGeneral">
           <div id="selectTileMobileTurorialDiv"><input type="checkbox" id="selectTileMobileTurorial" onclick="checked = !checked"> Legen Sie Ihren Finger auf ein Teil. </div>
           <div id="moveTileMobileTutorialDiv"><input type="checkbox" id="moveTileMobileTutorial" onclick="checked = !checked"> Bewegen Sie dann den Finger, um das Teil zu bewegen. </div>
@@ -734,7 +728,7 @@ display: block;
       </div>
         <div class="tutorialCard tutorialGeneral section" id="clippTutorial">
         <h2>Teile verbinden und lösen</h2>
-        <div class="tutorialCard tutorialGeneral section" id="connectTiles">
+        <div class="tutorialCard tutorialGeneral" id="connectTiles">
           <h3>Teile verbinden</h3>
           <div id="clippingInfosMobile"></div>
           <div class="tutorialCard tutorialGeneral">
@@ -746,6 +740,11 @@ display: block;
         </div>
         <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
           <h3>Teile lösen</h3>
+          <div class="tutorialCard tutorialGeneral">
+            <b style="font-size: 15px;">Allgemeiner Hinweis</b>
+            <br>
+            Wenn Sie Probleme mit dem Anklicken der Elemente oben in der leiste haben (scrollen, rotieren, Shift Taste), versuchen Sie, ein wenig weiter unten zu klicken, selbst wenn Sie außerhalb des angezeigten Elements klicken, kann das genau die richtige Stelle für das Klicken sein. 
+          </div>
           <div class="tutorialCard tutorialGeneral">
             <div id="pressShiftMobileUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
             <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf ein Teil. </div>
@@ -762,7 +761,6 @@ display: block;
           </div>
           <div class="tutorialCard tutorialGeneral">
             <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Legen Sie zwei Finger auf das Teil, das Sie lösen wollen. </div>
-            <div id="moveTwoFingersUnclippTutorialDiv"><input type="checkbox" id="moveTwoFingersUnclippTutorial" onclick="checked = !checked"> Bewegen Sie die Finger in eine beliebige Richtung </div>
             <div id="releaseTwoFingersUnclippTutorialDiv"><input type="checkbox" id="releaseTwoFingersUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Finger wieder vom Bildschirm los. </div>
             <div id="selectTileMobileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileTwoFingersUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf das abgelöste Teil. </div>
             <div id="moveTileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="moveTileTwoFingersUnclippTutorial" onclick="checked = !checked"> Bewegen Sie das abgelöste Teil mit dem Finger. </div>
@@ -772,7 +770,7 @@ display: block;
       </div>
       <div class="tutorialCard tutorialGeneral section" id="generalSkills">
         <h2>allgemeine Fertigkeiten</h2>
-        <div id="scrollTutorial" class="tutorialCard tutorialGeneral section">
+        <div id="scrollTutorial" class="tutorialCard tutorialGeneral">
           <b style="font-size: 21px;">scrollen und zoomen</b>
           <br>
           <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
@@ -789,54 +787,28 @@ display: block;
             <div id="unselectScrollScrollingTutorialDiv"><input type="checkbox" id="unselectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" ab</div> 
           </div>
           <div id="autoScrollMobileTutorial"></div>
-          <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
-            <h3>rotieren</h3>
-            <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Rotieren nach links aktivieren.</div>
-            <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
-            <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts aktivieren.</div>
-            <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
-            <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts deaktivieren.</div>
+        </div>
+        <div class="tutorialCard tutorialGeneral section">
+          <h3>rotieren</h3>
+          <div class="tutorialCard tutorialGeneral">
+            <b>Informationen zum Teile drehen</b>
+            <br>
+            Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
           </div>
+          <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Rotieren nach links aktivieren.</div>
+          <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
+          <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts aktivieren.</div>
+          <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
+          <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts deaktivieren.</div>
         </div>
       </div>
       <div id="tileSelectionBarMobileTutorial"></div>
     </div>
     <div id="lastTask" class="section">
-      <div class="tutorialCard tutorialGeneral">
-        <h3>Einstellungen</h3>
-        Es gibt viele weitere Einstellungen, auf die in diesem Tutorial nicht eingegangen wurde, da diese selbsterklärend sein sollten. Gucken Sie doch einfach mal durch!
-      </div>
       <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
     </div>
-  <div id="finishedTasks" class="tutorialCard tutorialGeneral">
-    <h2>erfolgreich abgeschlossene Aufgaben:</h2>
-  </div>
-</div>
-<div id="finishedTasksCheckboxDiv" onclick="scrollTutorial(finishedtasksCheckbox.checked);" width="150" height="150"> 
-  <input onclick="checked = !checked" checked="true" id="finishedtasksCheckbox" type="checkbox" >
 </div>
 </div>
-<style>
-  #finishedTasksCheckbox {
-    width: 57px;
-    height: 32px;
-    bottom: 12px;
-    right: -1;
-    position: absolute;
-  }
-  #finishedTasksCheckboxDiv {
-    border-radius: 100%;
-    background-color: green;
-    position: fixed;
-    right: 27;
-    bottom: 11;
-    width: 60;
-    height: 60;
-  }
-  #finishedTasksCheckboxDiv:hover {
-    background-color: #0e550e;
-  }
-</style>
 <script>
     window.onbeforeunload = function(){
     console.log("Leave Website");
@@ -858,7 +830,7 @@ display: block;
     autoScrollMobileTutorial.appendChild(autoScrollTutorial);
     tileSelectionBarMobileTutorial.appendChild(tileSelectionBarTutorial);
     clippingInfosMobile.appendChild(clippingInfos);
-    MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger auf Bildschirm legen";
+    MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger auf Teilliste legen";
     moveMouseScrollTileSelectionBarTutorialDiv.innerHTML = moveMouseScrollTileSelectionBarTutorialDiv.innerHTML.split('>')[0] + ">Finger bewegen, um die Liste in die entsprechende Richtung zu bewegen ";
     stopScrollingTileBarTutorialDiv.innerHTML = stopScrollingTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger vom Bildschirm entfernen";
     ScrollkeyTileBarTutorialDiv.remove();
@@ -886,30 +858,19 @@ display: block;
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
   // section 1: mainly change element style and visibility
-  function scrollTutorial (checked) {
-    if (checked) {
-      finishedTasks.scrollIntoView();
-      finishedTasksCheckboxDiv.style.backgroundColor = "red";
-    }
-    else {
-      scrollToTutorial.scrollIntoView();
-      finishedTasksCheckboxDiv.style.backgroundColor = "green";
-    }
-    finishedtasksCheckbox.checked = !checked;
-  }
   function rotateLeftModeChanged() {
     if (state.rotateLeft) rotatesLeft.checked = false; 
     state.rotateLeft = JSON.parse(JSON.stringify(rotatesLeft.checked));
     state.rotateRight = false;
-    if ((tutorial.state == 'activateRotateLeftTutorial' && rotateLeft.checked)) goTutorialSteps(1); 
-    if (tutorial.state == 'rotateLeftMobileTutorial' && !rotateLeft.checked) goTutorialSteps(-1);
+    if ((tutorial.state == 'activateRotateLeftTutorial' && rotatesLeft.checked)) goTutorialSteps(1); 
+    if (tutorial.state == 'rotateLeftMobileTutorial' && !rotatesLeft.checked) goTutorialSteps(-1);
   }
   function rotateRightModeChanged() {
     if (state.rotateRight) rotatesRight.checked = false;
     state.rotateRight = JSON.parse(JSON.stringify(rotatesRight.checked)); 
     state.rotateLeft = false;
-    if ((tutorial.state == 'activateRotateRightTutorial' && rotateRight.checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !rotateRight.checked)) goTutorialSteps(1); 
-    if (tutorial.state == 'rotateRightMobileTutorial' && !rotateRight.checked) goTutorialSteps(-1);
+    if ((tutorial.state == 'activateRotateRightTutorial' && rotatesRight.checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !rotatesRight.checked)) goTutorialSteps(1); 
+    if (tutorial.state == 'rotateRightMobileTutorial' && !rotatesRight.checked) goTutorialSteps(-1);
   }
   function hexTorgb(hex) {
     return ['0x' + hex[1] + hex[2] | 0, '0x' + hex[3] + hex[4] | 0, '0x' + hex[5] + hex[6] | 0];
@@ -2586,6 +2547,8 @@ var puzzles = {};
         adaptTitlesPosition();
       }
     }, 40);
+    document.getElementById('tutorial').style.maxHeight = window.innerHeight - mobileControls.getBoundingClientRect().bottom - 10;
+
   }
   // #importantUserInputs
   function readMouseMove(e) {
@@ -2790,7 +2753,7 @@ var puzzles = {};
 }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
-    if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial") || (tutorial.state == "moveTwoFingersUnclippTutorial" && state.shiftBySwipe)) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
+    if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
       goTutorialSteps(1);
     }
     if (state.mouse == "down" && tileSelectionBar.collidesMouse() && tutorial.state == "MouseDownScrollTileBarTutorial" && calledBy != "mousedown") goTutorialSteps(1);
@@ -3175,7 +3138,6 @@ layout(false, true);
     }
   }
   function unclipp(tile) {
-    if ((tutorial.state == "moveTwoFingersUnclippTutorial" && state.shiftBySwipe)) goTutorialSteps(1);
     var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
     var objTile = positions.wrong[tile];
     for (const direc of ['left', 'top', 'right', 'bottom']) {
@@ -3487,9 +3449,9 @@ function startTutorial(mode) {
       }
       tileSelectionCanvas.style.display = "none";
       selectBackToBarB.style.display = "none";
-      if (gerät == "Handy") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
     }
-    document.getElementById('tutorial').style.maxHeight = window.innerHeight;
+    if (gerät == "Handy") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
+    document.getElementById('tutorial').style.maxHeight = window.innerHeight - mobileControls.getBoundingClientRect().bottom - 10;
     automaticTileSelectionReset.disabled = true;
     doStorePuzzle.disabled = true;
     doStorePuzzle.disabled = true;
@@ -3498,6 +3460,19 @@ function startTutorial(mode) {
     listTilesS.style.display = "none";
   }, 500);
 }
+// function scrollElmIntoView(elm, originalElm, elmBefore) {
+//   elm.scrollIntoView();
+//   setTimeout(() => {
+//     if (!collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop, width: visualViewport.width, height: visualViewport.height}, originalElm.parentElement.getBoundingClientRect()).boolean) {
+//       elmBefore.scrollIntoView();
+//     }
+//       setTimeout(() => {
+//         if (collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 10, width: visualViewport.width, height: visualViewport.height - 20}, elm.parentElement.getBoundingClientRect()).boolean) {
+//           scrollElmIntoView(elm.parentElement, originalElm, elm);
+//         }
+//       }, 10);
+//     }, 10);
+// }
 function goTutorialSteps(steps) {
   // TODO: hide not needed space
   if (tutorial.state != "") document.getElementById(tutorial.state + 'Div').className = "";
@@ -3507,10 +3482,16 @@ function goTutorialSteps(steps) {
        document.getElementById(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + i].id).checked = true;
      }
      if (!angular.equals(getSectionElm(document.getElementById(tutorial.state + 'Div')), getSectionElm(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + steps]))) {
-      tutorial.index -= getSectionElm(document.getElementById(tutorial.state + 'Div')).querySelectorAll('input[type="checkbox"]').length;
-      finishedTasks.appendChild(getSectionElm(document.getElementById(tutorial.state + 'Div'))).querySelectorAll('input[type="checkbox"]');
+      // tutorial.index -= getSectionElm(document.getElementById(tutorial.state + 'Div')).querySelectorAll('input[type="checkbox"]').length;
       // getSectionElm(document.getElementById(tutorial.state + 'Div')).style.display = "none";
-     }
+      state.scrollToSection = true;
+      setTimeout(() => {
+        getSectionElm(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + steps]).scrollIntoView();
+        setTimeout(() => {
+          state.scrollToSection = false;
+        }, 1000);
+      }, 100);
+    }
   }
   if (steps < 0) {
       for (let i = tutorial.index - 1; i > tutorial.index + steps - 1; i--) {
@@ -3520,6 +3501,21 @@ function goTutorialSteps(steps) {
     tutorial.index += steps;
     tutorial.state = document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
     document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
+    setTimeout(() => {
+        if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
+            document.getElementById(tutorial.state + 'Div').parentElement.parentElement.scrollIntoView();
+          setTimeout(() => {
+            if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
+                document.getElementById(tutorial.state + 'Div').parentElement.scrollIntoView();
+              setTimeout(() => {
+              if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height -40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
+                  document.getElementById(tutorial.state + 'Div').scrollIntoView();
+              }
+            }, 100);
+          }
+          }, 100);
+      }
+    }, 300);
     if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
     if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
     if (tutorial.state == "pressShiftMobileUnclippTutorial") {
