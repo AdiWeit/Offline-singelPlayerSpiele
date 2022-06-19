@@ -147,7 +147,7 @@
     </a>
     <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
       <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
-      <option value="listTiles">Teile nebeneinander auflisten</option>
+      <option value="listTiles">Teile nebeneinander auflisten (Teilliste)</option>
       <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
     </select>
     <a id="shuffleHeadline" style="display: none;">
@@ -169,10 +169,22 @@
         </select>
       </a>
       <br>
+      <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
+      <a id="tileColliderSettings" style="display: none;">
+        <br>
+        Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
+        <br>
+        Hitbox Höhe: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
+        <br>
+        <canvas id="hitboxTextur"></canvas>
+      </a>
+      <br>
+      <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
+      <br>
+      <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
     <div style="display: none;" id="listTilesS">
-      <br>
-      <br>
+      <h3>Einstellungen zur Teilleiste: </h3>
       <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
       <br>
       <div id="backToBarBSize">
@@ -185,7 +197,7 @@
       <button onclick="changeTileBarHeight(lengthPerTeil.edit.y + 10);" id="resetBarSize">reset</button>
       <input type="range" oninput="changeTileBarHeight(value);" min="25" id="tileBarHeight">
       <div id="autoSelectTileBarP">
-        <input type="checkbox" checked=""true id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
+        <input type="checkbox" checked="true" id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
       </div>
     </div>
     <div id="tilesGapS" style="display: none;">
@@ -202,19 +214,7 @@
         <br>
       </a>
     </div>
-    <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
-    <a id="tileColliderSettings" style="display: none;">
-      <br>
-      Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
-      <br>
-      Hitbox Höhe: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
-      <br>
-      <canvas id="hitboxTextur"></canvas>
-    </a>
     <br>
-    <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
-    <br>
-    <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
   </div>
   <div id="exchangeSettings" style="display: none">
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
@@ -278,6 +278,8 @@
       <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
       <br>
   <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
+  <br>
+  Farbe: <input type="color" oninput="layout();" id="markRightColor" value="#00FF00">
   </a>
   <br>
   <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
@@ -286,6 +288,10 @@
     <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
     <br>
     <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
+    <br>
+    <input type="range" min="0.01" max="1" step="0.01" value="0.35" oninput="layout();" id="borderTransparency"> Transparenz des Randes
+    <br>
+    Farbe: <input type="color" id="borderColor" oninput="layout();" value="#0000FF">
   </p>
   <br>
   <!-- <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
@@ -547,6 +553,11 @@ display: block;
   </style>
   <div id="tutorial" class="tutorialGeneral">
     <a id="scrollToTutorial"></a>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Einstellungen während des Tutorials</b>
+      <br>
+      Sie können fast alle Einstellungen während des Tutorials ändern! Auf die Wichtigsten wird zwar im Tutorial aufmerksam gemacht, aber Sie können auch gerne selber reinschauen oder ausprobieren. 
+    </div>
     <div id="traditionalTutorial">
       <!-- PC -->
     <div style="display: none;" id="traditionalTutorialPC">
@@ -555,7 +566,7 @@ display: block;
       <div class="tutorialCard tutorialGeneral">
         <b>Informationen zum Teile drehen</b>
         <br>
-        Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+        Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie die Teile zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
       </div>
       <div class="tutorialCard tutorialGeneral" id="moveStandardPC">
         <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" name="moveStyle"> <b>Standard</b>
@@ -577,19 +588,25 @@ display: block;
       <h2>Teile verbinden und lösen</h2>
       <div class="tutorialCard tutorialGeneral section" id="connectTiles">
         <h3>Teile verbinden</h3>
-        <!-- <div class="tutorialCard tutorialGeneral"> -->
-          <!-- <b>Informationen zum Teile verbinden</b> -->
-          <div class="tutorialCard tutorialGeneral">
-            <b style="font-size: 15px;">Hitboxen</b>
-            <br>
-            In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
-          </div>
+          <div id="clippingInfos">
+            <div class="tutorialCard tutorialGeneral">
+              <b style="font-size: 15px;">Hitboxen</b>
+              <br>
+              In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
+            </div>
           <div class="tutorialCard tutorialGeneral">
             <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden nicht angeboten</b>
             <br>
-           Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
+            Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
           </div>
-        <!-- </div> -->
+          <div class="tutorialCard tutorialGeneral">
+            <b style="font-size: 15px;">nicht passende und richtige markieren</b>
+            <br>
+            Wenn Teile sich zu ähnlich sind, können Sie diese im Vorfeld entfernen oder nicht passende markieren lassen, wenn eine Verbindung vorgeschlagen wird. 
+            <br>
+            Standardmäßig wird nur markiert, ob ein Teil richtig ist (alle nötigen Teile drum herum)
+          </div>
+        </div>
         <div class="tutorialCard tutorialGeneral">
         <div id="selectTileConnectTileTutorialDiv"><input type="checkbox" id="selectTileConnectTileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
         <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
@@ -599,6 +616,11 @@ display: block;
       </div>
       <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
+        <div class="tutorialCard tutorialGeneral">
+          <b style="font-size: 15px;">Information Shift Taste</b>
+          <br>
+          Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
+        </div>
         <div class="tutorialCard tutorialGeneral">
           <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" id="unclippStandard" name="unclippStyle"><b> Standard (verbunden mit Standard für Bewegen der Teile) </b>
           <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
@@ -638,7 +660,7 @@ display: block;
       </div>
       <div class="tutorialCard tutorialGeneral">
         <h3>Zoomen</h3>
-        Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
+        Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das Übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
       </div>
     </div>
       <div class="tutorialCard tutorialGeneral section" id="tileSelectionBarTutorial">
@@ -647,6 +669,11 @@ display: block;
           <b>Informationen zur aufbereitung der Teile (ink. Teilliste)</b>
           <br>
           In den Einstellungen können Sie auswählen, wie die Teile aufbereitet werden. Sie können verteil werden (mit Überlappen), in die Teilliste gebracht werden, um die es im Folgenden geht, oder auf dem Spielfeld nebeneinander gelegt werden. Zudem können Sie mit leerer Liste starten, sodass Sie die Teile sortiert dort ablegen oder auf dem Spielfeld behalten können. 
+        </div>
+        <div class="tutorialCard tutorialGeneral">
+          <b>zusätzliche Einstellungen</b>
+          <br>
+          Für die Teilliste gibt es zusätzliche Einstellungen, die Sie jetzt einsehen können. 
         </div>
         <div class="tutorialCard tutorialGeneral section" id="controlTileBarScrollTutorial">
           <h3>Scrolling in der Teilliste</h3>
@@ -661,6 +688,11 @@ display: block;
         </div>
         <div class="tutorialCard tutorialGeneral section" id="leaveTileBarTutorial">
           <h3>Teile auf "Spielfeld" bringen</h3>
+          <div class="tutorialCard tutorialGeneral">
+            <b style="font-size: 15px;">automatisch nächste Teil auswählen</b>
+            <br>
+            Am PC wird standardmäßig das nächste Teil in der Teilliste ausgewählt, am Handy nicht. Solange Sie auf dem "Spielfeld" ein Teil angewählt haben, wird kein Teil aus der Teilliste genommen. Sie können auch dies in den Einstellungen ändern. 
+          </div>
           <div class="tutorialCard tutorialGeneral" id="leaveTileBarTutorial">
             <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil in der Liste, um es anzuwählen.</div> 
             <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Klicken Sie auf das "Spielfeld", um das Teil dort "abzulegen". </div> 
@@ -704,16 +736,7 @@ display: block;
         <h2>Teile verbinden und lösen</h2>
         <div class="tutorialCard tutorialGeneral section" id="connectTiles">
           <h3>Teile verbinden</h3>
-            <div class="tutorialCard tutorialGeneral">
-              <b style="font-size: 15px;">Hitboxen</b>
-              <br>
-              In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
-            </div>
-            <div class="tutorialCard tutorialGeneral">
-              <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden standardmäßig nicht angeboten</b>
-              <br>
-             Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
-            </div>
+          <div id="clippingInfosMobile"></div>
           <div class="tutorialCard tutorialGeneral">
           <div id="selectTileConnectTileMobileTutorialDiv"><input type="checkbox" id="selectTileConnectTileMobileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
           <div id="getClippingOptionConnectTileMobileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileMobileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
@@ -776,14 +799,15 @@ display: block;
           </div>
         </div>
       </div>
-      <!-- TODO: Zoomen -->
       <div id="tileSelectionBarMobileTutorial"></div>
     </div>
-    <div class="tutorialCard tutorialGeneral">
-      <h3>Einstellungen</h3>
-      Es gibt viele weitere Einstellungen, auf die in diesem Tutorial nicht eingegangen wurde, da diese selbsterklärend sein sollten. Gucken Sie doch einfach mal durch!
+    <div id="lastTask" class="section">
+      <div class="tutorialCard tutorialGeneral">
+        <h3>Einstellungen</h3>
+        Es gibt viele weitere Einstellungen, auf die in diesem Tutorial nicht eingegangen wurde, da diese selbsterklärend sein sollten. Gucken Sie doch einfach mal durch!
+      </div>
+      <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
     </div>
-  <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
   <div id="finishedTasks" class="tutorialCard tutorialGeneral">
     <h2>erfolgreich abgeschlossene Aufgaben:</h2>
   </div>
@@ -833,6 +857,7 @@ display: block;
     // tileSelectionCanvas.style.position = "fixed";
     autoScrollMobileTutorial.appendChild(autoScrollTutorial);
     tileSelectionBarMobileTutorial.appendChild(tileSelectionBarTutorial);
+    clippingInfosMobile.appendChild(clippingInfos);
     MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger auf Bildschirm legen";
     moveMouseScrollTileSelectionBarTutorialDiv.innerHTML = moveMouseScrollTileSelectionBarTutorialDiv.innerHTML.split('>')[0] + ">Finger bewegen, um die Liste in die entsprechende Richtung zu bewegen ";
     stopScrollingTileBarTutorialDiv.innerHTML = stopScrollingTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger vom Bildschirm entfernen";
@@ -844,6 +869,7 @@ display: block;
     scrollOnBlancP.style.display = "none";
     vibrateA.style.display = "none";
   }
+  document.getElementById('traditionalTutorial' + gerät).appendChild(lastTask);
   gapSizeChanged(tilesGap.value);
   expandBottom.style.height = window.innerWidth/29;
   expandTop.style.height = window.innerWidth/29;
@@ -884,6 +910,9 @@ display: block;
     state.rotateLeft = false;
     if ((tutorial.state == 'activateRotateRightTutorial' && rotateRight.checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !rotateRight.checked)) goTutorialSteps(1); 
     if (tutorial.state == 'rotateRightMobileTutorial' && !rotateRight.checked) goTutorialSteps(-1);
+  }
+  function hexTorgb(hex) {
+    return ['0x' + hex[1] + hex[2] | 0, '0x' + hex[3] + hex[4] | 0, '0x' + hex[5] + hex[6] | 0];
   }
   function checkOut(closeAnyway) {
     var stillIn = false;
@@ -937,6 +966,7 @@ display: block;
     }
     else {
       settings.style.display = 'none';
+      if (tileSelectionCanvas.style.display == "inline")  selectBackToBarB.style.display = "inline"
       originalDisplayChanged(false);
       canvas = textur.getContext('2d');
       if (wrongPosition && !state.changedPos) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
@@ -1384,10 +1414,7 @@ var pScrollY = scrollY;
   }
   function shufflePuzzle() {
     var shuffleStyleBefore = shuffleStyle.value;
-    if (emptyTileBar.checked) {
-      shuffleStyle.value = shuffleStyleBar.value;
-      autoSelectTileBar.checked = false;
-    }
+    if (emptyTileBar.checked)  shuffleStyle.value = shuffleStyleBar.value;
     if (modeSelection.value == "schieben" && !selected.tiles.length && !state.restorePuzzle) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
       for (var i = 0; i < anzahlY.value; i++) {
@@ -2300,14 +2327,16 @@ var puzzles = {};
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // pCanvas.restore();
     if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !state.removeTile && !finished)) {
-      pCanvas.fillStyle = "rgba(0, 255, 0, " + rightMarkerTransparence.value + ")";
+      var rgbColor = hexTorgb(markRightColor.value);
+      pCanvas.fillStyle = `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${rightMarkerTransparence.value})`
       if (richtigPlazierte.checked) {
         pCanvas.fillRect(-(lengthPerTeil.edit.x*rightMarkerRadius.value)/2, -(lengthPerTeil.edit.y*rightMarkerRadius.value)/2, lengthPerTeil.edit.x*rightMarkerRadius.value, lengthPerTeil.edit.y*rightMarkerRadius.value);
       }
       richtige++;
     }
     pCanvas.restore();
-    pCanvas.fillStyle = "rgba(0, 0, 255, 0.35)";
+    var rgbColor = hexTorgb(borderColor.value);
+    pCanvas.fillStyle = `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${borderTransparency.value})`;
     if (raender.checked) {
       pCanvas.save();
       if (modeSelection.value == "traditional" && !state.removeTile) pCanvas.translate(position.edit.x, position.edit.y);
@@ -2483,7 +2512,7 @@ var puzzles = {};
       if (["manuallyScrollingTutorial", "scrollMobileScrollingTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     } 
     if (scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
-    else if (aufgebenId.style.display == "inline" && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
+    else if (tileSelectionCanvas.style.display == "inline" && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
     state.scrollX = scrollX;
@@ -2675,22 +2704,16 @@ var puzzles = {};
           positions.layoutOrder.push(i.tileI);
           tileSelectionBar.tiles.splice(i.i, 1);
           // tileSelectionBar.tiles = tileSelectionBar.tiles.filter(x => x != undefined);
-          if (!autoSelectTileBar.checked) tileSelectionBar.selectedTile = undefined;
-            else {
-            if (!tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
+          if (!autoSelectTileBar.checked || !tileSelectionBar.tiles.length) tileSelectionBar.selectedTile = undefined;
             else {
               setTimeout(function () {
                 tileSelectionBar.selectedTile.byUser = false;
-                tileSelectionBar.selectedTile.tileI++;
-                if (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2) tileSelectionBar.selectedTile.i--;
-                while (tileSelectionBar.selectedTile.tileI >= 0 && tileSelectionBar.tiles.length > 0 && (!positions.wrong[tileSelectionBar.selectedTile.tileI] || positions.wrong[tileSelectionBar.selectedTile.tileI].edit.y != 5 + lengthPerTeil.edit.y/2)) {
-                  tileSelectionBar.selectedTile.tileI--;
-                }
+                if (tileSelectionBar.selectedTile.i >= tileSelectionBar.tiles.length) tileSelectionBar.selectedTile.i--;
+                tileSelectionBar.selectedTile.tileI = tileSelectionBar.tiles[tileSelectionBar.selectedTile.i];
                 layout();
               }, 10);
             }
-          }
-            positions.wrong[i.tileI].edit = {x: mausx, y: mausy, degree: 0};
+          positions.wrong[i.tileI].edit = {x: mausx, y: mausy, degree: 0};
           state.placeTile = true;
           scrollTileSelection(0);
         }
@@ -3467,7 +3490,12 @@ function startTutorial(mode) {
       if (gerät == "Handy") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
     }
     document.getElementById('tutorial').style.maxHeight = window.innerHeight;
-    // max-height: 669;
+    automaticTileSelectionReset.disabled = true;
+    doStorePuzzle.disabled = true;
+    doStorePuzzle.disabled = true;
+    puzzleName.disabled = true;
+    keepScrolling.disabled = true;
+    listTilesS.style.display = "none";
   }, 500);
 }
 function goTutorialSteps(steps) {
@@ -3493,6 +3521,7 @@ function goTutorialSteps(steps) {
     tutorial.state = document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
     document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
     if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
+    if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
     if (tutorial.state == "pressShiftMobileUnclippTutorial") {
       selectMultipleTitle.innerHTML = "Shift Taste";
       selectMultipleTitle.style.display = "inline";
@@ -3511,6 +3540,7 @@ function goTutorialSteps(steps) {
       }
       tileSelectionCanvas.style.display = "inline";
       selectBackToBarB.style.display = "inline";
+      listTilesS.style.display = "inline";
       for (var i = 0; i < 16; i++) {
         tileSelectionBar.tiles.splice(0, 0, i);
         unclipp(i);
@@ -3521,6 +3551,7 @@ function goTutorialSteps(steps) {
   }
   catch (err) {
     console.log('tutorial finished!');
+    console.log(tutorial.state);
     console.error(err)
     tutorial.state = "finished";
   }
