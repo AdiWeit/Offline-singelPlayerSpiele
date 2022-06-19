@@ -808,7 +808,7 @@ display: block;
       <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
     </div>
 </div>
-<div id="echangeTutorial" class="tutorialGeneral">
+<div id="exchangeTutorial" class="tutorialGeneral">
   <div class="tutorialCard tutorialGeneral section">
     <h3>Teile austauschen</h3>
     <div class="tutorialCard tutorialGeneral">
@@ -1607,15 +1607,16 @@ function canvasClicked(calledBy) {
   if (!state.removeTile && !scrollable.checked && !finished) { 
     if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
     if (selected.tile && selected.tiles.length && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile) {
-        // var i = selected.tile.y*anzahlX.value + selected.tile.x;
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
-          if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && !selected.boolean.swipe) {
+          if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && !selected.boolean.swipe && !state.unselected) {
             selected.tiles = selected.tiles.filter(x => x != i);
+            state.unselected = true;
+            setTimeout(() => {
+              state.unselected = false;
+            }, 100);
           }
           else if (selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
-          // for (var i1 = 0; i1 < positions.wrong.length; i1++) {
-            // if (positions.wrong[i1].edit.x/lengthPerTeil.edit.x == selected.coord.x && positions.wrong[i1].edit.y/lengthPerTeil.edit.y == selected.coord.y) {
               console.log("vertausche " + selected.tile.x + "-" + selected.tile.y + " mit " + selected.coord.x + "-" + selected.coord.y);
               stats.turns++;
               vertauscheZwei(i, selected.tiles[0]);
@@ -1627,9 +1628,8 @@ function canvasClicked(calledBy) {
               setTimeout(() => {
                 state.exchangedTiles = false;
               }, 500);
-            // }
-            selected.boolean = {click: false, swipe: false};
           }
+          selected.boolean = {click: false, swipe: false};
       }
     }
     }
@@ -1651,7 +1651,7 @@ function canvasClicked(calledBy) {
   }
   if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
-    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/) && !state.exchangedTiles) {
+    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/) && !state.exchangedTiles && !state.unselected) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
       selected.tiles = [getTileIByCoord(selected.tile)];
       selected.boolean.click = true;
