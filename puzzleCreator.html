@@ -3460,21 +3460,7 @@ function startTutorial(mode) {
     listTilesS.style.display = "none";
   }, 500);
 }
-// function scrollElmIntoView(elm, originalElm, elmBefore) {
-//   elm.scrollIntoView();
-//   setTimeout(() => {
-//     if (!collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop, width: visualViewport.width, height: visualViewport.height}, originalElm.parentElement.getBoundingClientRect()).boolean) {
-//       elmBefore.scrollIntoView();
-//     }
-//       setTimeout(() => {
-//         if (collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 10, width: visualViewport.width, height: visualViewport.height - 20}, elm.parentElement.getBoundingClientRect()).boolean) {
-//           scrollElmIntoView(elm.parentElement, originalElm, elm);
-//         }
-//       }, 10);
-//     }, 10);
-// }
 function goTutorialSteps(steps) {
-  // TODO: hide not needed space
   if (tutorial.state != "") document.getElementById(tutorial.state + 'Div').className = "";
   try {
     if (steps > 0)  {
@@ -3511,9 +3497,9 @@ function goTutorialSteps(steps) {
               if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height -40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
                   document.getElementById(tutorial.state + 'Div').scrollIntoView();
               }
-            }, 100);
+            }, 1000);
           }
-          }, 100);
+          }, 1000);
       }
     }, 300);
     if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
