@@ -2779,10 +2779,13 @@ var puzzles = {};
         });
         folgenMouseMove("mouseDown");
       }
-      else if (state.removeTile) folgenMouseMove("mouseDown");
     }
   }
-  else state.mouse = "down";
+  else {
+    state.coord = checkSelected(true);
+    state.mouse = "down";
+    if (state.removeTile) folgenMouseMove("mouseDown");
+  }
   }
 }
   // #importantUserInput
