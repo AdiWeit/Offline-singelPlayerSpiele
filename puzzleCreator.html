@@ -2948,7 +2948,7 @@ var puzzles = {};
   }
   selected.clip = [];
 }
-if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked) selected.tiles = [];
+if (selected.tiles.length && !state.shift && !state.removeTile && automaticTileSelectionReset.checked && modeSelection.value == "traditional") selected.tiles = [];
 delete state.rotated;
 layout(false, true);
   if (aufgebenId.style.display == "inline" && doStorePuzzle.checked && !finished) storePuzzle(); 
