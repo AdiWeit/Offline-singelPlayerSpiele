@@ -115,8 +115,10 @@
   <p id="traditionalDescription">Die Puzzleteile werden verteilt. Nun müssen Sie die Teile wieder zusammensetzen. 
     <br>
     Wo die Teile zusammengesetzt werden ist egal.
-    <br>
-    <button onclick="startTutorial('traditional');">tutorial</button>
+    <div id="startTutorialButton">
+      <br>
+      <button onclick="startTutorial(modeSelection.value);">tutorial</button>
+    </div>
   </p>
   <p style="display: none;" id="exchangeDescription">
     Die Positionen der Puzzleteile wird ausgetauscht. Danach haben Sie die Aufgabe, durch Klicken auf zwei Teile diese auszutauschen.
@@ -804,25 +806,41 @@ display: block;
       </div>
       <div id="tileSelectionBarMobileTutorial"></div>
     </div>
-    <div id="lastTask" class="section">
-      <div id="completePuzzleTutorialDiv"><input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.</div> 
+    <div id="completePuzzleTutorialDiv" class="section">
+      <input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.
     </div>
 </div>
 <div id="exchangeTutorial" class="tutorialGeneral">
   <div class="tutorialCard tutorialGeneral section">
-    <h3>Teile austauschen</h3>
+    <h1>Teile austauschen</h1>
     <div class="tutorialCard tutorialGeneral">
-      <h2>Standard Steuerung</h2>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das selbe Teil an, um es wieder ab zu wählen.</div>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie ein anderes Teil an, um es anzuwählen.</div>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
+      <input type="radio" id="moveStyleStandard" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
+      <b>Standard Steuerung</b>
+      <div id="selectFirstExchangeNormalTutorialDiv"><input type="checkbox" id="selectFirstExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
+      <div id="selectSecondExchangeNormalTutorialDiv"><input type="checkbox" id="selectSecondExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
     </div>
     <div class="tutorialCard tutorialGeneral">
-      <h2>Alternative Steuerung</h2>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Bewegen Sie die Maus zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
-      <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Lassen Sie die Maustausche los.</div>
+      <input type="radio" id="moveStyleStandard" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
+      <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
+      <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
+      <div id="mouseMoveExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseMoveExchangeAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
+      <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustausche bzw. den Bildschirm los.</div>
+    </div>
+    <h1>Auswahl abwählen</h1>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Standard Steuerung</b>
+      <div id="selectTileUnselectStandardTutorialDiv"><input type="checkbox" id="selectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
+      <div id="unselectTileUnselectStandardTutorialDiv"><input type="checkbox" id="unselectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie es erneut an, um es wieder abzuwählen. </div>
+    </div>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
+        <div id="mouseDownUnselectAlternativeTutorialDiv"><input type="checkbox" id="mouseDownUnselectAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
+        <div id="moveMouseOutUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseOutUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf ein anderes Teil.</div>
+        <div id="moveMouseInUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseInUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf das zuerst ausgewählte Teil.</div>
+        <div id="releaseMouseUnselectAlternativeTutorialDiv"><input type="checkbox" id="releaseMouseUnselectAlternativeTutorial" onclick="checked = !checked"> Lassen Sie auf dem Teil, auf dem Sie angefangen haben wieder los, um die Auswahl abzuwählen.</div>
+        <div class="tutorialCard tutorialGeneral">
+          Wenn Sie sich noch auf dem als erstes ausgewählen Teil befinden, können Sie auch die Maustaste bzw. den Finger sofort loslassen und erneut klicken, um das Teil abzuwählen. 
+        </div>
     </div>
   </div>
 </div>
@@ -859,7 +877,7 @@ display: block;
     scrollOnBlancP.style.display = "none";
     vibrateA.style.display = "none";
   }
-  document.getElementById('traditionalTutorial' + gerät).appendChild(lastTask);
+  exchangeTutorial.id += gerät;
   gapSizeChanged(tilesGap.value);
   expandBottom.style.height = window.innerWidth/29;
   expandTop.style.height = window.innerWidth/29;
@@ -1198,6 +1216,7 @@ display: block;
     }
   }
   function modeSelected(value) {
+    document.getElementById(value + 'Description').appendChild(startTutorialButton);
     modeSelection.value = value;
     traditionalDescription.style.display = 'none';
     exchangeDescription.style.display = 'none';
@@ -1609,8 +1628,9 @@ function canvasClicked(calledBy) {
     if (selected.tile && selected.tiles.length && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
-          if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && !selected.boolean.swipe && !state.unselected) {
+          if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && (!selected.boolean.swipe || (calledBy == "mouseup" && state.tileChanged)) && !state.unselected) {
             selected.tiles = selected.tiles.filter(x => x != i);
+            if (["unselectTileUnselectStandardTutorial"].includes(tutorial.state) || (tutorial.state == "releaseMouseUnselectAlternativeTutorial" && state.tileChanged)) goTutorialSteps(1);
             state.unselected = true;
             setTimeout(() => {
               state.unselected = false;
@@ -1618,6 +1638,7 @@ function canvasClicked(calledBy) {
           }
           else if (selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
               console.log("vertausche " + selected.tile.x + "-" + selected.tile.y + " mit " + selected.coord.x + "-" + selected.coord.y);
+              if (["selectSecondExchangeNormalTutorial"].includes(tutorial.state)) goTutorialSteps(1);
               stats.turns++;
               vertauscheZwei(i, selected.tiles[0]);
               selected.tiles = [];
@@ -1655,6 +1676,7 @@ function canvasClicked(calledBy) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
       selected.tiles = [getTileIByCoord(selected.tile)];
       selected.boolean.click = true;
+      if (["selectFirstExchangeNormalTutorial", "selectTileUnselectStandardTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     }
   }
     selected.tile = checkSelected(true);
@@ -2662,6 +2684,7 @@ var puzzles = {};
   }
   var tutorial = {state: "", index: 0};
   function mouseDown(elmCalled, touchStart) {
+    state.tileChanged = false;
     if (gerät == "PC" || !elmCalled) {
       selected.tile = checkSelected();
     if (swipeSteuerung.checked && modeSelection.value != "schieben" && selected.tile && !selected.boolean.click && !scrollable.checked) {
@@ -2683,7 +2706,9 @@ var puzzles = {};
         goTutorialSteps(1);
         if (tutorial.state != "SecondPlaceTileTutorial") automaticTileSelectionReset.checked = true;
       }
-      if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
+      if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state)) {
+        goTutorialSteps(-1);
+      }
       if (!state.removeTile) selected.tiles = [];
       else state.mouse = "up";
       state.shiftBefore = false;
@@ -2728,9 +2753,6 @@ var puzzles = {};
           if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && (!selected.tiles.includes(i) || (gerät == "Handy" && (rotatesLeft.checked || rotatesRight.checked))) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
             if (!state.placeTile) {
               if (!selected.tiles.includes(i)) selected.tiles.push(i);
-              if (selected.tiles.length > 1) {
-                console.log("debug please");
-              }
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
               if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial", "selectTileMobileTurorial", "selectTileConnectTileMobileTutorial", "selectTileMobileShiftUnclippTutorial", "selectTileMobileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tutorial.state == "selectTileMobileShiftMultipleUnclippTutorial" && selected.tiles.length >= 2)) {
@@ -2785,11 +2807,20 @@ var puzzles = {};
     state.coord = checkSelected(true);
     state.mouse = "down";
     if (state.removeTile) folgenMouseMove("mouseDown");
+    if (tutorial.state == "mouseMoveExchangeAlternativeTutorial") goTutorialSteps(-1);
+    if (["mouseDownSelectFirstExchangeAlternativeTutorial", "mouseDownUnselectAlternativeTutorial"].includes(tutorial.state)) {
+      goTutorialSteps(1);
+    }
   }
   }
 }
   // #importantUserInput
   function folgenMouseMove(calledBy) {
+    if (modeSelection.value == "exchange" && JSON.stringify(checkSelected()) != JSON.stringify(selected.coord)) {
+      state.tileChanged = true;
+      if (["mouseMoveExchangeAlternativeTutorial", "moveMouseOutUnselectAlternativeTutorial"].includes(tutorial.state)) goTutorialSteps(1);
+    }
+    if (state.tileChanged && JSON.stringify(checkSelected()) == JSON.stringify(selected.coord) && tutorial.state == "moveMouseInUnselectAlternativeTutorial") goTutorialSteps(1);
     if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
       goTutorialSteps(1);
     }
@@ -2893,11 +2924,11 @@ var puzzles = {};
     if (tutorial.state == "unselectAlternativeUnclippTutorial") {
       automaticTileSelectionReset.checked = JSON.parse(localStorage.getItem("automaticTileSelectionResetPuzzleCreator"));
     }
-    if (["unselectAlternativeUnclippTutorial", "unselectTileScrollingTutorial", "stopScrollingAutomaticScrollingTutorial", "stopScrollingTileBarTutorial", "releaseTileMobileTutorial", "releaseFingerMobileShiftTutorial", "releaseFingerMobileMultiShiftTutorial", "releaseFingerMobileTwoFingersTutorial"].includes(tutorial.state) || (automaticTileSelectionReset.checked && tutorial.state == "unselecTileAfterTileBarTilePlacementTutorial") || (tutorial.state == "releaseTwoFingersUnclippTutorial" && state.shiftBySwipe)) {
+    if (["unselectAlternativeUnclippTutorial", "unselectTileScrollingTutorial", "stopScrollingAutomaticScrollingTutorial", "stopScrollingTileBarTutorial", "releaseTileMobileTutorial", "releaseFingerMobileShiftTutorial", "releaseFingerMobileMultiShiftTutorial", "releaseFingerMobileTwoFingersTutorial", "mouseUpExchangeAlternativeTutorial"].includes(tutorial.state) || (automaticTileSelectionReset.checked && tutorial.state == "unselecTileAfterTileBarTilePlacementTutorial") || (tutorial.state == "releaseTwoFingersUnclippTutorial" && state.shiftBySwipe)) {
       goTutorialSteps(1);
     }
     if (swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) {
-      canvasClicked();
+      canvasClicked('mouseup');
     }
     if (automaticTileSelectionReset.checked || !selected.tiles.length || (state.removeTile && automaticTileSelectionReset.checked)) {
       state.mouse = "up";
@@ -3461,8 +3492,13 @@ setTimeout(function () {
 }
 // end section 7
 function getSectionElm(elm) {
-  while (!elm.className.includes("section")) {
-    elm = elm.parentElement;
+  try {
+    while (!elm.className.includes("section")) {
+      elm = elm.parentElement;
+    }
+    
+  } catch (error) {
+    console.log(err);
   }
   return elm;
 }
@@ -3470,6 +3506,7 @@ function startTutorial(mode) {
   document.getElementById('tutorial').style.display = "inline";
   // document.getElementById(mode + 'Tutorial').style.display = "inline";
   document.getElementById(mode + 'Tutorial' + gerät).style.display = "inline";
+  document.getElementById(mode + 'Tutorial' + gerät).appendChild(completePuzzleTutorialDiv);
   goTutorialSteps(0);
   if (mode == "traditional") {
     shuffleStyle.value = "listTiles";
@@ -3567,6 +3604,13 @@ function goTutorialSteps(steps) {
       }
       scrollTileSelection(1);
     }
+    if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
+    if (tutorial.state == "selectTileUnselectStandardTutorial") {
+      setTimeout(() => {
+        swipeSteuerung.checked = false;
+      }, 10);
+    }
+    if (tutorial.state == "mouseDownUnselectAlternativeTutorial") swipeSteuerung.checked = true;
   }
   catch (err) {
     console.log('tutorial finished!');
