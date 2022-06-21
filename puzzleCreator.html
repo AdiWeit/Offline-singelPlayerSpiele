@@ -824,7 +824,7 @@ display: block;
       <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
       <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
       <div id="mouseMoveExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseMoveExchangeAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
-      <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustausche bzw. den Bildschirm los.</div>
+      <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustaste bzw. den Bildschirm los.</div>
     </div>
     <h1>Auswahl abwählen</h1>
     <div class="tutorialCard tutorialGeneral">
@@ -1631,6 +1631,7 @@ function canvasClicked(calledBy) {
           if (selected.tile.x + "-" + selected.tile.y == selected.coord.x + "-" + selected.coord.y && (!selected.boolean.swipe || (calledBy == "mouseup" && state.tileChanged)) && !state.unselected) {
             selected.tiles = selected.tiles.filter(x => x != i);
             if (["unselectTileUnselectStandardTutorial"].includes(tutorial.state) || (tutorial.state == "releaseMouseUnselectAlternativeTutorial" && state.tileChanged)) goTutorialSteps(1);
+            if (tutorial.state == "selectSecondExchangeNormalTutorial") goTutorialSteps(-1);
             state.unselected = true;
             setTimeout(() => {
               state.unselected = false;
@@ -1639,6 +1640,8 @@ function canvasClicked(calledBy) {
           else if (selected.tile.x + "-" + selected.tile.y != selected.coord.x + "-" + selected.coord.y) {
               console.log("vertausche " + selected.tile.x + "-" + selected.tile.y + " mit " + selected.coord.x + "-" + selected.coord.y);
               if (["selectSecondExchangeNormalTutorial"].includes(tutorial.state)) goTutorialSteps(1);
+              if (tutorial.state == "unselectTileUnselectStandardTutorial") goTutorialSteps(-1);
+              if (tutorial.state == "releaseMouseUnselectAlternativeTutorial") goTutorialSteps(-3);
               stats.turns++;
               vertauscheZwei(i, selected.tiles[0]);
               selected.tiles = [];
@@ -2918,12 +2921,17 @@ var puzzles = {};
       goTutorialSteps(1);
       if (moveStyleSettingChosen.checked) goTutorialSteps(1);
     }
-    if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state) && automaticTileSelectionReset.checked) {
+    if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial", "moveMouseOutUnselectAlternativeTutorial"].includes(tutorial.state) && (automaticTileSelectionReset.checked || modeSelection.value != "traditional")) {
       goTutorialSteps(-1);
     }
+    setTimeout(() => {
+      if (tutorial.state == "selectSecondExchangeNormalTutorial" && !selected.boolean.click) goTutorialSteps(-1);
+    }, 500);
     if (tutorial.state == "unselectAlternativeUnclippTutorial") {
       automaticTileSelectionReset.checked = JSON.parse(localStorage.getItem("automaticTileSelectionResetPuzzleCreator"));
     }
+    if (["mouseMoveExchangeAlternativeTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
+    if (["moveMouseInUnselectAlternativeTutorial"].includes(tutorial.state)) goTutorialSteps(-2);
     if (["unselectAlternativeUnclippTutorial", "unselectTileScrollingTutorial", "stopScrollingAutomaticScrollingTutorial", "stopScrollingTileBarTutorial", "releaseTileMobileTutorial", "releaseFingerMobileShiftTutorial", "releaseFingerMobileMultiShiftTutorial", "releaseFingerMobileTwoFingersTutorial", "mouseUpExchangeAlternativeTutorial"].includes(tutorial.state) || (automaticTileSelectionReset.checked && tutorial.state == "unselecTileAfterTileBarTilePlacementTutorial") || (tutorial.state == "releaseTwoFingersUnclippTutorial" && state.shiftBySwipe)) {
       goTutorialSteps(1);
     }
