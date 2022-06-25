@@ -56,7 +56,7 @@
 <br>
 <input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
-<button type="button" onclick="resetImageSize();" name="button">⟲zurücksetzen</button>
+<button type="button" onclick="resetImageSize();" name="button">⟲Originalgröße des Bildes</button>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
@@ -83,17 +83,20 @@
     <input class="mobileControlsElm" type="checkbox" id="scrollable" onclick=" if ((tutorial.state == 'selectScrollScrollingTutorial' && checked) || (tutorial.state == 'unselectScrollScrollingTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'scrollMobileScrollingTutorial' && !checked) goTutorialSteps(-1); if (tutorial.state == 'zoomInTutorial' && !checked) goTutorialSteps(-2); if (tutorial.state == 'zoomOutTutorial' && !checked) goTutorialSteps(-3);" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
 </p2>
 <div id="tileElements">
-  <div id="rotateLeftTitle" style="left: -143px; top: 30px; display: none;" class="speech top">
+  <div id="rotateLeftTitle" style="display: none;" class="speech top">
     Teil pro Klick um 90° nach links drehen 
   </div>
-  <div id="rotateRightTitle" style="left: 1px; top: 30px; display: none;" class="speech top">
+  <div id="rotateRightTitle" style="display: none;" class="speech top">
     Teil pro Klick um 90° nach rechts drehen 
   </div>
-  <div id="selectMultipleTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
+  <div id="selectMultipleTitle" style="display: none;" class="speech top">
     Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählten Teile
   </div>
-  <div id="swipeTitle" style="left: 102px; top: 30px; display: none;" class="speech top">
+  <div id="swipeTitle" style="display: none;" class="speech top">
     Scrollen und Zoomen ermöglichen
+  </div>
+  <div id="scrollTileBarTitle" style="display: none;" class="speech bottom">
+    Pfeil
   </div>
 </div>
 <style>
@@ -121,7 +124,7 @@
     </div>
   </p>
   <p style="display: none;" id="exchangeDescription">
-    Die Positionen der Puzzleteile wird ausgetauscht. Danach haben Sie die Aufgabe, durch Klicken auf zwei Teile diese auszutauschen.
+    Die Positionen der Puzzleteile wird ausgetauscht. Danach haben Sie die Aufgabe, durch Klicken auf zwei Teile diese auszutauschen, bis das Originalbild wiederhergestellt ist.
   </p>
   <p style="display: none;" id="schiebenDescription">
     Mindestens ein Puzzleteil muss gelöscht werden. Danach vermischt das Programm die Teile durch Schieben.
@@ -558,7 +561,7 @@ display: block;
     <div class="tutorialCard tutorialGeneral">
       <b>Einstellungen während des Tutorials</b>
       <br>
-      Sie können fast alle Einstellungen während des Tutorials ändern! Auf die Wichtigsten wird zwar im Tutorial aufmerksam gemacht, aber Sie können auch gerne selber reinschauen oder ausprobieren. 
+      Sie können fast alle Einstellungen während des Tutorials ändern! Auf die Wichtigen wird zwar im Tutorial aufmerksam gemacht, aber Sie können auch gerne selber reinschauen oder ausprobieren. 
     </div>
     <div id="traditionalTutorial">
       <!-- PC -->
@@ -714,6 +717,11 @@ display: block;
             <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählten Teil wird das neue Teil eingereiht werden. </div> 
             <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton </div> 
             <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
+            <div class="tutorialCard tutorialGeneral">
+              <b style="font-size: 15px;">automatische Positionsauswahl</b>
+              <br>
+              Wenn Sie kein Teil ausgewählt haben und trotdem den Button drücken, wird das danach ausgewähle Teil an das Ende der Liste angehängt. 
+            </div>
           </div>
         </div>
       </div>
@@ -810,7 +818,7 @@ display: block;
       <input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.
     </div>
 </div>
-<div id="exchangeTutorial" class="tutorialGeneral">
+<div id="exchangeTutorial" style="display: none;" class="tutorialGeneral">
   <div class="tutorialCard tutorialGeneral section">
     <h1>Teile austauschen</h1>
     <div class="tutorialCard tutorialGeneral">
@@ -841,6 +849,20 @@ display: block;
         <div class="tutorialCard tutorialGeneral">
           Wenn Sie sich noch auf dem als erstes ausgewählen Teil befinden, können Sie auch die Maustaste bzw. den Finger sofort loslassen und erneut klicken, um das Teil abzuwählen. 
         </div>
+    </div>
+  </div>
+</div>
+<div id="schiebenTutorial" style="display: none;" class="tutorialGeneral">
+  <div class="tutorialCard tutorialGeneral section">
+    <h1>Teile schieben</h1>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Schieben eine Option</b>
+      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Klicken Sie ein Teil neben der Lücke an, um es in die Lücke zu schieben.</div>
+    </div>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Schieben mehrere Optionen</b>
+      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Wenn Sie ein Teil in mehrere Lücken verschieben können, müssen Sie erneut zuerst das Teil anwählen.</div>
+      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Nun müssen Sie jedoch zusätzlich auf die Lücke klicken, auf in die das Teil geschoben werden soll.</div>
     </div>
   </div>
 </div>
@@ -1117,6 +1139,7 @@ display: block;
     function generalBackToBar(elm) {
     if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
       if (tutorial.state == "clickBackToBarBTurotial") goTutorialSteps(1);
+      if (!tileSelectionBar.selectedTile) tileSelectionBar.selectedTile = {i: tileSelectionBar.tiles.length - 1};
       state.backToBar = tileSelectionBar.selectedTile.i + 1; 
       elm.style.backgroundColor = 'red';
       tileSelectionBar.selectedTile = undefined;
@@ -1675,7 +1698,7 @@ function canvasClicked(calledBy) {
   }
   if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
-    else if (selected.tile && (modeSelection.value != "schieben"/* || missing*/) && !state.exchangedTiles && !state.unselected) {
+    else if (selected.tile && (modeSelection.value == "exchange"/* || missing*/) && !state.exchangedTiles && !state.unselected) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
       selected.tiles = [getTileIByCoord(selected.tile)];
       selected.boolean.click = true;
@@ -2690,12 +2713,10 @@ var puzzles = {};
     state.tileChanged = false;
     if (gerät == "PC" || !elmCalled) {
       selected.tile = checkSelected();
-    if (swipeSteuerung.checked && modeSelection.value != "schieben" && selected.tile && !selected.boolean.click && !scrollable.checked) {
+    if (swipeSteuerung.checked && modeSelection.value == "exchange" && selected.tile && !selected.boolean.click && !scrollable.checked) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
-      if (modeSelection.value == "exchange") {
         selected.tiles = [getTileIByCoord(selected.tile)];
         layout();
-      }
       selected.boolean.swipe = true;
     }
     delete state.rorated;
@@ -3581,6 +3602,7 @@ function goTutorialSteps(steps) {
           }, 1000);
       }
     }, 300);
+    if (steps != 0) {
     if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
     if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
     if (tutorial.state == "pressShiftMobileUnclippTutorial") {
@@ -3608,7 +3630,11 @@ function goTutorialSteps(steps) {
         mouseDown();
       }
       scrollTileSelection(1);
+      scrollTileBarTitle.style.display = "inline";
+      scrollTileBarTitle.style.left = scrollTileSelectionLeft.getBoundingClientRect().left + scrollTileSelectionLeft.getBoundingClientRect().height/2;
+      scrollTileBarTitle.style.top = scrollTileSelectionLeft.getBoundingClientRect().top - scrollTileSelectionLeft.getBoundingClientRect().height/2 - 11;
     }
+    if (tutorial.state == "MouseDownScrollTileBarTutorial") scrollTileBarTitle.style.display = "none";
     if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
     if (tutorial.state == "selectTileUnselectStandardTutorial") {
       setTimeout(() => {
@@ -3616,6 +3642,7 @@ function goTutorialSteps(steps) {
       }, 10);
     }
     if (tutorial.state == "mouseDownUnselectAlternativeTutorial") swipeSteuerung.checked = true;
+  }
     if (steps != 0) goTutorialSteps(steps + direction*(-1));
   }
   catch (err) {
