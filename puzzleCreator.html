@@ -995,7 +995,7 @@ display: block;
     }
     else {
       settings.style.display = 'none';
-      if (tileSelectionCanvas.style.display == "inline")  selectBackToBarB.style.display = "inline"
+      if (['inline', ''].includes(tileSelectionCanvas.style.display))  selectBackToBarB.style.display = "inline"
       originalDisplayChanged(false);
       canvas = textur.getContext('2d');
       if (wrongPosition && !state.changedPos) positions.wrong = JSON.parse(JSON.stringify(wrongPosition));
@@ -1411,10 +1411,13 @@ if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "
   }
 // down
 var pScrollY = scrollY;
+if (!selected.tiles.length) {
+  console.log(('not tile selected!'));
+}
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
     var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
     if (ptexturTop < 0) ptexturTop = 0;
-    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (tileSelectionCanvas.style.display == "inline" && positions.wrong[selected.tiles[0]].edit.y + lengthPerTeil.edit.y/2 > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - ptexturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
+    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (['inline', ''].includes(tileSelectionCanvas.style.display) && positions.wrong[selected.tiles[0]].edit.y > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - texturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
         // window.scroll(scrollX, scrollY + 3);
         // mausy += 3;
         fAutoScroll({x: 0, y: +3});
@@ -2561,7 +2564,7 @@ var puzzles = {};
       if (["manuallyScrollingTutorial", "scrollMobileScrollingTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     } 
     if (scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
-    else if (tileSelectionCanvas.style.display == "inline" && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
+    else if (['inline', ''].includes(tileSelectionCanvas.style.display) && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
     state.scrollX = scrollX;
