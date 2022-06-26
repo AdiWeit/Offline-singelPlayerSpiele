@@ -139,7 +139,7 @@
     Wo die Teile zusammengesetzt werden ist egal.
     <div id="startTutorialButton">
       <br>
-      <button onclick="startTutorial(modeSelection.value);">tutorial</button>
+      <button onclick="setupTutorial();">tutorial</button>
     </div>
   </p>
   <p style="display: none;" id="exchangeDescription">
@@ -603,7 +603,7 @@ display: block;
           <div id="rotateTileTutorialAlternativeDiv"><input type="checkbox" id="rotateTileTutorialAlternative" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren. </div>
           <div id="releaseMoveTutorialDiv"><input type="checkbox" id="releaseMoveTutorial" onclick="checked = !checked"> Lassen Sie die Taste bzw. das Touchpad los. </div>
       </div>
-      <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern. </div>
+      <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie oben im Tutorial, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern. </div>
     </div>
       <div class="tutorialCard tutorialGeneral section" id="clippTutorial">
       <h2>Teile verbinden und lösen</h2>
@@ -1870,6 +1870,7 @@ function canvasClicked(calledBy) {
   }
   // end section 2.1
     // backTobar button clicked
+    var offline = false;
     function posInBarSelected(i) {
       if (tutorial.state == "BackToTileBarTutorial") goTutorialSteps(1);
       if (Array.from(document.getElementsByClassName('backToTileB')).filter(x => x.style.backgroundColor != "").length && i == state.backToBar) {
@@ -1918,6 +1919,9 @@ function canvasClicked(calledBy) {
     }
     if (!cancelLoading && sourceIsPicture.checked) loadImage();
     fileName = input.files[0].name;
+    setTimeout(() => {
+      if (state.waitForPictureSelection) startTutorial();
+    }, 1111);
   }
   var fileName;
   var video = document.createElement("video");
@@ -1938,7 +1942,7 @@ function canvasClicked(calledBy) {
       }
     }
     if (sourceIsPicture.checked) {
-    preview.src = sourceURL.value;
+        preview.src = sourceURL.value;
     loadImage();
   }
   else {
@@ -1966,7 +1970,8 @@ function canvasClicked(calledBy) {
       try {
         canvas.drawImage(document.getElementById('preview'), 0, 0);
       } catch (err) {
-        URLInfo.style.display = 'block';
+        if (useURLCheck.checked) URLInfo.style.display = 'block';
+        offline = true;
       }
       if (aufgebenId.style.display != "inline") {
         changeAdaptedSizeMax(width, height);
@@ -2764,9 +2769,10 @@ var puzzles = {};
         goTutorialSteps(1);
         if (tutorial.state != "SecondPlaceTileTutorial") automaticTileSelectionReset.checked = true;
       }
-      if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial"].includes(tutorial.state)) {
+      if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial", "moveMouseMoveTutorial"].includes(tutorial.state)) {
         goTutorialSteps(-1);
       }
+      if (tutorial.state == "rotateTileTutorial") goTutorialSteps(-2);
       if (!state.removeTile) selected.tiles = [];
       else state.mouse = "up";
       state.shiftBefore = false;
@@ -2880,6 +2886,8 @@ var puzzles = {};
     }
     if (state.tileChanged && JSON.stringify(checkSelected()) == JSON.stringify(selected.coord) && tutorial.state == "moveMouseInUnselectAlternativeTutorial") goTutorialSteps(1);
     if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
+      if (tutorial.state == "moveMouseMoveTutorial" && rotateTileTutorial.checked) goTutorialSteps(1);
+      if (tutorial.state == "moveMouseMoveTutorialAlternative" && rotateTileTutorialAlternative.checked) goTutorialSteps(1);
       goTutorialSteps(1);
     }
     if (state.mouse == "down" && tileSelectionBar.collidesMouse() && tutorial.state == "MouseDownScrollTileBarTutorial" && calledBy != "mousedown") goTutorialSteps(1);
@@ -3147,6 +3155,8 @@ layout(false, true);
     if ((event.key == "ArrowRight" || event.key == "ArrowLeft") && modeSelection.value == "traditional" && ((selected.tiles.length && rotateTiles.checked) || collidesTilesBar)) return false;
   }
   function rotateSelected(direction) {
+    if (tutorial.state == "moveMouseMoveTutorial") rotateTileTutorial.checked = true;
+    if (tutorial.state == "moveMouseMoveTutorialAlternative") rotateTileTutorialAlternative.checked = true;
     if (["rotateTileTutorial", "rotateTileTutorialAlternative"].includes(tutorial.state)) goTutorialSteps(1);
     if (!state.removeTile) {
       state.rotated = [];
@@ -3565,7 +3575,19 @@ function getSectionElm(elm) {
   }
   return elm;
 }
-function startTutorial(mode) {
+function setupTutorial() {
+  sourceURL.value = "https://adi.nicolaiweitkemper.de/Bilder/puzzleCreatorLogo.png";
+    useURL();
+    setTimeout(() => {
+      if (!offline) startTutorial();
+      else {
+        alert('Bitte importieren Sie ein Bild oder ein Video von diesem Gerät ("Datei (Foto oder Video) auswählen"), um das Tutorial mit dem Bild starten zu können. ');
+        state.waitForPictureSelection = true;
+      }
+      }, 777);
+  }
+function startTutorial() {
+  var mode = modeSelection.value;
   document.getElementById('tutorial').style.display = "inline";
   // document.getElementById(mode + 'Tutorial').style.display = "inline";
   document.getElementById(mode + 'Tutorial' + gerät).style.display = "inline";
@@ -3575,8 +3597,6 @@ function startTutorial(mode) {
     shuffleStyle.value = "listTiles";
     emptyTileBar.checked = true;
   }
-  sourceURL.value = "https://adi.nicolaiweitkemper.de/Bilder/puzzleCreatorLogo.png";
-  useURL();
   setTimeout(() => {
     create();
     shufflePuzzle();
