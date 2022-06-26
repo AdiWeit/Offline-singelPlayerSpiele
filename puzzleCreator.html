@@ -1148,11 +1148,18 @@ display: block;
     // back to bar to the right of the selected tile in the tileBar
     function generalBackToBar(elm) {
     if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
-      if (tutorial.state == "clickBackToBarBTurotial") goTutorialSteps(1);
-      if (!tileSelectionBar.selectedTile) tileSelectionBar.selectedTile = {i: tileSelectionBar.tiles.length - 1};
-      state.backToBar = tileSelectionBar.selectedTile.i + 1; 
-      elm.style.backgroundColor = 'red';
-      tileSelectionBar.selectedTile = undefined;
+      if (elm.style.backgroundColor == 'red') {
+        state.backToBar = false;
+        elm.style.backgroundColor = '';
+        tileSelectionBar.selectedTile = undefined;
+      }
+      else {
+        if (tutorial.state == "clickBackToBarBTurotial") goTutorialSteps(1);
+        if (!tileSelectionBar.selectedTile) tileSelectionBar.selectedTile = {i: tileSelectionBar.tiles.length - 1};
+        state.backToBar = tileSelectionBar.selectedTile.i + 1; 
+        elm.style.backgroundColor = 'red';
+        tileSelectionBar.selectedTile = undefined;
+      }
     }
   }
   function expandSide(side, adaptButtonsOnly) {
@@ -1411,9 +1418,6 @@ if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "
   }
 // down
 var pScrollY = scrollY;
-if (!selected.tiles.length) {
-  console.log(('not tile selected!'));
-}
     if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
     var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
     if (ptexturTop < 0) ptexturTop = 0;
@@ -1857,13 +1861,17 @@ function canvasClicked(calledBy) {
     // backTobar button clicked
     function posInBarSelected(i) {
       if (tutorial.state == "BackToTileBarTutorial") goTutorialSteps(1);
+      if (Array.from(document.getElementsByClassName('backToTileB')).filter(x => x.style.backgroundColor != "").length && i == state.backToBar) {
+        state.backToBar = "unselect " + i;
+      }
     for (const elm of document.getElementsByClassName('backToTileB')) {
       elm.style.backgroundColor = '';
     }
-    if (tileSelectionBar.tiles.length != positions.wrong.length) {
+    if (tileSelectionBar.tiles.length != positions.wrong.length && state.backToBar != "unselect " + i) {
       state.backToBar = i; 
       document.getElementsByClassName('backToTileB')[i].style.backgroundColor = 'red';
     }
+    if (typeof state.backToBar === "string" && state.backToBar.includes("unselect")) state.backToBar = false;
     tileSelectionBar.selectedTile = undefined;
     layout();
   }
