@@ -2,12 +2,7 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<div id="imageSettings">
-<input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2"> Teile x-Achse
-<br>
-<input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2"> Teile y-Achse
-<br>
-<div id="puzzleManager">
+<div id="puzzleManager" class="tutorialCard tutorialGeneral">
   <h1>Puzzle verwalten</h1>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/database_import_icon.png" title="Bereits erstellte Puzzle fortfahren" draggable="false" >
   <li id="puzzleSelection"></li>
@@ -29,7 +24,9 @@
     Sie haben ein Puzzle bereits so benannt. Bitte wählen Sie einen anderen Namen! Andernfalls wird das Puzzle das bisher so hieß überschrieben bzw. gelöscht!!!
   </p>
 </div>
-<h1>Quelle auswählen</h1>
+<div id="imageSettings">
+<div class="tutorialCard tutorialGeneral">
+<h1 id="selectSourceHeader" style="color: red;">Quelle auswählen</h1>
 <img src="https://adi.nicolaiweitkemper.de/Bilder/import_picture_icon.png" style="width: 100px; height: 100px;" title="Bild oder Video importieren" draggable="false" >
 <br>
 <input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
@@ -49,6 +46,14 @@
 </a>
 <input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze live Kamera</a></button>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
+</div>
+<div id="tilesSizeDiv" class="tutorialCard tutorialGeneral">
+  <h3>Anzahl der Puzzleteile</h3>
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2"> Teile x-Achse
+  <br>
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2"> Teile y-Achse
+</div>
+<div id="editCanvasDiv" class="tutorialCard tutorialGeneral">
 <h2>Bild bearbeiten</h2>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
 <br>
@@ -60,7 +65,7 @@
 <br>
 <input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
 <br>
-<button type="button" onclick="resetImageSize();" name="button">⟲Originalgröße des Bildes</button>
+<button type="button" onclick="resetImageSize();" name="button">⟲ Originalgröße des Bildes</button>
 <button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
@@ -70,7 +75,10 @@
     und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
   <br>
 </a>
-<button type="button" style="font-size: 33px;background-color: green;color: white;border: 10px;border-style: double;" onclick="create();" name="button">erstelle Puzzle</button>
+<br>
+<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+</div>
+<button type="button" style="font-size: 33px;color: white; background-color: red; border: 10px;border-style: double;" onclick="create();" id="createPuzzleButton" name="button">erstelle Puzzle</button>
 </div>
 <!-- <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button> -->
 <img src="https://adi.nicolaiweitkemper.de/Bilder/settings.png" id="showSettings" class="button" title="mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)" onmouseup="changeSettingsVis();"  draggable="false" >
@@ -117,8 +125,9 @@
     padding: 100px;
   }
 </style>
-<div id="settings" style="display: none;">
+<div id="settings" style="display: none;" class="tutorialCard tutorialGeneral">
   <h2 id="modeHeadline">Modus: </h2>
+  <div id="modeDiv" class="tutorialCard tutorialGeneral">
   <select onchange="modeSelected(value);" id="modeSelection">
     <option value="traditional">traditionell</option>
     <option value="exchange">austauschen</option>
@@ -141,8 +150,8 @@
     <br>
     Ist dies geschehen, können Sie die Teile durch Klicken auf das zu verschiebende Teil (und unter Umständen die gewünschte Zielposition) so verschieben, dass wieder das Originalbild entsteht.
   </p>
-  <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: </b>
-  <div id="traditionalSettings">
+  <div class="tutorialCard tutorialGeneral" id="traditionalSettings">
+    <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: <br> </b>
     <br>
     <input id="clipOptionsSound" checked="true" type="checkbox"> akustisches Feedback (Audio bei Verbindungsmöglichkeiten)
     <a id="vibrateA">
@@ -153,7 +162,7 @@
     <input id="automaticTileSelectionReset" type="checkbox"> automatisch Teile/Auswahl abwählen
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'inline';}" checked="true" type="checkbox"> drehe Teile
+    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionsettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
     </p>
     <input id="markWrong" style="accent-color: red;" type="checkbox" > markiere nicht passende
     <a id="shuffleStyleLable">
@@ -173,7 +182,7 @@
     </a>
     <a style="display: none" id="aEmptyTileBar">
       <br>
-      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'inline'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
+      <input id="emptyTileBar" onchange="if (checked) emptyTileBarsettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
       <a style="display: none;" id="emptyTileBarSettings">
         <br>
         dabei folgendermaßen die Teile mischen: 
@@ -197,7 +206,7 @@
           <br>
         </a>
       </div>
-      <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
+      <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileCollidersettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
         Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
@@ -230,10 +239,10 @@
     </div>
     <br>
   </div>
-  <div id="exchangeSettings" style="display: none">
+  <div id="exchangeSettings" class="tutorialCard tutorialGeneral" style="display: none">
   <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
-  <p id="schiebenSettings">
+  <p id="schiebenSettings" class="tutorialCard tutorialGeneral">
     <br>
     <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
     <br>
@@ -271,7 +280,7 @@
       </div>
       <br>
     </div>
-    <input onchange="if (checked) {userMovementPlayer.style.display = 'inline'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalSettings.style.display = 'inline';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
+    <input onchange="if (checked) {userMovementPlayer.style.display = 'inline'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
     <a style="display: none;" id="userMovementPlayer">
       <br>
       <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
@@ -281,24 +290,21 @@
       <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
     </a>
   </a>
-  <a2 id="generalSettings">
+  </div>
+  <div id="generalSettings" class="tutorialCard tutorialGeneral">
   <h2>allgemeine Einstellungen: </h2>
-  <a id="futurePuzzleManager">
-  </a>
-    <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'inline'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
+    <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'block'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
     <!-- <h3>general</h3> -->
-    <a id="rightMarkerSettings">
-      <br>
+    <div id="rightMarkerSettings" class="tutorialCard tutorialGeneral">
       <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
       <br>
   <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
   <br>
   Farbe: <input type="color" oninput="layout();" id="markRightColor" value="#00FF00">
-  </a>
-  <br>
-  <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'inline'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
-  <p id="randSettings">
+    </div>
     <br>
+  <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'block'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
+  <div id="randSettings" class="tutorialCard tutorialGeneral">
     <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
     <br>
     <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
@@ -306,9 +312,8 @@
     <input type="range" min="0.01" max="1" step="0.01" value="0.35" oninput="layout();" id="borderTransparency"> Transparenz des Randes
     <br>
     Farbe: <input type="color" id="borderColor" oninput="layout();" value="#0000FF">
-  </p>
-  <br>
-  <!-- <input type="checkbox" onchange="if (checked == true) {schiebenSettings.style.display = 'inline'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
+  </div>
+  <!-- <input type="checkbox" onchange="if (checked == true) {schiebensettings.style.display = 'block'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
   <br>
   <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
   <br>
@@ -316,10 +321,10 @@
   <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
-  <div style="display: none;" id="videoControls">
+  <div style="display: none;" class="tutorialCard tutorialGeneral" id="videoControls">
     <h3>video controls</h3>
     <a id="timeChangeDiv">
-    <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> Wiederholen
+    <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> ⟲ Wiederholen
     <br>
     <input type="checkbox" onclick="video.muted = checked;">mute</input>
     <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
@@ -348,10 +353,12 @@
   <img style="display: none;" id="preview">
   <canvas style="display: none;" id="videoPreview"></canvas>
 </p>
-</a2>
+<div id="futurePuzzleManager"></div>
 </div>
 <br>
+</div>
 <button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">Fertig</button>
+<div id="futureTexturPosition"></div>
 <a id="tileStatusOptions" style="display: none; position: fixed; background-color: rgba(205, 218, 199, 0.77); border-radius: 5px;">
 <input type="radio" id="pRemoveTile" checked="true" style="accent-color: red;" name="tileStatus"> Teil löschen
 <input type="radio" id="doNotMoveTile" style="accent-color: blue;" name="tileStatus"> Teil beim Mischen nicht bewegen
@@ -359,12 +366,11 @@
 <br>
 <br>
 <button onclick="expandSide('top');" style="height: 55px;" class="expandButtons" id="expandTop">+</button>
-<canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <button onclick="expandSide('right');" style="width: 55px;" class="expandButtons" id="expandRight">+</button>
 <button onclick="expandSide('left');" style="width: 55px;" class="expandButtons" id="expandLeft">+</button>
 <br>
 <button class="expandButtons" style="height: 55px;" onclick="expandSide('bottom');" id="expandBottom">+</button>
-<canvas id="tileSelectionCanvas" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
+<canvas id="tileSelectionCanvas" style="display: none;" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div class="expandButtons" id="backToBarButtons">
 </div>
 <img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1, 'elm');">
@@ -958,7 +964,7 @@ display: block;
     if (value == "overlapTiles") shuffleHeadline.style.display = 'none';
     else shuffleHeadline.style.display = 'inline';
     if (value == 'listTiles' && emptyTileBar.checked) {
-      emptyTileBarSettings.style.display = 'inline';  
+      emptyTileBarsettings.style.display = 'block';  
       if (shuffleStyleBar.value == "nextToEachOther") tilesGapS.style.display = 'inline';
     }
     else emptyTileBarSettings.style.display = 'none';
@@ -989,7 +995,7 @@ display: block;
   }
   function changeSettingsVis(vis) {
     if ((settings.style.display == 'none' || vis == "inline") && vis != "none") {
-      settings.style.display = 'inline'; 
+      settings.style.display = 'block'; 
       selectBackToBarB.style.display = 'none';
       if (!state.removeTile && aufgebenId.style.display == "inline") wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
     }
@@ -1006,7 +1012,7 @@ display: block;
   }
   function adaptExpandButtonPosition() {
     setTimeout(() => {
-      if (settings.style.display == "inline") expandTop.style.top = settings.getBoundingClientRect().bottom + scrollY + 17;
+      if (settings.style.display == "block") expandTop.style.top = settings.getBoundingClientRect().bottom + scrollY + 17;
       else expandTop.style.top = showSettings.getBoundingClientRect().bottom + scrollY + 17;
       textur.style.top = expandTop.getBoundingClientRect().bottom + scrollY;
       texturTop = textur.getBoundingClientRect().top + scrollY;
@@ -1244,6 +1250,10 @@ display: block;
   else {
     canvas.drawImage(document.getElementById('preview'), 0, 0, größeAnpassenX.value, größeAnpassenY.value);
   }
+  if (textur.width > window.innerWidth) editCanvasDiv.style.width = textur.width;
+  else if (editCanvasDiv.style.width.replace('px', '') > window.innerWidth || (textur.getBoundingClientRect().right <= window.innerWidth + textur.getBoundingClientRect().left && textur.getBoundingClientRect().right > editCanvasDiv.getBoundingClientRect().right)) editCanvasDiv.style.width = window.innerWidth;
+  // tilesSizeDiv: size reference
+  else if (textur.getBoundingClientRect().right <= tilesSizeDiv.getBoundingClientRect().right) editCanvasDiv.style.width = "";
   }
   function playPauseVideo(innerHTML) {
     if (innerHTML == "play") {
@@ -1263,12 +1273,11 @@ display: block;
     schiebenDescription.style.display = 'none';
     document.getElementById(value + 'Description').style.display = 'block';
     if (value == "traditional") zeigeGröße();
-    if (value == "exchange") modeSettingsHeading.style.display = 'none';
-    else modeSettingsHeading.style.display = 'inline';
     traditionalSettings.style.display = 'none';
     exchangeSettings.style.display = 'none';
     schiebenSettings.style.display = 'none';
-    document.getElementById(value + 'Settings').style.display = 'inline';
+    document.getElementById(value + 'Settings').style.display = 'block';
+    document.getElementById(value + 'Settings').prepend(modeSettingsHeading);
   }
   var originalSize = {width: 0, height: 0};
   function gapSizeChanged(value) {
@@ -1284,6 +1293,7 @@ display: block;
     function create() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else if (!state.removeTile) {
+      futureTexturPosition.appendChild(textur);
       if (modeSelection.value != "traditional") shuffleStyle.value = "none";
       if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
       if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
@@ -1297,7 +1307,7 @@ display: block;
       automaticTileSelectionReset.checked = true;
       removeTilesFinishedB.style.display = 'inline';
       if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
-      showSettings.innerHTML = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
+      showSettings.title = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
       imageSettings.style.display = "none";
       modeSelection.style.display = "none";
       schiebenSettings.style.display = "none";
@@ -1305,9 +1315,9 @@ display: block;
       missing = [];
       if (gerät == "Handy") mobileControls.style.display = "inline";
       if (sourceIsVideo.checked) {
-        videoControls.style.display = 'inline';
+        videoControls.style.display = 'block';
         videoPosition.max = video.duration;
-        settings.style.display = 'inline';
+        settings.style.display = 'block';
         videoPosition.style.width = window.innerWidth;
         while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
           videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
@@ -1383,8 +1393,9 @@ display: block;
       swipeTitle.style.display = "none";
       modeHeadline.style.display = 'none';
       shuffleHeadline.style.display = 'none';
+      startTutorialButton.style.display = "none";
       texturTop = textur.getBoundingClientRect().top + scrollY;
-      futurePuzzleManager.appendChild(storePuzzleManager);
+      futurePuzzleManager.appendChild(puzzleManager);
     }
     autoScroll = setInterval(function () {
       if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
@@ -1612,7 +1623,7 @@ var pScrollY = scrollY;
   if (shuffleStyle.value == "listTiles") {
     selectBackToBarB.style.display = 'inline';
     listTilesS.style.display = 'inline';
-    settings.style.display = 'inline';
+    settings.style.display = 'block';
     tileBarHeight.style.width = window.innerWidth - tileBarHeightText.getBoundingClientRect().width - resetBarSize.getBoundingClientRect().width - 100;
     settings.style.display = 'none';
   }
@@ -1664,7 +1675,7 @@ function canvasClicked(calledBy) {
   if (calledBy == "elm") selected.boolean.swipe = false;
   selected.tile = checkSelected();
   if (!state.removeTile && !scrollable.checked && !finished) { 
-    if (aufgebenId.style.display == "inline" && settings.style.display == "inline") changeSettingsVis('none');
+    if (aufgebenId.style.display == "inline" && settings.style.display == "block") changeSettingsVis('none');
     if (selected.tile && selected.tiles.length && (selected.boolean.click || selected.boolean.swipe) && modeSelection.value == "exchange" && !state.removeTile) {
       for (var i = 0; i < positions.wrong.length; i++) {
         if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == selected.tile.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == selected.tile.y) {
@@ -1974,6 +1985,8 @@ function canvasClicked(calledBy) {
         delete state.restorePuzzle;
        }
     }, 500);
+    selectSourceHeader.style.color = "green";
+    createPuzzleButton.style.backgroundColor = "green";
   }
   // end section 2
   // section 3: handle videos
@@ -2571,7 +2584,7 @@ var puzzles = {};
       selected.position = {x: selected.position.x + (state.scrollX - scrollX), y: selected.position.y + (state.scrollY - scrollY), manualScrolling: true};
       if (["manuallyScrollingTutorial", "scrollMobileScrollingTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     } 
-    if (scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "inline") selectBackToBarB.style.display = 'none';
+    if (scrollY < texturTop - (showSettings.getBoundingClientRect().bottom + scrollY) && settings.style.display == "block") selectBackToBarB.style.display = 'none';
     else if (['inline', ''].includes(tileSelectionCanvas.style.display) && shuffleStyle.value == "listTiles") selectBackToBarB.style.display = 'inline';
     adaptMobileControlsPosition();
     if (keepScrolling.checked) folgenMouseMove();
