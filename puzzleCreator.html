@@ -183,7 +183,20 @@
           <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
         </select>
       </a>
-      <br>
+      <div id="tilesGapS" style="display: none;">
+        <br>
+        Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
+        <br>
+        <br>
+        <canvas id="gapCanvas"></canvas>
+        <br>
+        <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm füllen
+        <br>
+        <a style="display: none" id="aScrollXTileGap">
+          <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> Teile nebeneinander
+          <br>
+        </a>
+      </div>
       <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'inline'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
@@ -214,20 +227,6 @@
       <div id="autoSelectTileBarP">
         <input type="checkbox" checked="true" id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
       </div>
-    </div>
-    <div id="tilesGapS" style="display: none;">
-      <br>
-      Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
-      <br>
-      <br>
-      <canvas id="gapCanvas"></canvas>
-      <br>
-      <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm füllen
-      <br>
-      <a style="display: none" id="aScrollXTileGap">
-        <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> Teile nebeneinander
-        <br>
-      </a>
     </div>
     <br>
   </div>
@@ -441,7 +440,8 @@ display: block;
     /* font-size: 0.5em; */
     /* font-size: 0.7em; */
     /* font-size: 1vw; */
-    font-size: 25px;
+    /* font-size: 25px; */
+    font-size: 5vh;
   
     /* (A2) COLORS */
     color: #fff;
