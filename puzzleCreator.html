@@ -9,7 +9,9 @@
 <br>
 <div id="puzzleManager">
   <h1>Puzzle verwalten</h1>
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/database_import_icon.png" title="Bereits erstellte Puzzle fortfahren" draggable="false" >
   <li id="puzzleSelection"></li>
+  <img src="https://adi.nicolaiweitkemper.de/Bilder/saveicon.png" title="im Folgenden erstellte Puzzle speichern" draggable="false" >
   <div style="display: none;" onmouseout="checkOut();"  class="dropdown-content" id="editPuzzleManager">
     <a onclick="restorePuzzleSource(selected.puzzle);">öffnen/fortfahren</a>
     <a onclick="editPuzzleName();">Name bearbeiten</a>
@@ -28,6 +30,8 @@
   </p>
 </div>
 <h1>Quelle auswählen</h1>
+<img src="https://adi.nicolaiweitkemper.de/Bilder/import_picture_icon.png" style="width: 100px; height: 100px;" title="Bild oder Video importieren" draggable="false" >
+<br>
 <input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
 <br>
@@ -66,9 +70,10 @@
     und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
   <br>
 </a>
-<button type="button" style="font-size: 33px;" onclick="create();" name="button">erstelle Puzzle</button>
+<button type="button" style="font-size: 33px;background-color: green;color: white;border: 10px;border-style: double;" onclick="create();" name="button">erstelle Puzzle</button>
 </div>
-<button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button>
+<!-- <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button> -->
+<img src="https://adi.nicolaiweitkemper.de/Bilder/settings.png" id="showSettings" class="button" title="mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)" onmouseup="changeSettingsVis();"  draggable="false" >
 <br>
 <button style="position: fixed; display: none; z-index: 3;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
@@ -100,6 +105,11 @@
   </div>
 </div>
 <style>
+  .button {
+    width: 50px; 
+    border: 3px solid hsla(0, 0%, 2%, 0.4); 
+    background: rgb(200, 200, 200);
+  }
   .mobileControlsElm {
     width: 44;
     height: 44;
@@ -1524,10 +1534,10 @@ var pScrollY = scrollY;
           positions.wrong[i].edit = {x: pos.x, y: pos.y, degree: 0};
           pos.x += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
           if ((pos.x + lengthPerTeil.edit.x/2 > window.innerWidth && fillScreenTileGap.checked) || (!fillScreenTileGap.checked && pos.x > lengthPerTeil.edit.x + (lengthPerTeil.edit.x + JSON.parse(tilesGap.value))*(parseInt(tilesXTileGap.value) - 1))) {
+            if (pos.x + lengthPerTeil.edit.x/2 > textur.width) textur.width = pos.x - lengthPerTeil.edit.x/2 - JSON.parse(tilesGap.value);
             pos.x = lengthPerTeil.edit.x/2;
-            if (pos.x + lengthPerTeil.edit.x/2 > textur.width) textur.width += lengthPerTeil.edit.x + parseInt(tilesGap.value);
+            if (pos.y + lengthPerTeil.edit.y/2 > textur.height) textur.height = pos.y + lengthPerTeil.edit.y/2;
             pos.y += lengthPerTeil.edit.x + JSON.parse(tilesGap.value);
-            if (pos.y + lengthPerTeil.edit.y/2 > textur.height) textur.height += lengthPerTeil.edit.y + parseInt(tilesGap.value);
           }
         }
       }
