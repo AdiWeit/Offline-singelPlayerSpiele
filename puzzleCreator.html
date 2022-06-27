@@ -49,9 +49,9 @@
 </div>
 <div id="tilesSizeDiv" class="tutorialCard tutorialGeneral">
   <h3>Anzahl der Puzzleteile</h3>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2"> Teile x-Achse
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> Teile x-Achse
   <br>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2"> Teile y-Achse
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> Teile y-Achse
 </div>
 <div id="editCanvasDiv" class="tutorialCard tutorialGeneral">
 <h2>Bild bearbeiten</h2>
@@ -1254,7 +1254,27 @@ display: block;
   else if (editCanvasDiv.style.width.replace('px', '') > window.innerWidth || (textur.getBoundingClientRect().right <= window.innerWidth + textur.getBoundingClientRect().left && textur.getBoundingClientRect().right > editCanvasDiv.getBoundingClientRect().right)) editCanvasDiv.style.width = window.innerWidth;
   // tilesSizeDiv: size reference
   else if (textur.getBoundingClientRect().right <= tilesSizeDiv.getBoundingClientRect().right) editCanvasDiv.style.width = "";
+  // show tiles in grid
+  drawTileGrid();
+}
+function drawTileGrid(doNotDrawPicture) {
+  if (!doNotDrawPicture) {
+    canvas.clearRect(0, 0, textur.width, textur.height);
+    canvas.drawImage(preview, 0, 0, textur.width, textur.height);
   }
+  for (let i = 0; i < anzahlX.value; i++) {
+    canvas.beginPath();
+    canvas.moveTo((textur.width/anzahlX.value)*i, 0);
+    canvas.lineTo((textur.width/anzahlX.value)*i, textur.height);
+    canvas.stroke();
+  }  
+  for (let i = 0; i < anzahlY.value; i++) {
+    canvas.beginPath();
+    canvas.moveTo(0, (textur.height/anzahlY.value)*i);
+    canvas.lineTo(textur.width, (textur.height/anzahlY.value)*i);
+    canvas.stroke();
+  }  
+}
   function playPauseVideo(innerHTML) {
     if (innerHTML == "play") {
       video.play();
@@ -2056,6 +2076,7 @@ function updateVideo(){
     }
     else {
       canvas.drawImage(video,0,0, größeAnpassenX.value, größeAnpassenY.value);
+      drawTileGrid(true);
     }
     videoPreview.getContext('2d').drawImage(video, 0, 0, größeAnpassenX.value, größeAnpassenY.value);
     showSelected();
