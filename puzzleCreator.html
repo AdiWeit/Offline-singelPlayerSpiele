@@ -633,7 +633,7 @@ display: block;
         <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
         <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab (Finger vom Bildschirm lösen), wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
         </div>
-        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie ein weiteres Teil. </div>
+        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weiteres Teil zu den bereis verbudenen. </div>
       </div>
       <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
@@ -645,7 +645,7 @@ display: block;
         <div class="tutorialCard tutorialGeneral">
           <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" id="unclippStandard" name="unclippStyle"><b> Standard (verbunden mit Standard für Bewegen der Teile) </b>
           <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
-          <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich) </div>
+          <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich), welches mit einem anderen verbunden ist. </div>
           <div id="releaseShiftStandardUnclippTutorialDiv"><input type="checkbox" id="releaseShiftStandardUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
           <div id="unclippStandardTutorialDiv"><input type="checkbox" id="unclippStandardTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
           <div id="unselectUnclippStandardTutorialDiv"><input type="checkbox" id="unselectUnclippStandardTutorial" onclick="checked = !checked"> Klicken Sie, um die ausgewählten Teile abzuwählen. </div>
@@ -653,7 +653,7 @@ display: block;
         <div class="tutorialCard tutorialGeneral">
           <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" id="unclippAlternative" name="unclippStyle"> <b>Alternative (verbunden mit Alternative für Bewegen der Teile)</b>
           <div id="pressShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="pressShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
-          <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des UnclippTutorials beliebige Anzahl möglich, Maustaste drücken und halten oder Doppelklick auf Touchpad) </div>
+          <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich, Maustaste drücken und halten oder Doppelklick auf Touchpad). Das Teil muss mit mindestens einem weiteren verbunden sein, damit es von diesem abgetrennt werden kann.  </div>
           <div id="unclippTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="unclippTileAlternativeUnclippTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
           <div id="releaseShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="releaseShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
           <div id="unselectAlternativeUnclippTutorialDiv"><input type="checkbox" id="unselectAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie das Touchpad bzw. die Maustaste los, um das Teil abzuwählen. </div>
@@ -731,7 +731,7 @@ display: block;
           <div class="tutorialCard tutorialGeneral" id="backToBarBTutorial">
             <h4>mit "zurück in Leiste"-Button</h4>
             <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählten Teil wird das neue Teil eingereiht werden. </div> 
-            <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton </div> 
+            <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton (oben links auf dem Bildschirm) </div> 
             <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
             <div class="tutorialCard tutorialGeneral">
               <b style="font-size: 15px;">automatische Positionsauswahl</b>
@@ -762,7 +762,7 @@ display: block;
           <div id="getClippingOptionConnectTileMobileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileMobileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
           <div id="clipTileMobileTutorialDiv"><input type="checkbox" id="clipTileMobileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab, wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
           </div>
-          <div id="clippSecondMobileTutorialDiv"><input id="clippSecondMobileTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weitere Teile miteinander. </div>
+          <div id="clippSecondMobileTutorialDiv"><input id="clippSecondMobileTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie drei weitere Teile zu den bereits verbundenen. </div>
         </div>
         <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
           <h3>Teile lösen</h3>
@@ -772,8 +772,13 @@ display: block;
             Wenn Sie Probleme mit dem Anklicken der Elemente oben in der leiste haben (scrollen, rotieren, Shift Taste), versuchen Sie, ein wenig weiter unten zu klicken, selbst wenn Sie außerhalb des angezeigten Elements klicken, kann das genau die richtige Stelle für das Klicken sein. 
           </div>
           <div class="tutorialCard tutorialGeneral">
+            <b style="font-size: 15px;">Information Shift Taste</b>
+            <br>
+            Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
+          </div>
+          <div class="tutorialCard tutorialGeneral">
             <div id="pressShiftMobileUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
-            <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf ein Teil. </div>
+            <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf ein Teil, welches mit einem anderen verbunden ist. </div>
             <div id="moveTileShiftUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftUnclippTutorial" onclick="checked = !checked"> Bewegen Sie ein Teil mit dem Finger. </div>
             <div id="releaseFingerMobileShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
           </div>
@@ -781,12 +786,12 @@ display: block;
             <b>Mehrfachauswahl (auch ohne Abtrennen möglich)</b>
             <br>
             <div id="pressShiftMobileMultipleUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileMultipleUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
-            <div id="selectTileMobileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Klicken Sie auf zwei Teile (außerhalb des Tutorials beliebige Anzahl möglich), die Sie von dem Rest abtrennen wollen. </div>
+            <div id="selectTileMobileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Klicken Sie auf zwei Teile, welche miteinander verbunden sind und eine Verbindung zu einem weiteren Teil haben (außerhalb des Tutorials beliebige Anzahl möglich), die Sie von dem Rest abtrennen wollen. </div>
             <div id="moveTileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Bewegen Sie eins der ausgewähltenTeile mit dem Finger. </div>
             <div id="releaseFingerMobileMultiShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileMultiShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
           </div>
           <div class="tutorialCard tutorialGeneral">
-            <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Legen Sie zwei Finger auf das Teil, das Sie lösen wollen. </div>
+            <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Legen Sie zwei Finger auf das Teil, das Sie lösen wollen. (muss mit mindestens einem weiteren Teil verbunden sein)</div>
             <div id="releaseTwoFingersUnclippTutorialDiv"><input type="checkbox" id="releaseTwoFingersUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Finger wieder vom Bildschirm los. </div>
             <div id="selectTileMobileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileTwoFingersUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf das abgelöste Teil. </div>
             <div id="moveTileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="moveTileTwoFingersUnclippTutorial" onclick="checked = !checked"> Bewegen Sie das abgelöste Teil mit dem Finger. </div>
@@ -2834,13 +2839,13 @@ var puzzles = {};
           if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && selected.tiles.includes(i) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height) {
             state.oldTileSelected = true;
           }
-          if (tutorial.state == "twoFingersDownUnclippTutorial" && state.shiftBySwipe) goTutorialSteps(1);
+          if (tutorial.state == "twoFingersDownUnclippTutorial" && state.shiftBySwipe && getConnectedTiles(selected.tiles[0], true).length >= 2) goTutorialSteps(1);
           if (!tileSelectionBar.tiles.includes(i) && !tileSelectionBar.collidesMouse() && !state.newTileSelected && (!selected.tiles.includes(i) || (gerät == "Handy" && (rotatesLeft.checked || rotatesRight.checked))) && mausx >= rotated.x && mausx <= rotated.x + rotated.width && mausy >= rotated.y && mausy <= rotated.y + rotated.height/* && selectedCollides(i) == undefined*/) {
             if (!state.placeTile) {
               if (!selected.tiles.includes(i)) selected.tiles.push(i);
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
-              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial", "selectTileMobileTurorial", "selectTileConnectTileMobileTutorial", "selectTileMobileShiftUnclippTutorial", "selectTileMobileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tutorial.state == "selectTileMobileShiftMultipleUnclippTutorial" && selected.tiles.length >= 2)) {
+              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial", "selectTileMobileTurorial", "selectTileConnectTileMobileTutorial", "selectTileMobileTwoFingersUnclippTutorial"].includes(tutorial.state) || (["selectTileMobileShiftMultipleUnclippTutorial"].includes(tutorial.state) && selected.tiles.length >= 2 && getConnectedTiles(selected.tiles[0], true).length >= 3) || (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state) && getConnectedTiles(selected.tiles[0], true).length >= 2)) {
                 goTutorialSteps(1);
               }
               if (!elmCalled && !touchStart && rotateTiles.checked) {
@@ -3059,7 +3064,7 @@ var puzzles = {};
     if (selected.clip.length && bClipped) {
       new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
       console.log("clipping...");
-      if (["clipTileTutorial", "clipTileMobileTutorial", "clippSecondTutorial"].includes(tutorial.state) || (tutorial.state == "clippSecondMobileTutorial" && getConnectedTiles(selected.tiles[0], true).length >= 4)) {
+      if ((["clipTileTutorial", "clipTileMobileTutorial"].includes(tutorial.state)) || (tutorial.state == "clippSecondTutorial" && getConnectedTiles(selected.tiles[0], true).length >= 4) || (tutorial.state == "clippSecondMobileTutorial" && getConnectedTiles(selected.tiles[0], true).length >= 5)) {
         if (!tutorial.state.includes('Mobile')) automaticTileSelectionReset.checked = false;
         goTutorialSteps(1);
       }
@@ -3678,46 +3683,47 @@ function goTutorialSteps(steps) {
       }
     }, 300);
     if (steps != 0) {
-    if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
-    if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
-    if (tutorial.state == "pressShiftMobileUnclippTutorial") {
-      selectMultipleTitle.innerHTML = "Shift Taste";
-      selectMultipleTitle.style.display = "inline";
-    }
-    if (tutorial.state == "activateRotateLeftTutorial") rotateLeftTitle.style.display = "inline";
-    else rotateLeftTitle.style.display = "none";
-    if (tutorial.state == "activateRotateRightTutorial") rotateRightTitle.style.display = "inline";
-    else rotateRightTitle.style.display = "none";
-    if (steps < 0 && ["pressShiftMobileUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state)) {
-      selected.tiles = [];
-      layout(true);
-    }
-    if (tutorial.state == "scrollArrowTileBarTutorial") {
-      for (const elm of document.getElementsByClassName('backToTileB')) {
-        elm.style.display = "inline";
+      if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, klicken laden Sie die Seite neu. ");
+      if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
+      if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
+      if (tutorial.state == "pressShiftMobileUnclippTutorial") {
+        selectMultipleTitle.innerHTML = "Shift Taste";
+        selectMultipleTitle.style.display = "inline";
       }
-      tileSelectionCanvas.style.display = "inline";
-      selectBackToBarB.style.display = "inline";
-      listTilesS.style.display = "inline";
-      for (var i = 0; i < 16; i++) {
-        tileSelectionBar.tiles.splice(0, 0, i);
-        unclipp(i);
-        mouseDown();
+      if (tutorial.state == "activateRotateLeftTutorial") rotateLeftTitle.style.display = "inline";
+      else rotateLeftTitle.style.display = "none";
+      if (tutorial.state == "activateRotateRightTutorial") rotateRightTitle.style.display = "inline";
+      else rotateRightTitle.style.display = "none";
+      if (steps < 0 && ["pressShiftMobileUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state)) {
+        selected.tiles = [];
+        layout(true);
       }
-      scrollTileSelection(1);
-      scrollTileBarTitle.style.display = "inline";
-      scrollTileBarTitle.style.left = scrollTileSelectionLeft.getBoundingClientRect().left + scrollTileSelectionLeft.getBoundingClientRect().height/2;
-      scrollTileBarTitle.style.top = scrollTileSelectionLeft.getBoundingClientRect().top - scrollTileSelectionLeft.getBoundingClientRect().height/2 - 11;
+      if (tutorial.state == "scrollArrowTileBarTutorial") {
+        for (const elm of document.getElementsByClassName('backToTileB')) {
+          elm.style.display = "inline";
+        }
+        tileSelectionCanvas.style.display = "inline";
+        selectBackToBarB.style.display = "inline";
+        listTilesS.style.display = "inline";
+        for (var i = 0; i < 16; i++) {
+          tileSelectionBar.tiles.splice(0, 0, i);
+          unclipp(i);
+          mouseDown();
+        }
+        scrollTileSelection(1);
+        scrollTileBarTitle.style.display = "inline";
+        scrollTileBarTitle.style.left = scrollTileSelectionLeft.getBoundingClientRect().left + scrollTileSelectionLeft.getBoundingClientRect().height/2;
+        scrollTileBarTitle.style.top = scrollTileSelectionLeft.getBoundingClientRect().top - scrollTileSelectionLeft.getBoundingClientRect().height/2 - 11;
+      }
+      if (tutorial.state == "MouseDownScrollTileBarTutorial") scrollTileBarTitle.style.display = "none";
+      if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
+      if (tutorial.state == "selectTileUnselectStandardTutorial") {
+        setTimeout(() => {
+          swipeSteuerung.checked = false;
+        }, 10);
+      }
+      if (tutorial.state == "mouseDownUnselectAlternativeTutorial") swipeSteuerung.checked = true;
     }
-    if (tutorial.state == "MouseDownScrollTileBarTutorial") scrollTileBarTitle.style.display = "none";
-    if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
-    if (tutorial.state == "selectTileUnselectStandardTutorial") {
-      setTimeout(() => {
-        swipeSteuerung.checked = false;
-      }, 10);
-    }
-    if (tutorial.state == "mouseDownUnselectAlternativeTutorial") swipeSteuerung.checked = true;
-  }
     if (steps != 0) goTutorialSteps(steps + direction*(-1));
   }
   catch (err) {
