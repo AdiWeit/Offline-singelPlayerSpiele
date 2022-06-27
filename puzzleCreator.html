@@ -161,7 +161,7 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick="tutorial.state = ''; document.onkeydown({key: 'F1'});" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
+    <input id="automaticTileSelectionReset" onclick="tutorial.state = ''; document.onkeydown({key: 'F1'}); localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionsettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
@@ -643,7 +643,7 @@ display: block;
       <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
         <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-        <div class="tutorialCard tthisneral">
+        <div class="tutorialCard tutorialgeneral">
           <b style="font-size: 15px;">Information Shift Taste</b>
           <br>
           Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
@@ -954,6 +954,13 @@ display: block;
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
+  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie als zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+    setTimeout(() => {
+      setupTutorial();
+    }, 100);
+  }
+  if (localStorage.getItem('automaticTileSelectionResetPuzzleCreator') != "true" && gerät == "PC") automaticTileSelectionReset.checked = false;
+  else automaticTileSelectionReset.checked = true;
   // section 1: mainly change element style and visibility
   function rotateLeftModeChanged() {
     if (state.rotateLeft) rotatesLeft.checked = false; 
@@ -1346,109 +1353,113 @@ function drawTileGrid(doNotDrawPicture) {
     function create() {
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else if (!state.removeTile) {
-      futureTexturPosition.appendChild(textur);
-      if (modeSelection.value != "traditional") shuffleStyle.value = "none";
-      if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
-      if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
-      positions = {right: [], wrong: []};
-      if (modeSelection.value == "traditional") {
-        positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
-        for (var i = 0; i < positions.layoutOrder.length; i++) {
-          positions.layoutOrder[i] = i;
-        }
+      if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('Sie haben diesen Spielmodus anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle in diesem Modus spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie als zu dem kompletten Tutorial zum Modus ' + modeSelection.value + ' gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+        setupTutorial();
       }
-      automaticTileSelectionReset.checked = true;
-      removeTilesFinishedB.style.display = 'inline';
-      if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
-      showSettings.title = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
-      imageSettings.style.display = "none";
-      modeSelection.style.display = "none";
-      schiebenSettings.style.display = "none";
-      rotateTilesP.style.display = "none";
-      missing = [];
-      if (gerät == "Handy") mobileControls.style.display = "inline";
-      if (sourceIsVideo.checked) {
-        videoControls.style.display = 'block';
-        videoPosition.max = video.duration;
-        settings.style.display = 'block';
-        videoPosition.style.width = window.innerWidth;
-        while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
-          videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
-        }
-        videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
-        playVideo.style.width = playVideo.getBoundingClientRect().width;
-        settings.style.display = 'none';
-        if (video.srcObject) {
-          for (const elm of timeChangeDiv) {
-            elm.style.display = 'none';
+      else {
+        futureTexturPosition.appendChild(textur);
+        if (modeSelection.value != "traditional") shuffleStyle.value = "none";
+        if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
+        if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
+        positions = {right: [], wrong: []};
+        if (modeSelection.value == "traditional") {
+          positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
+          for (var i = 0; i < positions.layoutOrder.length; i++) {
+            positions.layoutOrder[i] = i;
           }
         }
-      }
-      originalSize.width = preview.width;
-      originalSize.height = preview.height;
-      preview.width = größeAnpassenX.value;
-      preview.height = größeAnpassenY.value;
-      textur.width = preview.width + 3*(anzahlX.value - 1) - 1// + 111;
-      textur.height = preview.height + 3*(anzahlY.value - 1) - 1// + 111;
-      videoPreview.width = größeAnpassenX.value;
-      videoPreview.height = größeAnpassenY.value;
-      var pAnzahlX = anzahlX.value;
-      var pAnzahlY = anzahlY.value;
-      if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/pAnzahlX), y: Math.round(originalSize.height/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
-      else lengthPerTeil = {original: {x: Math.round(video.videoWidth/pAnzahlX), y: Math.round(video.videoHeight/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
-      breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
-      randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
-      for (var i = 0; i < pAnzahlY; i++) {
-        for (var i1 = 0; i1 < pAnzahlX; i1++) {
-          if (modeSelection.value == "traditional") {
-            var newTile = {original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}};
-            if (i1) newTile.original.left = {x: positions.right[i*pAnzahlX + i1 - 1]?.original.x, y: positions.right[i*pAnzahlX + i1 - 1]?.original.y};
-            if (i) newTile.original.top = {x: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.x, y: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.y};
-            positions.right.push(newTile);
-            if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.bottom = {x: newTile.original.x, y: newTile.original.y};
-            if (i1) positions.right[i*pAnzahlX + i1 - 1].original.right = {x: newTile.original.x, y: newTile.original.y};
+        removeTilesFinishedB.style.display = 'inline';
+        if (modeSelection.value == "schieben") tileStatusOptions.style.display = 'inline';
+        showSettings.title = "Einstellungsmöglichkeiten und Möglichkeit aufzugeben";
+        imageSettings.style.display = "none";
+        modeSelection.style.display = "none";
+        schiebenSettings.style.display = "none";
+        rotateTilesP.style.display = "none";
+        missing = [];
+        if (gerät == "Handy") mobileControls.style.display = "inline";
+        if (sourceIsVideo.checked) {
+          videoControls.style.display = 'block';
+          videoPosition.max = video.duration;
+          settings.style.display = 'block';
+          videoPosition.style.width = window.innerWidth;
+          while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
+            videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
           }
-          else {
-            positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}})
+          videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
+          playVideo.style.width = playVideo.getBoundingClientRect().width;
+          settings.style.display = 'none';
+          if (video.srcObject) {
+            for (const elm of timeChangeDiv) {
+              elm.style.display = 'none';
+            }
           }
-          positions.right[positions.right.length - 1].border = [];
-          if (i1 == 0) positions.right[positions.right.length - 1].border.push("left");
-          if (i1 == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
-          if (i == 0) positions.right[positions.right.length - 1].border.push("top");
-          if (i == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
-          positions.right[i*pAnzahlX + i1].x = i1;
-          positions.right[i*pAnzahlX + i1].y = i;
         }
-      }
-      positions.wrong = JSON.parse(JSON.stringify(positions.right));
-      for (var i = 0; i < pAnzahlY; i++) {
-        for (var i1 = 0; i1 < pAnzahlX; i1++) {
-          positions.wrong[i*pAnzahlX + i1].edit.x += 3*i1;
-          positions.wrong[i*pAnzahlX + i1].edit.y += 3*i;
+        originalSize.width = preview.width;
+        originalSize.height = preview.height;
+        preview.width = größeAnpassenX.value;
+        preview.height = größeAnpassenY.value;
+        textur.width = preview.width + 3*(anzahlX.value - 1) - 1// + 111;
+        textur.height = preview.height + 3*(anzahlY.value - 1) - 1// + 111;
+        videoPreview.width = größeAnpassenX.value;
+        videoPreview.height = größeAnpassenY.value;
+        var pAnzahlX = anzahlX.value;
+        var pAnzahlY = anzahlY.value;
+        if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/pAnzahlX), y: Math.round(originalSize.height/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
+        else lengthPerTeil = {original: {x: Math.round(video.videoWidth/pAnzahlX), y: Math.round(video.videoHeight/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
+        breiteRand.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3;
+        randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - breiteRand.value;
+        for (var i = 0; i < pAnzahlY; i++) {
+          for (var i1 = 0; i1 < pAnzahlX; i1++) {
+            if (modeSelection.value == "traditional") {
+              var newTile = {original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}};
+              if (i1) newTile.original.left = {x: positions.right[i*pAnzahlX + i1 - 1]?.original.x, y: positions.right[i*pAnzahlX + i1 - 1]?.original.y};
+              if (i) newTile.original.top = {x: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.x, y: positions.right[i*pAnzahlX + i1 - pAnzahlX]?.original.y};
+              positions.right.push(newTile);
+              if (i) positions.right[i*pAnzahlX + i1 - pAnzahlX].original.bottom = {x: newTile.original.x, y: newTile.original.y};
+              if (i1) positions.right[i*pAnzahlX + i1 - 1].original.right = {x: newTile.original.x, y: newTile.original.y};
+            }
+            else {
+              positions.right.push({original: {x: lengthPerTeil.original.x*i1, y: lengthPerTeil.original.y*i, degree: 0}, edit: {x: lengthPerTeil.edit.x*i1, y: lengthPerTeil.edit.y*i, degree: 0}})
+            }
+            positions.right[positions.right.length - 1].border = [];
+            if (i1 == 0) positions.right[positions.right.length - 1].border.push("left");
+            if (i1 == pAnzahlX - 1) positions.right[positions.right.length - 1].border.push("right");
+            if (i == 0) positions.right[positions.right.length - 1].border.push("top");
+            if (i == pAnzahlY - 1) positions.right[positions.right.length - 1].border.push("bottom");
+            positions.right[i*pAnzahlX + i1].x = i1;
+            positions.right[i*pAnzahlX + i1].y = i;
+          }
         }
+        positions.wrong = JSON.parse(JSON.stringify(positions.right));
+        for (var i = 0; i < pAnzahlY; i++) {
+          for (var i1 = 0; i1 < pAnzahlX; i1++) {
+            positions.wrong[i*pAnzahlX + i1].edit.x += 3*i1;
+            positions.wrong[i*pAnzahlX + i1].edit.y += 3*i;
+          }
+        }
+        //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
+        window.scroll(0, /*96 50*/32);
+        if (modeSelection.value == "schieben") {
+          if (!state.restorePuzzle) alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
+          state.removeTile = true;
+          layout(true, false, false, true);
+        }
+        else removeTile(true);
+        // else layout();
+        if (sourceIsVideo.checked) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
+        showSettings.scrollIntoView();
+        window.scroll(0, 0);
+        changeSettingsVis('none');
+        swipeTitle.style.display = "inline";
+        swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
+        swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
+        swipeTitle.style.display = "none";
+        modeHeadline.style.display = 'none';
+        shuffleHeadline.style.display = 'none';
+        startTutorialButton.style.display = "none";
+        texturTop = textur.getBoundingClientRect().top + scrollY;
+        futurePuzzleManager.appendChild(puzzleManager);
       }
-      //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
-      window.scroll(0, /*96 50*/32);
-      if (modeSelection.value == "schieben") {
-        if (!state.restorePuzzle) alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
-        state.removeTile = true;
-        layout(true, false, false, true);
-      }
-      else removeTile(true);
-      // else layout();
-      if (sourceIsVideo.checked) canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
-      showSettings.scrollIntoView();
-      window.scroll(0, 0);
-      changeSettingsVis('none');
-      swipeTitle.style.display = "inline";
-      swipeTitle.style.top = swipeSymbol.getBoundingClientRect().bottom + 20;
-      swipeTitle.style.left = swipeSymbol.getBoundingClientRect().left + swipeSymbol.getBoundingClientRect().width/2 - swipeTitle.getBoundingClientRect().width/2;
-      swipeTitle.style.display = "none";
-      modeHeadline.style.display = 'none';
-      shuffleHeadline.style.display = 'none';
-      startTutorialButton.style.display = "none";
-      texturTop = textur.getBoundingClientRect().top + scrollY;
-      futurePuzzleManager.appendChild(puzzleManager);
     }
     autoScroll = setInterval(function () {
       if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
@@ -1519,6 +1530,7 @@ var pScrollY = scrollY;
     if (emptyTileBar.checked)  shuffleStyle.value = shuffleStyleBar.value;
     if (modeSelection.value == "schieben" && !selected.tiles.length && !state.restorePuzzle) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
     else {
+      localStorage.setItem('tutorialAskedPuzzleCreator' + modeSelection.value, "true");
       for (var i = 0; i < anzahlY.value; i++) {
       for (var i1 = 0; i1 < anzahlX.value; i1++) {
         positions.wrong[i*anzahlX.value + i1].edit.x -= 3*i1;
@@ -1673,7 +1685,6 @@ var pScrollY = scrollY;
   hitboxHeight.value = lengthPerTeil.edit.y/4;
   hitboxTextur.width = lengthPerTeil.edit.x*2 + 33;
   hitboxTextur.height = lengthPerTeil.edit.y*2 + 33;
-  if (gerät == "PC") automaticTileSelectionReset.checked = false;
   if (shuffleStyle.value == "listTiles") {
     tileSelectionCanvas.style.display = "inline";
     selectBackToBarB.style.display = 'inline';
@@ -3038,7 +3049,6 @@ var puzzles = {};
     if (tutorial.state == "rotateTileTutorialAlternative") goTutorialSteps(-2);
     if (tutorial.state == "releaseMoveTutorial") {
       goTutorialSteps(1);
-      if (moveStyleSettingChosen.checked) goTutorialSteps(1);
     }
     if (["getClippingOptionConnectTileTutorial", "manuallyScrollingTutorial", "automaticScrollingTutorial", "moveMouseOutUnselectAlternativeTutorial"].includes(tutorial.state) && (automaticTileSelectionReset.checked || modeSelection.value != "traditional")) {
       goTutorialSteps(-1);
@@ -3676,6 +3686,7 @@ function setupTutorial() {
   }
   var tutorialSteps = [];
 function startTutorial() {
+  showTutorialB.innerHTML = "Tutorial verstecken";
   var mode = modeSelection.value;
   document.getElementById('tutorial').style.display = "inline";
   // document.getElementById(mode + 'Tutorial').style.display = "inline";
@@ -3750,10 +3761,11 @@ function goTutorialSteps(steps) {
           }, 1000);
       }
     }, 300);
+    if (tutorial.state == "tileClickMoveTutorial") automaticTileSelectionReset.checked = false;
     if (steps != 0) {
       if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, klicken laden Sie die Seite neu. ");
       if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
-      if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
+      if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined && steps == 1) goTutorialSteps(1);
       if (tutorial.state == "pressShiftMobileUnclippTutorial") {
         selectMultipleTitle.innerHTML = "Shift Taste";
         selectMultipleTitle.style.display = "inline";
@@ -3763,6 +3775,7 @@ function goTutorialSteps(steps) {
       else rotateLeftTitle.style.display = "none";
       if (tutorial.state == "activateRotateRightTutorial") rotateRightTitle.style.display = "inline";
       else rotateRightTitle.style.display = "none";
+      if (moveStyleSettingChosen.checked && tutorial.state == "moveStyleSettingChosen" && steps == 1) goTutorialSteps(1);
       if (steps < 0 && ["pressShiftMobileUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state)) {
         selected.tiles = [];
         layout(true);
@@ -3787,7 +3800,7 @@ function goTutorialSteps(steps) {
         scrollTileBarTitle.style.left = scrollTileSelectionLeft.getBoundingClientRect().left + scrollTileSelectionLeft.getBoundingClientRect().height/2;
         scrollTileBarTitle.style.top = scrollTileSelectionLeft.getBoundingClientRect().top - scrollTileSelectionLeft.getBoundingClientRect().height/2 - 11;
       }
-      if (tutorial.state == "MouseDownScrollTileBarTutorial") scrollTileBarTitle.style.display = "none";
+      else scrollTileBarTitle.style.display = "none";
       if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
       if (tutorial.state == "selectTileUnselectStandardTutorial") {
         setTimeout(() => {
