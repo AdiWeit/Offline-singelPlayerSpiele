@@ -70,7 +70,7 @@
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
 <a id="rotateTilesAdaptionSettings">
-  <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true);" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
+  <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true); drawTileGrid();" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
     und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
   <br>
 </a>
@@ -1211,7 +1211,7 @@ display: block;
         waitTime = 1777;
         canvas.fillStyle = "red";
       }
-      else if (shortHaltCollider.checked) canvas.fillStyle = "hsl(0, 100%, 34%)";
+      else canvas.fillStyle = "hsl(0, 100%, 34%)";
       state.rightTileCollidesHitbox = false;
     }
     canvas.fillRect(lengthPerTeil.edit.x*2 + 11, state.hitboxPos.rightTile, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
@@ -1229,7 +1229,7 @@ display: block;
         waitTime = 1777;
         canvas.fillStyle = "red";
       }
-      else if (shortHaltCollider.checked) canvas.fillStyle = "hsl(0, 100%, 34%)";
+      else canvas.fillStyle = "hsl(0, 100%, 34%)";
       state.leftTileCollidesHitbox = false;
     }
     canvas.fillRect(state.hitboxPos.bottomTile, lengthPerTeil.edit.y*2 + 11, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
