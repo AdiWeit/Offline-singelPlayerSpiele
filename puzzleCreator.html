@@ -1853,10 +1853,12 @@ function canvasClicked(calledBy) {
     }
     }
     else if (modeSelection.value == "schieben" && selected.tile/* && selected.boolean*/ && missing.length && !state.removeTile) {
+      var tileMoved = false;
       for (var i1 = 0; i1 < missing.length; i1++) {
         pMissing = missing[i1];
         if (possibleMissing.length && pMissing == (selected.tile.x)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y) {
           moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
+          tileMoved = true;
         }
         else {
         if ((pMissing == (selected.tile.x + 1)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y) /*right*/ || (pMissing ==(selected.tile.x - 1)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y)/*left*/ || (pMissing == selected.tile.x*lengthPerTeil.edit.x + ' - ' + (selected.tile.y + 1)*lengthPerTeil.edit.y)/*down*/ || (pMissing == (selected.tile.x*lengthPerTeil.edit.x + ' - ' + (selected.tile.y - 1)*lengthPerTeil.edit.y)/*up*/)) {
@@ -1868,7 +1870,7 @@ function canvasClicked(calledBy) {
         }
       }
   }
-  if (possibleMissing.length == 1) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
+  if (possibleMissing.length == 1 && !tileMoved) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
 }
     else if (selected.tile && (modeSelection.value == "exchange"/* || missing*/) && !state.exchangedTiles && !state.unselected) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
@@ -3146,7 +3148,7 @@ var puzzles = {};
     if (swipeSteuerung.checked && modeSelection.value == "exchange" && checkSelected()) {
       canvasClicked('mouseup');
     }
-    if (automaticTileSelectionReset.checked || !selected.tiles.length || (state.removeTile && automaticTileSelectionReset.checked)) {
+    if (automaticTileSelectionReset.checked || !selected.tiles.length || (state.removeTile && (automaticTileSelectionReset.checked)) || modeSelection.value != "traditional") {
       state.mouse = "up";
       if (tutorial.state == "releaseShiftAlternativeUnclippTutorial") {
         unselectAlternativeUnclippTutorial.checked = true;
