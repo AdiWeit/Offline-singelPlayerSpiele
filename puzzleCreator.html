@@ -1524,6 +1524,14 @@ var pScrollY = scrollY;
       }
     }
   }
+  function checkAutoscrollStop(scrollBefore) {
+    setTimeout(() => {
+      if (tutorial.state == "stopScrollingAutomaticScrollingTutorial") {
+        if (scrollX == scrollBefore.x && scrollY == scrollBefore.y) goTutorialSteps(1);
+        checkAutoscrollStop({x: scrollX, y: scrollY});
+      }
+    }, 777);
+  }
   function shufflePuzzle() {
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked)  shuffleStyle.value = shuffleStyleBar.value;
@@ -2314,7 +2322,7 @@ var puzzles = {};
     layout(true, true);
     positionBackToTileBarButtons();
   }
-  var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 0, height: 0, leftOffScreenTiles: 0, offset: 0};
+  var tileSelectionBar = {canvas: tileSelectionCanvas.getContext('2d'), tiles: [], scrollX: 1, height: 0, leftOffScreenTiles: 0, offset: 0};
   tileSelectionBar.collidesMouse = () => {
     var obj = tileSelectionCanvas.getBoundingClientRect();
     return collides({x: mausx, y: mausy - scrollY + texturTop, width: 1, height: 1}, obj).boolean;
@@ -2954,8 +2962,7 @@ var puzzles = {};
     }
     if (state.tileChanged && JSON.stringify(checkSelected()) == JSON.stringify(selected.coord) && tutorial.state == "moveMouseInUnselectAlternativeTutorial") goTutorialSteps(1);
     if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
-      if (tutorial.state == "moveMouseMoveTutorial" && rotateTileTutorial.checked) goTutorialSteps(1);
-      if (tutorial.state == "moveMouseMoveTutorialAlternative" && rotateTileTutorialAlternative.checked) goTutorialSteps(1);
+      if ((tutorial.state == "moveMouseMoveTutorial" && rotateTileTutorial.checked) || (tutorial.state == "moveMouseMoveTutorialAlternative" && rotateTileTutorialAlternative.checked)) goTutorialSteps(1);
       goTutorialSteps(1);
     }
     if (state.mouse == "down" && tileSelectionBar.collidesMouse() && tutorial.state == "MouseDownScrollTileBarTutorial" && calledBy != "mousedown") goTutorialSteps(1);
@@ -3769,6 +3776,7 @@ function goTutorialSteps(steps) {
       if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, klicken laden Sie die Seite neu. ");
       if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
       if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined && steps == 1) goTutorialSteps(1);
+      if (tutorial.state == "stopScrollingAutomaticScrollingTutorial") checkAutoscrollStop({x: scrollX, y: scrollY});
       if (tutorial.state == "pressShiftMobileUnclippTutorial") {
         selectMultipleTitle.innerHTML = "Shift Taste";
         selectMultipleTitle.style.display = "inline";
