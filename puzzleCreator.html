@@ -27,7 +27,6 @@
 <div id="imageSettings">
 <div class="tutorialCard tutorialGeneral">
 <h1 id="selectSourceHeader" style="color: red;">Quelle auswählen</h1>
-<img src="https://adi.nicolaiweitkemper.de/Bilder/import_picture_icon.png" style="width: 100px; height: 100px;" title="Bild oder Video importieren" draggable="false" >
 <br>
 <input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
@@ -376,8 +375,8 @@
 <canvas id="tileSelectionCanvas" style="display: none;" onmousedown="mouseDown(true);" onmouseup="mouseUp();" width="1" height="1"></canvas>
 <div class="expandButtons" id="backToBarButtons">
 </div>
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1, 'elm');">
-<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.3'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1, 'elm');">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.6'" id="scrollTileSelectionRight" onclick="scrollTileSelection(1, 'elm');">
+<img draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/roterPfeil.png" onmouseover="this.style.opacity = '1'" onmouseout="this.style.opacity = '0.6'" id="scrollTileSelectionLeft" onclick="scrollTileSelection(-1, 'elm');">
 <style>
   .dropdown {
 position: relative;
@@ -414,13 +413,13 @@ display: block;
   #scrollTileSelectionRight {
     position: fixed;
     right: 0px;
-    opacity: 0.3;
+    opacity: 0.6;
     display: none;
   }
   #scrollTileSelectionLeft {
     position: fixed;
     left: 0px;
-    opacity: 0.3;
+    opacity: 0.6;
     transform: rotate(180deg);
     display: none;
   }
@@ -2926,6 +2925,8 @@ var puzzles = {};
           var tile = positions.wrong[tileI];
           if (mausx > (5 + lengthPerTeil.sizeAdapted.x)*i + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && mausx < (5 + lengthPerTeil.sizeAdapted.x)*(i + 1) + 5 - tileSelectionBar.leftOffScreenTiles*(lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x)) + tileSelectionBar.offset && tileSelectionBar.collidesMouse()) {
             tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
+            if (rotatesLeft.checked) rotateTile(tileI, -90);
+            if (rotatesRight.checked) rotateTile(tileI, 90);
             if (["MouseDownScrollTileBarTutorial", "selectTileBarTileTutorial", "selectTileTileBarZurückInLeisteTutorial"].includes(tutorial.state)) goTutorialSteps(1);
             layout();
           }
@@ -3239,13 +3240,15 @@ layout(false, true);
       var collidesTilesBar = tileSelectionBar.collidesMouse();
       if (rotateTiles.checked) {
         if (event.key == "ArrowRight") {
-          if (collidesTilesBar) {
+          if (collidesTilesBar && state.mouse == "up") {
             scrollTileSelection(1, "arrowKey");
           }
+          else if (collidesTilesBar) rotateTile(tileSelectionBar.selectedTile.tileI, 90);
           else rotateSelected(90);
         }
         if (event.key == "ArrowLeft") {
-          if (collidesTilesBar) scrollTileSelection(-1, "arrowKey");
+          if (collidesTilesBar && state.mouse == "up") scrollTileSelection(-1, "arrowKey");
+          else if (collidesTilesBar) rotateTile(tileSelectionBar.selectedTile.tileI, -90);
           else rotateSelected(-90);
         }
       }
