@@ -211,6 +211,10 @@
       <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
+        <input onchange="if (checked) {showHitboxes(); shortHaltColliderDiv.style.display = 'inline';} else shortHaltColliderDiv.style.display = 'none';" id="doHitboxAnimation" type="checkbox"> animation
+        <br>
+        <div id="shortHaltColliderDiv" style="display: none;"><input id="shortHaltCollider" type="checkbox"> stoppe kurz bei Anfangspunkt und Endpunkt der Kollision</div>
+        <br>
         Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
         <br>
         Hitbox Höhe: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
@@ -1172,16 +1176,79 @@ display: block;
     getPuzzles();
     document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
   }
-  function showHitboxes() {
+  function showHitboxes(recursively) {
     var canvas = hitboxTextur.getContext('2d');
+    var waitTime = 0;
+    if (doHitboxAnimation.checked && tileColliderSettings.style.display == "block" && (!state.hitboxPos || recursively)) {
+      if (!state.hitboxPos) state.hitboxPos = {bottomTile: lengthPerTeil.edit.x, rightTile: lengthPerTeil.edit.y};
+      if (!state.hitboxDirection) state.hitboxDirection = {bottomTile: -1, rightTile: 1};
+      setTimeout(() => {
+        if (state.hitboxPos.bottomTile < 0 || state.hitboxPos.bottomTile > lengthPerTeil.edit.x*2) state.hitboxDirection.bottomTile *= -1;
+        if (state.hitboxPos.rightTile < 0 || state.hitboxPos.rightTile > lengthPerTeil.edit.y*2) state.hitboxDirection.rightTile *= -1;
+        state.hitboxPos.bottomTile += state.hitboxDirection.bottomTile;
+        state.hitboxPos.rightTile += state.hitboxDirection.rightTile;
+        setTimeout(() => {
+          showHitboxes(true);
+        }, waitTime);
+      }, 10);
+    }
+    if (!(doHitboxAnimation.checked && tileColliderSettings.style.display == "block")) state.hitboxPos = undefined;
     canvas.clearRect(0, 0, hitboxTextur.width, hitboxTextur.height);
-    canvas.fillStyle = "red";
+    canvas.fillStyle = "hsl(0, 100%, 41%)";
+    if (doHitboxAnimation.checked) {
+    canvas.fillRect(lengthPerTeil.edit.x, lengthPerTeil.edit.y, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    // right
+    if (collides({x: lengthPerTeil.edit.x*2, y: lengthPerTeil.edit.y/2 - parseInt(hitboxHeight.value)/2 + lengthPerTeil.edit.y, width: 10, height: parseInt(hitboxHeight.value)}, {x: lengthPerTeil.edit.x*2, y: lengthPerTeil.edit.y/2 - parseInt(hitboxHeight.value)/2 + state.hitboxPos.rightTile, width: 10, height: parseInt(hitboxHeight.value)}).boolean) {
+      if (shortHaltCollider.checked && !state.rightTileCollidesHitbox) {
+        waitTime = 1777;
+        canvas.fillStyle = "hsl(120, 100%, 40%)";
+      }
+      else canvas.fillStyle = "green";
+      state.rightTileCollidesHitbox = true;
+    }
+    else {
+      if (shortHaltCollider.checked && state.rightTileCollidesHitbox) {
+        waitTime = 1777;
+        canvas.fillStyle = "red";
+      }
+      else if (shortHaltCollider.checked) canvas.fillStyle = "hsl(0, 100%, 34%)";
+      state.rightTileCollidesHitbox = false;
+    }
+    canvas.fillRect(lengthPerTeil.edit.x*2 + 11, state.hitboxPos.rightTile, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    // bottom
+    if (collides({x: lengthPerTeil.edit.x/2 - parseInt(hitboxWidth.value)/2 + lengthPerTeil.edit.x, y: lengthPerTeil.edit.y*2, width: parseInt(hitboxWidth.value), height: 10}, {x: lengthPerTeil.edit.x/2 - parseInt(hitboxWidth.value)/2 + state.hitboxPos.bottomTile, y: lengthPerTeil.edit.y*2, width: parseInt(hitboxWidth.value), height: 10}).boolean) {
+      if (shortHaltCollider.checked && !state.leftTileCollidesHitbox) {
+        waitTime = 1777;
+        canvas.fillStyle = "hsl(120, 100%, 40%)";
+      }
+      else canvas.fillStyle = "green";
+      state.leftTileCollidesHitbox = true;
+    }
+    else {
+      if (shortHaltCollider.checked && state.leftTileCollidesHitbox) {
+        waitTime = 1777;
+        canvas.fillStyle = "red";
+      }
+      else if (shortHaltCollider.checked) canvas.fillStyle = "hsl(0, 100%, 34%)";
+      state.leftTileCollidesHitbox = false;
+    }
+    canvas.fillRect(state.hitboxPos.bottomTile, lengthPerTeil.edit.y*2 + 11, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+    canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
+    // right
+    canvas.fillRect(lengthPerTeil.edit.x*2, lengthPerTeil.edit.y/2 - hitboxHeight.value/2 + lengthPerTeil.edit.y, 10, hitboxHeight.value);
+    canvas.fillRect(lengthPerTeil.edit.x*2, lengthPerTeil.edit.y/2 - hitboxHeight.value/2 + state.hitboxPos.rightTile, 10, hitboxHeight.value);
+    // bottom
+    canvas.fillRect(lengthPerTeil.edit.x/2 - hitboxWidth.value/2 + lengthPerTeil.edit.x, lengthPerTeil.edit.y*2, hitboxWidth.value, 10);
+    canvas.fillRect(lengthPerTeil.edit.x/2 - hitboxWidth.value/2 + state.hitboxPos.bottomTile, lengthPerTeil.edit.y*2, hitboxWidth.value, 10);
+  }
+    else {
     canvas.fillRect(0, 0, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     canvas.fillRect(lengthPerTeil.edit.x + 11, 0, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     canvas.fillRect(0, lengthPerTeil.edit.y + 11, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     canvas.fillStyle = "rgba(6, 143, 255, 0.82)";
     canvas.fillRect(lengthPerTeil.edit.x, lengthPerTeil.edit.y/2 - hitboxHeight.value/2, 10, hitboxHeight.value);
     canvas.fillRect(lengthPerTeil.edit.x/2 - hitboxWidth.value/2, lengthPerTeil.edit.y, hitboxWidth.value, 10);
+    }
   }
   function changeAdaptedSizeMax(width, height) {
     textur.width = width// + 111;
@@ -1694,8 +1761,8 @@ var pScrollY = scrollY;
   hitboxWidth.value = lengthPerTeil.edit.x/4;
   hitboxHeight.max = lengthPerTeil.edit.y;
   hitboxHeight.value = lengthPerTeil.edit.y/4;
-  hitboxTextur.width = lengthPerTeil.edit.x*2 + 33;
-  hitboxTextur.height = lengthPerTeil.edit.y*2 + 33;
+  hitboxTextur.width = lengthPerTeil.edit.x*3 + 33;
+  hitboxTextur.height = lengthPerTeil.edit.y*3 + 33;
   if (shuffleStyle.value == "listTiles") {
     tileSelectionCanvas.style.display = "inline";
     selectBackToBarB.style.display = 'inline';
