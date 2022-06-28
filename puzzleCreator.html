@@ -295,6 +295,8 @@
       <br>
       <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
     </a>
+    <br>
+    <input id="showRemovedTiles" type="checkbox"> gelöschte Teile als Anhaltspunkte an richtiger Position anzeigen (vorrausgesetzt kein Teil wurde auf die Position geschoben)
   </a>
   </div>
   <div id="generalSettings" class="tutorialCard tutorialGeneral">
@@ -1428,6 +1430,7 @@ function drawTileGrid(doNotDrawPicture) {
       }
       else {
         futureTexturPosition.appendChild(textur);
+        turnsHistoryS.prepend(modeSettingsHeading);
         if (modeSelection.value != "traditional") shuffleStyle.value = "none";
         if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
         if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
@@ -1603,6 +1606,7 @@ var pScrollY = scrollY;
       }
     }, 777);
   }
+  var positionsBeginning = [];
   function shufflePuzzle() {
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked)  shuffleStyle.value = shuffleStyleBar.value;
@@ -1620,6 +1624,7 @@ var pScrollY = scrollY;
       var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
       for (var i of selected.tiles) {
         missing.push(JSON.parse(JSON.stringify(positions.wrong[i].edit.x + ' - ' + positions.wrong[i].edit.y)));
+        positionsBeginning.push(positions.wrong[i]);
         positions.wrong.forEach((position, i1) => {
           for (var direc of ['top', 'right', 'bottom', 'left']) {
             if (positions.wrong[i].border.includes(directionConverter[direc]) && positions.wrong[i].original[direc] && !i1/* && !selected.tiles.includes(getTile(positions.wrong[i].original[direc]))*/) {
@@ -1889,9 +1894,10 @@ function canvasClicked(calledBy) {
     }
     selected.tile = checkSelected();
   }
-  function getTileIByCoord(coord) {
-    for (let i = 0; i < positions.wrong.length; i++) {
-      if (positions.wrong[i].edit.x/lengthPerTeil.edit.x == coord.x && positions.wrong[i].edit.y/lengthPerTeil.edit.y == coord.y) return i;
+  function getTileIByCoord(coord, positionType) {
+    if (!positionType) positionType = "wrong";
+    for (let i = 0; i < positions[positionType].length; i++) {
+      if (positions[positionType][i].edit.x/lengthPerTeil.edit.x == coord.x && positions[positionType][i].edit.y/lengthPerTeil.edit.y == coord.y) return i;
     }
   }
   // section 2.1: movementPlayer (player of PC movement in schieben mode)
@@ -2491,6 +2497,11 @@ var puzzles = {};
     else if (positions.wrong.length) tileSelectionCanvas.width = positions.wrong.length*lengthPerTeil.edit.x;
     if (lengthPerTeil.sizeAdapted && (lengthPerTeil.sizeAdapted.x + 5*(lengthPerTeil.sizeAdapted.x/lengthPerTeil.edit.x))*tileSelectionBar.tiles.length < window.innerWidth) tileSelectionBar.scrollX = 0;
     richtige = 0;
+    if (modeSelection.value == "schieben") {
+      for (const position of positionsBeginning) {
+        if (showRemovedTiles.checked) drawPictureSegment(position, position, removeTilesScreen, null, null, null, 0.5);
+      }
+    }
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
       var i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
@@ -2533,7 +2544,7 @@ var puzzles = {};
   }
 }
   var richtige = 0;
-  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1) {
+  function drawPictureSegment(position, segmentPosition, removeTilesScreen, i, pCanvas, i1, tileTransparency) {
     if (i1 == undefined) i1 = tileSelectionBar.getTilePosition(i);
     if (!pCanvas) pCanvas = canvas;
     else if (!state.modelEmptybar) {
@@ -2548,10 +2559,13 @@ var puzzles = {};
       if (tileSelectionBar.selectedTile?.tileI == i) tileSelectionBar.canvas.fillRect(-(lengthPerTeil.edit.x/2) - 5, -(lengthPerTeil.edit.y/2) - 5, lengthPerTeil.edit.x + 10, lengthPerTeil.edit.y + 10);
     }
     pCanvas.rotate(position.original.degree*Math.PI/180);
+    if (tileTransparency) canvas.globalAlpha = tileTransparency;
     if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // pCanvas.restore();
-    if ((((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !state.removeTile && !finished)) {
+    canvas.globalAlpha = 1;
+    // #potentialErrorCause
+    if (tileTransparency != 0.5 && (((modeSelection.value != "traditional" && position.edit.x == segmentPosition.edit.x && position.edit.y == segmentPosition.edit.y) || (modeSelection.value == "traditional" && angular.equals(position.original, segmentPosition.original) && connectedTilesRotationRight(position.original))) && !removeTilesScreen && !state.removeTile && !finished)) {
       var rgbColor = hexTorgb(markRightColor.value);
       pCanvas.fillStyle = `rgba(${rgbColor[0]}, ${rgbColor[1]}, ${rgbColor[2]}, ${rightMarkerTransparence.value})`
       if (richtigPlazierte.checked) {
