@@ -160,7 +160,7 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick="tutorial.state = ''; document.onkeydown({key: 'F1'}); localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
+    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1'}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionsettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
@@ -591,6 +591,8 @@ display: block;
         <b>Informationen zum Teile drehen</b>
         <br>
         Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie die Teile zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+        <br>
+        Zudem können Sie auch in der später erwähnten Teilliste die Teile mit den Pfeiltasten rotieren, während Sie die Maustaste gedrückt haben bzw. auf das Touchpad einen Doppelklick ausgeführt haben. 
       </div>
       <div class="tutorialCard tutorialGeneral" id="moveStandardPC">
         <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" name="moveStyle"> <b>Standard</b>
@@ -842,6 +844,8 @@ display: block;
             <b>Informationen zum Teile drehen</b>
             <br>
             Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+            <br>
+            Zudem können Sie nach Aktivieren der Rotierfunktion oben in der Leiste auch in der später erwähnten Teilleiste durch Anklicken der Teile rotieren, bis Sie die Funktion abgewählt haben. 
           </div>
           <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Rotieren nach links aktivieren.</div>
           <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
