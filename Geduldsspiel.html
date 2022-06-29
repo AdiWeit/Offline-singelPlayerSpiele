@@ -33,29 +33,6 @@
     <div class="shape" id="sphere1"></div>
   </div>
   <br>
-  <div class="" id="levelEditTool">
-  <button type="button" id="back" onclick="folgenKeyPressed({key: 'z', ctrlKey: true})" name="button">←</button>
-  <button type="button" onclick="select(name)" id="rotatingWall" name="rotatingWall">rotierendes Viereck</button>
-  <button type="button" onclick="select(name)" id="blinkWall" name="blinkWall">blinkendes Viereck</button>
-  <button type="button" style="background: ''" onclick="select(name)" id="rotatingDreieck" name="rotatingDreieck">rotierendesDreieck</button>
-  <input type="range" min="1" onchange="changedSlider(id)" oninput="changing(id)" max="1500" value="55" size="277" width="277" class="slider" id="sliderWidth">
-  <input type="range" min="1" onchange="changedSlider(id)" oninput="changing(id)" max="800" value="55" class="slider" id="sliderHeight">
-  <input type="range" min="1" onchange="changedSlider(id)" oninput="changing(id)" max="200" value="37" class="slider" id="sliderSize">
-  <input type="text" placeholder="angle(ca.°)" value="0" onchange="changeTextbox(id)" id="angle"></input>
-  <input type="text" placeholder="time for 360° Rotation in mili secs" onchange="changeTextbox(id)" id="timeFor360GradRotation" value="1000"></input>
-
-  <input type="text" placeholder="time visible" onchange="changeTextbox(id)" id="timeVisible" value="3000"></input>
-  <input type="text" placeholder="time invisible" onchange="changeTextbox(id)" id="timeInvisible" value="3000"></input>
-  <button type="button" id="select" onclick="selected()" name="button">select</button>
-  <button type="button" id="save" onclick="folgenKeyPressed({key: 's', ctrlKey: true})" name="button">save</button>
-  <button type="button" id="testLevel" onclick="testLevel();" name="button">test Level</button>
-  <button type="button" id="uploadLevel" onclick="uploadLevel()" name="button">upload level</button>
-  <button type="button" id="forward" onclick="folgenKeyPressed({key: 'y', ctrlKey: true})" name="button">→</button>
-  <br>
-  <br>
-  <p id="pictureSelection">select Picture as level from PC<input type="file" onchange="imageLoaded(this);"></p>
-  <select name="course" id="courceSelectionEdit" onchange="courceSelectedEdit(value)">Hintergrund von vorgefertigten Leveln auswählen</select>
-  </div>
   <head>
     <style>
       table, td {
@@ -171,81 +148,15 @@
       sensibilityAcc = {x: value, y: value};
   //}
   }
-    function changing(id) {
-      //  console.log(document.getElementById('sliderWidth').value);
-      // if (id == "")
-      //if (!(level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout")) AblageListe[7] = JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"]));
-      //level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = "Layout";
-      level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][id.replace("slider", "").toLowerCase()] = JSON.parse(JSON.stringify(document.getElementById(id).value))
-      Layout();
-      // setTimeout(function () {
-      //   Layout();
-      // }, 100);
-    }
-
-    function changedSlider(id) {
-      level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory] /*[level[level.mode].editHistory.length - 1]*/ )));
-      //  if (level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] == "Layout") level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = AblageListe[0]
-      //  level[level.mode].stepOfHistory++;
-      level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
-      Layout();
-    }
-
-    function changeTextbox(id) {
-      if (!(isNaN(document.getElementById(id).value))) {
-        level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory])));
-        level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][id] = document.getElementById(id).value;
-        //  level[level.mode].stepOfHistory++;
-        level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
-        Layout();
-      }
-    }
-    function courceSelectedEdit(value) {
-      AblageListe[4] = true;
-      if (offline == false) document.getElementById('preview').src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + value.toString().split('.')[0] + ".png";
-      else document.getElementById('preview').src = level[level.mode].mapsVorgefertigt[JSON.parse(value.toString().split('.')[0]) - 1];
-      Layout();
-      setTimeout(function() {
-        Layout();
-      }, 500);
-    }
-    // function changeAngle() {
-    //   level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["angle"] = document.getElementById("angle").value;
-    //   Layout();
-    //   level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1])));
-    //
-    // }
-    // function changetimeFor360GradRotation() {
-    //   level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById("timeFor360GradRotation").value;
-    //   Layout();
-    //   level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].editHistory.length - 1])));
-    // }
-    // document.getElementById('image').width = window.innerWidth;
-    // document.getElementById('image').height = AblageListe[5];
     visible([
-      ['pictureSelection', "none"],
       ['app', "none"],
       // ['sliderSize', "none"],
       // ['sliderWidth', "none"],
       // ['sliderHeight', "none"],
       // ['angle', "none"]
-      ['levelEditTool', "none"]
     ])
-    // document.getElementById('pictureSelection').style.display = "none";
-    // document.getElementById('sliderSize').style.display = "none";
-    // document.getElementById('sliderWidth').style.display = "none";
-    // document.getElementById('sliderHeight').style.display = "none";
-    // document.getElementById('angle').style.display = "none";
 
     var canvas = textur.getContext('2d'); //Dimension
-    document.getElementById('textur').width = window.innerWidth - 20;
-    document.getElementById('textur').height = window.innerHeight - 20;
-    visible([
-      ['timeFor360GradRotation', "none"],
-      ['timeVisible', "none"],
-      ['timeInvisible', "none"]
-    ]);
-    document.getElementById('timeFor360GradRotation').style.display = "none";
     console.log(window.innerWidth + " - " + window.innerHeight);
     var RotatingWall;
     var RotatingDreieck;
@@ -303,7 +214,7 @@
           sensibility: 5,
           spawnPoint: {
             x: 50,
-            y: 355
+            y: 155
           }
         },
         5: {
@@ -322,14 +233,14 @@
           blinkWall: [{
             timeInvisible: 3000,
             timeVisible: 3000,
-            x: /*220*/ window.innerWidth / 7.25,
-            y: /*177*/ window.innerHeight / 4.4,
-            width: /*115*/ window.innerWidth / 14,
+            x: 210,
+            y: 177,
+            width: 115,
             height: 17
           }, {
-            x: /*220*/ window.innerWidth / 7.25,
-            y: /*177*/ window.innerHeight / 2,
-            width: /*115*/ window.innerWidth / 14,
+            x: 210,
+            y: 288,
+            width: 115,
             height: 17
           }]
         },
@@ -404,7 +315,7 @@
           }]
         },
         8: {
-          sensibility: 15,
+          sensibility: 10,
           spawnPoint: {
             x: 10,
             y: 255
@@ -413,25 +324,25 @@
             x: window.innerWidth / (1600 / 300),
             y: window.innerHeight / (769 / 155),
             size: window.innerWidth / (1600 / 37),
-            timeFor360GradRotation: 1000,
+            timeFor360GradRotation: 3000,
             angle: 0
           }, {
             x: window.innerWidth / (1600 / 500),
             y: window.innerHeight / (769 / 444),
             size: (window.innerWidth + window.innerHeight) / ((1600 + 769) / 37),
-            timeFor360GradRotation: 1000,
+            timeFor360GradRotation: 3000,
             angle: 10
           }, {
             x: window.innerWidth / (1600 / 733),
             y: window.innerHeight / (769 / 588),
             size: window.innerWidth / (1600 / 37),
-            timeFor360GradRotation: 1000,
+            timeFor360GradRotation: 3000,
             angle: 0
           }, {
             x: window.innerWidth / (1600 / 1222),
             y: window.innerHeight / (769 / 377),
             size: window.innerWidth / (1600 / 96),
-            timeFor360GradRotation: 777,
+            timeFor360GradRotation: 3077,
             angle: 0
           }]
         },
@@ -449,27 +360,39 @@
             y: 255
           },
           rotatingWall: [{
-            x: window.innerWidth / 4.22,
-            y: window.innerHeight / 5.85,
-            width: window.innerWidth / 2.9,
+            x: 355,
+            y: 130,
+            width: 370,
             height: 17,
             angle: 0
           }, {
-            x: window.innerWidth / 2.4,
-            y: window.innerHeight / 1.9,
-            width: window.innerWidth / 4,
+            x: 1080,
+            y: 450,
+            width: 400,
             height: 17,
             angle: 0
           }, {
-            x: window.innerWidth / 1.44,
-            y: window.innerHeight / 1.77,
-            width: window.innerWidth / 5,
+            x: 657,
+            y: 370,
+            width: 355,
             height: 17,
             angle: 0
           }, {
-            x: window.innerWidth / 1.1,
-            y: window.innerHeight / 1.8,
-            width: window.innerWidth / 5,
+            x: 1350,
+            y: 370,
+            width: 311,
+            height: 17,
+            angle: 0
+          }, {
+            x: 911,
+            y: 70,
+            width: 311,
+            height: 17,
+            angle: 0
+          }, {
+            x: 733,
+            y: 630,
+            width: 311,
             height: 17,
             angle: 0
           }]
@@ -509,7 +432,7 @@
             y: 255
           },
           cannons: [
-            {x: window.innerWidth + 100, y: 45, width: 100, height: 100, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
           ],
         },
         17: {
@@ -519,8 +442,8 @@
             y: 255
           },
           cannons: [
-            {x: window.innerWidth + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
-            {x: window.innerWidth + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
+            {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
           ],
         },
       },
@@ -655,278 +578,30 @@
     var highscores = {}
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
-    if (!localStorage.getItem("storedName")) {
-      var name = prompt("What's your user name? (This information is needed to save your highscores (best time) and level progress)");
-    }
-    else var name = localStorage.getItem("storedName");
-    changeName(true);
-    localStorage.setItem("storedName", name);
     for (var i = 0; i < Object.keys(level).length - 1; i++) {
       highscores[Object.keys(level)[i]] = {};
-      highscores[Object.keys(level)[i]][name] = [];
+      // highscores[Object.keys(level)[i]] = [];
     }
     AblageListe[6] = false;
     function selected() {
       if (AblageListe[6] == true) {AblageListe[6] = false; document.getElementById('select').style.background = "";}
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
-    function changeName(nameSelected) {
-      document.getElementById("courceSelection").options.length = 0;
-      if (!nameSelected) name = prompt ("Which user do you want to log in?");
-      nameEingeloggt.innerHTML = "als " + name + " eingeloggt";
-      dbGet("Gelduldspiel", "highscores").then(result => {
-        folgenDbgetHighscores(/*JSON.parse(*/result/*)*/, false);
-        if (localStorage.getItem("uploadScore") == true && localStorage.getItem("profileName") == name) {
-          for (var i = 0; i < Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld"))).length; i++) {
-            level[level.mode].worldWideLevel[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]].highscores[0][name] = localStorage.getItem("levelAroundTheWorld")[Object.keys(JSON.parse(localStorage.getItem("levelAroundTheWorld")))[i]];
-          }
-          localStorage.setItem("uploadScore", false);
-        }
-        if (localStorage.getItem("profileName") == name && localStorage.getItem("highscores") != null && !(angular.equals(highscores[level.mode][joyStickPlay.checked][name]), JSON.parse(localStorage.getItem("highscores"))[name])) {
-          highscores[level.mode][joyStickPlay.checked][name] = JSON.parse(localStorage.getItem("highscores"))[level.mode][name];
-        }
-      }).catch(function(e) {
-        console.error(e);
-        if (e == "TypeError: Failed to fetch") {
-          alert("Offline Modus aktiviert! Da sie keine Internetverbindung haben, werden die zuletzt auf ihrem Gerät gespeicherten Daten verwendet, welche jedoch uventuell nicht aktuell sind. Wenn sie wieder Internet haben, werden die Daten synchronisiert!");
-          offline = true;
-          if (localStorage.getItem("profileName") == name && localStorage.getItem("mapsVorgefertigt") != null) level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
-          else alert("please save the vorgefertigt maps on your device when you are online againt to be alble to play them offline!");
-          document.getElementById('saveMaps').style.display = "none";
-          window.innerWidth += 832;
-          folgenDbgetHighscores(JSON.parse(localStorage.getItem("highscores")), true);
-        }
-      });
-    }
-    function folgenDbgetHighscores(result, offline) {
-        highscores = result
-        // for (var i = 0; i < result.length; i++) {
-        //   highscores[Object.keys(result)[i]] = result[Object.keys(result)[i]];
-        // }
+    folgenDbgetHighscores();
+    function folgenDbgetHighscores() {
+      if (JSON.parse(localStorage.getItem('geduldsspielHighscores'))) highscores = JSON.parse(localStorage.getItem('geduldsspielHighscores'));
       AblageListe[0] = 0;
-      for (var i1 = 0; i1 < Object.keys(highscores).length; i1++) {
-      highscores[Object.keys(highscores)[i1]] = {true: {allMaps: []}, false: {allMaps: []}};
-      for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
-        highscores[Object.keys(highscores)[i1]][true].allMaps.push("allMaps");
-        highscores[Object.keys(highscores)[i1]][false].allMaps.push("allMaps");
-      }
-    }
-        if (highscores[level.mode][false] && highscores[level.mode][false][name] != undefined && highscores[level.mode][false][name].length > 0 && (!highscores[level.mode][true] || !highscores[level.mode][true][name] || highscores[level.mode][false][name].length >= highscores[level.mode][true][name].length)) {
-        for (var i = 0;
-          (i < highscores[level.mode][false][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
-          opt = document.createElement("option");
-          document.getElementById("courceSelection").options.add(opt);
-          opt.setAttribute("id", i);
-          opt.text = (i + 1) + ". map"
-          opt1 = document.createElement("option");
-          document.getElementById("courceSelectionEdit").options.add(opt1);
-          opt1.setAttribute("id", i);
-          opt1.text = (i + 1) + ". map"
-          AblageListe[0] = i;
-        }
-        opt = document.createElement("option");
-        document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", i + 1);
-        opt.text = "show Scores";
-      }
-      else if (highscores[level.mode][true] && highscores[level.mode][true][name] != undefined && Object.keys(highscores[level.mode][true][name]).length > 0 && (!highscores[level.mode][false] || !highscores[level.mode][false][name] || highscores[level.mode][true][name].length >= highscores[level.mode][false][name].length)) {
-      for (var i = 0;
-        (i < highscores[level.mode][true][name].length && i <= Object.keys(level[level.mode].vorgefertigt).length - 1)/* || i < highscores[level.mode][joyStickPlay.checked][name].length*/; i++) {
+      for (let i = 0; i < Object.keys(level.normal.vorgefertigt).length; i++) {
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
         opt.text = (i + 1) + ". map"
-        opt1 = document.createElement("option");
-        document.getElementById("courceSelectionEdit").options.add(opt1);
-        opt1.setAttribute("id", i);
-        opt1.text = (i + 1) + ". map"
-        AblageListe[0] = i;
       }
-      opt = document.createElement("option");
-      document.getElementById("courceSelection").options.add(opt);
-      opt.setAttribute("id", i + 1);
-      opt.text = "show Scores";
-    }
-      else {
-        visible([["modeSelection", "none"]]);
-        highscores.normal[name] = [];
-        opt = document.createElement("option");
-        document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", 0);
-        opt.text = (1) + ". map"
-        courceSelection.value = "1. map";
-      }
-      if (!highscores[level.mode][joyStickPlay.checked] || !highscores[level.mode][joyStickPlay.checked][name] || highscores[level.mode][joyStickPlay.checked][name].length == 0) courceSelected();
-      else document.getElementById('textur').style.display = "none";
-      document.getElementById('courceSelection').value = "select map!";
-    //   if (highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0 && offline == false) {
-    //   dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-    //     folgenDbGetLevelAroundTheWorld(result, false);
-    //   }).catch(function(e) {
-    //     console.error(e);
-    //   });
-    //   dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-    //     folgenDbGetLevelBy(result, false);
-    //     if (localStorage.getItem("profileName") == name && JSON.parse(localStorage.getItem("uploadCources")).length > 0) {
-    //       for (var i = 0; i < JSON.parse(localStorage.getItem("uploadCources")).length; i++) {
-    //         level[level.mode].editLevel.selectedLevel = JSON.parse(localStorage.getItem("uploadCources"))[i];
-    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel];
-    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
-    //         level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
-    //       }
-    //       localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-    //       dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
-    //       localStorage.setItem("uploadCources", []);
-    //     }
-    //   }).catch(function(e) {
-    //     console.error(e);
-    //     app._data.db = [];
-    //     app._data.db.push("create new level");
-    //   });
-    // }
-    // else if (localStorage.getItem("profileName") == name && highscores[level.mode][joyStickPlay.checked][name] && highscores[level.mode][joyStickPlay.checked][name].length > 0) {
-    //   folgenDbGetLevelBy(JSON.parse(localStorage.getItem("levelBy " + name)), true);
-    //   folgenDbGetLevelAroundTheWorld(JSON.parse(localStorage.getItem("levelAroundTheWorld")), true);
-    // }
-    }
-    function folgenDbGetLevelAroundTheWorld(result, offline) {
-      level[level.mode].worldWideLevel = result;
-      app._data.db = Object.keys(result);
-      setTimeout(function() {
-        visible([
-          ["app", "inline"],
-          ['uploadLevel', "inline"],
-          ['levelEditTool', "none"]
-        ]);
-        var items = document.querySelectorAll("#levelNames");
-        var tab = [];
-        var liIndex;
-        for (i = 0; i < items.length; i++) {
-          tab.push(items[i].innerHTML);
-        }
-        for (var i = 0; i < items.length; i++) {
-          items[i].onclick = function() {
-            liIndex = tab.indexOf(this.innerHTML);
-            console.log(this.innerText + " INDEX = " + liIndex);
-            level[level.mode].levelType = "worldWideLevel";
-            level[level.mode].number = this.innerText;
-            if (level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name] == undefined)  level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name] = {played: true, finished: false};
-            document.getElementById('preview').src = level[level.mode][level[level.mode].levelType][level[level.mode].number].picture;
-            Layout();
-            visible([['preview', "none"], ['textur', "inline"]]);
-            document.getElementById('preview').style.display = "none";
-            window.scroll(0, 0);
-            startPause();
-            activateBlinkWall();
-            sensibility(level[level.mode].worldWideLevel[level[level.mode].number].sensibility, false);
-            if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
-            RotatingWall = setInterval(function() {
-              level[level.mode].rotating.rotatingWall = true;
-              level[level.mode].rotatingNow = "rotatingWall";
-              Layout();
-              rotatingWall(true);
-            }, 70);
-          }
-            if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
-            RotatingDreieck = setInterval(function() {
-              level[level.mode].rotating.rotatingDreieck = true;
-              level[level.mode].rotatingNow = "rotatingDreieck";
-              Layout();
-              rotatingDreieck();
-            }, 70);
-          }
-          };
-        };
-      }, 1);
-        alert("you are now ready to play level from all around the world!");
-      var notification = new Notification('level loaded!', {
-        icon: 'https://adi.nicolaiweitkemper.de/Bilder/loadingIcon.png',
-        body: "Your level are now ready to be edited, played or uploaded!",
-      });
-    }
-    function folgenDbGetLevelBy(result, offline) {
-
-      // if (Object.keys(level[level.mode].editLevel).length > 2) {
-      //   AblageListe[0] = Object.keys(level[level.mode].editLevel);
-      //   for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
-      //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
-      //   }
-      //   app._data.db = AblageListe[0]
-      //   app._data.db.push("create new level");
-      // }
-      // alert("loading your levels...");
-      // visible([
-      //   ['app', "inline"],
-      //   ['preview', "none"]/*,
-      //   ['levelEditTool', "inline"]*/
-      // ]);
-      //
-      app._data.db = [];
-      for (var i = 0; result != null && i < Object.keys(result).length; i++) {
-        level[level.mode].editLevel[Object.keys(result)[i]] = result[Object.keys(result)[i]];
-        if (Object.keys(result)[i] != "selectedLevel" && Object.keys(result)[i] != "selected") app._data.db.push(Object.keys(result)[i]);
-      }
-      app._data.db.push("create new level");
-      setTimeout(function() {
-        visible([
-          ["app", "inline"]
-        ]);
-        var items = document.querySelectorAll("#levelNames");
-        var tab = [];
-        var liIndex;
-        for (i = 0; i < items.length; i++) {
-          tab.push(items[i].innerHTML);
-        }
-        for (var i = 0; i < items.length; i++) {
-          items[i].onclick = function() {
-            liIndex = tab.indexOf(this.innerHTML);
-            console.log(this.innerText + " INDEX = " + liIndex);
-            visible([
-              ['pictureSelection', "inline"],
-              ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
-              ['preview', "none"],
-              // ['blinkWall', "inline"],
-              // ['rotatingWall', "inline"],
-              // ["rotatingDreieck", "inline"],
-              // ['testLevel', "inline"],
-              // ["courceSelectionEdit", "inline"]
-              ['levelEditTool', "inline"]
-            ]);
-            level[level.mode].editHistory = [];
-            if (this.innerHTML.includes("create new level")) {
-              createNewLevel();
-              canvas.fillStyle = "white";
-              canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
-              canvas.font = "50px Georgia";
-              canvas.fillStyle = "black";
-              canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
-            } else {
-              document.getElementById('preview').src = level[level.mode].editLevel[this.innerText].picture; /*level[level.mode].number = this.innerText; */
-              level[level.mode].number = 1;
-              level[level.mode].editHistory.push(level[level.mode].editLevel[this.innerText]);
-            //  level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
-              level[level.mode].stepOfHistory = 1;
-              level.normal.editHistory.unshift([]);
-              level[level.mode].editLevel.selectedLevel = this.innerText;
-              größeAnpassen();
-              Layout();
-              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
-              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
-              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
-              level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
-              setTimeout(function() {
-                Layout();
-              }, 500);
-            };
-          };
-        }
-        Notification.requestPermission();
-          alert("you are now ready to open your level!");
-        var notification = new Notification('level loaded!', {
-          icon: 'https://adi.nicolaiweitkemper.de/Bilder/loadingIcon.png',
-          body: "Your level are now ready to be edited, played or uploaded!",
-        });
-      }, 1);
+      if (highscores.normal[joyStickPlay.checked]) courceSelection.value = Object.keys(highscores.normal[joyStickPlay.checked])[Object.keys(highscores.normal[joyStickPlay.checked]).length - 1] + '. map';
+      setTimeout(() => {
+        courceSelected();
+        startPause();
+      }, 777);
     }
     var app = new Vue({
       el: '#app',
@@ -934,27 +609,6 @@
         db: []
       }
     })
-    function createNewLevel() {
-      AblageListe[0] = prompt("Wie wollen sie das Level nennen?");
-      if (Object.keys(level[level.mode].editLevel).includes(AblageListe[0]) || AblageListe[0] == "Test") {
-        alert("Name bereits vorhanden! Bitte anderen Namen eingeben!");
-        createNewLevel();
-      } else {
-        level[level.mode].editLevel.selectedLevel = AblageListe[0];
-        level[level.mode].number = AblageListe[0];
-        level[level.mode].editHistory.spawnPoint = {
-          x: 10,
-          y: 255
-        };
-      }
-    }
-
-
-    function uploadLevel() {
-      alert("You have to beat your level, before you can upload it!");
-      AblageListe[1] = "uploadLevel";
-      testLevel();
-    }
 
     function courceSelected() {
       window.scroll(0, 0);
@@ -963,127 +617,18 @@
       level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
       /*if (document.getElementById('modeSelection').value == "survive") */
-      if (document.getElementById('courceSelection').value == "show Scores") {showScores(highscores[level.mode][joyStickPlay.checked]);document.getElementById('levelEditTool').style.display = "none";level[level.mode].levelType = "showScores";        clearInterval(BlinkWall);
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);}
-      else if (document.getElementById('courceSelection').value == "upload own level") {
-        folgenDbGetLevelBy(level[level.mode].editLevel, offline);
-        // setTimeout(function () {
-        //   var items = document.querySelectorAll("#levelNames");
-        //   var tab = [];
-        //   var liIndex;
-        //   for (i = 0; i < items.length; i++) {
-        //     tab.push(items[i].innerHTML);
-        //   }
-        //   for (var i = 0; i < items.length; i++) {
-        //     items[i].onclick = function() {
-        //       liIndex = tab.indexOf(this.innerHTML);
-        //       console.log(this.innerText + " INDEX = " + liIndex);
-        //       level[level.mode].blinkWall = false;
-        //       visible([
-        //         ['pictureSelection', "inline"],
-        //         ['textur', "inline"] /*, ['courceSelection', "none"]*/ ,
-        //         ['preview', "none"],
-        //         // ['blinkWall', "inline"],
-        //         // ['rotatingWall', "inline"],
-        //         // ["rotatingDreieck", "inline"],
-        //         // ['testLevel', "inline"],
-        //         // ["courceSelectionEdit", "inline"]
-        //         ['levelEditTool', "inline"]
-        //       ]);
-        //       if (this.innerHTML.includes("create new level")) {
-        //         createNewLevel();
-        //         canvas.fillStyle = "white";
-        //         canvas.fillRect(0, 0, window.innerWidth, AblageListe[5]);
-        //         canvas.font = "50px Georgia";
-        //         canvas.fillStyle = "black";
-        //         canvas.fillText("Please select a background", window.innerWidth / 2 - 300, AblageListe[5] / 2 - 50);
-        //       } else {
-        //         document.getElementById('preview').src = level[level.mode].editLevel[this.innerText].picture; /*level[level.mode].number = this.innerText; */
-        //         level[level.mode].editHistory.push(level[level.mode].editLevel[this.innerText]);
-        //         level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
-        //         level[level.mode].editLevel.selectedLevel = this.innerText;
-        //         größeAnpassen();
-        //         Layout();
-        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = innerWidth;
-        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = innerHeight;
-        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = result[level[level.mode].editLevel.selectedLevel].sensibility;
-        //         level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = result[level[level.mode].editLevel.selectedLevel].spawnPoint;
-        //         setTimeout(function() {
-        //           Layout();
-        //         }, 500);
-        //       };
-        //     };
-        //   }
-        // }, 1000);
-        // if (Object.keys(level[level.mode].editLevel).length > 2) {
-        //   AblageListe[0] = Object.keys(level[level.mode].editLevel);
-        //   for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
-        //     if (AblageListe[0][i] == "selectedLevel" || AblageListe[0][i] == "selected") {AblageListe[0].splice(i, 1); i = -1;}
-        //   }
-        //   app._data.db = AblageListe[0]
-        //   app._data.db.push("create new level");
-        // }
-        // alert("loading your levels...");
-        // visible([
-        //   ['app', "inline"],
-        //   ['preview', "none"]/*,
-        //   ['levelEditTool', "inline"]*/
-        // ]);
-        level[level.mode].number = level[level.mode].editHistory.length - 1;
-        // document.getElementById('pictureSelection').style.display = "inline";
-        // document.getElementById('courceSelection').style.display = "none";
-        // document.getElementById('preview').style.display = "none";
-        // document.getElementById('blinkWall').style.display = "inline";
-        // document.getElementById('rotatingWall').style.display = "inline";
-        // document.getElementById('rotatingDreieck').style.display = "inline";
-        level[level.mode].levelType = "editHistory";
-
-        clearInterval(BlinkWall);
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
-        level[level.mode].number = 1;
-      } else if (document.getElementById('courceSelection').value == "play from world wide web") {
-        level[level.mode].levelType = "worldWideLevel";
-        folgenDbGetLevelAroundTheWorld(level[level.mode].worldWideLevel, offline);
-        // setTimeout(function () {
-        //   var items = document.querySelectorAll("#levelNames");
-        //   var tab = [];
-        //   var liIndex;
-        //   for (i = 0; i < items.length; i++) {
-        //     tab.push(items[i].innerHTML);
-        //   }
-        //   for (var i = 0; i < items.length; i++) {
-        //     items[i].onclick = function() {
-        //       liIndex = tab.indexOf(this.innerHTML);
-        //       console.log(this.innerText + " INDEX = " + liIndex);
-        //       level[level.mode].blinkWall = false;
-        //       level[level.mode].levelType = "worldWideLevel";
-        //       level[level.mode].number = this.innerText;
-        //       document.getElementById('preview').src = level[level.mode][level[level.mode].levelType][level[level.mode].number].picture;
-        //       Layout();
-        //       visible([['preview', "none"], ['textur', "inline"]]);
-        //       document.getElementById('preview').style.display = "none";
-        //       window.scroll(0, 0);
-        //       startPause();
-        //       activateBlinkWall();
-        //     };
-        //   };
-        // }, 1000);
-        visible([
-          ["app", "inline"],
-          ['uploadLevel', "inline"],
-          ['levelEditTool', "none"]
-        ]);
-        if (Object.keys(level[level.mode].worldWideLevel).length > 0) app._data.db = Object.keys(level[level.mode].worldWideLevel);
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
-        clearInterval(BlinkWall);
-      } else {
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
-        clearInterval(BlinkWall);
+      if (document.getElementById('courceSelection').value == "show Scores") {
+        showScores();
         document.getElementById('levelEditTool').style.display = "none";
+        level[level.mode].levelType = "showScores";      
+        clearInterval(BlinkWall);
+        clearInterval(RotatingWall);
+        clearInterval(RotatingDreieck);
+      } else {
+        time = 0;  
+        clearInterval(RotatingWall);
+        clearInterval(RotatingDreieck);
+        clearInterval(BlinkWall);
         level[level.mode].levelType = "vorgefertigt";
       //  if (highscores[level.mode][joyStickPlay.checked][name] != undefined && highscores[level.mode][joyStickPlay.checked][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
         if (document.getElementById('courceSelection').value != "") level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
@@ -1095,7 +640,7 @@
         setTimeout(function() {
           Layout();
         }, 500);
-        startPause();
+        // startPause();
         window.scroll(0, 0)
       //  BlinkWall = setInterval(blinkWall, 6000);
       BlinkWall = setInterval(function() {
@@ -1127,6 +672,7 @@
         rotatingDreieck();
       }, 70);
     }
+    if (level && level.normal.vorgefertigt[level.normal.number].cannons) requestAnimationFrame(renderLoop);
       }
       if (level[level.mode].levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -1140,22 +686,15 @@
       if (offline == false)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
       else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
     }
+    setTimeout(() => {
+      textur.width = Bild.width;
+      textur.height = Bild.height;
+      Layout();
+    }, 777);
     document.getElementById('sensibility').value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
     sensibilityAcc = {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility};
     }
 
-    function imageLoaded(input) {
-      AblageListe[4] = false;
-      var reader = new FileReader();
-      reader.onload = function(e) {
-        document.getElementById('preview').setAttribute("src", e.target.result)
-      };
-      reader.readAsDataURL(input.files[0])
-      setTimeout(function() {
-        canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        document.getElementById('textur').style.display = "inline";
-      }, 500);
-    }
     sphere1.style.width = (window.innerWidth / 40 + 66) / 2 + "px";
     sphere1.style.height = (window.innerWidth / 40 + 66) / 2 + "px";
     if (window.DeviceMotionEvent != undefined || joyStick.coordinates) {
@@ -1170,7 +709,6 @@
         // joy-stick:
         var nextCoordinates = {x: 0, y: 0};
         if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores") {
-          if (!level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) Layout();
           if (joyStick && joyStick.coordinates) {
             if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 + (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
             else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 - (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
@@ -1210,7 +748,7 @@
         }
         sphere1.style.top = y1 + "px";
         sphere1.style.left = x1 + "px";
-        if ( /*y1 <= AblageListe[5]*/ scrollY == 0 && window.innerHeight == AblageListe[5]) sphere1.style.display = "inline";
+        if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
         else sphere1.style.display = "none";
         var numbers = [
           [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - 7, y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2],
@@ -1240,6 +778,7 @@
           }
           if (red == 255 && blue == 0 && alpha == 255 && green == 242 && level[level.mode].levelType != "editHistory") zielErreicht();
         }
+        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) Layout();
         if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
           canvas.fillStyle = "blue";
           canvas.beginPath();
@@ -1255,104 +794,13 @@
       }, 25);
     }
 
-    function testLevel() {
-      if (document.getElementById('testLevel').innerHTML == "test Level") {
-        level[level.mode].editLevel["Test"] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
-        if (level[level.mode].editHistory.spawnPoint != undefined) level[level.mode].editLevel.Test.spawnPoint = level[level.mode].editHistory.spawnPoint;
-        level[level.mode].levelType = "editLevel";
-        level[level.mode].number = "Test";
-        if (!(level[level.mode].editLevel["Test"].rotatingWall == undefined) && level[level.mode].editLevel["Test"].rotatingWall.length > 0) {
-        AblageListe[8] = JSON.parse(JSON.stringify(level[level.mode].editLevel["Test"].rotatingWall));
-        RotatingWall = setInterval(function() {
-          level[level.mode].rotating.rotatingWall = true;
-          level[level.mode].rotatingNow = "rotatingWall";
-          Layout();
-        }, 40);
-      }
-      if (!(level[level.mode].editLevel["Test"].rotatingDreieck == undefined) && level[level.mode].editLevel["Test"].rotatingDreieck.length > 0) {
-        RotatingDreieck = setInterval(function() {
-          level[level.mode].rotating.rotatingDreieck = true;
-          level[level.mode].rotatingNow = "rotatingDreieck";
-          Layout();
-        }, 40);
-      }
-        activateBlinkWall();
-        document.getElementById('testLevel').innerHTML = "stop Test";
-
-        visible([
-          ['sliderSize', "none"],
-          ['sliderWidth', "none"],
-          ['sliderHeight', "none"],
-          ['angle', "none"],
-          ["rotatingWall", "none"],
-          ["rotatingDreieck", "none"],
-          ["blinkWall", "none"],
-          ["timeVisible", "none"],
-          ['timeInvisible', "none"]
-        //  ['levelEditTool', "none"]
-        ]);
-      } else {
-        //  level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
-        level[level.mode].number = 0;
-        document.getElementById('testLevel').innerHTML = "test Level";
-        //clearInterval(BlinkWall);
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
-        for (var i = 0; !(level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall == undefined) && i < AblageListe[8].length; i++) {
-          level[level.mode].editHistory[level[level.mode].stepOfHistory].rotatingWall[i].angle = AblageListe[8][i].angle;
-        }
-        level[level.mode].levelType = "editHistory";
-        Layout();
-        visible([
-          ['angle', "inline"],
-          ['blinkWall', "inline"],
-          ['rotatingWall', "inline"],
-          ['rotatingDreieck', "inline"]
-        //  ['levelEditTool', "inline"]
-        ]);
-        document.getElementById('angle').style.display = "inline";
-        visibilityEditStuff();
-      }
-    }
-
-    function visibilityEditStuff() {
-      if (level[level.mode].editLevel.selected[0] == "blinkWall") {
-        visible([
-          ['timeVisible', "inline"],
-          ['timeInvisible', "inline"],
-          ['angle', "none"]
-        ]);
-
-      } else visible([
-        ['timeVisible', "none"],
-        ['timeInvisible', "none"],
-        ['angle', "inline"]
-      ]);
-      if (!(level[level.mode].editLevel.selected[0] == "rotatingDreieck")) {
-        visible([
-          ['sliderSize', "none"],
-          ['timeFor360GradRotation', "none"],
-          ['sliderWidth', "inline"],
-          ['sliderHeight', "inline"]
-        ])
-      } else {
-        visible([
-          ["sliderSize", "inline"],
-          ['sliderWidth', "none"],
-          ['sliderHeight', "none"],
-          ['timeFor360GradRotation', "inline"]
-        ]);
-      }
-    }
-
     function blinkWall() {
       // if (!(level[level.mode].levelType == "editHistory")) {
       //Layout();
       //  setTimeout(function () {
       for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
-        if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "blinkWall") canvas.fillStyle = "blue";
-        else canvas.fillStyle = "black";
-        if (level[level.mode].levelType == "editHistory" || (level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
+        canvas.fillStyle = "black";
+        if ((level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
       }
       //  }, 3000);
       // }
@@ -1368,19 +816,11 @@
         alert("every vorgefertigt level finished! That was the last one :(  )");
       }
       if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || (level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility == undefined && level[level.mode].levelType == "editLevel")) {
-      if (level[level.mode].levelType == "worldWideLevel") {
-        level[level.mode].worldWideLevel[level[level.mode].number].playedBy[name].finished = true;
-        if (level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] == undefined) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        else if (mins + ":" + secs + ":" + "0" + tenths < level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name][0]) level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][name] = [mins + ":" + secs + ":" + "0" + tenths];
-        showScores(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0]);
-      }
       if (level[level.mode].levelType == "vorgefertigt") {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
-        if (!highscores[level.mode][joyStickPlay.checked][name]) highscores[level.mode][joyStickPlay.checked][name] = [];
-        if (highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
-          highscores[level.mode][joyStickPlay.checked][name][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
-          // localStorage.setItem("highscores", JSON.stringify(highscores));
-          if (!offline)  dbSetWarteschlange.push({tag: "highscores", data: highscores});
+        if (highscores[level.mode][joyStickPlay.checked][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
+          highscores[level.mode][joyStickPlay.checked][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
+          localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
         }
         level[level.mode].number++;
         document.getElementById('courceSelection').value = level[level.mode].number + ". map";
@@ -1390,40 +830,12 @@
           clearInterval(BlinkWall);
           clearInterval(RotatingWall);
           clearInterval(RotatingDreieck);
-          showScores(highscores[level.mode][joyStickPlay.checked]);
+          showScores();
         }
       }
-      if (level[level.mode].levelType == "editLevel" && !(AblageListe[1] == "uploadLevel") && confirm("you have to clear your level, to upload it, so this is the best chance, if you have finished!")) AblageListe[1] = "uploadLevel";
-      if (level[level.mode].levelType == "editLevel" && AblageListe[1] == "uploadLevel") {
-        AblageListe[1] = "beendet";
-        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editLevel.Test//[level[level.mode].editLevel.selectedLevel];
-        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].playedBy = {};
-        level[level.mode].worldWideLevel[level[level.mode].editLevel.selectedLevel].highscores = [{}];
-        // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-        if (!offline) {
-        dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
-        alert("uploading...");
-        var checkLevelUploaded = setInterval(function() {
-          dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-            if (angular.equals(Object.keys(level[level.mode].worldWideLevel), Object.keys(result))) {
-              alert("level uploaded!");
-              clearInterval(checkLevelUploaded);
-            }
-          }).catch(function(e) {
-            console.error(e);
-          });
-        }, 1000);
-      }
-      else if (localStorage.getItem("profileName") == name) {
-        alert("level will be uploaded, when you have internet again and open this site");
-        AblageListe[0] = JSON.parse(localStorage.getItem("oploadCources"));
-        AblageListe[0].push();
-        localStorage.setItem("oploadCources", level[level.mode].editLevel.selectedLevel);
-      }
-      }
     }
-    else if (highscores[level.mode][joyStickPlay.checked] && level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length) {
-      alert("gg! Now, try it at normal speed to receve an highscore and maybe even unlock new level)");
+    else if (highscores[level.mode][joyStickPlay.checked] && level[level.mode].number == highscores[level.mode][joyStickPlay.checked].length) {
+      alert("gg! Now, try it at normal speed to receve an highscore!");
     }
     else {
       alert("WARNING: The sensibility isn't normal, so you won't get any score for that!");
@@ -1435,7 +847,7 @@
         clearInterval(BlinkWall);
         clearInterval(RotatingWall);
         clearInterval(RotatingDreieck);
-        showScores(highscores[level.mode][joyStickPlay.checked]);
+        showScores();
       }
     }
     if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
@@ -1444,7 +856,8 @@
   }
     if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
   }
-    function showScores(highscores) {
+    function showScores() {
+      var highscores = highscores[level.mode][joyStickPlay.checked];
       for (var i = 0; i < 11; i++) {
         try {
           document.getElementById("scores").deleteRow(0);
@@ -1458,21 +871,13 @@
       document.getElementById('textur').style.display = "none";
       console.log("scores: " + highscores);
       var cell = [ /*row.insertCell(0)*/ ];
-      for (var i = 0; i < Object.keys(highscores).length; i++) {
-        if (!(Object.keys(highscores)[i] == "allMaps")) {
-          var table = document.getElementById("scores");
-          var row = table.insertRow(i);
-          cell.push(row.insertCell(0));
-          cell[cell.length - 1].innerHTML = Object.keys(highscores)[i];
-        }
         //  var cell = [/*row.insertCell(0)*/];
         for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
-          if (!(Object.keys(highscores)[i] == "allMaps")) {
-            if (i1 < highscores[Object.keys(highscores)[i]].length + 1) {
+            if (i1 < highscores.length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
-              if (highscores[Object.keys(highscores)[i]][i1]) cell[cell.length - 2].innerHTML = highscores[Object.keys(highscores)[i]][i1];
-              if (highscores[Object.keys(highscores)[i]][i1] > highscores[name][i1]) cell[cell.length - 2].style.color = "green";
-              else if (highscores[Object.keys(highscores)[i]][i1] < highscores[name][i1]) cell[cell.length - 2].style.color = "red";
+              if (highscores[i1]) cell[cell.length - 2].innerHTML = highscores[i1];
+              if (highscores[i1] > highscores[name][i1]) cell[cell.length - 2].style.color = "green";
+              else if (highscores[i1] < highscores[name][i1]) cell[cell.length - 2].style.color = "red";
               else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
               else cell[cell.length - 2].style.color = "black";
 
@@ -1481,13 +886,11 @@
               //  cell[cell.length - 2].innerHTML = "unmade";
               //  cell[cell.length - 2].style.color = "black";
             }
-          }
         }
         if (table) var row = table.insertRow(i);
         if (i == 0) {}
         //  var row = table.insertRow(i+1);
         // var row = table.insertRow(i + 1);
-      }
       //  var row = table.insertRow(0);
       //  var cell = [/*row.insertCell(0)*/];
       // cell.push(row.insertCell(0));
@@ -1495,41 +898,10 @@
       var row = table.insertRow(0);
       cell.push(row.insertCell(0));
       cell[cell.length - 1].innerHTML = "name";
-      if (level[level.mode].levelType == "worldWideLevel") {
-        cell.push(row.insertCell(i1 - 3));
-        cell[cell.length - 1].innerHTML = "times";
-      }
       for (var i1 = 1; level[level.mode].levelType != "worldWideLevel" && i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
-      if (level[level.mode].levelType == "worldWideLevel") {
-        // localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel));
-        if (!offline) {
-      dbSetWarteschlange.push({tag: "levelAroundTheWorld", data: level[level.mode].worldWideLevel});
-      alert("uploading (high)score...");
-      var checkLevelUploadedHighscore = setInterval(function() {
-        dbGet("Gelduldspiel", "levelAroundTheWorld").then(result => {
-          if (angular.equals(Object.keys(level[level.mode].worldWideLevel), Object.keys(result))) {
-            AblageListe[0] = 0;
-            for (var i = 0; i < Object.keys(level[level.mode].worldWideLevel).length; i++) {
-              if (angular.equals(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0][Object.keys(level[level.mode].worldWideLevel[level[level.mode].number].highscores[0])[i]], result[level[level.mode].number].highscores[0][Object.keys(result[level[level.mode].number].highscores[0])[i]])) AblageListe[0]++;
-            }
-            if (AblageListe[0] == Object.keys(result).length) {
-            alert("(high)score uploaded!");
-            clearInterval(checkLevelUploadedHighscore);
-          }
-          }
-        }).catch(function(e) {
-          console.error(e);
-        });
-      }, 5000);
-    }
-    else {
-      alert("your score will be uploaded when you are online again!");
-      localStorage.setItem("uploadScore", true);
-    }
-    }
     highscores = highscoresBefore;
     }
     // Für rotatingDreieck:
@@ -1566,10 +938,7 @@
       for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
         time = AblageListe[0];
         // time += level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle * 10000
-          if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingDreieck") drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number]
-            .rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ , time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) *
-            Math.PI + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "blue", "blue", i); //360 every 2 second
-          else drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ ,
+          drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ ,
             time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
       }
       // scale path
@@ -1596,10 +965,10 @@
         canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       }
       bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      // for development:
-      requestAnimationFrame(renderLoop);
+      if (level.normal.vorgefertigt[level.normal.number].cannons || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) {
+        requestAnimationFrame(renderLoop);
+      }
     }
-
     function createPath(...points) {
       var cx = 0;
       cy = 0;
@@ -1655,8 +1024,7 @@
         canvas.save();
         canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
         canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
-        if (i == level[level.mode].editLevel.selected[1] && level[level.mode].levelType == "editHistory" && level[level.mode].editLevel.selected[0] == "rotatingWall") canvas.fillStyle = "blue";
-        else canvas.fillStyle = "black";
+        canvas.fillStyle = "black";
         canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
           .rotatingWall[i].height);
         canvas.restore();
@@ -1702,7 +1070,7 @@
 
     function Layout() {
       if (level[level.mode].levelType == "vorgefertigt") {
-        canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5])
+        canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/)
       } else canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
       //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
       //    größeAnpassen();
@@ -1712,54 +1080,7 @@
       if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
       // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
-      if (level[level.mode].levelType == "editHistory") {
-        level[level.mode].number = level[level.mode].stepOfHistory;
-        canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        AblageListe[1] = ["rotatingWall", "rotatingDreieck", "blinkWall", "bullet"];
-        for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory]).length; i++) {
-          if (!(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "picture"))
-            for (var i1 = 0; (AblageListe[1].includes(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]) && i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length); i1++) {
-              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingWall") rotatingWall(false);
-              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "rotatingDreieck") rotatingDreieck(false);
-              if (Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i] == "blinkWall") blinkWall();
-            }
-        }
-      }
       //if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
-    }
-
-    function größeAnpassen() {
-      //  AblageListe[1] = JSON.parse(JSON.stringify(level[level.mode][level[level.mode].levelType]));
-      if (level[level.mode].levelType == "editHistory") AblageListe[2] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
-      else AblageListe[2] = JSON.parse(JSON.stringify(level[level.mode][level[level.mode].levelType]));
-      for (var i = 0; i < Object.keys(AblageListe[2]).length; i++) {
-        if (!(Object.keys(AblageListe[2])[i] == "picture")) {
-          for (var i1 = 0; i1 < AblageListe[2][Object.keys(AblageListe[2])[i]].length; i1++) {
-            if (!(AblageListe[2].screenXOriginal == undefined) && !(AblageListe[2].screenXOriginal == window.innerWidth && AblageListe[2].screenYOriginal == AblageListe[5])) {
-              //  if (!(AblageListe[2][Object.keys(AblageListe[2])[i]] == "rotatingDreieck")) {
-              // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x + (window.innerWidth - AblageListe[2].screenXOriginal);
-              // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y + (AblageListe[5] - AblageListe[2][Object.keys(AblageListe[2])[i]][i1].screenYOriginal);
-              //  }
-              // window.innerWidth/(1600/300)
-              AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x = window.innerWidth / (AblageListe[2].screenXOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].x);
-              AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y = AblageListe[5] / (AblageListe[2].screenYOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].y);
-              // if ([Object.keys(AblageListe[2])[i]][i1] == "rotatingWall") {
-              //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width + ((window.innerWidth - AblageListe[2].screenXOriginal)/2);
-              //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height + ((AblageListe[5] - AblageListe[2][Object.keys(AblageListe[2])[i]][i1].screenYOriginal)/2);
-              // }
-              // if ([Object.keys(AblageListe[2])[i]][i1] == "blinkWall") {
-              //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width + ((window.innerWidth - AblageListe[2].screenXOriginal));
-              //   // AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height = AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height + ((AblageListe[5] - AblageListe[2][Object.keys(AblageListe[2])[i]][i1].screenYOriginal));
-              // }
-              if ([Object.keys(AblageListe[2])[i]][i1] == "rotatingDreieck") AblageListe[2][Object.keys(AblageListe[2])[i]][i1].size = window.innerWidth / (AblageListe[2].screenXOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].size);
-              else {
-                AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width = window.innerWidth / (AblageListe[2].screenXOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].width);
-                AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height = AblageListe[5] / (AblageListe[2].screenYOriginal / AblageListe[2][Object.keys(AblageListe[2])[i]][i1].height);
-              }
-            }
-          }
-        }
-      }
     }
     // stopWatch:
     var time = 0;
@@ -1807,20 +1128,10 @@
       else level[level.mode].editLevel.selected = [type, level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1];
       document.getElementById(type).style.background = "blue";
     }
-    visible([
-      /*['blinkWall', "none"],
-      ['rotatingWall', "none"],
-      ['rotatingDreieck', "none"],
-      ['testLevel', "none"],*/
-    //["courceSelectionEdit", "none"]
-      ['levelEditTool', "none"]
-    ]);
     // document.getElementById('blinkWall').style.display = "none";
     // document.getElementById('rotatingWall').style.display = "none";
     // document.getElementById('rotatingDreieck').style.display = "none";
     // level[level.mode].editLevel.selected = [];
-    level[level.mode].editLevel.selected = ["blinkWall", 0];
-    document.getElementById("blinkWall").style.background = "blue";
 
     function activateBlinkWall() {
       level[level.mode].blinkWall = true;
@@ -1974,141 +1285,8 @@
     }
     AblageListe[3] = false;
 
-    function saveLevel() {
-      if (AblageListe[3] == false) {
-        AblageListe[3] = true;
-        AblageListe[0] = {};
-        for (var i = 0; i < Object.keys(level[level.mode].editLevel).length; i++) {
-          if (!(Object.keys(level[level.mode].editLevel)[i] == "selectedLevel" || Object.keys(level[level.mode].editLevel)[i] == "selected" || Object.keys(level[level.mode].editLevel)[i] == "Test")) AblageListe[0][Object.keys(level[level.mode].editLevel)[i]] = level[level.mode].editLevel[Object.keys(level[level.mode].editLevel)[i]];
-        }
-        Layout();
-        localStorage.setItem("levelBy " + name, JSON.stringify(AblageListe[0]));
-        if (offline == false) {
-        dbSetWarteschlange.push({tag: "levelBy " + name, data: AblageListe[0]});
-        alert("saving...")
-        var checkLevelSaved = setInterval(function() {
-          dbGet("Gelduldspiel", "levelBy " + name).then(result => {
-            if (angular.equals(Object.keys(level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel]), Object.keys(result[level[level.mode].editLevel.selectedLevel]))) {
-              alert("level saved!");
-              clearInterval(checkLevelSaved);
-              AblageListe[3] = false;
-            }
-            // else {
-            //   // dbSetWarteschlange.push("levelBy " + name, AblageListe[0]);
-            // }
-          }).catch(function(e) {
-            console.error(e);
-          });
-        }, 1000);
-      }
-      }
-    }
-    document.onkeydown = function(event) {
-      folgenKeyPressed(event);
-    }
-    function folgenKeyPressed(event) {
-      setTimeout(function () {
-        Layout();
-      }, 100);
-      console.log(event)
-      if (level[level.mode].levelType == "editHistory" && event.key.toLowerCase() == "s" && event.ctrlKey == true) {
-        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel] = level[level.mode].editHistory[level[level.mode].stepOfHistory];
-        canvas.drawImage(document.getElementById('preview'), 0, 0, window.innerWidth, AblageListe[5]);
-        if (AblageListe[4] == false) level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].picture = textur.toDataURL();
-        else level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].picture = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + document.getElementById('courceSelectionEdit').value.toString().split('.')[0] + ".png";
-        if (level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal == undefined) {
-          level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenXOriginal = window.innerWidth;
-          level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].screenYOriginal = AblageListe[5];
-        }
-        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].spawnPoint = level[level.mode].editHistory.spawnPoint;
-        level[level.mode].editLevel[level[level.mode].editLevel.selectedLevel].sensibility = level[level.mode].editHistory.sensibility;
-        saveLevel();
-      }
-      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == level[level.mode].editHistory.length - 1 && (offline != true && angular.equals(level[level.mode].editHistory[level[level.mode].editHistory.length - 1], level[level.mode].editHistory[level[level.mode].editHistory.length -
-          2])) || (offline == true && level[level.mode].editHistory[level[level.mode].editHistory.length - 1] == level[level.mode].editHistory[level[level.mode].editHistory.length -2])) {
-            level[level.mode].stepOfHistory--;
-          }
-      if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory > 0) level[level.mode].stepOfHistory--;
-      // why should I?:   if (level[level.mode].levelType == "editHistory" && event.key == "z" && event.ctrlKey == true && level[level.mode].stepOfHistory == 0 && !(Object.keys(level[level.mode].editHistory[0]).length == 0)) level[level.mode].editHistory.unshift([]);
-      if (level[level.mode].levelType == "editHistory" && event.key == "y" && event.ctrlKey == true && level[level.mode].stepOfHistory < level[level.mode].editHistory.length - 1) level[level.mode].stepOfHistory++;
-      if (level[level.mode].levelType == "editHistory" && (event.key == "z" || event.key == "y") && event.ctrlKey == true && level[level.mode].stepOfHistory > -1 && level[level.mode].stepOfHistory < level[level.mode].editHistory.length) {
-        level[level.mode].number = level[level.mode].stepOfHistory;
-        for (var i = level[level.mode].editHistory.length - 1; Object.keys(level[level.mode].editHistory[i]).length == 0 && level[level.mode].editHistory.length > 0; i--) {
-          level[level.mode].editHistory.pop();
-        }
-        for (var i = 0; i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]).length; i++) {
-          for (var i1 = 0; i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length; i1++) {
-            for (var i2 = 0; i2 < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][0]).length; i2++) {
-              // if (!(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1 == undefined) && event.key == "y" && !(angular.equals(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]], level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory - 1])[i]]))) level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory - 1])[i];
-              // if (!(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1 == undefined) && event.key == "z" && !(angular.equals(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]], level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory + 1])[i]])))level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory] + 1)[i];
-              if (!(document.getElementById(level[level.mode].editLevel.selected[0]) == undefined) && (level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]] == undefined)) {
-                document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
-                level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[0];
-                document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "blue";
-              };
-              if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "width" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
-                  i]][i1])[i2] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "size")
-                  document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2])).value =
-                  level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
-              else if (!(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2] == "x" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[
-                  i]][i1])[i2] == "y"))
-                   document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]).value =
-                   level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1])[i2]];
-            }
-          }
-        }
-        Layout();
-      }
-      for (var i = level[level.mode].editHistory.length - 1; level[level.mode].editHistory.length > 0 && Object.keys(level[level.mode].editHistory[i]).length == 0; i--) {
-        level[level.mode].editHistory.pop();
-      }
-    }
-
     function capitalizeFirstLetter(string) {
       return string.charAt(0).toUpperCase() + string.slice(1);
-    }
-    function saveMapsVorgefertigt() {
-      alert("WARNING: wait for all maps been shown on the screen. After that, it finished! you will also get a message then.");
-      localStorage.setItem("profileName", name);
-      localStorage.setItem("highscores", JSON.stringify(highscores));
-      localStorage.setItem("levelAroundTheWorld", JSON.stringify(level[level.mode].worldWideLevel))
-      document.getElementById('textur').style.display = "inline";
-      setTimeout(function () {
-      AblageListe[7] = [];
-      AblageListe[1] = [0, 0];
-      if (offline == false) {
-      var saveLevelFertig = setInterval(function () {
-          if (!((AblageListe[1][0]/2 + "").includes("."))) AblageListe[1][1]++;
-          console.log("i: " + AblageListe[1][1]);
-          Bild = new Image();
-          if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + (AblageListe[1][1]) + ".png"
-          else Bild.src = level[level.mode].mapsVorgefertigt[AblageListe[1][1]];
-          canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
-          if ((AblageListe[1][0]/2 + "").includes(".")) AblageListe[7].push(textur.toDataURL());
-          if (AblageListe[1][1] >= Object.keys(level[level.mode].vorgefertigt).length && (AblageListe[1][0]/2 + "").includes(".")) {
-          //  if (localStorage.getItem("mapsVorgefertigt") == null || !(angular.equals(JSON.parse(localStorage.getItem("mapsVorgefertigt")).length, AblageListe[7].length))) {
-              localStorage.setItem("mapsVorgefertigt", JSON.stringify(AblageListe[7]));
-              alert("level stored on device!");
-        //    }
-            level[level.mode].mapsVorgefertigt = AblageListe[7];
-            clearInterval(saveLevelFertig);
-          }
-          AblageListe[1][0]++;
-      }, 1500);
-    }
-    else {
-      if (localStorage.getItem("mapsVorgefertigt") == null) alert("You have to be online first, to be able to store the maps for offline play!");
-      else level[level.mode].mapsVorgefertigt = JSON.parse(localStorage.getItem("mapsVorgefertigt"));
-    }
-      // for (var i = 0; i < Object.keys(level[level.mode].vorgefertigt).length; i++) {
-      //   Bild = new Image();
-      //   if (offline == false) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + document.getElementById('modeSelection').value + "/GeduldsspielMap" + (i + 1) + ".png"
-      //   else Bild.src = level[level.mode].mapsVorgefertigt[i];
-      //   canvas.drawImage(Bild, 0, 0, window.innerWidth, AblageListe[5]);
-      //   AblageListe[7].push(textur.toDataURL());
-      // }
-      console.log(AblageListe[7]);
-      }, 3000);
     }
 
     document.addEventListener('touchmove', touch);
