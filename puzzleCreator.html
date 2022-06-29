@@ -246,7 +246,7 @@
     <br>
   </div>
   <div id="exchangeSettings" class="tutorialCard tutorialGeneral" style="display: none">
-  <p id="swipeSteuerungP"><input type="checkbox"  id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1'}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
   <p id="schiebenSettings" class="tutorialCard tutorialGeneral">
     <br>
@@ -869,25 +869,26 @@ display: block;
   <div class="tutorialCard tutorialGeneral section">
     <h1>Teile austauschen</h1>
     <div class="tutorialCard tutorialGeneral">
-      <div id="moveStyleStandardExchangeDiv"><input type="radio" id="moveStyleStandardExchange" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle"></div>
+      <div id="moveStyleStandardExchangeDiv" class="tutorialCard tutorialGeneral">
+        <input type="radio" id="moveStyleStandardExchange" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
       <b>Standard Steuerung</b>
       <div id="selectFirstExchangeNormalTutorialDiv"><input type="checkbox" id="selectFirstExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
       <div id="selectSecondExchangeNormalTutorialDiv"><input type="checkbox" id="selectSecondExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
     </div>
-    <div class="tutorialCard tutorialGeneral">
-      <input type="radio" id="moveStyleAlternativeExchange" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
+    <div id="moveStyleAlternativeExchange" class="tutorialCard tutorialGeneral">
+      <input type="radio" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
       <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
       <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
       <div id="mouseMoveExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseMoveExchangeAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
       <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustaste bzw. den Bildschirm los.</div>
     </div>
     <h1>Auswahl abwählen</h1>
-    <div class="tutorialCard tutorialGeneral">
+    <div id="standardUnselectExchangeTutorial" class="tutorialCard tutorialGeneral">
       <b>Standard Steuerung</b>
       <div id="selectTileUnselectStandardTutorialDiv"><input type="checkbox" id="selectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
       <div id="unselectTileUnselectStandardTutorialDiv"><input type="checkbox" id="unselectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie es erneut an, um es wieder abzuwählen. </div>
     </div>
-    <div class="tutorialCard tutorialGeneral">
+    <div id="alternativeUnselectExchangeTutorial" class="tutorialCard tutorialGeneral">
       <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
         <div id="mouseDownUnselectAlternativeTutorialDiv"><input type="checkbox" id="mouseDownUnselectAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
         <div id="moveMouseOutUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseOutUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf ein anderes Teil.</div>
@@ -1053,7 +1054,18 @@ display: block;
       if (!state.removeTile && aufgebenId.style.display == "inline") wrongPosition = JSON.parse(JSON.stringify(positions.wrong));
     }
     else {
-      if (tutorial.state != "") document.getElementById('tutorial').style.display = "inline";
+      if (tutorial.state != "") {
+        document.getElementById('tutorial').style.display = "inline";
+        setTimeout(() => {
+          tutorialSteps = Array.from(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')).filter(x => x.offsetWidth > 0 || x.offsetHeight > 0);
+          tutorial.index = 0;
+          while (tutorialSteps.filter(x => document.getElementById(x.id + 'Div').className.includes('currentTutorialStep')).length > 0 && tutorialSteps[tutorial.index] && !document.getElementById(tutorialSteps[tutorial.index].id + "Div").className.includes('currentTutorialStep')) {
+            tutorial.index++;
+          }
+          if (tutorialSteps[tutorial.index]) tutorial.state = tutorialSteps[tutorial.index].id;
+          goTutorialSteps(0)
+        }, 777);
+      }
       settings.style.display = 'none';
       if (['inline', ''].includes(tileSelectionCanvas.style.display))  selectBackToBarB.style.display = "inline"
       originalDisplayChanged(false);
@@ -3315,8 +3327,9 @@ layout(false, true);
         if (tutorial.state == "") {
           showTutorialB.innerHTML = showTutorialB.innerHTML.replace('anzeigen', 'verstecken');
           state.helpTutorial = true;
-          startTutorial();
+          startTutorial(true);
           if (shuffleStyle.value != "listTiles") tileSelectionBarTutorial.style.display = "none";
+          // traditional mode: standard/alternative visibility
           completePuzzleTutorialDiv.style.display = "none";
           moveStandardPC.style.display = "block";
           moveAlternativePC.style.display = "block";
@@ -3334,7 +3347,22 @@ layout(false, true);
             moveStyleStandard.checked = true;
             unclippStandard.checked = true;
           }
+          // exchange mode: standard/alternative visibility
+          moveStyleStandardExchangeDiv.style.display = "block";
+          moveStyleAlternativeExchange.style.display = "block";
+          standardUnselectExchangeTutorial.style.display = "block";
+          alternativeUnselectExchangeTutorial.style.display = "block";
+          if (swipeSteuerung.checked) {
+            moveStyleStandardExchangeDiv.style.display = "none";
+            standardUnselectExchangeTutorial.style.display = "none";
+          }
+          else {
+            moveStyleAlternativeExchange.style.display = "none";
+            alternativeUnselectExchangeTutorial.style.display = "none";
+          }
+
           moveStyleSettingChosenDiv.style.display = "none";
+          // if (tutorialSteps.length) tutorial.state = tutorialSteps[tutorial.index].id;
         }
        else {
         showTutorialB.innerHTML = showTutorialB.innerHTML.replace('verstecken', 'anzeigen');
@@ -3810,7 +3838,9 @@ function startTutorial() {
   tutorial.state = "starting";
   setTimeout(() => {
     // tutorialSteps = Array.from(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')).filter(x => x.style.display != "none");
+    document.getElementById('tutorial').style.display = "inline";
     tutorialSteps = Array.from(document.getElementById('tutorial').querySelectorAll('input[type="checkbox"]')).filter(x => x.offsetWidth > 0 || x.offsetHeight > 0);
+    if (settings.style.display != "none") document.getElementById('tutorial').style.display = "none";
     goTutorialSteps(0);
   }, 777);
   if (mode == "traditional" && !state.helpTutorial) {
@@ -3836,6 +3866,7 @@ function startTutorial() {
       doStorePuzzle.disabled = true;
       puzzleName.disabled = true;
       keepScrolling.disabled = true;
+      swipeSteuerung,disabled = true; 
       listTilesS.style.display = "none";
     }, 500);
   }
@@ -3861,9 +3892,11 @@ function goTutorialSteps(steps) {
       }, 100);
     }
   }
+  if (document.getElementById('tutorial').style.display == "inline") {
     tutorial.index += direction;
     tutorial.state = tutorialSteps[tutorial.index].id;
-    document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
+  }
+  if (!tutorialSteps.filter(x => document.getElementById(x.id + 'Div').className.includes('currentTutorialStep')).length) document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
     setTimeout(() => {
         if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
             document.getElementById(tutorial.state + 'Div').parentElement.parentElement.scrollIntoView();
