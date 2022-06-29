@@ -265,7 +265,7 @@
       <input onchange="changeMovementPlayerVis(checked);" type="checkbox"><b>Züge des PCs ansehen</b>
       <div id="innerMovementPlayer" style="display: none;">
         <br>
-        <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung
+        <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung, die der PC weiß
         <br>
         <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
         <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
@@ -286,15 +286,14 @@
       </div>
       <br>
     </div>
-    <input onchange="if (checked) {userMovementPlayer.style.display = 'inline'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
-    <a style="display: none;" id="userMovementPlayer">
-      <br>
+    <input onchange="if (checked) {userMovementPlayer.style.display = 'block'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
+    <div class="tutorialgeneral tutorialCard" style="display: none;" id="userMovementPlayer">
       <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
       <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
       <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
       <br>
       <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
-    </a>
+    </div>
     <br>
     <input id="showRemovedTiles" type="checkbox"> gelöschte Teile als Anhaltspunkte an richtiger Position anzeigen (vorrausgesetzt kein Teil wurde auf die Position geschoben)
   </a>
@@ -907,10 +906,23 @@ display: block;
       <b>Schieben eine Option</b>
       <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Klicken Sie ein Teil neben der Lücke an, um es in die Lücke zu schieben.</div>
     </div>
-    <div class="tutorialCard tutorialGeneral">
+    <div id="moveMultipleOptionsSchiebenTutorial" class="tutorialCard tutorialGeneral">
       <b>Schieben mehrere Optionen</b>
-      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Wenn Sie ein Teil in mehrere Lücken verschieben können, müssen Sie erneut zuerst das Teil anwählen.</div>
-      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Nun müssen Sie jedoch zusätzlich auf die Lücke klicken, auf in die das Teil geschoben werden soll.</div>
+      <div id="schiebenSelectTileMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectTileMoveMultipleTurorial" onclick="checked = !checked"> Wenn Sie ein Teil in mehrere Lücken verschieben können, müssen Sie <b>erneut zuerst das Teil anwählen</b>.</div>
+      <div id="schiebenSelectGapMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectGapMoveMultipleTurorial" onclick="checked = !checked"> Nun müssen Sie jedoch zusätzlich auf die Lücke klicken, in die das Teil geschoben werden soll.</div>
+    </div>
+    <div class="tutorialCard tutorialGeneral">
+      <b>Informationen Einstellungen</b>
+      <div class="tutorialCard tutorialGeneral">
+        <b>Züge rückgängig machen</b>
+        <br>
+        In den Einstellungen können Sie Ihre Züge rückgängig machen und zuvor wählen, ob die dafür notwendigen Züge für die Statistik zählen sollen. 
+      </div>
+      <div class="tutorialCard tutorialGeneral">
+        <b>Züge des PC angucken</b>
+        <br>
+        Zudem können Sie sich angucken, wie der PC das Puzzle löst. Er nimmt zwar nicht immer die kürzeste Route, aber immerhin weiß er eine. Wenn sie sich mit Ihrer überschneidet, können Sie sogar ab Ihrer Position im Spiel gucken, wie man das Puzzle lösen kann. 
+      </div>
     </div>
   </div>
 </div>
@@ -948,6 +960,7 @@ display: block;
     vibrateA.style.display = "none";
   }
   exchangeTutorial.id += gerät;
+  schiebenTutorial.id += gerät;
   gapSizeChanged(tilesGap.value);
   expandBottom.style.height = window.innerWidth/29;
   expandTop.style.height = window.innerWidth/29;
@@ -1862,6 +1875,7 @@ function canvasClicked(calledBy) {
       for (var i1 = 0; i1 < missing.length; i1++) {
         pMissing = missing[i1];
         if (possibleMissing.length && pMissing == (selected.tile.x)*lengthPerTeil.edit.x + ' - ' + selected.tile.y*lengthPerTeil.edit.y) {
+          if (tutorial.state == "schiebenSelectGapMoveMultipleTurorial") goTutorialSteps(1);
           moveTile(possibleMissing.filter(x => x.i1 == i1)[0].i, i1);
           tileMoved = true;
         }
@@ -1875,7 +1889,11 @@ function canvasClicked(calledBy) {
         }
       }
   }
-  if (possibleMissing.length == 1 && !tileMoved) moveTile(possibleMissing[0].i, possibleMissing[0].i1);
+  if (possibleMissing.length == 1 && !tileMoved) {
+    if (tutorial.state == "schiebenNormalTurorial") goTutorialSteps(1);
+    moveTile(possibleMissing[0].i, possibleMissing[0].i1);
+  }
+  if (possibleMissing.length > 1 && tutorial.state == "schiebenSelectTileMoveMultipleTurorial") goTutorialSteps(1);
 }
     else if (selected.tile && (modeSelection.value == "exchange"/* || missing*/) && !state.exchangedTiles && !state.unselected) {
       selected.coord = {x: selected.tile.x, y: selected.tile.y};
@@ -3799,10 +3817,13 @@ function startTutorial() {
     shuffleStyle.value = "listTiles";
     emptyTileBar.checked = true;
   }
+  if (state.helpTutorial && missing.length == 1) {
+    moveMultipleOptionsSchiebenTutorial.style.display = "none";
+  }
   if (!state.helpTutorial) {
     setTimeout(() => {
       create();
-      shufflePuzzle();
+      if (mode != "schieben") shufflePuzzle();
       if (mode == "traditional") {
         for (const elm of document.getElementsByClassName('backToTileB')) {
           elm.style.display = "none";
@@ -3860,10 +3881,25 @@ function goTutorialSteps(steps) {
     }, 300);
     if (tutorial.state == "tileClickMoveTutorial") automaticTileSelectionReset.checked = false;
     if (steps != 0) {
-      if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, klicken laden Sie die Seite neu. ");
+      if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, laden Sie die Seite neu. ");
       if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
       if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined && steps == 1) goTutorialSteps(1);
       if (tutorial.state == "stopScrollingAutomaticScrollingTutorial") checkAutoscrollStop({x: scrollX, y: scrollY});
+      if (tutorial.state == "schiebenSelectTileMoveMultipleTurorial" && !state.helpTutorial) {
+        try {
+          setTimeout(() => {
+            missing.push("0 - 0");
+            // positionsBeginning.push(positions.wrong[getTileIByCoord({x: 0, y: 0})]);
+            positions.right.splice(getTileIByCoord({x: 0, y: 0}), 1);
+            positions.wrong.splice(getTileIByCoord({x: 0, y: 0}), 1);
+            missing.push(lengthPerTeil.edit.x*2 + " - 0");
+            // positionsBeginning.push(positions.wrong[getTileIByCoord({x: 2, y: 0})]);
+            positions.right.splice(getTileIByCoord({x: 2, y: 0}), 1);
+            positions.wrong.splice(getTileIByCoord({x: 2, y: 0}), 1);
+            layout(true, true);
+          }, 1000);
+        } catch (e) {}
+      }
       if (tutorial.state == "pressShiftMobileUnclippTutorial") {
         selectMultipleTitle.innerHTML = "Shift Taste";
         selectMultipleTitle.style.display = "inline";
