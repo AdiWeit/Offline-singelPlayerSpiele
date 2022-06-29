@@ -714,7 +714,7 @@ display: block;
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten (halbtransparenten) Pfeile an den Rändern des Bildschirms (werden sichtbarer, wenn man sie mit der Maus berührt)</div> 
           <div class="tutorialCard tutorialGeneral" id="scrollWithMouse">
-            <h4>Scrollen mit der Maustaste</h4>
+            <h4 id="scrollTilelistSwipeTutorial">Scrollen mit der Maustaste</h4>
             <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
             <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Zeiger bewegen, um die Liste in die entsprechende Richtung zu bewegen </div> 
             <div id="stopScrollingTileBarTutorialDiv"><input type="checkbox" id="stopScrollingTileBarTutorial" onclick="checked = !checked">Maustaste bzw. Touchpad loslassen</div> 
@@ -953,6 +953,7 @@ display: block;
     MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger auf Teilliste legen";
     moveMouseScrollTileSelectionBarTutorialDiv.innerHTML = moveMouseScrollTileSelectionBarTutorialDiv.innerHTML.split('>')[0] + ">Finger bewegen, um die Liste in die entsprechende Richtung zu bewegen ";
     stopScrollingTileBarTutorialDiv.innerHTML = stopScrollingTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger vom Bildschirm entfernen";
+    scrollTilelistSwipeTutorial.innerHTML = "Scrollen durch Swipen";
     ScrollkeyTileBarTutorialDiv.remove();
   } else {
     var gerät = "PC"
@@ -1149,14 +1150,10 @@ display: block;
     }
     backToBarBWidth.max = lengthPerTeil.sizeAdapted.x;
     backToBarBHeight.max = lengthPerTeil.sizeAdapted.y;
-    scrollTileSelectionRight.style.bottom = lengthPerTeil.sizeAdapted.y/4 + "px";
-    scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/4 + "px";
     scrollTileSelectionLeft.height = lengthPerTeil.sizeAdapted.y/2;
     scrollTileSelectionRight.height = lengthPerTeil.sizeAdapted.y/2;
-    if (gerät == "Handy") {
-      scrollTileSelectionRight.style.bottom = lengthPerTeil.sizeAdapted.y/2 + "px";
-      scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 + "px";
-    }
+      scrollTileSelectionRight.style.bottom = (lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionRight.getBoundingClientRect().height/2) + "px";
+      scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
   }
   function originalDisplayChanged(checked) {
     startPause('viewOriginal');
@@ -1803,11 +1800,9 @@ var pScrollY = scrollY;
     settings.style.display = 'none';
   }
   else tileSelectionCanvas.style.display = "none";
-  scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/4 + "px";
-  scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/4 + "px";
+  scrollTileSelectionRight.style.bottom = (lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionRight.getBoundingClientRect().height/2) + "px";
+  scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
   if (gerät == "Handy") {
-    scrollTileSelectionRight.style.bottom = lengthPerTeil.edit.y/2 + "px";
-    scrollTileSelectionLeft.style.bottom = lengthPerTeil.edit.y/2 + "px";
     selectBackToBarB.style.fontSize = '5vh';
     // zoom out: 
     var newElm = document.createElement('meta');
@@ -2857,7 +2852,7 @@ var puzzles = {};
       }
     }, 40);
     document.getElementById('tutorial').style.maxHeight = window.innerHeight - mobileControls.getBoundingClientRect().bottom - 10;
-
+    if (modeSelection.value != "traditional") document.getElementById('tutorial').style.maxHeight = window.innerHeight;
   }
   // #importantUserInputs
   function readMouseMove(e) {
@@ -3871,8 +3866,11 @@ function startTutorial() {
       listTilesS.style.display = "none";
     }, 500);
   }
-  if (gerät == "Handy") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
+  setTimeout(() => {
+    if (gerät == "Handy"  && modeSelection.value == "traditional") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
+  }, 777);
   document.getElementById('tutorial').style.maxHeight = window.innerHeight - mobileControls.getBoundingClientRect().bottom - 10;
+  if (modeSelection.value != "traditional") document.getElementById('tutorial').style.maxHeight = window.innerHeight;
 }
 function goTutorialSteps(steps) {
   var direction = 1;
@@ -3960,6 +3958,10 @@ function goTutorialSteps(steps) {
           unclipp(i);
           mouseDown();
         }
+        setTimeout(() => {
+          scrollTileSelectionRight.style.bottom = (lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionRight.getBoundingClientRect().height/2) + "px";
+          scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
+        }, 777);
       }
       if (tutorial.state == "scrollArrowTileBarTutorial") {
         scrollTileSelection(1, 'arrowKey');
