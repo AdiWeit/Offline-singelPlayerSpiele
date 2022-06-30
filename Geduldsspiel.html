@@ -108,18 +108,6 @@
   console.log("Leave Website");
     if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
   };
-  var dbSetWarteschlange = [];
-  var alertWhenFinishedSaving = false;
-  setInterval(function () {
-    if (dbSetWarteschlange.length > 0) {
-      dbSet("Gelduldspiel", dbSetWarteschlange[0].tag, dbSetWarteschlange[0].data);
-      dbSetWarteschlange.shift();
-    }
-    else if (alertWhenFinishedSaving) {
-      alert("Saving finished! You can now leave the website!");
-      alertWhenFinishedSaving = false;
-    }
-  }, 2222);
   var sphere1 = document.getElementById("sphere1");
   var growing;
   function modeSelected(value) {
@@ -168,13 +156,8 @@
   }
   var sensibilityAcc = {x: 5, y: 5};
   function sensibility(value, backToNormal) {
-//    if (value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {
-      if (backToNormal == true || !(confirm("WARNING: When the sensibility isn't normal, you won't get any score for that!"))) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
-      if ((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") && backToNormal == true) value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
-      if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory") {level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility = document.getElementById('sensibility').value; value = document.getElementById('sensibility').value;}
-      document.getElementById('sensibility').value = value;
-      sensibilityAcc = {x: value, y: value};
-  //}
+    document.getElementById('sensibility').value = value;
+    sensibilityAcc = {x: value, y: value};
   }
     visible([
       ['app', "none"],
@@ -905,7 +888,6 @@
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
         alert("every vorgefertigt level finished! That was the last one :(  )");
       }
-      if (document.getElementById('sensibility').value == level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility || (level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility == undefined && level[level.mode].levelType == "editLevel")) {
       if (level[level.mode].levelType == "vorgefertigt") {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
         if (highscores[level.mode][joyStickPlay.checked][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
@@ -923,23 +905,6 @@
           showScores();
         }
       }
-    }
-    else if (highscores[level.mode][joyStickPlay.checked] && level[level.mode].number == highscores[level.mode][joyStickPlay.checked].length) {
-      alert("gg! Now, try it at normal speed to receve an highscore!");
-    }
-    else {
-      alert("WARNING: The sensibility isn't normal, so you won't get any score for that!");
-      level[level.mode].number++;
-      document.getElementById('courceSelection').value = level[level.mode].number + ". map";
-      courceSelected();
-      if (level[level.mode].vorgefertigt[level[level.mode].number] == undefined) {
-        console.log("everything Finished!");
-        clearInterval(BlinkWall);
-        clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
-        showScores();
-      }
-    }
     if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
     x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
     y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
@@ -984,7 +949,7 @@
       //  var row = table.insertRow(0);
       //  var cell = [/*row.insertCell(0)*/];
       // cell.push(row.insertCell(0));
-      // cell[cell.length - 1].innerHTML = "name";
+      // cell[cell.length - 1].innerHTML = "name";f
       var row = table.insertRow(0);
       cell.push(row.insertCell(0));
       cell[cell.length - 1].innerHTML = "name";
