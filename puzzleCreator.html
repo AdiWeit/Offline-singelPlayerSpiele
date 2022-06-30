@@ -183,7 +183,7 @@
     </a>
     <a style="display: none" id="aEmptyTileBar">
       <br>
-      <input id="emptyTileBar" onchange="if (checked) emptyTileBarsettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
+      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
       <a style="display: none;" id="emptyTileBarSettings">
         <br>
         dabei folgendermaßen die Teile mischen: 
@@ -1019,7 +1019,7 @@ display: block;
     if (value == "overlapTiles") shuffleHeadline.style.display = 'none';
     else shuffleHeadline.style.display = 'inline';
     if (value == 'listTiles' && emptyTileBar.checked) {
-      emptyTileBarsettings.style.display = 'block';  
+      emptyTileBarSettings.style.display = 'block';  
       if (shuffleStyleBar.value == "nextToEachOther") tilesGapS.style.display = 'inline';
     }
     else emptyTileBarSettings.style.display = 'none';
