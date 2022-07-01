@@ -227,6 +227,8 @@
       <br>
       <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
       <br>
+      <input checked="true" onchange="if (checked)  connectableSlightOverlap.value = 10; else connectableSlightOverlap.value = 0;" type="checkbox"> Verbindungsoptionen auch bei leichter Überlappung der Teile anbieten
+      <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
       <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
     <div style="display: none;" id="listTilesS">
@@ -3585,10 +3587,10 @@ layout(false, true);
       };
       if (!clipped.includes(pos.tempI + ' - ' + tile) && !clipped.includes(tile + ' - ' + pos.tempI)) {
         var nearTile = {
-          right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
-          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10, height: pCollider.height - 2}),
-          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y + pLengthPerTeil.edit.y, width: pCollider.width - 2, height: 10}),
-          top: collides(selectedObj.top, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y - 10, width: pCollider.width - 2, height: 10})
+          right: collides(selectedObj.right, {x: obj.all.x + pLengthPerTeil.edit.x - parseInt(connectableSlightOverlap.value), y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10 + parseInt(connectableSlightOverlap.value), height: pCollider.height - 2}),
+          left: collides(selectedObj.left, {x: obj.all.x - 10, y: obj.all.y + 1 + pLengthPerTeil.edit.y/2 - pCollider.height/2, width: 10 + parseInt(connectableSlightOverlap.value), height: pCollider.height - 2}),
+          bottom: collides(selectedObj.bottom, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y + pLengthPerTeil.edit.y - parseInt(connectableSlightOverlap.value), width: pCollider.width - 2, height: 10 + parseInt(connectableSlightOverlap.value)}),
+          top: collides(selectedObj.top, {x: obj.all.x + 1 + pLengthPerTeil.edit.x/2 - pCollider.width/2, y: obj.all.y - 10, width: pCollider.width - 2, height: 10 + parseInt(connectableSlightOverlap.value)})
         };
         for (var side of Object.keys(nearTile)) {
           if (nearTile[side].boolean && nearTile[side].area < nearest[side].area) {
