@@ -3416,21 +3416,26 @@ layout(false, true);
     if (tutorial.state == "moveMouseMoveTutorialAlternative") rotateTileTutorialAlternative.checked = true;
     if (["rotateTileTutorial", "rotateTileTutorialAlternative"].includes(tutorial.state)) goTutorialSteps(1);
     if (!state.removeTile) {
-      state.rotated = [];
-      if (!state.shift) {
-        rotateAround(selected.tiles[0], direction);
-        if (lengthPerTeil.edit.x != lengthPerTeil.edit.y && getConnectedTiles(selected.tiles[0], true).length > 1) {
-          state.rotated = [];
-          rotateAround(selected.tiles[0], direction);
-        }
+      if (selected.tiles.length == 1 && getConnectedTiles(selected.tiles[0], true).length > 1) {
+        rotateTile(selected.tiles[0], direction);
       }
       else {
-        for (const tile of selected.tiles) {
-          rotateTile(tile, direction);
+        state.rotated = [];
+        if (!state.shift) {
+          rotateAround(selected.tiles[0], direction);
+          if (lengthPerTeil.edit.x != lengthPerTeil.edit.y && getConnectedTiles(selected.tiles[0], true).length > 1) {
+            state.rotated = [];
+            rotateAround(selected.tiles[0], direction);
+          }
         }
+        else {
+          for (const tile of selected.tiles) {
+            rotateTile(tile, direction);
+          }
+        }
+        // layout(true, true);
+        folgenMouseMove();
       }
-      // layout(true, true);
-      folgenMouseMove();
     }
   }
   function rotateAround(tile, direction, connectionSide, connectionObj) {
