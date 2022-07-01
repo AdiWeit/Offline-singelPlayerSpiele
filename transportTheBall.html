@@ -1650,10 +1650,10 @@ function tablePositionModeSelected() {
       }
       var newCheckpoint = 0;
       checkpoint.forEach((pCheckpoint, i1) => {
-      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > 100 || Math.abs(pCheckpoint.schieber.y - y1) > 100)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > 100 || Math.abs(pCheckpoint.ball.y - ball.y) > 100))))) {
+      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > 50 || Math.abs(pCheckpoint.schieber.y - y1) > 50)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > 50 || Math.abs(pCheckpoint.ball.y - ball.y) > 50))))) {
         newCheckpoint++;
       }
-        if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 100 && Math.abs(pCheckpoint.schieber.y - y1) < 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 100 && Math.abs(pCheckpoint.ball.y - ball.y) < 100)))) {
+        if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 50 && Math.abs(pCheckpoint.schieber.y - y1) < 50) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 50 && Math.abs(pCheckpoint.ball.y - ball.y) < 50)))) {
         if (i1) checkpointSelection.value = i1 + '. checkpoint';
         else checkpointSelection.value = 'start';
         level.checkpoint = i1;
