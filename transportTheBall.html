@@ -514,7 +514,8 @@ slow/low
         }]
       },
       11: {
-        checkpointWhen_touches: "schieber"
+        checkpointWhen_touches: "schieber",
+        checkpointSize: 50
       },
       12: {
         heart: {
@@ -1168,6 +1169,7 @@ slow/low
       for (const pLevel of Object.keys(level[mode])) {
         if (!level[mode][pLevel].sizes) level[mode][pLevel].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
         if (!level[mode][pLevel].checkpointWhen_touches) level[mode][pLevel].checkpointWhen_touches = "ball";
+        if (!level[mode][pLevel].checkpointSize) level[mode][pLevel].checkpointSize = 100;
         if (!level[mode][pLevel].spawnPoint) level[mode][pLevel].spawnPoint =     {
           schieber: {
             x: 155,
@@ -1650,10 +1652,10 @@ function tablePositionModeSelected() {
       }
       var newCheckpoint = 0;
       checkpoint.forEach((pCheckpoint, i1) => {
-      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > 100 || Math.abs(pCheckpoint.schieber.y - y1) > 100)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > 100 || Math.abs(pCheckpoint.ball.y - ball.y) > 100))))) {
+      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > currentLevel.checkpointSize || Math.abs(pCheckpoint.schieber.y - y1) > currentLevel.checkpointSize)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > currentLevel.checkpointSize || Math.abs(pCheckpoint.ball.y - ball.y) > currentLevel.checkpointSize))))) {
         newCheckpoint++;
       }
-        if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 100 && Math.abs(pCheckpoint.schieber.y - y1) < 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 100 && Math.abs(pCheckpoint.ball.y - ball.y) < 100)))) {
+        if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < currentLevel.checkpointSize && Math.abs(pCheckpoint.schieber.y - y1) < currentLevel.checkpointSize) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < currentLevel.checkpointSize && Math.abs(pCheckpoint.ball.y - ball.y) < currentLevel.checkpointSize)))) {
         if (i1) checkpointSelection.value = i1 + '. checkpoint';
         else checkpointSelection.value = 'start';
         level.checkpoint = i1;
