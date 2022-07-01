@@ -151,6 +151,7 @@
     <br>
     Ist dies geschehen, können Sie die Teile durch Klicken auf das zu verschiebende Teil (und unter Umständen die gewünschte Zielposition) so verschieben, dass wieder das Originalbild entsteht.
   </p>
+  <div id="futureModeSettingsHeader"></div>
   <div class="tutorialCard tutorialGeneral" id="traditionalSettings">
     <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: <br> </b>
     <br>
@@ -181,19 +182,18 @@
       <b style="font-size: 25px;">Einstellungen zu der Verteilung der Teile:</b>
       <br>
     </a>
-    <a style="display: none" id="aEmptyTileBar">
+    <div style="display: none" class="tutorialCard tutorialGeneral" id="EmptyTileBarDiv">
       <br>
-      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none';" type="checkbox">mit leerer Liste starten
-      <a style="display: none;" id="emptyTileBarSettings">
-        <br>
+      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">mit leerer Liste starten
+      <div style="display: none;" id="emptyTileBarSettings">
         dabei folgendermaßen die Teile mischen: 
-        <br>
-        <select onchange="if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; else tilesGapS.style.display = 'none';" id="shuffleStyleBar">
+        <select onchange="emptyTileBarShuffleStyleSelected(value);" id="shuffleStyleBar">
           <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
           <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
         </select>
-      </a>
-      <div id="tilesGapS" style="display: none;">
+      </div>
+      <div id="emptyTilebarTileGap"></div>
+      <div id="tilesGapS" class="tutorialCard tutorialGeneral" style="display: none;">
         <br>
         Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
         <br>
@@ -208,6 +208,8 @@
         </a>
       </div>
       <br>
+    </div>
+    <div id="shuffleStyleTileGap"></div>
       <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
@@ -224,7 +226,7 @@
       <br>
       <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
       <br>
-      <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
+      <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
     <div style="display: none;" id="listTilesS">
       <h3>Einstellungen zur Teilleiste: </h3>
@@ -832,7 +834,7 @@ display: block;
             <div class="tutorialCard tutorialGeneral">
               <b style="font-size: 15px;">auf leerem Hintergrund</b>
               <br>
-              In den Einstellungen haben Sie die Möglichkeit einzustellen, dass Sie auf leerem Hintergrund immer scrollen können (ohne den Haken bei "scroll" zu setzen)
+              In den Einstellungen haben Sie die Möglichkeit auszustellen, dass Sie auf leerem bzw. weißem Hintergrund immer scrollen können (ohne den Haken bei "scroll" zu setzen)
             </div>
             <div id="selectScrollScrollingTutorialDiv"><input type="checkbox" id="selectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" an</div> 
             <div id="scrollMobileScrollingTutorialDiv"><input type="checkbox" id="scrollMobileScrollingTutorial" onclick="checked = !checked">Scrollen Sie</div> 
@@ -987,6 +989,10 @@ display: block;
   if (localStorage.getItem('automaticTileSelectionResetPuzzleCreator') != "true" && gerät == "PC") automaticTileSelectionReset.checked = false;
   else automaticTileSelectionReset.checked = true;
   // section 1: mainly change element style and visibility
+  function emptyTileBarShuffleStyleSelected(value) {
+    if (value == 'nextToEachOther' && emptyTileBar.checked) tilesGapS.style.display = 'block'; 
+    else tilesGapS.style.display = 'none';
+  }
   function rotateLeftModeChanged() {
     if (state.rotateLeft) rotatesLeft.checked = false; 
     state.rotateLeft = JSON.parse(JSON.stringify(rotatesLeft.checked));
@@ -1012,15 +1018,21 @@ display: block;
     if (!stillIn || closeAnyway) document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
   }
   function shuffleStyleVisibilities(value) {
-    if (value == 'nextToEachOther') tilesGapS.style.display = 'inline'; 
+    if (value == 'nextToEachOther') {
+      shuffleStyleTileGap.appendChild(tilesGapS);
+      tilesGapS.style.display = 'block'; 
+    }
     else tilesGapS.style.display = 'none';
-    if (value == "listTiles") aEmptyTileBar.style.display = "inline";
-    else aEmptyTileBar.style.display = "none";
+    if (value == "listTiles") document.getElementById('EmptyTileBarDiv').style.display = "block";
+    else document.getElementById('EmptyTileBarDiv').style.display = "none";
     if (value == "overlapTiles") shuffleHeadline.style.display = 'none';
     else shuffleHeadline.style.display = 'inline';
     if (value == 'listTiles' && emptyTileBar.checked) {
       emptyTileBarSettings.style.display = 'block';  
-      if (shuffleStyleBar.value == "nextToEachOther") tilesGapS.style.display = 'inline';
+      if (shuffleStyleBar.value == "nextToEachOther") {
+        emptyTilebarTileGap.appendChild(tilesGapS);
+        tilesGapS.style.display = 'block';
+      }
     }
     else emptyTileBarSettings.style.display = 'none';
   }
@@ -1453,7 +1465,7 @@ function drawTileGrid(doNotDrawPicture) {
       }
       else {
         futureTexturPosition.appendChild(textur);
-        turnsHistoryS.prepend(modeSettingsHeading);
+        futureModeSettingsHeader.appendChild(modeSettingsHeading);
         if (modeSelection.value != "traditional") shuffleStyle.value = "none";
         if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
         if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
