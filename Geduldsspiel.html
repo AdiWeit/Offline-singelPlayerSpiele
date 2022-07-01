@@ -40,7 +40,9 @@
 </style>
   </head>
   <h2>sensibility: </h2>
+  high (fast)
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
+  low (slow)
   <button type="button" id="normalSensibility" onclick="sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
@@ -612,9 +614,12 @@
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
-        opt.text = (i + 1) + ". map"
+        if (Object.keys(highscores.normal[joyStickPlay.checked]).includes((i + 1).toString())) opt.text = "✅ " +  (i + 1) + ". map";
+        else opt.text = (i + 1) + ". map";
+        opt.value = (i + 1) + ". map";
       }
       if (highscores.normal[joyStickPlay.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked])[Object.keys(highscores.normal[joyStickPlay.checked]).length - 1]) + 1) + '. map';
+      if (courceSelection.value == "") courceSelection.value = "1. map";
       setTimeout(() => {
         courceSelected();
         startPause();
@@ -912,7 +917,7 @@
     if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
   }
     function showScores() {
-      var highscores = highscores[level.mode][joyStickPlay.checked];
+      var pHighscores = highscores[level.mode][joyStickPlay.checked];
       for (var i = 0; i < 11; i++) {
         try {
           document.getElementById("scores").deleteRow(0);
@@ -921,19 +926,16 @@
           i = 11
         }
       }
-      var highscoresBefore = JSON.parse(JSON.stringify(highscores));
-      delete highscores.allMaps;
       document.getElementById('textur').style.display = "none";
-      console.log("scores: " + highscores);
       var cell = [ /*row.insertCell(0)*/ ];
         //  var cell = [/*row.insertCell(0)*/];
-        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(highscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
-            if (i1 < highscores.length + 1) {
+        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(pHighscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
+            if (i1 < pHighscores.length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
-              if (highscores[i1]) cell[cell.length - 2].innerHTML = highscores[i1];
-              if (highscores[i1] > highscores[name][i1]) cell[cell.length - 2].style.color = "green";
-              else if (highscores[i1] < highscores[name][i1]) cell[cell.length - 2].style.color = "red";
-              else if (name == Object.keys(highscores)[i]) cell[cell.length - 2].style.color = "blue";
+              if (pHighscores[i1]) cell[cell.length - 2].innerHTML = pHighscores[i1];
+              if (pHighscores[i1] > pHighscores[name][i1]) cell[cell.length - 2].style.color = "green";
+              else if (pHighscores[i1] < pHighscores[name][i1]) cell[cell.length - 2].style.color = "red";
+              else if (name == Object.keys(pHighscores)[i]) cell[cell.length - 2].style.color = "blue";
               else cell[cell.length - 2].style.color = "black";
 
             } else {
@@ -957,7 +959,6 @@
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
-    highscores = highscoresBefore;
     }
     // Für rotatingDreieck:
     const point = (x, y) => ({
@@ -1210,7 +1211,7 @@
 
     if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
     function canvasClicked() {
-      if (joyStick == "place" && gerät == "PC") {
+      if (/*joyStick == "place" && */gerät == "PC") {
         joyStick = {coordinates : {x: mausx, y: mausy}};
       }
       if (level[level.mode].levelType == "editHistory") {
