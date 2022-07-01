@@ -1650,8 +1650,7 @@ function tablePositionModeSelected() {
       }
       var newCheckpoint = 0;
       checkpoint.forEach((pCheckpoint, i1) => {
-        
-      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) > 100 && Math.abs(pCheckpoint.schieber.y - y1) > 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > 100 || Math.abs(pCheckpoint.ball.y - ball.y) > 100))))) {
+      if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > 100 || Math.abs(pCheckpoint.schieber.y - y1) > 100)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > 100 || Math.abs(pCheckpoint.ball.y - ball.y) > 100))))) {
         newCheckpoint++;
       }
         if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < 100 && Math.abs(pCheckpoint.schieber.y - y1) < 100) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < 100 && Math.abs(pCheckpoint.ball.y - ball.y) < 100)))) {
@@ -1666,6 +1665,9 @@ function tablePositionModeSelected() {
         checkpoint.push({schieber: {x: x1, y: y1, width: sphere.schieber.style.width.replace('px', ''), height: sphere.schieber.style.height.replace('px', '')}, ball: {x: ball.x, y: ball.y, width: ball.width, height: ball.height}, timeNeededToReach: time})
         level.checkpoint++;
         checkpoints[level.mode][level.aktuell] = checkpoint;
+        opt = document.createElement("option");
+        document.getElementById("checkpointSelection").options.add(opt);
+        opt.text = level.checkpoint + ". checkpoint";
         checkpointManager.style.display = "inline";
         localStorage.setItem('checkpointsTransportTheBall', JSON.stringify(checkpoints));
       }
@@ -1688,6 +1690,7 @@ function tablePositionModeSelected() {
     sphere.ball.style.top = ball.y + "px";
   }
   function setHighscores(pNextLevel) {
+    if (!mapsFinished.includes(levelSelector.value.split('. ')[0])) mapsFinished.push(levelSelector.value.split('. ')[0]);
     if (oppositeCheck.checked) level.mode += ' opposite';
     if (easyMaps.checked) level.mode += ' easy maps';
     if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
@@ -1871,8 +1874,20 @@ function tablePositionModeSelected() {
     }
   }
   function nextLevel() {
-    if (!document.getElementById('level ' + level.aktuell).text.includes("✅")) document.getElementById('level ' + level.aktuell).text = "✅ " + document.getElementById('level ' + level.aktuell).text;
-    level.aktuell++;
+    if (!document.getElementById('level ' + level.aktuell).text.includes("✅")) {
+      document.getElementById('level ' + level.aktuell).text = "✅ " + document.getElementById('level ' + level.aktuell).text;
+    }
+    for (var i = level.aktuell; i < Object.keys(level[level.mode]).length; i++) {
+      if (!mapsFinished.includes(i.toString())) break;
+    }
+    if (i < Object.keys(level[level.mode]).length) level.aktuell = i;
+    else {
+      for (var i = level.aktuell - 1; i > 0; i--) {
+        if (!mapsFinished.includes(i.toString())) break;
+      }
+      if (i > 0) level.aktuell = i;
+      else level.aktuell++;
+    }
     zaehler = "newLevel";
     setTimeout(function () {
       zaehler = 0;
@@ -2037,6 +2052,7 @@ function tablePositionModeSelected() {
   }
   if (currentLevel.rotating) requestAnimationFrame(renderLoop);
 }
+var mapsFinished = [];
   function modeSelected(mode) {
     if (mode == "showScores") showScores(highscores);
     else {
@@ -2048,25 +2064,38 @@ function tablePositionModeSelected() {
     while (document.getElementById('levelSelector').options.length > 0) {
       document.getElementById('levelSelector').options[0] = undefined;
     }
-    var mapsFinished = 0;
+    mapsFinished = [];
     for (const pMode of Object.keys(highscores)) {
-      if (pMode.includes(mode) && Object.keys(highscores[pMode])?.length > mapsFinished) mapsFinished = Object.keys(highscores[pMode])?.length;
+      if (pMode.includes(mode)) {
+        for (const level of Object.keys(highscores[pMode])) {
+          if (pMode.includes(mode) && !mapsFinished.includes(level)) mapsFinished.push(level);
+        }
+      }
     }
     for (var i = 0; i < Object.keys(level[mode]).length; i++) {
       opt = document.createElement("option");
       document.getElementById("levelSelector").options.add(opt);
       opt.setAttribute("id", "level " + (i + 1));
       opt.text = (i + 1) + ". level";
-      if (i < mapsFinished) opt.text = "✅ " + opt.text;
+      if (mapsFinished.includes((i + 1).toString())) opt.text = "✅ " + opt.text;
     }
-    if (mapsFinished == Object.keys(level[mode]).length) {
+    if (mapsFinished.length == Object.keys(level[mode]).length) {
       opt = document.createElement("option");
       document.getElementById("levelSelector").options.add(opt);
       // opt.setAttribute("id", i);
       opt.text = "winnerScreen";
-      levelSelected(/*"1. level"*/mapsFinished + ". level");
-  }
-    else levelSelected(/*"1. level"*/(mapsFinished + 1) + ". level");
+      levelSelected(/*"1. level"*/mapsFinished[mapsFinished.length - 1] + ". level");
+    }
+    if (!mapsFinished.length) levelSelected("1. level");
+    else {
+      if (parseInt(mapsFinished[mapsFinished.length - 1]) == Object.keys(level[mode]).length) {
+        for (var i = Object.keys(level[mode]).length - 1; i > 0; i--) {
+          if (!mapsFinished.includes(i.toString())) break;
+        }
+        levelSelected(/*"1. level"*/(i) + ". level");
+      }
+      else levelSelected(/*"1. level"*/(parseInt(mapsFinished[mapsFinished.length - 1]) + 1) + ". level");
+    }
     // else inOrAgainstDirection = 1;
     gameModeSelection.value = mode;
 }
