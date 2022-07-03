@@ -231,7 +231,7 @@
       <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
       <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
-    <div style="display: none;" id="listTilesS">
+    <div style="display: none;" class="tutorialCard tutorialGeneral" id="listTilesS">
       <h3>Einstellungen zur Teilleiste: </h3>
       <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
       <br>
@@ -1468,7 +1468,8 @@ function drawTileGrid(doNotDrawPicture) {
       }
       else {
         futureTexturPosition.appendChild(textur);
-        futureModeSettingsHeader.appendChild(modeSettingsHeading);
+        if (modeSelection.value == "schieben") modeDiv.prepend(modeSettingsHeading);
+        else document.getElementById(modeSelection.value + 'Settings').prepend(modeSettingsHeading);
         if (modeSelection.value != "traditional") shuffleStyle.value = "none";
         if (modeSelection.value == "exchange") doNotMoveTile.checked = true;
         if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
@@ -1568,6 +1569,7 @@ function drawTileGrid(doNotDrawPicture) {
         modeHeadline.style.display = 'none';
         shuffleHeadline.style.display = 'none';
         startTutorialButton.style.display = "none";
+        EmptyTileBarDiv.style.display = "none";
         texturTop = textur.getBoundingClientRect().top + scrollY;
         futurePuzzleManager.appendChild(puzzleManager);
       }
@@ -1809,7 +1811,7 @@ var pScrollY = scrollY;
   if (shuffleStyle.value == "listTiles") {
     tileSelectionCanvas.style.display = "inline";
     selectBackToBarB.style.display = 'inline';
-    listTilesS.style.display = 'inline';
+    listTilesS.style.display = 'block';
     settings.style.display = 'block';
     tileBarHeight.style.width = window.innerWidth - tileBarHeightText.getBoundingClientRect().width - resetBarSize.getBoundingClientRect().width - 100;
     settings.style.display = 'none';
@@ -1852,9 +1854,11 @@ var pScrollY = scrollY;
   startPause('completionTime');
   setTimeout(() => {
     adaptMobileControlsPosition();
-    scrollTileSelection(1);
-    changeTileBarHeight(tileBarHeight.value);
-    scrollTileSelection(-1);
+    if (tileSelectionCanvas.style.display != "none") {
+      scrollTileSelection(1);
+      changeTileBarHeight(tileBarHeight.value);
+      scrollTileSelection(-1);
+    }
   }, 100);
 }
 // #importantUserInputs
@@ -3983,7 +3987,7 @@ function goTutorialSteps(steps) {
         }
         tileSelectionCanvas.style.display = "inline";
         selectBackToBarB.style.display = "inline";
-        listTilesS.style.display = "inline";
+        listTilesS.style.display = "block";
         for (var i = 0; i < 16; i++) {
           tileSelectionBar.tiles.splice(0, 0, i);
           unclipp(i);
@@ -4081,7 +4085,7 @@ function goTutorialSteps(steps) {
 //       }
 //       tileSelectionCanvas.style.display = "inline";
 //       selectBackToBarB.style.display = "inline";
-//       listTilesS.style.display = "inline";
+//       listTilesS.style.display = "block";
 //       for (var i = 0; i < 16; i++) {
 //         tileSelectionBar.tiles.splice(0, 0, i);
 //         unclipp(i);
