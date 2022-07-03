@@ -1576,6 +1576,9 @@ function drawTileGrid(doNotDrawPicture) {
     }
     autoScroll = setInterval(function () {
       if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
+        // top boundary: 
+      // canvas.fillStyle = "blue";
+      // canvas.fillRect(visualViewport.pageLeft - texturLeft, visualViewport.pageTop + state.upScroll - texturTop, visualViewport.width, 10);
   // up
   if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll - texturTop && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
@@ -2917,7 +2920,7 @@ var puzzles = {};
     tileSelectionCanvas.addEventListener('touchend', touch);
     function touch(ev) {
       if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile) && (!scrollOnBlanc.checked || selected.tiles.length)) {
-        ev.preventDefault();
+        if (event.cancelable) ev.preventDefault();
       }
       if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
@@ -3623,10 +3626,10 @@ layout(false, true);
       }
     }
     var acceptedI = getConnectedTiles(nearest.overAll.i, true);
-    var screenObj = {x: visualViewport.pageLeft, y: visualViewport.pageTop, width: window.visualViewport.width - 22, height: window.visualViewport.height};
-    if (mirrorInput.checked) screenObj = {x: textur.width - scrollX - window.innerWidth, y: scrollY, width: window.innerWidth - 22, height: window.innerHeight};
+    screenObj = {x: visualViewport.pageLeft - texturLeft + state.rightScroll, y: visualViewport.pageTop - texturTop + state.upScroll, width: window.visualViewport.width, height: window.visualViewport.height};
+    if (mirrorInput.checked) screenObj = {x: textur.width - (visualViewport.pageLeft - texturLeft + state.rightScroll), y: visualViewport.pageTop - texturTop + state.upScroll, width: window.visualViewport.width, height: window.visualViewport.height};
     canvas.fillStyle = "blue";
-    // canvas.fillRect(textur.width - scrollX - window.innerWidth, scrollY, window.innerWidth, window.innerHeight);
+    // canvas.fillRect(screenObj.x, screenObj.y, screenObj.width, screenObj.height);
     var clipLength = selected.clip.length;
     var filteredClip = JSON.stringify(filter(selected.clip, false, true));
     var obj = {all: positions.wrong[nearest?.right.i]?.edit, slc: positions.wrong[tile].edit};
