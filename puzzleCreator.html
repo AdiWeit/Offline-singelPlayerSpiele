@@ -229,7 +229,7 @@
       <br>
       <input checked="true" onchange="if (checked)  connectableSlightOverlap.value = 10; else connectableSlightOverlap.value = 0;" type="checkbox"> Verbindungsoptionen auch bei leichter Überlappung der Teile anbieten
       <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
-      <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
+      <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
     <div style="display: none;" id="listTilesS">
       <h3>Einstellungen zur Teilleiste: </h3>
@@ -1152,7 +1152,7 @@ display: block;
     // TODO: handle sides seperately
     tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
     lengthPerTeil.sizeAdapted = {x: tileSelectionBar.pictureSize.width, y: tileSelectionBar.pictureSize.height};
-    tileSelectionCanvas.width = 10000;
+    tileSelectionCanvas.width = (lengthPerTeil.edit.x + 10)*positions.wrong.length;
     layout();
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
       var elm = document.getElementsByClassName('backToTileB')[i];
@@ -1167,8 +1167,8 @@ display: block;
     backToBarBHeight.max = lengthPerTeil.sizeAdapted.y;
     scrollTileSelectionLeft.height = lengthPerTeil.sizeAdapted.y/2;
     scrollTileSelectionRight.height = lengthPerTeil.sizeAdapted.y/2;
-      scrollTileSelectionRight.style.bottom = (lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionRight.getBoundingClientRect().height/2) + "px";
-      scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
+    scrollTileSelectionRight.style.bottom = (lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionRight.getBoundingClientRect().height/2) + "px";
+    scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
   }
   function originalDisplayChanged(checked) {
     startPause('viewOriginal');
@@ -1852,6 +1852,9 @@ var pScrollY = scrollY;
   startPause('completionTime');
   setTimeout(() => {
     adaptMobileControlsPosition();
+    scrollTileSelection(1);
+    changeTileBarHeight(tileBarHeight.value);
+    scrollTileSelection(-1);
   }, 100);
 }
 // #importantUserInputs
@@ -2991,7 +2994,8 @@ var puzzles = {};
       if (gerät == "Handy" && selectMultiple.checked) state.shift = true;
       state.coord = checkSelected(true);
       if (modeSelection.value == "traditional") {
-        if (tileSelectionBar.selectedTile?.tileI != undefined && (tileSelectionBar.selectedTile.byUser || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
+        // tile on field
+        if (tileSelectionBar.selectedTile?.tileI != undefined && ((tileSelectionBar.selectedTile.byUser && autoSelectTileBar.checked) || !tileSelected()) && !tileSelectionBar.collidesMouse() && state.backToBar === false) {
           if (["placeTileOnFiledTutorial", "SecondPlaceTileTutorial"].includes(tutorial.state)) goTutorialSteps(1);
           var i = tileSelectionBar.selectedTile;
           selected.tiles.push(i.tileI);
@@ -3418,7 +3422,7 @@ layout(false, true);
     if (tutorial.state == "moveMouseMoveTutorialAlternative") rotateTileTutorialAlternative.checked = true;
     if (["rotateTileTutorial", "rotateTileTutorialAlternative"].includes(tutorial.state)) goTutorialSteps(1);
     if (!state.removeTile) {
-      if (selected.tiles.length == 1 && getConnectedTiles(selected.tiles[0], true).length > 1) {
+      if (selected.tiles.length == 1 && getConnectedTiles(selected.tiles[0], true).length > 1 && gerät == "PC") {
         rotateTile(selected.tiles[0], direction);
       }
       else {
