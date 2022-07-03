@@ -1577,7 +1577,7 @@ function drawTileGrid(doNotDrawPicture) {
     autoScroll = setInterval(function () {
       if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y + lengthPerTeil.edit.y/3 < visualViewport.pageTop + state.upScroll && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll - texturTop && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
@@ -1630,7 +1630,7 @@ var pScrollY = scrollY;
         else canvas.translate(-direction.x, 0);
         layout(true, true);
       }
-      if (direction.y && scrollY == state.scrollY && (positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0)) {
+      if (direction.y && scrollY == state.scrollY && ((positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y < textur.height/*textur.height - visualViewport.height*/ && direction.y > 0) || (direction.y < 0 && positions.wrong[selected.tiles[0]] && positions.wrong[selected.tiles[0]].edit.y > 0))) {
         state.upScroll += direction.y;
         canvas.translate(0, -direction.y);
         layout(true, true);
@@ -2815,9 +2815,14 @@ var puzzles = {};
   window.visualViewport.addEventListener("resize", resized);
   var scale = 1;
   function resized (event) {
-    if ((scale < visualViewport.scale && tutorial.state == "zoomInTutorial") || (scale > visualViewport.scale && tutorial.state == "zoomOutTutorial")) goTutorialSteps(1);
-    scale = visualViewport.scale;
-    if (state.rightScroll < 0 && (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) > visualViewport.pageLeft) {
+    if (scale != visualViewport.scale) {
+      setTimeout(() => {
+        state.shift = false;
+        state.shiftBySwipe = false;
+      }, 500);
+      if ((scale < visualViewport.scale && tutorial.state == "zoomInTutorial") || (scale > visualViewport.scale && tutorial.state == "zoomOutTutorial")) goTutorialSteps(1);
+      scale = visualViewport.scale;
+      if (state.rightScroll < 0 && (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) > visualViewport.pageLeft) {
       var distance = (positions.wrong.reduce((acc, val) => val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 < acc ? val.edit.x - state.rightScroll - lengthPerTeil.edit.x/2 : acc, textur.width)) - visualViewport.pageLeft;
       state.rightScroll += distance;
       if (mirrorInput.checked) canvas.translate(distance, 0);
@@ -2840,6 +2845,7 @@ var puzzles = {};
       canvas.translate(0, distance);
     }
     layout(true, true);
+   }
   }
   function adaptTitlesPosition() {
     var vis = {rotateLeft: rotateLeftTitle.style.display, rotateRight: rotateRightTitle.style.display, selectMultiple: selectMultipleTitle.style.display, swipe: swipeTitle.style.display};
