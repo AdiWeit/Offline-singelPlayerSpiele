@@ -229,7 +229,7 @@
       <br>
       <input checked="true" onchange="if (checked)  connectableSlightOverlap.value = 10; else connectableSlightOverlap.value = 0;" type="checkbox"> Verbindungsoptionen auch bei leichter Überlappung der Teile anbieten
       <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
-      <p id="scrollOnBlancP"><input id="scrollOnBlanc" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
+      <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
     <div style="display: none;" class="tutorialCard tutorialGeneral" id="listTilesS">
       <h3>Einstellungen zur Teilleiste: </h3>
@@ -1572,6 +1572,7 @@ function drawTileGrid(doNotDrawPicture) {
         EmptyTileBarDiv.style.display = "none";
         texturTop = textur.getBoundingClientRect().top + scrollY;
         futurePuzzleManager.appendChild(puzzleManager);
+        automaticTileSelectionReset.checked = true;
       }
     }
     autoScroll = setInterval(function () {
@@ -1773,6 +1774,7 @@ var pScrollY = scrollY;
   shuffleStyleLable.style.display = 'none';
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   // expand textur buttons
+  automaticTileSelectionReset.checked = false;
   if (modeSelection.value == "traditional") { 
   textur.style.position = "absolute";
   expandBottom.style.width = textur.width + 6; 
@@ -2988,7 +2990,7 @@ var puzzles = {};
     if (modeSelection.value == "traditional") {
     if (state.mouse == "up" && !automaticTileSelectionReset.checked && state.removeTile) state.mouse = "downNow";
     if (state.mouse != "downNow") state.mouse = "down";
-    if (selected.tiles.length && !state.shift && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
+    if (((selected.tiles.length && !state.shift) || state.removeTile) && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
       mouseUp(true);
       if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || ["unselectUnclippStandardTutorial", "unselecTileAfterTileBarTilePlacementTutorial"].includes(tutorial.state)) {
         goTutorialSteps(1);
