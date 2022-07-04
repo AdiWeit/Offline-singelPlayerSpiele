@@ -161,7 +161,7 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1'}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
+    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionsettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
@@ -251,7 +251,7 @@
     <br>
   </div>
   <div id="exchangeSettings" class="tutorialCard tutorialGeneral" style="display: none">
-  <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1'}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
   <p id="schiebenSettings" class="tutorialCard tutorialGeneral">
     <br>
@@ -989,8 +989,6 @@ display: block;
       setupTutorial();
     }, 100);
   }
-  if (localStorage.getItem('automaticTileSelectionResetPuzzleCreator') != "true" && gerät == "PC") automaticTileSelectionReset.checked = false;
-  else automaticTileSelectionReset.checked = true;
   // section 1: mainly change element style and visibility
   function emptyTileBarShuffleStyleSelected(value) {
     if (value == 'nextToEachOther' && emptyTileBar.checked) tilesGapS.style.display = 'block'; 
@@ -1774,8 +1772,9 @@ var pScrollY = scrollY;
   shuffleStyleLable.style.display = 'none';
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   // expand textur buttons
-  automaticTileSelectionReset.checked = false;
   if (modeSelection.value == "traditional") { 
+    if (localStorage.getItem('automaticTileSelectionResetPuzzleCreator') != "true" && gerät == "PC") automaticTileSelectionReset.checked = false;
+    else automaticTileSelectionReset.checked = true;
   textur.style.position = "absolute";
   expandBottom.style.width = textur.width + 6; 
   expandTop.style.width = textur.width + 6;  
@@ -2923,6 +2922,7 @@ var puzzles = {};
     function touch(ev) {
       if (!scrollable.checked && ev.type == "touchmove" && settings.style.display != "inline" && (aufgebenId.style.display == "inline" || state.removeTile) && (!scrollOnBlanc.checked || selected.tiles.length)) {
         if (event.cancelable) ev.preventDefault();
+        else console.log("event not cancable!");
       }
       if ((aufgebenId.style.display == "inline" || removeTilesFinishedB.style.display == "inline") && (!ev.touches[0] || (ev.touches[0] && !collides({x: ev.touches[0]["pageX"] - scrollX, y: ev.touches[0]["pageY"] - scrollY, width: 1, height: 1}, mobileControls.getBoundingClientRect()).boolean))) {
     if (ev.touches[1] && aufgebenId.style.display == "inline") {
@@ -3362,9 +3362,11 @@ layout(false, true);
     document.onkeydown = function(event) {
       if (event.key == "F1") {
         if (tutorial.state == "") {
-          showTutorialB.innerHTML = showTutorialB.innerHTML.replace('anzeigen', 'verstecken');
-          state.helpTutorial = true;
-          startTutorial(true);
+          if (!event.changeElement) {
+            startTutorial(true);
+            showTutorialB.innerHTML = showTutorialB.innerHTML.replace('anzeigen', 'verstecken');
+            state.helpTutorial = true;
+          }
           if (shuffleStyle.value != "listTiles") tileSelectionBarTutorial.style.display = "none";
           // traditional mode: standard/alternative visibility
           completePuzzleTutorialDiv.style.display = "none";
@@ -3892,8 +3894,8 @@ function startTutorial() {
   if (state.helpTutorial && missing.length == 1) {
     moveMultipleOptionsSchiebenTutorial.style.display = "none";
   }
-  if (!state.helpTutorial) {
-    setTimeout(() => {
+  setTimeout(() => {
+      if (!state.helpTutorial) {
       create();
       if (mode != "schieben") shufflePuzzle();
       if (mode == "traditional") {
@@ -3910,8 +3912,8 @@ function startTutorial() {
       keepScrolling.disabled = true;
       swipeSteuerung,disabled = true; 
       listTilesS.style.display = "none";
-    }, 500);
-  }
+    }
+  }, 500);
   setTimeout(() => {
     if (gerät == "Handy"  && modeSelection.value == "traditional") document.getElementById('tutorial').style.top = mobileControls.getBoundingClientRect().bottom + 10;
   }, 777);
@@ -3937,10 +3939,10 @@ function goTutorialSteps(steps) {
       }, 100);
     }
   }
-  if (document.getElementById('tutorial').style.display == "inline") {
+  // if (document.getElementById('tutorial').style.display == "inline") {
     tutorial.index += direction;
     tutorial.state = tutorialSteps[tutorial.index].id;
-  }
+  // }
   if (!tutorialSteps.filter(x => document.getElementById(x.id + 'Div').className.includes('currentTutorialStep')).length) document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
     setTimeout(() => {
         if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
