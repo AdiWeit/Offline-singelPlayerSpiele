@@ -136,23 +136,23 @@
   }
   function checkpointSelected(value) {
     if (value == "start") {
-      checkpoint = checkpoints[level.mode][level[level.mode].number][0];
+      checkpoint = checkpoints[level.mode][currentLevel.levelNr][0];
       level.checkpoint = 0;
     }
     else {
-      checkpoint = checkpoints[level.mode][level[level.mode].number][parseInt(value.split('. ')[0])];
+      checkpoint = checkpoints[level.mode][currentLevel.levelNr][parseInt(value.split('. ')[0])];
       level.checkpoint = parseInt(value.split('. ')[0]);
     }
   }
   function deleteCheckpoint() {
-    if (checkpoints[level.mode][level[level.mode].number].length > 1 && level.checkpoint && confirm('Are you sure you want to delete the latest checkpoint (' + (checkpoints[level.mode][level[level.mode].number].length - 1) + '.) ?')) {
-      checkpoints[level.mode][level[level.mode].number].pop();
+    if (checkpoints[level.mode][currentLevel.levelNr].length > 1 && level.checkpoint && confirm('Are you sure you want to delete the latest checkpoint (' + (checkpoints[level.mode][currentLevel.levelNr].length - 1) + '.) ?')) {
+      checkpoints[level.mode][currentLevel.levelNr].pop();
       document.getElementById('checkpointSelection').options[level.checkpoint] = undefined;
       level.checkpoint--;
       if (!level.checkpoint) {
         checkpointManagement.style.display = "none";
       }
-      checkpoint = checkpoints[level.mode][level[level.mode].number][level.checkpoint];
+      checkpoint = checkpoints[level.mode][currentLevel.levelNr][level.checkpoint];
       localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
       if (level.checkpoint) checkpointSelection.value = level.checkpoint + '. checkpoint';
       else checkpointSelection.value = "start";
@@ -346,25 +346,29 @@
           spawnPoint: {
             x: 700,
             y: 555
-          }
+          },
+          levelNr: 1
         },
         2: {
           spawnPoint: {
             x: 300,
             y: 577
-          }
+          },
+          levelNr: 2
         },
         3: {
           spawnPoint: {
             x: 50,
             y: 255
-          }
+          },
+          levelNr: 3
         },
         4: {
           spawnPoint: {
             x: 75,
             y: 75
-          }
+          },
+          levelNr: 4
         },
         5: {
           spawnPoint: {
@@ -419,20 +423,25 @@
             y: 475,
             width: 17,
             height: 225
-          }]
+          }],
+          levelNr: 5
         },
         6: {
           spawnPoint: {
             x: 150,
             y: 155
-          }
+          },
+          levelNr: 6
         },
-        7: {},
+        7: {
+          levelNr: 7
+        },
         8: {
           spawnPoint: {
             x: 50,
             y: 455
-          }
+          },
+          levelNr: 8
         },
         9: {
           rotatingWall: [{
@@ -441,7 +450,8 @@
             width: 1480,
             height: 17,
             angle: 0
-          }]
+          }],
+          levelNr: 9
         },
         10: {
           rotatingDreieck: [{
@@ -450,15 +460,19 @@
             size: 50,
             timeFor360GradRotation: 6000,
             angle: 0
-          }]
+          }],
+          levelNr: 10
         },
         11: {
           spawnPoint: {
             x: 50,
             y: 155
-          }
+          },
+          levelNr: 11
         },
-        12: {},
+        12: {
+          levelNr: 12,
+        },
         13: {
           blinkWall: [{
             timeInvisible: 3000,
@@ -472,7 +486,8 @@
             y: 388,
             width: 115,
             height: 17
-          }]
+          }],
+          levelNr: 13
         },
         14: {
           rotatingWall: [{
@@ -523,7 +538,8 @@
             width: 1366,
             height: 17,
             angle: 70
-          }]
+          }],
+          levelNr: 14
         },
         16: {
           rotatingWall: [{
@@ -532,7 +548,8 @@
             width: window.innerWidth - 200,
             height: 17,
             angle: 0
-          }]
+          }],
+          levelNr: 16
         },
         15: {
           sensibility: 9,
@@ -560,9 +577,11 @@
             size: 68,
             timeFor360GradRotation: 4077,
             angle: 0
-          }]
+          }],
+          levelNr: 15
         },
         17: {
+          levelNr: 17
         },
         18: {
           rotatingWall: [{
@@ -601,16 +620,26 @@
             width: 311,
             height: 17,
             angle: 0
-          }]
+          }],
+          levelNr: 18
         },
-        19: {},
-        20: {},
-        21: {},
-        22: {},
+        19: {
+          levelNr: 19
+        },
+        20: {
+          levelNr: 20
+        },
+        21: {
+          levelNr: 21
+        },
+        22: {
+          levelNr: 22
+        },
         23: {
           cannons: [
             {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 9999, bulletSpeed: 7, timeGone: 0, direction: {x: -1, y: 0}}
           ],
+          levelNr: 23
         },
         24: {
           sensibility: 7,
@@ -618,6 +647,7 @@
             {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
             {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
           ],
+          levelNr: 24
         },
       },
       editLevel: {
@@ -780,14 +810,14 @@
       if (localStorage.getItem('geduldsspielHighscores')) highscores = JSON.parse(localStorage.getItem('geduldsspielHighscores'));
       if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
       AblageListe[0] = 0;
-      for (let i = 0; i < Object.keys(level.normal.vorgefertigt).length; i++) {
+      Object.keys(level.normal.vorgefertigt).forEach((levelNrNow, i) => {
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
-        if (Object.keys(highscores.normal[joyStickPlay.checked]).includes((i + 1).toString())) opt.text = "✅ " +  (i + 1) + ". map";
+        if (Object.keys(highscores.normal[joyStickPlay.checked]).includes((level.normal.vorgefertigt[levelNrNow].levelNr).toString())) opt.text = "✅ " +  (i + 1) + ". map";
         else opt.text = (i + 1) + ". map";
         opt.value = (i + 1) + ". map";
-      }
+      });
       if (highscores.normal[joyStickPlay.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked])[Object.keys(highscores.normal[joyStickPlay.checked]).length - 1]) + 1) + '. map';
       if (courceSelection.value == "") courceSelection.value = "1. map";
       setTimeout(() => {
@@ -843,19 +873,19 @@
           alert("every vorgefertigt level finished! That was the last one :(  )");
         }
         if (checkpoints[level.mode][level[level.mode].number]) {
-          checkpoint = checkpoints[level.mode][level[level.mode].number][checkpoints[level.mode][level[level.mode].number].length - 1];
+          checkpoint = checkpoints[level.mode][currentLevel.levelNr][checkpoints[level.mode][currentLevel.levelNr].length - 1];
         }
         else checkpoint = undefined;
         while (document.getElementById('checkpointSelection').options.length > 0) {
           document.getElementById('checkpointSelection').options[0] = undefined;
         }
-        for (var i = 0; checkpoint && i < checkpoints[level.mode][level[level.mode].number].length; i++) {
+        for (var i = 0; checkpoint && i < checkpoints[level.mode][currentLevel.levelNr].length; i++) {
           opt = document.createElement("option");
           document.getElementById("checkpointSelection").options.add(opt);
           if (i > 0) opt.text = i + ". checkpoint";
           else opt.text = "start";
         }
-        if (checkpoints[level.mode][level[level.mode].number]?.length > 1) checkpointManagement.style.display = "inline";
+        if (checkpoints[level.mode][currentLevel.levelNr]?.length > 1) checkpointManagement.style.display = "inline";
         else checkpointManagement.style.display = "none";
         document.getElementById('textur').style.display = "inline";
         Layout();
@@ -992,9 +1022,9 @@
             restartLevel();
           }
           if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
-          if (!checkpoints[level.mode][level[level.mode].number]) checkpoints[level.mode][level[level.mode].number] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
+          if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
           var newCheckpoint = 0;
-          checkpoints[level.mode][level[level.mode].number].forEach((pCheckpoint, i1) => {
+          checkpoints[level.mode][currentLevel.levelNr].forEach((pCheckpoint, i1) => {
             
         if ((red == 168 && green == 230 && blue == 29) && Math.abs(x1 - pCheckpoint.position.x) > 100 || Math.abs(y1 - pCheckpoint.position.y) > 100) {
           newCheckpoint++;
@@ -1003,14 +1033,14 @@
           if (i1) checkpointSelection.value = i1 + '. checkpoint';
           else checkpointSelection.value = 'start';
           level.checkpoint = i1;
-          checkpoint = checkpoints[level.mode][level[level.mode].number][i1];
+          checkpoint = checkpoints[level.mode][currentLevel.levelNr][i1];
         }
         });
-        if (newCheckpoint == checkpoints[level.mode][level[level.mode].number].length && (red == 168 && green == 230 && blue == 29)) {
+        if (newCheckpoint == checkpoints[level.mode][currentLevel.levelNr].length && (red == 168 && green == 230 && blue == 29)) {
           console.log("checkpoint!!!");
-          checkpoints[level.mode][level[level.mode].number].push({position: {x: x1, y: y1}, timeNeededToReach: time})
+          checkpoints[level.mode][currentLevel.levelNr].push({position: {x: x1, y: y1}, timeNeededToReach: time})
           level.checkpoint++;
-          checkpoint = checkpoints[level.mode][level[level.mode].number][level.checkpoint];
+          checkpoint = checkpoints[level.mode][currentLevel.levelNr][level.checkpoint];
           localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
           opt = document.createElement("option");
           document.getElementById("checkpointSelection").options.add(opt);
@@ -1060,8 +1090,8 @@
       }
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
-        if (highscores[level.mode][joyStickPlay.checked][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
-          highscores[level.mode][joyStickPlay.checked][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
+        if (highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
+          highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
           localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
         }
         level[level.mode].number++;
@@ -1079,7 +1109,6 @@
     x1 = currentLevel.spawnPoint.x;
     y1 = currentLevel.spawnPoint.y;
   }
-    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(currentLevel.sensibility);
   }
     function showScores() {
       var pHighscores = highscores[level.mode][joyStickPlay.checked];
