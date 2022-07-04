@@ -39,11 +39,12 @@
 }
 </style>
   </head>
+  <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected();" type="checkbox"> easy map versions
   <h2>sensibility: </h2>
   high (fast)
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
   low (slow)
-  <button type="button" id="normalSensibility" onclick="sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, true)" name="button">back to normal</button>
+  <button type="button" id="normalSensibility" onclick="sensibility(currentLevel.sensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
     <td>Row1 cell1</td>
@@ -202,48 +203,107 @@
         rotatingDreieck: false
       },
       number: 1,
+      easyMaps: {
+        2: {
+          spawnPoint: {
+            x: 300,
+            y: 755
+          }
+        },
+        7: {
+          rotatingWall: [{
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: window.innerWidth - 120,
+            height: 17,
+            angle: 0
+          }, {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: window.innerWidth - 120,
+            height: 17,
+            angle: 44
+          }, {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: window.innerWidth - 120,
+            height: 17,
+            angle: 110
+          }, {
+            x: window.innerWidth / 2,
+            y: window.innerHeight / 2,
+            width: window.innerWidth - 120,
+            height: 17,
+            angle: 150
+          }]
+        },
+        8: {
+          rotatingDreieck: [{
+            x: window.innerWidth / (1600 / 300),
+            y: window.innerHeight / (769 / 155),
+            size: window.innerWidth / (1600 / 50),
+            timeFor360GradRotation: 5000,
+            angle: 0
+          }, {
+            x: window.innerWidth / (1600 / 500),
+            y: window.innerHeight / (769 / 444),
+            size: (window.innerWidth + window.innerHeight) / ((1600 + 769) / 30),
+            timeFor360GradRotation: 5000,
+            angle: 10
+          }, {
+            x: window.innerWidth / (1600 / 733),
+            y: window.innerHeight / (769 / 588),
+            size: window.innerWidth / (1600 / 30),
+            timeFor360GradRotation: 5000,
+            angle: 0
+          }, {
+            x: window.innerWidth / (1600 / 1222),
+            y: window.innerHeight / (769 / 377),
+            size: window.innerWidth / (1600 / 100),
+            timeFor360GradRotation: 5077,
+            angle: 0
+          }]
+        },
+        16: {
+          cannons: [
+            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}}
+          ],
+        },
+        17: {
+          sensibility: 7,
+          cannons: [
+            {x: 1520 + 100, y: -17, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}},
+            {x: 1520 + 100, y: 145, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}}
+          ],
+        },
+      },
       vorgefertigt: {
         1: {
-          sensibility: 5,
           spawnPoint: {
             x: 700,
             y: 555
           }
         },
         2: {
-          sensibility: 5,
           spawnPoint: {
             x: 300,
-            y: 755
+            y: 577
           }
         },
         3: {
-          sensibility: 5,
           spawnPoint: {
             x: 50,
             y: 255
           }
         },
         4: {
-          sensibility: 5,
           spawnPoint: {
             x: 50,
             y: 155
           }
         },
-        5: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
-        },
+        5: {},
         6: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           blinkWall: [{
             timeInvisible: 3000,
             timeVisible: 3000,
@@ -259,12 +319,7 @@
           }]
         },
         7: {
-          sensibility: 5,
           screenSizeDependent: true,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           rotatingWall: [{
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
@@ -316,11 +371,6 @@
           }]
         },
         9: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           rotatingWall: [{
             x: window.innerWidth / 2,
             y: window.innerHeight / 2,
@@ -332,10 +382,6 @@
         8: {
           sensibility: 10,
           screenSizeDependent: true,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           rotatingDreieck: [{
             x: window.innerWidth / (1600 / 300),
             y: window.innerHeight / (769 / 155),
@@ -363,18 +409,8 @@
           }]
         },
         10: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
         },
         11: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           rotatingWall: [{
             x: 355,
             y: 130,
@@ -413,50 +449,17 @@
             angle: 0
           }]
         },
-        12: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
-        },
-        13: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
-        },
-        14: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
-        },
-        15: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          }
-        },
+        12: {},
+        13: {},
+        14: {},
+        15: {},
         16: {
-          sensibility: 5,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           cannons: [
             {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
           ],
         },
         17: {
           sensibility: 7,
-          spawnPoint: {
-            x: 10,
-            y: 255
-          },
           cannons: [
             {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
             {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
@@ -469,7 +472,7 @@
       editHistory: [],
       stepOfHistory: -1,
       worldWideLevel: {},
-      levelType: "vorgefertigt"
+      levelType: "easyMaps"
     },
     growing: {
       rotating: {
@@ -486,7 +489,6 @@
       levelType: "vorgefertigt",
       vorgefertigt: {
         1: {
-          sensibility: 5,
           miliSecForGrowning: 0.07,
           beginningSize: {
             x: (window.innerWidth / 40 + 333) / 2 + "px",
@@ -591,6 +593,20 @@
     //   }
     //   zählerListe[0]--;
     // }
+    for (const key of Object.keys(level.normal.vorgefertigt)) {
+      var pLevel = level.normal.vorgefertigt[key];
+      if (!pLevel.spawnPoint) {
+        pLevel.spawnPoint = {
+            x: 10,
+            y: 255
+          };
+      }
+      if (!pLevel.sensibility) pLevel.sensibility = 5;
+      for (const attr of Object.keys(pLevel)) {
+        if (!level.normal.easyMaps[key]) level.normal.easyMaps[key] = {};
+        if (!Object.keys(level.normal.easyMaps[key]).includes(attr)) level.normal.easyMaps[key][attr] = pLevel[attr];
+      }
+    }
     var highscores = {}
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
@@ -636,11 +652,12 @@
         modeSelected("growing");
         startPause();
       }
-      x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
-      y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y; //AblageListe[5] - 150 + 3;
+      x1 = currentLevel.spawnPoint.x;
+      y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       time = 0;
       goToCheckpoint();
     }
+    var currentLevel;
     function courceSelected() {
       for (let i = 1; i > 0 && window.innerHeight < textur.height; i -= 0.01) {
         scaleControler.content = "maximum-scale=" + i;
@@ -660,9 +677,12 @@
         level[level.mode].levelType = "showScores";      
       } else {
         time = 0;
-        level[level.mode].levelType = "vorgefertigt";
+        // level[level.mode].levelType = "vorgefertigt";
       //  if (highscores[level.mode][joyStickPlay.checked][name] != undefined && highscores[level.mode][joyStickPlay.checked][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
-        if (document.getElementById('courceSelection').value != "") level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+        if (document.getElementById('courceSelection').value != "") {
+          level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
+          currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
+        }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
           alert("every vorgefertigt level finished! That was the last one :(  )");
         }
@@ -690,11 +710,11 @@
         window.scroll(0, 0)
       //  BlinkWall = setInterval(blinkWall, 6000);
       BlinkWall = setInterval(function() {
-        for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall != undefined && i <  level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+        for (var i = 0; currentLevel.blinkWall != undefined && i <  currentLevel.blinkWall.length; i++) {
           level[level.mode].rotating.blinkWall[i] = false;
         }
         setTimeout(function() {
-          for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall != undefined &&  i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+          for (var i = 0; currentLevel.blinkWall != undefined &&  i < currentLevel.blinkWall.length; i++) {
             level[level.mode].rotating.blinkWall[i] = true;
           }
           level[level.mode].rotatingNow = "blinkWall";
@@ -702,7 +722,7 @@
         }, 3000);
         Layout();
       }, 6000);
-      if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined)) {
+      if (currentLevel != undefined && !(currentLevel.rotatingWall == undefined)) {
       RotatingWall = setInterval(function() {
         level[level.mode].rotating.rotatingWall = true;
         level[level.mode].rotatingNow = "rotatingWall";
@@ -710,7 +730,7 @@
         rotatingWall(true);
       }, 70);
     }
-      if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined)) {
+      if (currentLevel != undefined && !(currentLevel.rotatingDreieck == undefined)) {
       RotatingDreieck = setInterval(function() {
         level[level.mode].rotating.rotatingDreieck = true;
         level[level.mode].rotatingNow = "rotatingDreieck";
@@ -718,32 +738,32 @@
         rotatingDreieck();
       }, 70);
     }
-    if (level && level.normal.vorgefertigt[level.normal.number].cannons) requestAnimationFrame(renderLoop);
+    if (level && currentLevel.cannons) requestAnimationFrame(renderLoop);
       }
-      if (level[level.mode].levelType != "vorgefertigt") document.getElementById('textur').style.display = "none";
+      if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
       else document.getElementById('scores').style.display = "inline";
-      if (level.type != "showScores" && level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
-      x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
-      y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
+      if (level.type != "showScores" && currentLevel != undefined) {
+      x1 = currentLevel.spawnPoint.x;
+      y1 = currentLevel.spawnPoint.y;
       goToCheckpoint();
     }
-    if (level[level.mode].levelType == "vorgefertigt") {
+    if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
       Bild = new Image();
-      if (offline == false)  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
-      else Bild.src = level[level.mode].mapsVorgefertigt[level[level.mode].number - 1];
+      if (easyMaps.checked) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/easyMaps/GeduldsspielMap" + level[level.mode].number + ".png"
+      else Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/" + level.mode + "/GeduldsspielMap" + level[level.mode].number + ".png"
     }
     setTimeout(() => {
       textur.width = Bild.width;
       textur.height = Bild.height;
-      if (level[level.mode][level[level.mode].levelType][level[level.mode].number].screenSizeDependent) {
+      if (currentLevel.screenSizeDependent) {
         textur.width = window.innerWidth;
         textur.height = window.innerHeight;
       }
       Layout();
     }, 777);
-    document.getElementById('sensibility').value = level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility;
-    sensibilityAcc = {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility};
+    document.getElementById('sensibility').value = currentLevel.sensibility;
+    sensibilityAcc = {x: currentLevel.sensibility, y: currentLevel.sensibility};
     }
 
     sphere1.style.width = 50 + "px";
@@ -827,7 +847,7 @@
             restartLevel();
           }
           if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
-          if (!checkpoints[level.mode][level[level.mode].number]) checkpoints[level.mode][level[level.mode].number] = [{position: {x: level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x, y: level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y}, timeNeededToReach: 0}];
+          if (!checkpoints[level.mode][level[level.mode].number]) checkpoints[level.mode][level[level.mode].number] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
           var newCheckpoint = 0;
           checkpoints[level.mode][level[level.mode].number].forEach((pCheckpoint, i1) => {
             
@@ -854,7 +874,7 @@
         }
           if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
         }
-        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall && !level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) Layout();
+        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) Layout();
         if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
           canvas.fillStyle = "blue";
           canvas.beginPath();
@@ -876,15 +896,15 @@
       // if (!(level[level.mode].levelType == "editHistory")) {
       //Layout();
       //  setTimeout(function () {
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined && !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+      for (var i = 0; currentLevel != undefined && !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
         canvas.fillStyle = "black";
-        if ((level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
+        if ((level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
       }
       //  }, 3000);
       // }
       // else {
-      //   for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
-      //     canvas.fillRect(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].height);
+      //   for (var i = 0; !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
+      //     canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
       //   }
       //}
     }
@@ -893,7 +913,7 @@
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
         alert("every vorgefertigt level finished! That was the last one :(  )");
       }
-      if (level[level.mode].levelType == "vorgefertigt") {
+      if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
         if (highscores[level.mode][joyStickPlay.checked][level[level.mode].number] == undefined || highscores[level.mode][joyStickPlay.checked][level[level.mode].number] > mins + ":" + secs + ":" + "0" + tenths) {
           highscores[level.mode][joyStickPlay.checked][level[level.mode].number] = mins + ":" + secs + ":" + "0" + tenths;
@@ -910,11 +930,11 @@
           showScores();
         }
       }
-    if (level[level.mode][level[level.mode].levelType][level[level.mode].number] != undefined) {
-    x1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.x;
-    y1 = level[level.mode][level[level.mode].levelType][level[level.mode].number].spawnPoint.y;
+    if (currentLevel != undefined) {
+    x1 = currentLevel.spawnPoint.x;
+    y1 = currentLevel.spawnPoint.y;
   }
-    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(level[level.mode][level[level.mode].levelType][level[level.mode].number].sensibility);
+    if (document.getElementById('sensibility').value != level[level.mode][level[level.mode].levelType][level[level.mode].number - 1].sensibility && !(level[level.mode].number == highscores[level.mode][joyStickPlay.checked][name].length)) sensibility(currentLevel.sensibility);
   }
     function showScores() {
       var pHighscores = highscores[level.mode][joyStickPlay.checked];
@@ -929,7 +949,7 @@
       document.getElementById('textur').style.display = "none";
       var cell = [ /*row.insertCell(0)*/ ];
         //  var cell = [/*row.insertCell(0)*/];
-        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && level[level.mode].levelType == "vorgefertigt") || (i1 < Object.keys(pHighscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
+        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && ["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) || (i1 < Object.keys(pHighscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
             if (i1 < pHighscores.length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
               if (pHighscores[i1]) cell[cell.length - 2].innerHTML = pHighscores[i1];
@@ -975,8 +995,8 @@
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating.rotatingDreieck == false*/) angle = (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle / 58);
-      if (level[level.mode].rotating.rotatingDreieck == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length - 1) level[level.mode].rotating.rotatingDreieck = false;
+      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating.rotatingDreieck == false*/) angle = (currentLevel.rotatingDreieck[i].angle / 58);
+      if (level[level.mode].rotating.rotatingDreieck == true && i == currentLevel.rotatingDreieck.length - 1) level[level.mode].rotating.rotatingDreieck = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
@@ -989,13 +1009,13 @@
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       AblageListe[0] = time
-  //    if (/*offline == true && */level[level.mode].levelType != "editHistory" && (level[level.mode].rotatingNow == "rotatingDreieck" || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined) ) Layout();
-    //  if (level[level.mode].levelType == "vorgefertigt") Layout();
-      for (var i = 0; level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck != undefined && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
+  //    if (/*offline == true && */level[level.mode].levelType != "editHistory" && (level[level.mode].rotatingNow == "rotatingDreieck" || currentLevel.rotatingDreieck == undefined) ) Layout();
+    //  if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) Layout();
+      for (var i = 0; currentLevel.rotatingDreieck != undefined && i < currentLevel.rotatingDreieck.length; i++) {
         time = AblageListe[0];
-        // time += level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle * 10000
-          drawPath_V2(triangle, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].y, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size / 10 /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].size*/ ,
-            time / (level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].timeFor360GradRotation) * Math.PI + level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle /*level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
+        // time += currentLevel.rotatingDreieck[i].angle * 10000
+          drawPath_V2(triangle, currentLevel.rotatingDreieck[i].x, currentLevel.rotatingDreieck[i].y, currentLevel.rotatingDreieck[i].size / 10 /*currentLevel.rotatingDreieck[i].size*/ ,
+            time / (currentLevel.rotatingDreieck[i].timeFor360GradRotation) * Math.PI + currentLevel.rotatingDreieck[i].angle /*currentLevel.rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
       }
       // scale path
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
@@ -1003,13 +1023,15 @@
       canvas.setTransform(1, 0, 0, 1, 0, 0);
       //  requestAnimationFrame(renderLoop);
       // bullets animation
-      for (var cannon of level[level.mode][level[level.mode].levelType][level[level.mode].number].cannons) {
-        canvas.fillStyle = "black";
-        canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
-        cannon.timeGone += 16;
-        if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
-          cannon.timeGone = 1;
-          bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+      if (currentLevel.cannons) {
+        for (var cannon of currentLevel.cannons) {
+          canvas.fillStyle = "black";
+          canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
+          cannon.timeGone += 16;
+          if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
+            cannon.timeGone = 1;
+            bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+          }
         }
       }
       for (var bullet of bullets) {
@@ -1021,7 +1043,7 @@
         canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       }
       bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      if (level.normal.vorgefertigt[level.normal.number].cannons || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck) {
+      if (currentLevel.cannons || currentLevel.rotatingDreieck) {
         requestAnimationFrame(renderLoop);
       }
     }
@@ -1044,17 +1066,17 @@
     }
 
     function rotatingDreieck() {
-      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined/* || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined*/)) {
+      if (!(currentLevel == undefined || currentLevel.rotatingDreieck == undefined/* || currentLevel.rotatingDreieck == undefined*/)) {
         requestAnimationFrame(renderLoop); // start animation
       }
-      //   if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[0].angle == undefined)) Layout();
-      //   for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck.length; i++) {
+      //   if (!(currentLevel == undefined || currentLevel.rotatingDreieck == undefined || currentLevel.rotatingDreieck[0].angle == undefined)) Layout();
+      //   for (var i = 0; !(currentLevel == undefined || currentLevel.rotatingDreieck == undefined || currentLevel.rotatingDreieck[0].angle == undefined) && i < currentLevel.rotatingDreieck.length; i++) {
       //   canvas.save();
       //   canvas.beginPath();
       //
       //     // canvas.moveTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo(0, -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo((level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
+      //     // canvas.lineTo(0, -(currentLevel.rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
+      //     // canvas.lineTo((currentLevel.rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
       //     // canvas.lineTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
       //     canvas.fillStyle = "black";
       //     var path=new Path2D();
@@ -1065,27 +1087,27 @@
       //
       // canvas.closePath();
       // canvas.restore();
-      // level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingDreieck[i].angle++;
+      // currentLevel.rotatingDreieck[i].angle++;
       // }
 
     }
 
     function rotatingWall(rotate) {
-      //if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
-      if (offline == true && level[level.mode].levelType == "vorgefertigt") level[level.mode].rotatingNow = "rotatingWall";
-  //    if (level[level.mode].levelType == "vorgefertigt") {rotate = true;Layout();}
-      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number] == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall == undefined || level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
+      //if (!(currentLevel == undefined || currentLevel.rotatingWall == undefined || currentLevel.rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
+      if (offline == true && ["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) level[level.mode].rotatingNow = "rotatingWall";
+  //    if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {rotate = true;Layout();}
+      for (var i = 0; !(currentLevel == undefined || currentLevel.rotatingWall == undefined || currentLevel.rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
           level[level.mode].number
         ].rotatingWall.length; i++) {
         canvas.save();
-        canvas.translate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].x, level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].y);
-        canvas.rotate(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle * Math.PI / 180)
+        canvas.translate(currentLevel.rotatingWall[i].x, currentLevel.rotatingWall[i].y);
+        canvas.rotate(currentLevel.rotatingWall[i].angle * Math.PI / 180)
         canvas.fillStyle = "black";
-        canvas.fillRect(-(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width / 2), -(level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].height / 2), level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].width, level[level.mode][level[level.mode].levelType][level[level.mode].number]
+        canvas.fillRect(-(currentLevel.rotatingWall[i].width / 2), -(currentLevel.rotatingWall[i].height / 2), currentLevel.rotatingWall[i].width, currentLevel
           .rotatingWall[i].height);
         canvas.restore();
-        if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall[i].angle++;
-        if (level[level.mode].levelType != "vorgefertigt" && level[level.mode].rotating.rotatingWall == true && i == level[level.mode][level[level.mode].levelType][level[level.mode].number].rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
+        if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) currentLevel.rotatingWall[i].angle++;
+        if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType) && level[level.mode].rotating.rotatingWall == true && i == currentLevel.rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
       }
     }
 
@@ -1125,7 +1147,7 @@
     }
 
     function Layout() {
-      if (level[level.mode].levelType == "vorgefertigt") {
+      if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
         if (level[level.mode].vorgefertigt[level[level.mode].number].screenSizeDependent) canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight);
       }
@@ -1134,7 +1156,7 @@
       //}
       if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
       if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
-      if (!(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
+      if (!(currentLevel.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
       // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       //if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
@@ -1192,7 +1214,7 @@
 
     function activateBlinkWall() {
       level[level.mode].blinkWall = true;
-      for (var i = 0; !(level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall == undefined) && i < level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall.length; i++) {
+      for (var i = 0; !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
         blinkWallFunction(i);
       }
     }
@@ -1205,8 +1227,8 @@
           level[level.mode].rotating.blinkWall[i] = false;
           if (level[level.mode].levelType == "worldWideLevel") Layout();
           if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel" && level[level.mode].blinkWall == true) blinkWallFunction(i);
-        }, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].timeVisible);
-      }, level[level.mode][level[level.mode].levelType][level[level.mode].number].blinkWall[i].timeInvisible);
+        }, currentLevel.blinkWall[i].timeVisible);
+      }, currentLevel.blinkWall[i].timeInvisible);
     }
 
     if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
