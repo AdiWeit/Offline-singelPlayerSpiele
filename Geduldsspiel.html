@@ -7,7 +7,7 @@
 
 <head>
   <title>game of caution</title>
-  <canvas id="textur" width="1582" onclick="canvasClicked();" height="740"></canvas>
+  <canvas id="textur" width="1582" style="border-width: 3px; border-style: solid;" onclick="canvasClicked();" height="740"></canvas>
   <meta name="viewport" id="scaleControler">
   <div id="ball">
     <style>
@@ -41,9 +41,9 @@
   </head>
   <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected();" type="checkbox"> easy map versions
   <h2>sensibility: </h2>
-  high (fast)
+  <a id="sensibilityTitleLeft">high (fast)</a>
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
-  low (slow)
+  <a id="sensibilityTitleRight">low (slow)</a>
   <button type="button" id="normalSensibility" onclick="sensibility(currentLevel.sensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
@@ -99,6 +99,8 @@
   ) {
     var gerät = "Handy"
     console.log("Handy");
+    sensibilityTitleLeft.innerHTML = "low (slow)";
+    sensibilityTitleRight.innerHTML = "high (fast)";
   } else {
     var gerät = "PC"
     joyStickPlayP.style.display = "none";
@@ -446,7 +448,7 @@
             x: 700,
             y: 370,
             size: 50,
-            timeFor360GradRotation: 5000,
+            timeFor360GradRotation: 3000,
             angle: 0
           }]
         },
@@ -534,7 +536,7 @@
           }]
         },
         15: {
-          sensibility: 25,
+          sensibility: 9,
           screenSizeDependent: true,
           rotatingDreieck: [{
             x: window.innerWidth / (1600 / 300),
@@ -813,6 +815,8 @@
     }
     var currentLevel;
     function courceSelected() {
+      bullets = [];
+      if (currentLevel) var levelBefore = JSON.parse(JSON.stringify(currentLevel));
       for (let i = 1; i > 0 && window.innerHeight < textur.height; i -= 0.01) {
         scaleControler.content = "maximum-scale=" + i;
       }
@@ -884,15 +888,7 @@
         rotatingWall(true);
       }, 70);
     }
-      if (currentLevel != undefined && !(currentLevel.rotatingDreieck == undefined)) {
-      RotatingDreieck = setInterval(function() {
-        level[level.mode].rotating.rotatingDreieck = true;
-        level[level.mode].rotatingNow = "rotatingDreieck";
-        Layout();
-        rotatingDreieck();
-      }, 70);
-    }
-    if (level && currentLevel.cannons) requestAnimationFrame(renderLoop);
+    if (level && currentLevel.cannons && !levelBefore.cannons) requestAnimationFrame(renderLoop);
       }
       if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -918,6 +914,7 @@
     }, 777);
     document.getElementById('sensibility').value = currentLevel.sensibility;
     sensibilityAcc = {x: currentLevel.sensibility, y: currentLevel.sensibility};
+    if (currentLevel.rotatingDreieck && !levelBefore.rotatingDreieck) requestAnimationFrame(renderLoop);
     }
 
     sphere1.style.width = 50 + "px";
@@ -1158,6 +1155,8 @@
 
 
     function renderLoop(time) {
+      canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
+      // if (level[level.mode].vorgefertigt[level[level.mode].number].screenSizeDependent) canvas.drawImage(Bild, 0, 0, window.innerWidth, window.innerHeight);
       //  canvas.clearRect(0, 0, textur.width, textur.height);
       //  if (!(level[level.mode].levelType == "editHistory")) Layout();
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
@@ -1189,15 +1188,13 @@
         }
       }
       for (var bullet of bullets) {
-        canvas.fillStyle = "hsl(20, 4%, 50%)";
-        canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
         canvas.fillStyle = "black";
         bullet.x += bullet.speed*bullet.direction.x;
         bullet.y += bullet.speed*bullet.direction.y;
         canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       }
       bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      if (currentLevel.cannons && !currentLevel.rotatingDreieck) {
+      if (currentLevel.cannons || currentLevel.rotatingDreieck) {
         requestAnimationFrame(renderLoop);
       }
     }
@@ -1217,33 +1214,6 @@
       }
       path.closePath();
       return path;
-    }
-
-    function rotatingDreieck() {
-      if (!(currentLevel == undefined || currentLevel.rotatingDreieck == undefined/* || currentLevel.rotatingDreieck == undefined*/)) {
-        requestAnimationFrame(renderLoop); // start animation
-      }
-      //   if (!(currentLevel == undefined || currentLevel.rotatingDreieck == undefined || currentLevel.rotatingDreieck[0].angle == undefined)) Layout();
-      //   for (var i = 0; !(currentLevel == undefined || currentLevel.rotatingDreieck == undefined || currentLevel.rotatingDreieck[0].angle == undefined) && i < currentLevel.rotatingDreieck.length; i++) {
-      //   canvas.save();
-      //   canvas.beginPath();
-      //
-      //     // canvas.moveTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo(0, -(currentLevel.rotatingDreieck[i].x / 2), canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo((currentLevel.rotatingDreieck[i].x / 2) / 2, canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     // canvas.lineTo(0, -canvas.width/2 * (Math.sqrt(3)/2) / 2);
-      //     canvas.fillStyle = "black";
-      //     var path=new Path2D();
-      //     path.moveTo(-50+50,-(25/2));
-      //     path.lineTo(-50,-(25/2)-50);
-      //     path.lineTo(-50-50,-(25/2));
-      //     canvas.fill(path);
-      //
-      // canvas.closePath();
-      // canvas.restore();
-      // currentLevel.rotatingDreieck[i].angle++;
-      // }
-
     }
 
     function rotatingWall(rotate) {
@@ -1274,12 +1244,12 @@
         y1 = 0;
         vy1 = -vy1;
       }
-      if (x1 > window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
-        x1 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
+      if (x1 > textur.width - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+        x1 = textur.width - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
         vx1 = -vx1;
       }
-      if (y1 > window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
-        y1 = window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
+      if (y1 > textur.height - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+        y1 = textur.height - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
         vy1 = -vy1;
       }
       if (x2 < 0) {
@@ -1290,12 +1260,12 @@
         y2 = 0;
         vy2 = -vy2;
       }
-      if (x2 > window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
-        x2 = window.innerWidth - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
+      if (x2 > textur.width - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2) {
+        x2 = textur.width - JSON.parse(sphere1.style.width.toString().split('px')[0]) / 2;
         vx2 = -vx2;
       }
-      if (y2 > window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
-        y2 = window.innerHeight - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
+      if (y2 > textur.height - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2) {
+        y2 = textur.height - JSON.parse(sphere1.style.height.toString().split('px')[0]) / 2;
         vy2 = -vy2;
       }
     }
@@ -1309,7 +1279,6 @@
       //    größeAnpassen();
       //}
       if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
-      if (level[level.mode].rotatingNow != "rotatingDreieck") rotatingDreieck();
       if (!(currentLevel.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
       // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
       // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
