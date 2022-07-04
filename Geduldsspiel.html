@@ -119,20 +119,20 @@
     clearInterval(growing);
     level.mode = value;
     startPause();
-    if (value == "growing") {
-      sphere1.style.width =  level.growing[level.growing.levelType][level.growing.number].beginningSize.x//(window.innerWidth / 40 + 66) / 2 + "px";
-      sphere1.style.height = level.growing[level.growing.levelType][level.growing.number].beginningSize.y//(window.innerHeight / 40 + 66) / 2 + "px";
-      growing = setInterval(function () {
-        sphere1.style.width = (JSON.parse(sphere1.style.width.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
-        sphere1.style.height = (JSON.parse(sphere1.style.height.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
-        level.growing[level.growing.levelType][level.growing.number].spawnPoint.x = window.innerWidth/2 - JSON.parse(sphere1.style.width.toString().split('px')[0]) + 77;
-        level.growing[level.growing.levelType][level.growing.number].spawnPointy = window.innerHeight/2 - JSON.parse(sphere1.style.height.toString().split('px')[0]);
-      }, 7);
-    }
-    else {
+    // if (value == "growing") {
+    //   sphere1.style.width =  level.growing[level.growing.levelType][level.growing.number].beginningSize.x//(window.innerWidth / 40 + 66) / 2 + "px";
+    //   sphere1.style.height = level.growing[level.growing.levelType][level.growing.number].beginningSize.y//(window.innerHeight / 40 + 66) / 2 + "px";
+    //   growing = setInterval(function () {
+    //     sphere1.style.width = (JSON.parse(sphere1.style.width.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
+    //     sphere1.style.height = (JSON.parse(sphere1.style.height.toString().split('px')[0]) + level.growing[level.growing.levelType][level.growing.number].miliSecForGrowning) + "px";
+    //     level.growing[level.growing.levelType][level.growing.number].spawnPoint.x = window.innerWidth/2 - JSON.parse(sphere1.style.width.toString().split('px')[0]) + 77;
+    //     level.growing[level.growing.levelType][level.growing.number].spawnPointy = window.innerHeight/2 - JSON.parse(sphere1.style.height.toString().split('px')[0]);
+    //   }, 7);
+    // }
+    // else {
       sphere1.style.width = 50 + "px";
       sphere1.style.height = 50 + "px";
-    }
+    // }
   }
   function checkpointSelected(value) {
     if (value == "start") {
@@ -166,10 +166,6 @@
   }
     visible([
       ['app', "none"],
-      // ['sliderSize', "none"],
-      // ['sliderWidth', "none"],
-      // ['sliderHeight', "none"],
-      // ['angle', "none"]
     ])
 
     var canvas = textur.getContext('2d'); //Dimension
@@ -491,50 +487,50 @@
         },
         14: {
           rotatingWall: [{
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 677,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 0
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 22
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 44
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 88
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 110
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 130
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 150
           }, {
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: 1366,
             height: 17,
             angle: 70
@@ -543,8 +539,8 @@
         },
         16: {
           rotatingWall: [{
-            x: window.innerWidth / 2,
-            y: window.innerHeight / 2,
+            x: 1366,
+            y: 334,
             width: window.innerWidth - 200,
             height: 17,
             angle: 0
@@ -653,9 +649,6 @@
       editLevel: {
         selectedLevel: 1
       },
-      editHistory: [],
-      stepOfHistory: -1,
-      worldWideLevel: {},
       levelType: "easyMaps"
     },
     growing: {
@@ -667,9 +660,6 @@
       editLevel: {
         selectedLevel: 1
       },
-      editHistory: [],
-      stepOfHistory: -1,
-      worldWideLevel: {},
       levelType: "vorgefertigt",
       vorgefertigt: {
         1: {
@@ -694,9 +684,6 @@
       editLevel: {
         selectedLevel: 1
       },
-      editHistory: [],
-      stepOfHistory: -1,
-      worldWideLevel: {},
       levelType: "vorgefertigt",
       vorgefertigt: {
         1: {
@@ -764,19 +751,6 @@
     },
       mode: "normal"
     }
-    //window.innerHeight - 150 + 3//window.innerHeight/4//610;
-    // for (var i = 0; zählerListe[0]>0;i++) {
-    //   data = canvas.getImageData(10, zählerListe[0], 1, 1);
-    //   red = data.data[0];
-    //   green = data.data[1];
-    //   blue = data.data[2];
-    //   alpha = data.data[3];
-    //   if (red == 0 && blue == 0 && alpha == 255 && green == 0) {
-    //     y1 = zählerListe[0] - (window.innerWidth/40 + 66);
-    //     spawnPoint = zählerListe[0] - (window.innerWidth/40 + 66)
-    //   }
-    //   zählerListe[0]--;
-    // }
     for (const key of Object.keys(level.normal.vorgefertigt)) {
       var pLevel = level.normal.vorgefertigt[key];
       if (!pLevel.spawnPoint) {
@@ -863,8 +837,6 @@
         level[level.mode].levelType = "showScores";      
       } else {
         time = 0;
-        // level[level.mode].levelType = "vorgefertigt";
-      //  if (highscores[level.mode][joyStickPlay.checked][name] != undefined && highscores[level.mode][joyStickPlay.checked][name].length > 0 && document.getElementById('courceSelection').value == "") level[level.mode].number++;
         if (document.getElementById('courceSelection').value != "") {
           level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
           currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
@@ -894,7 +866,6 @@
         }, 500);
         // startPause();
         window.scroll(0, 0)
-      //  BlinkWall = setInterval(blinkWall, 6000);
       BlinkWall = setInterval(function() {
         for (var i = 0; currentLevel.blinkWall != undefined && i <  currentLevel.blinkWall.length; i++) {
           level[level.mode].rotating.blinkWall[i] = false;
@@ -903,7 +874,6 @@
           for (var i = 0; currentLevel.blinkWall != undefined &&  i < currentLevel.blinkWall.length; i++) {
             level[level.mode].rotating.blinkWall[i] = true;
           }
-          level[level.mode].rotatingNow = "blinkWall";
           Layout();
         }, 3000);
         Layout();
@@ -911,7 +881,6 @@
       if (currentLevel != undefined && !(currentLevel.rotatingWall == undefined)) {
       RotatingWall = setInterval(function() {
         level[level.mode].rotating.rotatingWall = true;
-        level[level.mode].rotatingNow = "rotatingWall";
         Layout();
         rotatingWall(true);
       }, 70);
@@ -1073,7 +1042,7 @@
       //  setTimeout(function () {
       for (var i = 0; currentLevel != undefined && !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
         canvas.fillStyle = "black";
-        if ((level[level.mode].rotating.blinkWall[i] == true/* && (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel")*/)) canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
+        if ((level[level.mode].rotating.blinkWall[i] == true)) canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
       }
       //  }, 3000);
       // }
@@ -1123,7 +1092,7 @@
       document.getElementById('textur').style.display = "none";
       var cell = [ /*row.insertCell(0)*/ ];
         //  var cell = [/*row.insertCell(0)*/];
-        for (var i1 = 1; (i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && ["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) || (i1 < Object.keys(pHighscores).length + 1 && level[level.mode].levelType == "worldWideLevel"); i1++) {
+        for (var i1 = 1; i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length && ["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType); i1++) {
             if (i1 < pHighscores.length + 1) {
               cell[cell.length - 2] = row.insertCell(i1);
               if (pHighscores[i1]) cell[cell.length - 2].innerHTML = pHighscores[i1];
@@ -1149,7 +1118,7 @@
       var row = table.insertRow(0);
       cell.push(row.insertCell(0));
       cell[cell.length - 1].innerHTML = "name";
-      for (var i1 = 1; level[level.mode].levelType != "worldWideLevel" && i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
+      for (var i1 = 1; i1 < Object.keys(level[level.mode][level[level.mode].levelType]).length; i1++) {
         cell.push(row.insertCell(i1));
         cell[cell.length - 1].innerHTML = (i1) + ". Map";
       }
@@ -1161,15 +1130,9 @@
     });
     const triangle = createPath(point(0, -25), point(-50, -75), point(-100, -25));
     var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
-    // function drawPath(path, x, y, angle) {
-    //     canvas.setTransform(1, 0, 0, 1, x, y);
-    //     canvas.rotate(level[level.mode].vorgefertigt[level[level.mode].number].rotatingDreieck[i].angle);
-    //     canvas.stroke(path);
-    // }
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level[level.mode].levelType == "editHistory"/* || level[level.mode].rotating.rotatingDreieck == false*/) angle = (currentLevel.rotatingDreieck[i].angle / 58);
       if (level[level.mode].rotating.rotatingDreieck == true && i == currentLevel.rotatingDreieck.length - 1) level[level.mode].rotating.rotatingDreieck = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
@@ -1180,11 +1143,9 @@
     function renderLoop(time) {
       canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
       //  canvas.clearRect(0, 0, textur.width, textur.height);
-      //  if (!(level[level.mode].levelType == "editHistory")) Layout();
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
       AblageListe[0] = time
-  //    if (/*offline == true && */level[level.mode].levelType != "editHistory" && (level[level.mode].rotatingNow == "rotatingDreieck" || currentLevel.rotatingDreieck == undefined) ) Layout();
     //  if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) Layout();
       for (var i = 0; currentLevel.rotatingDreieck != undefined && i < currentLevel.rotatingDreieck.length; i++) {
         time = AblageListe[0];
@@ -1196,7 +1157,6 @@
       //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
 
       canvas.setTransform(1, 0, 0, 1, 0, 0);
-      //  requestAnimationFrame(renderLoop);
       // bullets animation
       if (currentLevel.cannons) {
         for (var cannon of currentLevel.cannons) {
@@ -1240,11 +1200,7 @@
 
     function rotatingWall(rotate) {
       //if (!(currentLevel == undefined || currentLevel.rotatingWall == undefined || currentLevel.rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
-      if (offline == true && ["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) level[level.mode].rotatingNow = "rotatingWall";
-  //    if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {rotate = true;Layout();}
-      for (var i = 0; !(currentLevel == undefined || currentLevel.rotatingWall == undefined || currentLevel.rotatingWall[0].angle == undefined) && i < level[level.mode][level[level.mode].levelType][
-          level[level.mode].number
-        ].rotatingWall.length; i++) {
+      for (var i = 0; currentLevel && currentLevel.rotatingWall && currentLevel.rotatingWall[0].angle != undefined && i < currentLevel.rotatingWall.length; i++) {
         canvas.save();
         canvas.translate(currentLevel.rotatingWall[i].x, currentLevel.rotatingWall[i].y);
         canvas.rotate(currentLevel.rotatingWall[i].angle * Math.PI / 180)
@@ -1252,7 +1208,7 @@
         canvas.fillRect(-(currentLevel.rotatingWall[i].width / 2), -(currentLevel.rotatingWall[i].height / 2), currentLevel.rotatingWall[i].width, currentLevel
           .rotatingWall[i].height);
         canvas.restore();
-        if (!(level[level.mode].levelType == "editHistory") && level[level.mode].rotating.rotatingWall == true) currentLevel.rotatingWall[i].angle++;
+        if (level[level.mode].rotating.rotatingWall == true) currentLevel.rotatingWall[i].angle++;
         if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType) && level[level.mode].rotating.rotatingWall == true && i == currentLevel.rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
       }
     }
@@ -1296,14 +1252,8 @@
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
       }
-      //  if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") {
-      //    größeAnpassen();
-      //}
-      if (level[level.mode].rotatingNow != "rotatingWall") rotatingWall();
-      if (!(currentLevel.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
-      // if (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingWall") || (((level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "editHistory" || level[level.mode].levelType == "worldWideLevel") && !(level[level.mode].rotatingNow == "rotatingDreieck")))) || level[level.mode].rotatingNow == "rotatingWall") rotating();
-      // if (!(level[level.mode].rotating.blinkWall == undefined) && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
-      //if (level[level.mode].levelType == "editHistory"/* || level[level.mode].levelType == "editLevel" */|| level[level.mode].levelType == "worldWideLevel") level[level.mode][level[level.mode].levelType] = JSON.parse(JSON.stringify(AblageListe[1]));
+      rotatingWall();
+      if (currentLevel.blinkWall && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
     }
     // stopWatch:
     var time = 0;
@@ -1342,20 +1292,6 @@
         }, 100);
       }
     }
-
-    function select(type) {
-      level[level.mode].rotatingNow = type;
-      document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
-      if (level[level.mode].editHistory.length == 0) level[level.mode].editLevel.selected = [type, 0];
-      else if (level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]] == undefined) level[level.mode].editLevel.selected = [type, 0];
-      else level[level.mode].editLevel.selected = [type, level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]].length - 1];
-      document.getElementById(type).style.background = "blue";
-    }
-    // document.getElementById('blinkWall').style.display = "none";
-    // document.getElementById('rotatingWall').style.display = "none";
-    // document.getElementById('rotatingDreieck').style.display = "none";
-    // level[level.mode].editLevel.selected = [];
-
     function activateBlinkWall() {
       level[level.mode].blinkWall = true;
       for (var i = 0; !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
@@ -1366,11 +1302,8 @@
     function blinkWallFunction(i) {
       setTimeout(function() {
         level[level.mode].rotating.blinkWall[i] = true;
-        if (level[level.mode].levelType == "worldWideLevel") Layout();
         setTimeout(function() {
           level[level.mode].rotating.blinkWall[i] = false;
-          if (level[level.mode].levelType == "worldWideLevel") Layout();
-          if (level[level.mode].levelType == "editLevel" || level[level.mode].levelType == "worldWideLevel" && level[level.mode].blinkWall == true) blinkWallFunction(i);
         }, currentLevel.blinkWall[i].timeVisible);
       }, currentLevel.blinkWall[i].timeInvisible);
     }
@@ -1379,109 +1312,6 @@
     function canvasClicked() {
       if (/*joyStick == "place" && */gerät == "PC") {
         joyStick = {coordinates : {x: mausx, y: mausy}};
-      }
-      if (level[level.mode].levelType == "editHistory") {
-        AblageListe[0] = [];
-        AblageListe[0][0] = [];
-        AblageListe[0][1] = [];
-        AblageListe[0][2] = [];
-        AblageListe[0][3] = [];
-        AblageListe[0][4] = [];
-
-        AblageListe[0][5] = ["rotatingWall", "rotatingDreieck", "blinkWall", "bullet"];
-        for (var i = 0; level[level.mode].stepOfHistory > -1 && i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]).length; i++) {
-          for (var i1 = 0; (AblageListe[0][5].includes(Object.keys(level[level.mode]["editHistory"][level[level.mode].stepOfHistory])[i]) && i1 < level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length); i1++) {
-            if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i] == "picture") i1 = level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]].length;
-            else {
-              AblageListe[0][0].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].x);
-              AblageListe[0][1].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].y);
-              AblageListe[0][2].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].width);
-              AblageListe[0][3].push(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[i]][i1].hight);
-              AblageListe[0][4].push([i, i1]);
-            }
-          }
-        }
-        for (var i = 0; i < AblageListe[0][0].length; i++) {
-          if ((AblageListe[0][0][i] - mausx < 55 && AblageListe[0][0][i] - mausx > -55) && (AblageListe[0][1][i] - mausy < 55 && AblageListe[0][1][i] - mausy > -55)) {
-            console.log(AblageListe[0][4][i])
-            console.log(level[level.mode].editHistory[level[level.mode].stepOfHistory][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[AblageListe[0][4][i][0]]]
-              [AblageListe[0][4][i][1]]);
-            AblageListe[0][0] = i;
-            i = AblageListe[0][1].length + 1;
-          }
-        }
-        if (i == AblageListe[0][1].length + 2 && AblageListe[6] == true) {
-          document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "";
-          level[level.mode].editLevel.selected[0] = Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory])[AblageListe[0][4][AblageListe[0][0]][0]]; //[AblageListe[0][0]];
-          level[level.mode].editLevel.selected[1] = [AblageListe[0][4][AblageListe[0][0]][1]];
-          document.getElementById(level[level.mode].editLevel.selected[0]).style.background = "blue";
-          Layout();
-          visibilityEditStuff();
-          for (var i = 0; i < Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]]).length; i++) {
-            if (Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i] == "width" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[
-                i] == "height" || Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i] == "size") document.getElementById("slider" + capitalizeFirstLetter(Object.keys(level[level.mode].editHistory[
-              level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i])).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory]
-              [level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]];
-            else if (!(document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]) == undefined))
-              document.getElementById(Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]).value = level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[
-                1]][Object.keys(level[level.mode].editHistory[level[level.mode].stepOfHistory][level[level.mode].editLevel.selected[0]][level[level.mode].editLevel.selected[1]])[i]];
-          }
-        } else {
-          console.log("createElement");
-          //  level[level.mode].stepOfHistory++;
-          if (level[level.mode].editHistory.length > 0) {
-            level[level.mode].editHistory.push(JSON.parse(JSON.stringify(level[level.mode].editHistory[level[level.mode].stepOfHistory])));
-          } else {
-            level[level.mode].editHistory.push({});
-          }
-          if (level[level.mode].editHistory.length == 1) level.normal.editHistory.unshift([]);
-          level[level.mode].stepOfHistory = level[level.mode].editHistory.length - 1;
-          level[level.mode].number = level[level.mode].stepOfHistory;
-          if (level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] == undefined) level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]] = [];
-          level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].push({
-            x: mausx,
-            y: mausy /* - 17 - scrollY*/ ,
-            angle: 0
-          })
-    //      level[level.mode].editHistory[level[level.mode].editHistory.length - 1].spawnPoint = {x: 10, y: 255};
-          level[level.mode].editHistory/*[level[level.mode].editHistory.length - 1]*/.sensibility = 5;
-          document.getElementById('angle').style.display = "inline";
-          visibilityEditStuff();
-          if (level[level.mode].editLevel.selected[0] == "rotatingWall") level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = 3000;
-          if (level[level.mode].editLevel.selected[0] == "blinkWall") {
-            //    visible([['timeVisible', "inline"], ['timeInvisible', "inline"]]);
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeVisible"] = document.getElementById('timeVisible').value;
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeInvisible"] = document.getElementById('timeInvisible').value;
-          }
-          //  else visible([['timeVisible', "none"], ['timeInvisible', "none"]]);
-          if (!(level[level.mode].editLevel.selected[0] == "rotatingDreieck")) {
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["width"] = document.getElementById('sliderWidth').value;
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["height"] = document.getElementById('sliderHeight').value;
-            //    visible([['sliderSize', "none"], ['timeFor360GradRotation', "none"], ['sliderWidth', "inline"], ['sliderHeight', "inline"]])
-            // document.getElementById('sliderSize').style.display = "none";
-            // document.getElementById('timeFor360GradRotation').style.display = "none";
-            // document.getElementById('sliderWidth').style.display = "inline";
-            // document.getElementById('sliderHeight').style.display = "inline";
-          } else {
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["size"] = document.getElementById('sliderSize').value;
-            level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]][level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1]["timeFor360GradRotation"] = document.getElementById(
-              'timeFor360GradRotation').value;
-            //    visible([["sliderSize", "inline"], ['sliderWidth', "none"], ['sliderHeight', "none"], ['timeFor360GradRotation', "inline"]]);
-            // document.getElementById('sliderSize').style.display = "inline";
-            // document.getElementById('sliderWidth').style.display = "none";
-            // document.getElementById('sliderHeight').style.display = "none";
-            // document.getElementById('timeFor360GradRotation').style.display = "inline";
-          }
-          if (level[level.mode].editLevel.selected[0] == "blinkWall") {
-            document.getElementById('angle').style.display = "none";
-          }
-          //  else document.getElementById('angle').style.display = "inline";
-          level[level.mode].editLevel.selected[1] = level[level.mode].editHistory[level[level.mode].editHistory.length - 1][level[level.mode].editLevel.selected[0]].length - 1;
-          Layout();
-        }
-      }
-      for (var i = level[level.mode].editHistory.length - 1; level[level.mode].editHistory[i] != undefined && Object.keys(level[level.mode].editHistory[i]).length == 0; i--) {
-        level[level.mode].editHistory.pop();
       }
     }
 
