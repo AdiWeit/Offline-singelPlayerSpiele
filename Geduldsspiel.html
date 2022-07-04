@@ -7,6 +7,9 @@
 
 <head>
   <title>game of caution</title>
+  <div>
+    <h1 id="stopClockText" style="color: green; position: absolute; left: 13px; top: 13px"></h1>
+  </div>
   <canvas id="textur" width="1582" style="border-width: 3px; border-style: solid; border-color: orange;" onclick="canvasClicked();" height="740"></canvas>
   <meta name="viewport" id="scaleControler">
   <div id="ball">
@@ -40,6 +43,7 @@
 </style>
   </head>
   <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected();" type="checkbox"> easy map versions
+  <button onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2>sensibility: </h2>
   <a id="sensibilityTitleLeft">high (fast)</a>
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
@@ -70,19 +74,16 @@
   </select>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
   <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
-  <br>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
     <option value="growing">growing</option>
     <option value="survive">survive</option>
   </select>
-  <br>
   <div id="checkpointManagement">
     <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
     <button onclick="deleteCheckpoint();">delete latest checkpoint</button>
   </div>
   <!-- <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button> -->
-  <br>
   <select id="tabletPositionModeSelection">
     <option>flat (most natural)</option>
     <option>almost on end (slopes away from you a bit, best? for your posture)</option>
@@ -788,7 +789,7 @@
         opt = document.createElement("option");
         document.getElementById("courceSelection").options.add(opt);
         opt.setAttribute("id", i);
-        if (Object.keys(highscores.normal[joyStickPlay.checked]).includes((level.normal.vorgefertigt[levelNrNow].levelNr).toString())) opt.text = "✅ " +  (i + 1) + ". map";
+        if (highscores.normal[joyStickPlay.checked] && Object.keys(highscores.normal[joyStickPlay.checked]).includes((level.normal.vorgefertigt[levelNrNow].levelNr).toString())) opt.text = "✅ " +  (i + 1) + ". map";
         else opt.text = (i + 1) + ". map";
         opt.value = (i + 1) + ". map";
       });
@@ -813,6 +814,7 @@
       x1 = currentLevel.spawnPoint.x;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       time = 0;
+      stopClockText.style.color = "green";
       goToCheckpoint();
     }
     var currentLevel;
@@ -837,6 +839,7 @@
         level[level.mode].levelType = "showScores";      
       } else {
         time = 0;
+        stopClockText.style.color = "green";
         if (document.getElementById('courceSelection').value != "") {
           level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
           currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
@@ -885,7 +888,7 @@
         rotatingWall(true);
       }, 70);
     }
-    if (level && currentLevel.cannons && !levelBefore.cannons) requestAnimationFrame(renderLoop);
+    if (level && currentLevel.cannons && !levelBefore?.cannons) requestAnimationFrame(renderLoop);
       }
       if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -1019,7 +1022,11 @@
           if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
         }
         if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) Layout();
-        if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
+        drawJoystick();
+      }, 25);
+    }
+    function drawJoystick() {
+      if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
           canvas.fillStyle = "blue";
           canvas.beginPath();
           canvas.arc(joyStick.coordinates.x, joyStick.coordinates.y, 10, 0, Math.PI*2, false);
@@ -1031,7 +1038,6 @@
           canvas.stroke();
           canvas.closePath();
         }
-      }, 25);
     }
     document.onkeydown = () => {
       // TODO: pause
@@ -1142,6 +1148,7 @@
 
     function renderLoop(time) {
       canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
+      drawJoystick();
       //  canvas.clearRect(0, 0, textur.width, textur.height);
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
@@ -1288,6 +1295,8 @@
           if (secs < 10) {
             secs = "0" + secs;
           }
+          stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
+          if (highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) stopClockText.style.color = "red";
           increment();
         }, 100);
       }
