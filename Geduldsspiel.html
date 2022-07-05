@@ -42,7 +42,7 @@
 }
 </style>
   </head>
-  <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected();" type="checkbox"> easy map versions
+  <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected(); showLevels();" type="checkbox"> easy map versions
   <button onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2>sensibility: </h2>
   <a id="sensibilityTitleLeft">high (fast)</a>
@@ -771,7 +771,7 @@
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
     for (var i = 0; i < Object.keys(level).length - 1; i++) {
-      highscores[Object.keys(level)[i]] = {};
+      highscores[Object.keys(level)[i]] = {true: {}, false: {}};
       // highscores[Object.keys(level)[i]] = [];
     }
     AblageListe[6] = false;
@@ -779,22 +779,15 @@
       if (AblageListe[6] == true) {AblageListe[6] = false; document.getElementById('select').style.background = "";}
       else {AblageListe[6] = true; document.getElementById('select').style.background = "blue";}
     }
-    var checkpoints = {};
+    var checkpoints = {normal: {}};
     var checkpoint;
     folgenDbgetHighscores();
     function folgenDbgetHighscores() {
       if (localStorage.getItem('geduldsspielHighscores')) highscores = JSON.parse(localStorage.getItem('geduldsspielHighscores'));
       if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
       AblageListe[0] = 0;
-      Object.keys(level.normal.vorgefertigt).forEach((levelNrNow, i) => {
-        opt = document.createElement("option");
-        document.getElementById("courceSelection").options.add(opt);
-        opt.setAttribute("id", i);
-        if (highscores.normal[joyStickPlay.checked] && Object.keys(highscores.normal[joyStickPlay.checked]).includes((level.normal.vorgefertigt[levelNrNow].levelNr).toString())) opt.text = "✅ " +  (i + 1) + ". map";
-        else opt.text = (i + 1) + ". map";
-        opt.value = (i + 1) + ". map";
-      });
-      if (highscores.normal[joyStickPlay.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked])[Object.keys(highscores.normal[joyStickPlay.checked]).length - 1]) + 1) + '. map';
+      showLevels();
+      if (highscores.normal[joyStickPlay.checked][easyMaps.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked])[Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked]).length - 1]) + 1) + '. map';
       if (courceSelection.value == "") courceSelection.value = "1. map";
       setTimeout(() => {
         courceSelected();
@@ -807,6 +800,19 @@
         db: []
       }
     })
+    function showLevels(params) {
+      while (courceSelection.options.length > 0) {
+        courceSelection.options[0] = undefined;
+      }
+      Object.keys(level.normal.vorgefertigt).forEach((levelNrNow, i) => {
+        opt = document.createElement("option");
+        document.getElementById("courceSelection").options.add(opt);
+        opt.setAttribute("id", i);
+        if (highscores.normal[joyStickPlay.checked][easyMaps.checked] && Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked]).includes((level.normal.vorgefertigt[levelNrNow].levelNr).toString())) opt.text = "✅ " +  (i + 1) + ". map";
+        else opt.text = (i + 1) + ". map";
+        opt.value = (i + 1) + ". map";
+      });
+    }
     function restartLevel() {
       if (level.mode == "growing") {
         modeSelected("growing");
@@ -844,11 +850,13 @@
         if (document.getElementById('courceSelection').value != "") {
           level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
           currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
+          if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [];
+          checkpoints[level.mode][currentLevel.levelNr][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
         }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
           alert("every vorgefertigt level finished! That was the last one :(  )");
         }
-        if (checkpoints[level.mode][level[level.mode].number]) {
+        if (checkpoints[level.mode][currentLevel.levelNr]) {
           checkpoint = checkpoints[level.mode][currentLevel.levelNr][checkpoints[level.mode][currentLevel.levelNr].length - 1];
         }
         else checkpoint = undefined;
@@ -1061,15 +1069,18 @@
     }
 
     function zielErreicht() {
+      x1 = 0;
+      x2 = 0;
       courceSelection.options[level.normal.number - 1].innerHTML = "✅ " +  level.normal.number + ". map";
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
         alert("every vorgefertigt level finished! That was the last one :(  )");
       }
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
-        if (highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
-          if (highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr]) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
-          highscores[level.mode][joyStickPlay.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
+        if (!highscores[level.mode][joyStickPlay.checked][easyMaps.checked]) highscores[level.mode][joyStickPlay.checked][easyMaps.checked] = {};
+        if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
+          if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr]) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
+          highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
           localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
         }
         level[level.mode].number++;
@@ -1089,7 +1100,7 @@
   }
   }
     function showScores() {
-      var pHighscores = highscores[level.mode][joyStickPlay.checked];
+      var pHighscores = highscores[level.mode][joyStickPlay.checked][easyMaps.checked];
       for (var i = 0; i < 11; i++) {
         try {
           document.getElementById("scores").deleteRow(0);
@@ -1299,7 +1310,7 @@
             secs = "0" + secs;
           }
           stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
-          if (stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
+          if (stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
             new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
             stopClockText.style.color = "red";
           }
