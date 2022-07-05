@@ -48,7 +48,7 @@
   <a id="sensibilityTitleLeft">high (fast)</a>
   <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
   <a id="sensibilityTitleRight">low (slow)</a>
-  <button type="button" id="normalSensibility" onclick="sensibility(currentLevel.sensibility, true)" name="button">back to normal</button>
+  <button type="button" id="normalSensibility" onclick="sensibility(level.currentSensibility, true)" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
     <td>Row1 cell1</td>
@@ -73,7 +73,7 @@
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
-  <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
+  <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentSensibility = currentLevel.joyStickSensibility} else level.currentSensibility = currentLevel.sensibility;" id="joyStickPlay"> joystick control </p>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
     <option value="growing">growing</option>
@@ -196,6 +196,7 @@
       Layout();
     }, 500);
     var level = {
+      currentSensibility: 5,
       checkpoint: 0,
       normal: {
       rotating: {
@@ -332,7 +333,6 @@
           ],
         },
         24: {
-          sensibility: 7,
           cannons: [
             {x: 1520 + 100, y: -17, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}},
             {x: 1520 + 100, y: 145, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}}
@@ -551,6 +551,7 @@
         },
         15: {
           sensibility: 9,
+          joyStickSensibility: 4,
           rotatingDreieck: [{
             x: 204,
             y: 107,
@@ -641,6 +642,7 @@
         },
         24: {
           sensibility: 7,
+          joyStickSensibility: 4,
           cannons: [
             {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
             {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
@@ -762,6 +764,7 @@
         };
       }
       if (!pLevel.sensibility) pLevel.sensibility = 5;
+      if (!pLevel.joyStickSensibility) pLevel.joyStickSensibility = pLevel.sensibility;
       for (const attr of Object.keys(pLevel)) {
         if (!level.normal.easyMaps[key]) level.normal.easyMaps[key] = {};
         if (!Object.keys(level.normal.easyMaps[key]).includes(attr)) level.normal.easyMaps[key][attr] = pLevel[attr];
@@ -850,6 +853,8 @@
         if (document.getElementById('courceSelection').value != "") {
           level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
           currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
+          level.currentSensibility = currentLevel.sensibility;
+          if (joyStickPlay.checked) level.currentSensibility = currentLevel.joyStickSensibility;
           if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [];
           checkpoints[level.mode][currentLevel.levelNr][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
         }
@@ -917,8 +922,8 @@
       textur.height = Bild.height;
       Layout();
     }, 777);
-    document.getElementById('sensibility').value = currentLevel.sensibility;
-    sensibilityAcc = {x: currentLevel.sensibility, y: currentLevel.sensibility};
+    document.getElementById('sensibility').value = level.currentSensibility;
+    sensibilityAcc = {x: level.currentSensibility, y: level.currentSensibility};
     if (currentLevel.rotatingDreieck && !levelBefore.rotatingDreieck) requestAnimationFrame(renderLoop);
     }
 
