@@ -2,6 +2,7 @@
 <meta charset="utf-8">
 <canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
+<br>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
   <option id="normalSelection" value="normal">normal</option>
   <option id="magnetSelection" value="magnet">magnet</option>
@@ -26,9 +27,9 @@
 <!-- <button onclick="joyStick = 'place';">move joystick position</button>
 <br> -->
 <h3>sensibility</h3>
-fast/high
+<a id="sensibilityTitleLeft">high (fast)</a>
 <input type="range" min="1" onchange="sensibility = {x: value, y: value};" max="35" value="17" class="slider" id="sensibilityRange">
-slow/low
+<a id="sensibilityTitleRight">low (slow)</a>
 <button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
 <br>
 <select onchange="tablePositionModeSelected();" id="tabletPositionModeSelection">
@@ -1477,15 +1478,16 @@ function tablePositionModeSelected() {
     navigator.userAgent.match(/Windows Phone/i)
   ) {
     var gerät = "Handy"
-    console.log("Handy");
+    sensibilityTitleLeft.innerHTML = "low (slow)";
+    sensibilityTitleRight.innerHTML = "high (fast)";
   } else {
     var gerät = "PC"
-    console.log("PC");
     scrollingInterac.user = true;
     joyStickPlayP.style.display = "none";
     joyStickPlay.checked = true;
     tabletPositionModeSelection.style.display = 'none';
   }
+  console.log(gerät);
   var invisible = {directions: {left: 0, right: 0, up: 0, down: 0}, boolean: false};
   var checkpoint = {schieber: {x: 0, y: 0}, ball: {x: 0, y: 0}}
   var timeDirection = {
@@ -1864,6 +1866,7 @@ function tablePositionModeSelected() {
       //   scrollingInterac.PC = false;
       // }
     // }
+    rotationStartTime = rotationTime;
   }
   var scrolling = false;
   function registerAutoScrolling(direction, scrolledBefore) {
@@ -2052,7 +2055,12 @@ function tablePositionModeSelected() {
       time = checkpoint[level.checkpoint].timeNeededToReach;
     }
   }
-  if (currentLevel.rotating) requestAnimationFrame(renderLoop);
+  if (currentLevel.rotating) {
+    requestAnimationFrame(renderLoop);
+    setTimeout(() => {
+      rotationStartTime = rotationTime;
+    }, 1);
+  }
 }
 var mapsFinished = [];
   function modeSelected(mode) {
@@ -2221,8 +2229,13 @@ function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
     strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
 }
 var myReq;
+var rotationStartTime = 0;
+var rotationTime = 0;
 function renderLoop(time) {
     //canvas.clearRect(0, 0, textur.width, textur.height);
+    if (pause) rotationStartTime += (time - rotationTime);
+    rotationTime = time;
+    time -= rotationStartTime;
     checkColourCollisions();
     var scale = Math.sin(time / 500) * 0.2 + 1.0;
     var scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
@@ -2253,7 +2266,7 @@ function renderLoop(time) {
     // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
 
     canvas.setTransform(1, 0, 0, 1, 0, 0);
-    if (currentLevel.rotating && level.aktuell != "winnerScreen" && !pause) myReq = requestAnimationFrame(renderLoop);
+    if (currentLevel.rotating && level.aktuell != "winnerScreen") requestAnimationFrame(renderLoop);
 }
 
 
@@ -2315,11 +2328,7 @@ var pause = false;
 document.onkeydown = function(event) {
   if (event.key == "p") {
     pause = !pause;
-    if (pause) {
-      cancelAnimationFrame(myReq);
-    }
-    else {
-      requestAnimationFrame(renderLoop);
+      if (!pause) {
       increment();
     }
   }
