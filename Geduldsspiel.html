@@ -200,7 +200,6 @@
       checkpoint: 0,
       normal: {
       rotating: {
-        blinkWall: [false] /*, rotatingWall: false*/ ,
         rotatingDreieck: false
       },
       number: 1,
@@ -223,7 +222,7 @@
             y: 133
           },
           blinkWall: [{
-            timeInvisible: 3000,
+            timeInvisible: 2000,
             timeVisible: 2000,
             x: 349,
             y: 388,
@@ -374,7 +373,7 @@
             y: 75
           },
           blinkWall: [{
-            timeInvisible: 3000,
+            timeInvisible: 2000,
             timeVisible: 2000,
             x: 349,
             y: 475,
@@ -480,6 +479,8 @@
             width: 115,
             height: 17
           }, {
+            timeInvisible: 3000,
+            timeVisible: 3000,
             x: 210,
             y: 388,
             width: 115,
@@ -657,7 +658,6 @@
     },
     growing: {
       rotating: {
-        blinkWall: [false] /*, rotatingWall: false*/ ,
         rotatingDreieck: false
       },
       number: 1,
@@ -681,7 +681,6 @@
     },
     survive: {
       rotating: {
-        blinkWall: [false] /*, rotatingWall: false*/ ,
         rotatingDreieck: false
       },
       number: 1,
@@ -769,6 +768,16 @@
         if (!level.normal.easyMaps[key]) level.normal.easyMaps[key] = {};
         if (!Object.keys(level.normal.easyMaps[key]).includes(attr)) level.normal.easyMaps[key][attr] = pLevel[attr];
       }
+      if (pLevel.blinkWall) initializeBlinkWall(pLevel.blinkWall);
+      if (level.normal.easyMaps[key].blinkWall) initializeBlinkWall(level.normal.easyMaps[key].blinkWall);
+    }
+    function initializeBlinkWall(walls) {
+      for (const wall of walls) {
+        if (!wall.start) wall.start = {};
+        if (!wall.start.visible) wall.start.visible = true;
+        if (!wall.start.timeUntilChange) wall.start.timeUntilChange = wall.timeVisible;
+        if (!wall.changing) wall.changing = wall.start;
+      }
     }
     var highscores = {}
     var AblageListe = [];
@@ -835,14 +844,11 @@
         scaleControler.content = "maximum-scale=" + i;
       }
       window.scroll(0, 0);
-      level[level.mode].rotating.blinkWall = [false];
       level[level.mode].rotating.rotatingDreieck = false;
       level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
       /*if (document.getElementById('modeSelection').value == "survive") */
-      clearInterval(BlinkWall);
         clearInterval(RotatingWall);
-        clearInterval(RotatingDreieck);
       if (document.getElementById('courceSelection').value == "show Scores") {
         showScores();
         document.getElementById('levelEditTool').style.display = "none";
@@ -857,6 +863,11 @@
           if (joyStickPlay.checked) level.currentSensibility = currentLevel.joyStickSensibility;
           if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [];
           checkpoints[level.mode][currentLevel.levelNr][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
+          // start blinkWalls
+          for (let i = 0; i < currentLevel.blinkWall?.length; i++) {
+            var wall = currentLevel.blinkWall[i];
+            wall.changing = wall.start;
+          }
         }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
           alert("every vorgefertigt level finished! That was the last one :(  )");
@@ -883,18 +894,6 @@
         }, 500);
         // startPause();
         window.scroll(0, 0)
-      BlinkWall = setInterval(function() {
-        for (var i = 0; currentLevel.blinkWall != undefined && i <  currentLevel.blinkWall.length; i++) {
-          level[level.mode].rotating.blinkWall[i] = false;
-        }
-        setTimeout(function() {
-          for (var i = 0; currentLevel.blinkWall != undefined &&  i < currentLevel.blinkWall.length; i++) {
-            level[level.mode].rotating.blinkWall[i] = true;
-          }
-          Layout();
-        }, 3000);
-        Layout();
-      }, 6000);
       if (currentLevel != undefined && !(currentLevel.rotatingWall == undefined)) {
       RotatingWall = setInterval(function() {
         level[level.mode].rotating.rotatingWall = true;
@@ -1037,6 +1036,7 @@
         }
         if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) Layout();
         drawJoystick();
+        if (currentLevel.blinkWall) blinkWall();
       }, 25);
     }
     function drawJoystick() {
@@ -1057,20 +1057,14 @@
       // TODO: pause
     }
     function blinkWall() {
-      // if (!(level[level.mode].levelType == "editHistory")) {
-      //Layout();
-      //  setTimeout(function () {
-      for (var i = 0; currentLevel != undefined && !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
-        canvas.fillStyle = "black";
-        if ((level[level.mode].rotating.blinkWall[i] == true)) canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
+      for (const wall of currentLevel.blinkWall) {
+        wall.changing.timeUntilChange -= 25;
+        if (wall.changing.timeUntilChange <= 0) {
+          wall.changing.visible = !wall.changing.visible;
+          if (wall.changing.visible) wall.changing.timeUntilChange = wall.timeVisible;
+          else wall.changing.timeUntilChange = wall.timeInvisible;
+        }
       }
-      //  }, 3000);
-      // }
-      // else {
-      //   for (var i = 0; !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
-      //     canvas.fillRect(currentLevel.blinkWall[i].x, currentLevel.blinkWall[i].y, currentLevel.blinkWall[i].width, currentLevel.blinkWall[i].height);
-      //   }
-      //}
     }
 
     function zielErreicht() {
@@ -1093,7 +1087,6 @@
         courceSelected();
         if (level[level.mode].vorgefertigt[level[level.mode].number] == undefined) {
           console.log("everything Finished!");
-          clearInterval(BlinkWall);
           clearInterval(RotatingWall);
           clearInterval(RotatingDreieck);
           showScores();
@@ -1279,7 +1272,12 @@
         canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
       }
       rotatingWall();
-      if (currentLevel.blinkWall && level[level.mode].rotating.blinkWall.includes(true)) blinkWall();
+      // visualize blinkWalls
+      canvas.fillStyle = "black";
+      for (let i = 0; i < currentLevel?.blinkWall?.length; i++) {
+        var wall = currentLevel.blinkWall[i];
+        if (wall.changing.visible) canvas.fillRect(wall.x, wall.y, wall.width, wall.height);
+      }
     }
     // stopWatch:
     var time = 0;
@@ -1322,21 +1320,6 @@
           increment();
         }, 100);
       }
-    }
-    function activateBlinkWall() {
-      level[level.mode].blinkWall = true;
-      for (var i = 0; !(currentLevel.blinkWall == undefined) && i < currentLevel.blinkWall.length; i++) {
-        blinkWallFunction(i);
-      }
-    }
-
-    function blinkWallFunction(i) {
-      setTimeout(function() {
-        level[level.mode].rotating.blinkWall[i] = true;
-        setTimeout(function() {
-          level[level.mode].rotating.blinkWall[i] = false;
-        }, currentLevel.blinkWall[i].timeVisible);
-      }, currentLevel.blinkWall[i].timeInvisible);
     }
 
     if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
