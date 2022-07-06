@@ -199,9 +199,6 @@
       currentSensibility: 5,
       checkpoint: 0,
       normal: {
-      rotating: {
-        rotatingDreieck: false
-      },
       number: 1,
       easyMaps: {
         2: {
@@ -657,9 +654,6 @@
       levelType: "easyMaps"
     },
     growing: {
-      rotating: {
-        rotatingDreieck: false
-      },
       number: 1,
       editLevel: {
         selectedLevel: 1
@@ -680,9 +674,6 @@
       }
     },
     survive: {
-      rotating: {
-        rotatingDreieck: false
-      },
       number: 1,
       editLevel: {
         selectedLevel: 1
@@ -844,8 +835,6 @@
         scaleControler.content = "maximum-scale=" + i;
       }
       window.scroll(0, 0);
-      level[level.mode].rotating.rotatingDreieck = false;
-      level[level.mode].rotating.rotatingWall = false;
       if (document.getElementById('courceSelection').value != "vorgefertigt") app._data.db = [];
       /*if (document.getElementById('modeSelection').value == "survive") */
         clearInterval(RotatingWall);
@@ -896,7 +885,6 @@
         window.scroll(0, 0)
       if (currentLevel != undefined && !(currentLevel.rotatingWall == undefined)) {
       RotatingWall = setInterval(function() {
-        level[level.mode].rotating.rotatingWall = true;
         Layout();
         rotatingWall(true);
       }, 70);
@@ -1151,7 +1139,6 @@
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
-      if (level[level.mode].rotating.rotatingDreieck == true && i == currentLevel.rotatingDreieck.length - 1) level[level.mode].rotating.rotatingDreieck = false;
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
@@ -1227,8 +1214,7 @@
         canvas.fillRect(-(currentLevel.rotatingWall[i].width / 2), -(currentLevel.rotatingWall[i].height / 2), currentLevel.rotatingWall[i].width, currentLevel
           .rotatingWall[i].height);
         canvas.restore();
-        if (level[level.mode].rotating.rotatingWall == true) currentLevel.rotatingWall[i].angle++;
-        if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType) && level[level.mode].rotating.rotatingWall == true && i == currentLevel.rotatingWall.length - 1) level[level.mode].rotating.rotatingWall = false;
+        currentLevel.rotatingWall[i].angle++;
       }
     }
 
