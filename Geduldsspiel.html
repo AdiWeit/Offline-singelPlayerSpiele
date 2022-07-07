@@ -113,7 +113,7 @@
   var inOrAgainstDirection = 1;
   window.onbeforeunload = function(){
   console.log("Leave Website");
-    if (dbSetWarteschlange.length > 0) {alertWhenFinishedSaving = true; return 'Es wurden noch nicht alle Änderungen gespeichert! Bitte klicken sie auf "bleiben" und warten sie auf die Meldung, dass der Speichervorgang erfolgreich war!';}
+    return;
   };
   var sphere1 = document.getElementById("sphere1");
   var growing;
@@ -260,6 +260,16 @@
             y: 155
           }
         },
+        9: {
+          rotatingWall: [{
+            x: 700,
+            y: 400,
+            width: 1480,
+            height: 17,
+            angle: 90,
+            timeFor360GradRotation: 10000
+          }],
+        },
         10: {
           rotatingDreieck: [{
             x: 700,
@@ -275,25 +285,13 @@
             y: 334,
             width: 1366,
             height: 17,
-            angle: 0
+            angle: 0,
           }, {
             x: 677,
             y: 334,
             width: 1366,
             height: 17,
-            angle: 44
-          }, {
-            x: 677,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 110
-          }, {
-            x: 677,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 150
+            angle: 90
           }]
         },
         15: {
@@ -322,6 +320,16 @@
             timeFor360GradRotation: 10077,
             angle: 0
           }]
+        },
+        16: {
+          rotatingWall: [{
+            x: 760,
+            y: 334,
+            width: 1480,
+            height: 17,
+            angle: 0,
+            timeFor360GradRotation: 13000
+          }],
         },
         23: {
           cannons: [
@@ -443,7 +451,8 @@
             y: 400,
             width: 1480,
             height: 17,
-            angle: 0
+            angle: 90,
+            timeFor360GradRotation: 4000,
           }],
           levelNr: 9
         },
@@ -497,43 +506,19 @@
             y: 334,
             width: 1366,
             height: 17,
-            angle: 22
+            angle: 45
           }, {
             x: 644,
             y: 334,
             width: 1366,
             height: 17,
-            angle: 44
+            angle: 90
           }, {
             x: 644,
             y: 334,
             width: 1366,
             height: 17,
-            angle: 88
-          }, {
-            x: 644,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 110
-          }, {
-            x: 644,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 130
-          }, {
-            x: 644,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 150
-          }, {
-            x: 644,
-            y: 334,
-            width: 1366,
-            height: 17,
-            angle: 70
+            angle: 135
           }],
           levelNr: 14
         },
@@ -541,9 +526,9 @@
           rotatingWall: [{
             x: 760,
             y: 334,
-            width: window.innerWidth - 200,
+            width: 1480,
             height: 17,
-            angle: 0
+            angle: 0,
           }],
           levelNr: 16
         },
@@ -756,8 +741,18 @@
       if (!pLevel.sensibility) pLevel.sensibility = 5;
       if (!pLevel.joyStickSensibility) pLevel.joyStickSensibility = pLevel.sensibility;
       for (const attr of Object.keys(pLevel)) {
+        if (attr == "rotatingWall") {
+          for (const wall of pLevel.rotatingWall) {
+            if (!wall.timeFor360GradRotation) wall.timeFor360GradRotation = 10000;
+          }
+        }
         if (!level.normal.easyMaps[key]) level.normal.easyMaps[key] = {};
         if (!Object.keys(level.normal.easyMaps[key]).includes(attr)) level.normal.easyMaps[key][attr] = pLevel[attr];
+        if (level.normal.easyMaps[key].rotatingWall) {
+          for (const wall of level.normal.easyMaps[key].rotatingWall) {
+            if (!wall.timeFor360GradRotation) wall.timeFor360GradRotation = 10000;
+          }
+        }
       }
       if (pLevel.blinkWall) initializeBlinkWall(pLevel.blinkWall);
       if (level.normal.easyMaps[key].blinkWall) initializeBlinkWall(level.normal.easyMaps[key].blinkWall);
@@ -788,7 +783,6 @@
     function folgenDbgetHighscores() {
       if (localStorage.getItem('geduldsspielHighscores')) highscores = JSON.parse(localStorage.getItem('geduldsspielHighscores'));
       if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
-      AblageListe[0] = 0;
       showLevels();
       if (highscores.normal[joyStickPlay.checked][easyMaps.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked])[Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked]).length - 1]) + 1) + '. map';
       if (courceSelection.value == "") courceSelection.value = "1. map";
@@ -803,7 +797,8 @@
         db: []
       }
     })
-    function showLevels(params) {
+    function showLevels() {
+      var value = courceSelection.value;
       while (courceSelection.options.length > 0) {
         courceSelection.options[0] = undefined;
       }
@@ -815,6 +810,7 @@
         else opt.text = (i + 1) + ". map";
         opt.value = (i + 1) + ". map";
       });
+      courceSelection.value = value;
     }
     function restartLevel() {
       if (level.mode == "growing") {
@@ -883,12 +879,6 @@
         }, 500);
         // startPause();
         window.scroll(0, 0)
-      if (currentLevel != undefined && !(currentLevel.rotatingWall == undefined)) {
-      RotatingWall = setInterval(function() {
-        Layout();
-        rotatingWall(true);
-      }, 70);
-    }
     if (level && currentLevel.cannons && !levelBefore?.cannons) requestAnimationFrame(renderLoop);
       }
       if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) document.getElementById('textur').style.display = "none";
@@ -911,7 +901,8 @@
     }, 777);
     document.getElementById('sensibility').value = level.currentSensibility;
     sensibilityAcc = {x: level.currentSensibility, y: level.currentSensibility};
-    if (currentLevel.rotatingDreieck && !levelBefore.rotatingDreieck) requestAnimationFrame(renderLoop);
+    if (currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) requestAnimationFrame(renderLoop);
+    if (currentLevel.rotatingWall && !levelBefore?.rotatingWall) requestAnimationFrame(renderLoop);
     }
 
     sphere1.style.width = 50 + "px";
@@ -1137,36 +1128,41 @@
     const triangle = createPath(point(0, -25), point(-50, -75), point(-100, -25));
     var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
 
-    function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle, i) {
+    function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
       canvas.rotate(angle);
       fillStyle && (canvas.fillStyle = fillStyle, canvas.fill(path));
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
     }
-
+    function drawRechteck(x, y, width, height, angle) {
+      canvas.setTransform(1, 0, 0, 1, x, y);
+      canvas.rotate(angle);
+      canvas.fillRect(-width/2, -height/2, width, height);
+    }
 
     function renderLoop(time) {
       canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
+      canvas.fillStyle = "black";
       drawJoystick();
       //  canvas.clearRect(0, 0, textur.width, textur.height);
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
-      AblageListe[0] = time
     //  if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) Layout();
-      for (var i = 0; currentLevel.rotatingDreieck != undefined && i < currentLevel.rotatingDreieck.length; i++) {
-        time = AblageListe[0];
-        // time += currentLevel.rotatingDreieck[i].angle * 10000
-          drawPath_V2(triangle, currentLevel.rotatingDreieck[i].x, currentLevel.rotatingDreieck[i].y, currentLevel.rotatingDreieck[i].size / 10 /*currentLevel.rotatingDreieck[i].size*/ ,
-            time / (currentLevel.rotatingDreieck[i].timeFor360GradRotation/2) * Math.PI + currentLevel.rotatingDreieck[i].angle /*currentLevel.rotatingDreieck[i].angle*/ , "black", "black", i); //360 every 2 second
+    if (currentLevel.rotatingDreieck) {
+      for (const dreieck of currentLevel.rotatingDreieck) {
+        drawPath_V2(triangle, dreieck.x, dreieck.y, dreieck.size / 10 /*dreieck.size*/ ,
+          time / (dreieck.timeFor360GradRotation/2) * Math.PI + dreieck.angle /*dreieck.angle*/ , "black", "black", i);
       }
-      // scale path
-      //  drawPath_V2(rectangle, 125, 125, scale, time / 2000 * Math.PI, "black"); //360 every 4 second
-
+    }
+    if (currentLevel.rotatingWall) {
+      for (const wall of currentLevel.rotatingWall) {
+        drawRechteck(wall.x, wall.y, wall.width, wall.height, time / (wall.timeFor360GradRotation/2) * Math.PI + wall.angle*Math.PI/180);
+      }
+    }
       canvas.setTransform(1, 0, 0, 1, 0, 0);
       // bullets animation
       if (currentLevel.cannons) {
         for (var cannon of currentLevel.cannons) {
-          canvas.fillStyle = "black";
           canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
           cannon.timeGone += 16;
           if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
@@ -1176,13 +1172,12 @@
         }
       }
       for (var bullet of bullets) {
-        canvas.fillStyle = "black";
         bullet.x += bullet.speed*bullet.direction.x;
         bullet.y += bullet.speed*bullet.direction.y;
         canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       }
       bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      if (currentLevel.cannons || currentLevel.rotatingDreieck) {
+      if (currentLevel.cannons || currentLevel.rotatingDreieck || currentLevel.rotatingWall) {
         requestAnimationFrame(renderLoop);
       }
     }
@@ -1202,20 +1197,6 @@
       }
       path.closePath();
       return path;
-    }
-
-    function rotatingWall(rotate) {
-      //if (!(currentLevel == undefined || currentLevel.rotatingWall == undefined || currentLevel.rotatingWall[0].angle == undefined) && !(level[level.mode].levelType == "editHistory")) Layout();
-      for (var i = 0; currentLevel && currentLevel.rotatingWall && currentLevel.rotatingWall[0].angle != undefined && i < currentLevel.rotatingWall.length; i++) {
-        canvas.save();
-        canvas.translate(currentLevel.rotatingWall[i].x, currentLevel.rotatingWall[i].y);
-        canvas.rotate(currentLevel.rotatingWall[i].angle * Math.PI / 180)
-        canvas.fillStyle = "black";
-        canvas.fillRect(-(currentLevel.rotatingWall[i].width / 2), -(currentLevel.rotatingWall[i].height / 2), currentLevel.rotatingWall[i].width, currentLevel
-          .rotatingWall[i].height);
-        canvas.restore();
-        currentLevel.rotatingWall[i].angle++;
-      }
     }
 
     function boundingBoxCheck() {
@@ -1257,7 +1238,6 @@
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
       }
-      rotatingWall();
       // visualize blinkWalls
       canvas.fillStyle = "black";
       for (let i = 0; i < currentLevel?.blinkWall?.length; i++) {
