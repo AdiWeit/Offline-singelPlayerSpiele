@@ -300,11 +300,11 @@
             y: 107,
             size: 20,
             timeFor360GradRotation: 10000,
-            angle: 0
+            angle: 50
           }, {
             x: 341,
             y: 308,
-            size: 20,
+            size: 21,
             timeFor360GradRotation: 10000,
             angle: 10
           }, {
@@ -538,20 +538,20 @@
           rotatingDreieck: [{
             x: 204,
             y: 107,
-            size: 20,
-            timeFor360GradRotation: 4000,
-            angle: 0
+            size: 33,
+            timeFor360GradRotation: 7000,
+            angle: 77
           }, {
             x: 341,
             y: 308,
             size: 20,
-            timeFor360GradRotation: 4000,
+            timeFor360GradRotation: 7000,
             angle: 10
           }, {
             x: 500,
             y: 409,
             size: 20,
-            timeFor360GradRotation: 4000,
+            timeFor360GradRotation: 7000,
             angle: 0
           }, {
             x: 900,
@@ -1151,7 +1151,7 @@
     if (currentLevel.rotatingDreieck) {
       for (const dreieck of currentLevel.rotatingDreieck) {
         drawPath_V2(triangle, dreieck.x, dreieck.y, dreieck.size / 10 /*dreieck.size*/ ,
-          time / (dreieck.timeFor360GradRotation/2) * Math.PI + dreieck.angle /*dreieck.angle*/ , "black", "black", i);
+          time / (dreieck.timeFor360GradRotation/2) * Math.PI + dreieck.angle*Math.PI/180 /*dreieck.angle*/ , "black", "black", i);
       }
     }
     if (currentLevel.rotatingWall) {
