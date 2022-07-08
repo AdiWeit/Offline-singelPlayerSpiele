@@ -2198,11 +2198,11 @@ else level.mode = mode;
       rotateSettings.style.display = 'block';
       rotatingObj[selected.type].push(selected.obj);
       if (!currentLevel.rotating) currentLevel.rotating = [];
-      if (selected.type == "triangles") {
-        var newRotating = {shape: "randomMapCreatorTriangle", path: selected.obj.path, position: selected.obj.middle, miliSecsPerRotation: parseInt(miliSecPerRotationNumber.value), objType: selected.type, objNumber: selected.obj.number};
+      // if (selected.type == "triangles") {
+        var newRotating = {shape: "randomMapCreator", path: selected.obj.path, position: selected.obj.middle, miliSecsPerRotation: parseInt(miliSecPerRotationNumber.value), objType: selected.type, objNumber: selected.obj.number};
         currentLevel.rotating.push(newRotating);
         if (currentLevel.rotating.length == 1) requestAnimationFrame(renderLoop);
-      }
+      // }
       objects[selected.type] = objects[selected.type].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
       layoutObjs();
     }
@@ -2279,6 +2279,8 @@ else level.mode = mode;
     for (let i = 0; i < rectangleAmount.value; i++) {
       var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), number: objects.rectangles.length};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      newObj.middle = {x: newObj.x + newObj.width/2, y: newObj.y + newObj.height/2};
+      newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height)], true, newObj.middle);
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
       else objects.rectangles.push(newObj);
@@ -2575,7 +2577,7 @@ function renderLoop(time) {
         if (obj.shape && obj.shape == "rectangle") drawPath_V2(rectangle, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 4 second
         var color = "black";
         if (selected.obj?.number == obj.objNumber) color = "red";
-        if (obj.shape && obj.shape == "randomMapCreatorTriangle") drawPath_V2(obj.path, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", color); //360 every 4 second
+        if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", color); //360 every 4 second
       }
     }
     for (var i = 0; i < pointShapes.length; i++) {
