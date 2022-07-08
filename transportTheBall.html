@@ -1,6 +1,74 @@
 <title>transport the ball</title>
 <meta charset="utf-8">
 <canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
+<div id="randomMapCreator" style="display: none;">
+  <input type="number" style="width: 44px;" value="2" id="circleAmount" min="0"> Kreise
+<br>
+maximaler Radius: 
+<input id="maxCircleSize" type="range">
+<br>
+<input type="number" style="width: 44px;" value="2" id="triangleAmount" min="0"> Dreiecke
+<br>
+maximale Breite: 
+<input id="maxTriangleWidth" type="range">
+<br>
+maximale Höhe: 
+<input id="maxTriangleHeight" type="range">
+<br>
+<input type="number" style="width: 44px;" value="4" id="rectangleAmount" min="0"> Rechtecke
+<br>
+maximale Breite: 
+<input id="maxRectangleWidth" type="range">
+<br>
+maximale Höhe: 
+<input id="maxRectangleHeight" type="range">
+<br>
+<!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
+<br> -->
+<input type="number" style="width: 66px;" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0"> Breite Level
+<br>
+<input type="number" style="width: 66px;" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0"> Höhe level
+<br>
+<input type="number" style="width: 66px;" min="1" value="66" id="minimalDistance" min="0"> minimaler Abstand
+<br>
+<button onclick="createRandomMap();">erstellen</button>
+<button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; layoutObjs();">löschen</button>
+<button onclick="removeElement();">Element löschen</button>
+<br>
+<button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint blue ball</button>
+<button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint red ball</button>
+<br>
+Ballgröße: 
+<br>
+roter Ball: 
+<br>
+Breite: 
+<input oninput="currentLevel.sizes.ball.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+Höhe: 
+<input oninput="currentLevel.sizes.ball.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+<br>
+blauer Ball: 
+<br>
+Breite: 
+<input oninput="currentLevel.sizes.schieber.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+Höhe: 
+<input oninput="currentLevel.sizes.schieber.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+Seite Ziel
+<br>
+<input id="goalTop" onchange="layoutObjs();" name="goalSide" type="radio">oben
+<br>
+<input id="goalLeft" onchange="layoutObjs();" name="goalSide" type="radio">links
+<input id="goalRight" onchange="layoutObjs();" checked="true" name="goalSide" type="radio">rechts
+<br>
+<input id="goalBottom" onchange="layoutObjs();" name="goalSide" type="radio">unten
+<br>
+<input id="rotateTile" onchange="if (checked) rotateSettings.style.display = 'block'; else rotateSettings.style.display = 'none';" type="checkbox"> Teil rotieren lassen
+<!-- <div id="rotateSettings" style="display: none;">
+  <b>Einstellungen zum Rotieren</b>
+  <br>
+  <input min="10" id="miliSecPerRotation" value="5000" style="width: 66px;" type="number"> Mili Sek. pro Rotation
+</div> -->
+</div>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <br>
 <select name="course" id="gameModeSelection" value="normal" onchange="modeSelected(value);">
@@ -37,6 +105,8 @@
   <option value="almost on end">almost on end (slopes away from you a bit, best? for your posture)</option>
   <option value="on end">on end (better for your posture)</option>
 </select>
+<br>
+<input type="checkbox" onchange="if (checked) {randomMapCreator.style.display = 'inline'; currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}}; checkpointManager.style.display = 'none'; refreshBallSize();} else randomMapCreator.style.display = 'none';"> show random map creator
 <div id="ball">
   <style>
     .shape {
@@ -1414,10 +1484,12 @@ function tablePositionModeSelected() {
       }
       invisibleDirectionCheck(nextCoordinates);
       // normal mode
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere./*schieber*/ball.style.height)//-= 3;
-      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball) && directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+      if (level.mode == "normal" && isCollide({x: x1, y: y1, width: cssToNumber(sphere.schieber.style.width), height: cssToNumber(sphere.schieber.style.height)}, ball)) {
+        if (directionBefore.includes("left")) ball.x = x1 - cssToNumber(sphere./*schieber*/ball.style.width)//-= 3;
+        if (directionBefore.includes("right")) ball.x = x1 + cssToNumber(sphere.schieber.style.width)//+= 3;
+        if (directionBefore.includes("up")) ball.y = y1 - cssToNumber(sphere./*schieber*/ball.style.height)//-= 3;
+        if (directionBefore.includes("down")) ball.y = y1 + cssToNumber(sphere.schieber.style.height) //+= 3;
+      }
     }
     else {
       invisibleDirectionCheck(nextCoordinates);
@@ -1628,16 +1700,19 @@ function tablePositionModeSelected() {
       }
       if (red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level[level.mode][level.aktuell + 1] && level.aktuell != "winnerScreen") {
         console.log("goal reached (yellow)");
-        goalReached = true;
+        sphere.ball.style.top = "0px";
+        sphere.ball.style.left = "0px";
+        ball.x = 0;
+        ball.y = 0;
+        if (randomMapCreator.style.display != "none") alert("You reached your set goal!");
+        else {
+          goalReached = true;
           i = 8;
-          sphere.ball.style.top = "0px";
-          sphere.ball.style.left = "0px";
-          ball.x = 0;
-          ball.y = 0;
           // inOrAgainstDirection = 0;
           //restartLevel();
           setHighscores(true);
-      }
+        }
+        }
       else if (!(sphere.ball.style.top == "0px" && sphere.ball.style.left == "0px") && red == 255 && blue == 0 && alpha == 255 && (green > 241) && i > 3 && level.aktuell != "winnerScreen") {
         i = 8;
         sphere.ball.style.top = "0px";
@@ -1777,7 +1852,7 @@ function tablePositionModeSelected() {
   }
 
   function Layout() {
-    if (level.aktuell != "winnerScreen") {
+    if (level.aktuell != "winnerScreen" && randomMapCreator.style.display == 'none') {
     if (easyMaps.checked) Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/easy_versions/" + level.mode + "/map" + level.aktuell + ".png";
     else Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/transportTheBall/" + level.mode + "/map" + level.aktuell + ".png";
     textur.width = Bild.width;
@@ -1930,7 +2005,7 @@ function tablePositionModeSelected() {
       heartBeatStop("schieber", "min", firstCall);
     }
       setTimeout(function () {
-        if (currentLevel.heart != undefined) heartBeatFunc();
+        if (currentLevel.heart != undefined && !pause) heartBeatFunc();
       }, 100);
     ball.width = cssToNumber(sphere.ball.style.width);
     ball.height = cssToNumber(sphere.ball.style.height);
@@ -1945,6 +2020,14 @@ function tablePositionModeSelected() {
       }, time);
     }
   }
+  function refreshBallSize() {
+    ball.width = currentLevel.sizes.ball.width;
+    ball.height = currentLevel.sizes.ball.height;
+    sphere.schieber.style.width = currentLevel.sizes.schieber.width + "px";
+    sphere.schieber.style.height = currentLevel.sizes.schieber.height + "px";
+    sphere.ball.style.width = ball.width + "px";
+    sphere.ball.style.height = ball.height + "px";
+  }
   function setupLevel(direction) {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
     else sensibility = {x: 17, y: 17};
@@ -1952,12 +2035,7 @@ function tablePositionModeSelected() {
     level.checkpoint = 0;
     if (!direction) checkpoint = [{schieber: {x: currentLevel.spawnPoint.schieber.x, y: currentLevel.spawnPoint.schieber.y}, ball: {x: currentLevel.spawnPoint.ball.x, y: currentLevel.spawnPoint.ball.y}}];
     restartLevel();
-    ball.width = currentLevel.sizes.ball.width;
-    ball.height = currentLevel.sizes.ball.height;
-    sphere.schieber.style.width = currentLevel.sizes.schieber.width + "px";
-    sphere.schieber.style.height = currentLevel.sizes.schieber.height + "px";
-    sphere.ball.style.width = ball.width + "px";
-    sphere.ball.style.height = ball.height + "px";
+    refreshBallSize();
     if (!direction && currentLevel.heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc(true);}
     scrollingInterac.user = false;
     setTimeout(() => {
@@ -2065,7 +2143,7 @@ function tablePositionModeSelected() {
 var mapsFinished = [];
   function modeSelected(mode) {
     if (mode == "showScores") showScores(highscores);
-    else {
+    else if (randomMapCreator.style.display == "none") {
       textur.style.display = "inline";
       levelSelector.style.display = "inline";
       sphere.schieber.style.display = "inline";
@@ -2109,7 +2187,178 @@ var mapsFinished = [];
     // else inOrAgainstDirection = 1;
     gameModeSelection.value = mode;
 }
+else level.mode = mode;
   }
+  // random map creator stuff: 
+  var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
+  handleMaxSizeSlider(true);
+  function handleMaxSizeSlider(changeValue) {
+    maxCircleSize.max = canvasWidth.value/2;
+    maxTriangleWidth.max = canvasWidth.value;
+    maxTriangleHeight.max = canvasHeight.value;
+    maxRectangleWidth.max = canvasWidth.value;
+    maxRectangleHeight.max = canvasHeight.value;
+    if (changeValue) {
+      maxCircleSize.value = canvasWidth.value/2;
+      maxTriangleWidth.value = canvasWidth.value;
+      maxTriangleHeight.value = canvasHeight.value;
+      maxRectangleWidth.value = canvasWidth.value;
+      maxRectangleHeight.value = canvasHeight.value;
+    }
+  }
+  function createRandomMap() {
+    textur.width = canvasWidth.value;
+    textur.height = canvasHeight.value;
+
+    collideCount = 0;
+    createCircles();
+    createTriangles();
+    createRectangles();
+    layoutObjs();
+  }
+  function createCircles() {
+    for (let i = 0; i < circleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), radius: Math.round(Math.random()*maxCircleSize.value)};
+      newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.circles.push(newObj);
+    }
+  }
+  function createTriangles() {
+    for (let i = 0; i < triangleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), direction: Math.round(Math.random()*3)};
+      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.triangles.push(newObj);
+    }
+  }
+  function createRectangles() {
+    for (let i = 0; i < rectangleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value)};
+      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.rectangles.push(newObj);
+    }
+  }
+  // function createSquares() {
+    
+  // }
+
+  function newCollidesOthers(newObj) {
+    for (const objType of Object.keys(objects)) {
+      for (const obj of objects[objType]) {
+        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value  || Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))) {
+          collideCount++;
+          return true;
+        }
+      }
+    }
+  }
+  if (gerät == "PC") alert("please click to place a joy-stick!"); 
+  joyStick = "place";
+  var joyStick;
+  function canvasClicked() {
+    if (setBallSpawnPoint.style.backgroundColor != "") {
+      checkpoint[0].ball = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
+      setBallSpawnPoint.style.backgroundColor = "";
+      level.checkpoint = 0;
+    }
+    if (setSchieberSpawnPoint.style.backgroundColor != "") {
+      checkpoint[0].schieber = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
+      setSchieberSpawnPoint.style.backgroundColor = "";
+      level.checkpoint = 0;
+    }
+    if (/*joyStick == "place" && */gerät == "PC") {
+      joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
+    }
+    var newSelection = false
+    for (const objType of Object.keys(objects)) {
+      for (const obj of objects[objType]) {
+        if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
+          selected.obj = obj;
+          newSelection = true;
+          layoutObjs();
+        }
+      }
+    }
+    if (!newSelection) {
+      delete selected.obj;
+      layoutObjs();
+    }
+  }
+  function removeElement() {
+    if (!selected.obj) alert("Bitte wählen Sie zuerst das Teil aus, das Sie löschen wollen. ");
+    for (const objType of Object.keys(objects)) {
+      objects[objType].forEach((obj, i) => {
+        if (JSON.stringify(obj) == JSON.stringify(selected.obj))  {
+          objects[objType].splice(i, 1);
+          layoutObjs();
+        }
+      });
+    }
+  }
+  var selected = {};
+  var collideCount = 0;
+  function collides(a, b) {
+      return /*{boolean: */!(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
+        )/*, area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)}*/;
+  }
+  function layoutObjs() {
+    canvas.clearRect(0, 0, textur.width, textur.height);
+    for (const objType of Object.keys(objects)) {
+      for (const obj of objects[objType]) {
+        if (JSON.stringify(obj) == JSON.stringify(selected.obj)) canvas.fillStyle = "red";
+        else canvas.fillStyle = "black";
+        if (objType == "circles") {
+          canvas.beginPath();
+          canvas.arc(obj.x, obj.y, obj.radius, 0, 2 * Math.PI, false);
+          canvas.fill();
+        }
+        if (objType == "rectangles") canvas.fillRect(obj.x, obj.y, obj.width, obj.height);
+        if (objType == "triangles") {
+          canvas.beginPath();
+          // pointing down
+          if (!obj.direction) {
+            canvas.moveTo(obj.x, obj.y);
+            canvas.lineTo(obj.x + obj.width, obj.y);
+            canvas.lineTo(obj.x + obj.width/2, obj.y + obj.height);
+          }
+          // pointing left
+          if (obj.direction == 1) {
+            canvas.moveTo(obj.x + obj.width, obj.y);
+            canvas.lineTo(obj.x + obj.width, obj.y + obj.height);
+            canvas.lineTo(obj.x, obj.y + obj.height/2);
+          }
+          // pointing up
+          if (obj.direction == 2) {
+            canvas.moveTo(obj.x, obj.y + obj.height);
+            canvas.lineTo(obj.x + obj.width, obj.y + obj.height);
+            canvas.lineTo(obj.x + obj.width/2, obj.y);
+          }
+          // pointing right
+          if (obj.direction == 3) {
+            canvas.moveTo(obj.x, obj.y);
+            canvas.lineTo(obj.x, obj.y + obj.height);
+            canvas.lineTo(obj.x + obj.width, obj.y + obj.height/2);
+          }
+          canvas.fill();
+        }
+      }
+    }
+    canvas.fillStyle = "yellow";
+    if (goalTop.checked) canvas.fillRect(0, 0, textur.width, 33);
+    if (goalLeft.checked) canvas.fillRect(0, 0, 33, textur.height);
+    if (goalBottom.checked) canvas.fillRect(0, textur.height - 33, textur.width, 33);
+    if (goalRight.checked) canvas.fillRect(textur.width - 33, 0, 33, textur.height);
+  }
+
   var highscoresDisplayedBefore = {};
   function showScores(highscores) {
     scores.style.display = "inline";
@@ -2287,17 +2536,9 @@ function createPath(...points) {
     return path;
 }
 
-if (gerät == "PC") alert("please click to place a joy-stick!"); 
-joyStick = "place";
-function canvasClicked() {
-  if (/*joyStick == "place" && */gerät == "PC") {
-    joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
-  }
-}
 document.addEventListener('touchmove', touch);
 document.addEventListener('touchstart', touch);
 document.addEventListener('touchend', touch);
-var joyStick;
 function touch(ev) {
 scrollingInterac.user = true;
 if (joyStickPlay.checked && ev.type == "touchend" && joyStick.coordinates) {
@@ -2330,6 +2571,7 @@ document.onkeydown = function(event) {
     pause = !pause;
       if (!pause) {
       increment();
+      heartBeatFunc();
     }
   }
 }
