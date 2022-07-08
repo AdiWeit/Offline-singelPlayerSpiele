@@ -35,6 +35,13 @@ maximale Höhe:
 <button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; layoutObjs();">löschen</button>
 <button onclick="removeElement();">Element löschen</button>
 <br>
+<a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="changeIfRotates(checked);" type="checkbox"> Teil rotieren lassen</a>
+<div id="rotateSettings" style="display: none;">
+  <b>Einstellungen zum Rotieren</b>
+  <br>
+  <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotationSpeed(parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sek. pro Rotation
+</div>
+<br>
 <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint blue ball</button>
 <button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint red ball</button>
 <br>
@@ -61,13 +68,6 @@ Seite Ziel
 <input id="goalRight" onchange="layoutObjs();" checked="true" name="goalSide" type="radio">rechts
 <br>
 <input id="goalBottom" onchange="layoutObjs();" name="goalSide" type="radio">unten
-<br>
-<input id="rotateTile" onchange="if (checked) rotateSettings.style.display = 'block'; else rotateSettings.style.display = 'none';" type="checkbox"> Teil rotieren lassen
-<!-- <div id="rotateSettings" style="display: none;">
-  <b>Einstellungen zum Rotieren</b>
-  <br>
-  <input min="10" id="miliSecPerRotation" value="5000" style="width: 66px;" type="number"> Mili Sek. pro Rotation
-</div> -->
 </div>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <br>
@@ -106,7 +106,7 @@ Seite Ziel
   <option value="on end">on end (better for your posture)</option>
 </select>
 <br>
-<input type="checkbox" onchange="if (checked) {randomMapCreator.style.display = 'inline'; currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}}; checkpointManager.style.display = 'none'; refreshBallSize();} else randomMapCreator.style.display = 'none';"> show random map creator
+<input type="checkbox" onchange="if (checked) {randomMapCreator.style.display = 'block'; currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}}; checkpointManager.style.display = 'none'; refreshBallSize();} else randomMapCreator.style.display = 'none';"> show random map creator
 <div id="ball">
   <style>
     .shape {
@@ -1215,8 +1215,8 @@ Seite Ziel
 
   // transform points to forms:
   var point = (x, y) => ({x, y});
-  var triangle = createPath(point(0,-25), point(-50,-75), point(-100,-25));
-  var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
+  var triangle = createPath([point(0,-25), point(-50,-75), point(-100,-25)]);
+  var rectangle = createPath([point(0,-25), point(-50,-25), point(-50,-125), point(0,-125)]);
   var pointShapes = [];
   /*for (var i = 0; i < currentLevel.rotating.length; i++) {
     for (var i1 = 0; i1 < currentLevel.rotating[i].points.length; i1++) {
@@ -1225,9 +1225,9 @@ Seite Ziel
       for (var i2 = 0; i2 < currentLevel.rotating[i].points[i1].points.length; i2++) {
         points.push(point(currentLevel.rotating[i].points[i1].points[i2].x, currentLevel.rotating[i].points[i1].points[i2].y));
       }
-      if (points[1] && !points[2]) pointShapes.push({path: createPath(points[0], points[1]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
-      if (points[2] && !points[3]) pointShapes.push({path: createPath(points[0], points[1], points[2]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
-      if (points[3] && !points[4]) pointShapes.push({path: createPath(points[0], points[1], points[2], points[3]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
+      if (points[1] && !points[2]) pointShapes.push({path: createPath([points[0], points[1]]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
+      if (points[2] && !points[3]) pointShapes.push({path: createPath([points[0], points[1], points[2]]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
+      if (points[3] && !points[4]) pointShapes.push({path: createPath([points[0], points[1], points[2]], points[3]), position: currentLevel.rotating[i].points[i1].position, angle: currentLevel.rotating[i].points[i1].angle, miliSecsPerRotation: currentLevel.rotating[i].points[i1].miliSecsPerRotation, onceInMiliSec: currentLevel.rotating[i].heart.onceInMiliSec, sizeRelationToOriginal: currentLevel.rotating[i].sizeRelationToOriginal});
 
     }
     }
@@ -1872,6 +1872,7 @@ function tablePositionModeSelected() {
       canvas.stroke();
     }
   }
+  if (joyStickPlay.checked && randomMapCreator.style.display != 'none') layoutObjs();
   }
   var ball = {
     x: 0,
@@ -2190,7 +2191,38 @@ var mapsFinished = [];
 else level.mode = mode;
   }
   // random map creator stuff: 
+  function changeIfRotates(checked) {
+    if (checked) {
+      if (!selected.obj.rotated) showPresetRotationSettings();
+      selected.obj.rotated = true;
+      rotateSettings.style.display = 'block';
+      rotatingObj[selected.type].push(selected.obj);
+      if (!currentLevel.rotating) currentLevel.rotating = [];
+      if (selected.type == "triangles") {
+        var newRotating = {shape: "randomMapCreatorTriangle", path: selected.obj.path, position: selected.obj.middle, miliSecsPerRotation: parseInt(miliSecPerRotationNumber.value), objType: selected.type, objNumber: selected.obj.number};
+        currentLevel.rotating.push(newRotating);
+        if (currentLevel.rotating.length == 1) requestAnimationFrame(renderLoop);
+      }
+      objects[selected.type] = objects[selected.type].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
+      layoutObjs();
+    }
+    else {
+      rotateSettings.style.display = 'none';
+      currentLevel.rotating = currentLevel.rotating.filter(x => x.objNumber != selected.obj.number);
+      objects[selected.type].push(selected.obj);
+      rotatingObj[selected.type] = rotatingObj[selected.type].filter(x => x.number != selected.obj.number);
+    }
+  }
+  function changeRotationSpeed(speed) {
+    for (const obj of currentLevel.rotating) {
+      if (obj.objNumber == selected.obj.number) obj.miliSecsPerRotation = speed;
+    }
+  }
+  function showPresetRotationSettings() {
+    miliSecPerRotationNumber.value = 10000;
+  }
   var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
+  var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
   handleMaxSizeSlider(true);
   function handleMaxSizeSlider(changeValue) {
     maxCircleSize.max = canvasWidth.value/2;
@@ -2215,10 +2247,11 @@ else level.mode = mode;
     createTriangles();
     createRectangles();
     layoutObjs();
+    setSpawnPoints();
   }
   function createCircles() {
     for (let i = 0; i < circleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), radius: Math.round(Math.random()*maxCircleSize.value)};
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), radius: Math.round(Math.random()*maxCircleSize.value), number: objects.circles.length};
       newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
@@ -2227,8 +2260,16 @@ else level.mode = mode;
   }
   function createTriangles() {
     for (let i = 0; i < triangleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), direction: Math.round(Math.random()*3)};
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), direction: Math.round(Math.random()*3), number: objects.triangles.length};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      newObj.middle = {x: newObj.hitbox.x + newObj.hitbox.width/2, y: newObj.hitbox.y + newObj.hitbox.height/2};
+      if (!newObj.direction) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width/2, newObj.y + newObj.height)], true, newObj.middle);
+      // pointing left
+      if (newObj.direction == 1) newObj.path = createPath([point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height/2)], true, newObj.middle);
+      // pointing up
+      if (newObj.direction == 2) newObj.path = createPath([point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x + newObj.width/2, newObj.y)], true, newObj.middle);
+      // pointing right
+      if (newObj.direction == 3) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height/2)], true, newObj.middle);
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
       else objects.triangles.push(newObj);
@@ -2236,7 +2277,7 @@ else level.mode = mode;
   }
   function createRectangles() {
     for (let i = 0; i < rectangleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value)};
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), number: objects.rectangles.length};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
@@ -2246,7 +2287,33 @@ else level.mode = mode;
   // function createSquares() {
     
   // }
-
+  function setSpawnPoints(time, parts) {
+    if (!time) time = 0;
+    if (!parts) parts = ["ball", "schieber"]
+    if (parts.includes("ball")) {
+      checkpoint[0].ball = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), timeNeededToReach: 0};
+    }
+    if (parts.includes("schieber")) {
+      checkpoint[0].schieber = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), timeNeededToReach: 0};
+    }
+    restartLevel();
+    if (time < 5000) {
+    setTimeout(() => {
+      var minimalDistanceStored = minimalDistance.value;
+      minimalDistance.value = 0;
+        if (newCollidesOthers({hitbox: {x: checkpoint[0].ball.x, y: checkpoint[0].ball.y, width: ball.width, height: ball.height}})) {
+          setSpawnPoints(time + 1, ["ball"]);
+        }
+        if (newCollidesOthers({hitbox: {x: checkpoint[0].schieber.x, y: checkpoint[0].schieber.y, width: cssToNumber(sphere.schieber.style.width), height:  cssToNumber(sphere.schieber.style.height)}})) {
+          setSpawnPoints(time + 1, ["schieber"]);
+        }
+        if (collides(ball, {x: checkpoint[0].schieber.x, y: checkpoint[0].schieber.y, width: cssToNumber(sphere.schieber.style.width), height:  cssToNumber(sphere.schieber.style.height)})) {
+          setSpawnPoints(time + 1, ["ball", "schieber"]);
+        }
+        minimalDistance.value = minimalDistanceStored;
+      }, 1);
+    }
+  }
   function newCollidesOthers(newObj) {
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
@@ -2271,21 +2338,42 @@ else level.mode = mode;
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
     }
-    if (/*joyStick == "place" && */gerät == "PC") {
-      joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
-    }
     var newSelection = false
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
         if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
           selected.obj = obj;
+          selected.type = objType;
           newSelection = true;
           layoutObjs();
+          rotateTile.checked = false;
         }
       }
     }
+    for (const objType of Object.keys(rotatingObj)) {
+      for (const obj of rotatingObj[objType]) {
+        if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
+          selected.obj = obj;
+          selected.type = objType;
+          newSelection = true;
+          layoutObjs();
+          rotateTile.checked = true;
+          miliSecPerRotationNumber.value = currentLevel.rotating.filter(x => x.objNumber == obj.number)[0].miliSecsPerRotation;
+        }
+      }
+    }
+    if (newSelection) {
+      rotateTileA.style.display = "inline";
+      if (!rotateTile.checked) rotateSettings.style.display = 'none';
+      else rotateSettings.style.display = 'block';
+    }
     if (!newSelection) {
+      if (!selected.obj && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "" && setBallSpawnPoint.style.backgroundColor == "") {
+        joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
+      }
       delete selected.obj;
+      rotateTileA.style.display = "none";
+      rotateSettings.style.display = 'none';
       layoutObjs();
     }
   }
@@ -2314,8 +2402,12 @@ else level.mode = mode;
     canvas.clearRect(0, 0, textur.width, textur.height);
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
-        if (JSON.stringify(obj) == JSON.stringify(selected.obj)) canvas.fillStyle = "red";
-        else canvas.fillStyle = "black";
+        if (JSON.stringify(obj) == JSON.stringify(selected.obj)) {
+          canvas.fillStyle = "red";
+        }
+        else {
+          canvas.fillStyle = "black";
+        }
         if (objType == "circles") {
           canvas.beginPath();
           canvas.arc(obj.x, obj.y, obj.radius, 0, 2 * Math.PI, false);
@@ -2323,32 +2415,10 @@ else level.mode = mode;
         }
         if (objType == "rectangles") canvas.fillRect(obj.x, obj.y, obj.width, obj.height);
         if (objType == "triangles") {
-          canvas.beginPath();
-          // pointing down
-          if (!obj.direction) {
-            canvas.moveTo(obj.x, obj.y);
-            canvas.lineTo(obj.x + obj.width, obj.y);
-            canvas.lineTo(obj.x + obj.width/2, obj.y + obj.height);
-          }
-          // pointing left
-          if (obj.direction == 1) {
-            canvas.moveTo(obj.x + obj.width, obj.y);
-            canvas.lineTo(obj.x + obj.width, obj.y + obj.height);
-            canvas.lineTo(obj.x, obj.y + obj.height/2);
-          }
-          // pointing up
-          if (obj.direction == 2) {
-            canvas.moveTo(obj.x, obj.y + obj.height);
-            canvas.lineTo(obj.x + obj.width, obj.y + obj.height);
-            canvas.lineTo(obj.x + obj.width/2, obj.y);
-          }
-          // pointing right
-          if (obj.direction == 3) {
-            canvas.moveTo(obj.x, obj.y);
-            canvas.lineTo(obj.x, obj.y + obj.height);
-            canvas.lineTo(obj.x + obj.width, obj.y + obj.height/2);
-          }
-          canvas.fill();
+          canvas.save();
+          canvas.translate(obj.middle.x, obj.middle.y);
+          canvas.fill(obj.path);
+          canvas.restore();
         }
       }
     }
@@ -2491,25 +2561,29 @@ function renderLoop(time) {
     var miliSecsPerRotation = 2222;
     var angle = 0;
     var sizeRelationToOriginal = 1.0;
-    for (var i = 0; i < currentLevel.rotating?.length; i++) {
-      if (currentLevel.rotating[i].angle) angle = currentLevel.rotating[i].angle;
-      if (currentLevel.rotating[i].miliSecsPerRotation) miliSecsPerRotation = currentLevel.rotating[i].miliSecsPerRotation;
-      if (easyMaps.checked && currentLevel.rotating[i].miliSecsPerRotationEasy) miliSecsPerRotation = currentLevel.rotating[i].miliSecsPerRotationEasy;
-      if (currentLevel.rotating[i].sizeRelationToOriginal) sizeRelationToOriginal = currentLevel.rotating[i].sizeRelationToOriginal;
-      scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
-      if (currentLevel.rotating[i].heart && currentLevel.rotating[i].heart.onceInMiliSec) scale2 = Math.cos(time / currentLevel.rotating[i].heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
-      else if (easyMaps.checked && currentLevel.rotating[i].heart && currentLevel.rotating[i].heart.onceInMiliSecEasy) scale2 = Math.cos(time / currentLevel.rotating[i].heart.onceInMiliSecEasy) * 0.4 + sizeRelationToOriginal;
-      else scale2 = sizeRelationToOriginal;
-    if (currentLevel.rotating[i].shape && currentLevel.rotating[i].shape == "triangle") drawPath_V2(triangle, currentLevel.rotating[i].position.x, currentLevel.rotating[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
-    // scale path
-    if (currentLevel.rotating[i].shape && currentLevel.rotating[i].shape == "rectangle") drawPath_V2(rectangle, currentLevel.rotating[i].position.x, currentLevel.rotating[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 4 second
+    if (currentLevel.rotating) {
+      for (const obj of currentLevel.rotating) {
+        if (obj.angle) angle = obj.angle;
+        if (obj.miliSecsPerRotation) miliSecsPerRotation = obj.miliSecsPerRotation;
+        if (easyMaps.checked && obj.miliSecsPerRotationEasy) miliSecsPerRotation = obj.miliSecsPerRotationEasy;
+        if (obj.sizeRelationToOriginal) sizeRelationToOriginal = obj.sizeRelationToOriginal;
+        scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
+        if (obj.heart && obj.heart.onceInMiliSec) scale2 = Math.cos(time / obj.heart.onceInMiliSec) * 0.4 + sizeRelationToOriginal;
+        else if (easyMaps.checked && obj.heart && obj.heart.onceInMiliSecEasy) scale2 = Math.cos(time / obj.heart.onceInMiliSecEasy) * 0.4 + sizeRelationToOriginal;
+        else scale2 = sizeRelationToOriginal;
+        if (obj.shape && obj.shape == "triangle") drawPath_V2(triangle, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 2 second
+        if (obj.shape && obj.shape == "rectangle") drawPath_V2(rectangle, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 4 second
+        var color = "black";
+        if (selected.obj?.number == obj.objNumber) color = "red";
+        if (obj.shape && obj.shape == "randomMapCreatorTriangle") drawPath_V2(obj.path, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", color); //360 every 4 second
+      }
     }
     for (var i = 0; i < pointShapes.length; i++) {
       if (pointShapes[i].angle) angle = pointShapes[i].angle;
       if (pointShapes[i].miliSecsPerRotation) miliSecsPerRotation = pointShapes[i].miliSecsPerRotation;
       if (pointShapes[i].sizeRelationToOriginal) sizeRelationToOriginal = pointShapes[i].sizeRelationToOriginal;
       if (pointShapes[i].onceInMiliSec) scale2 = Math.cos(time / pointShapes[i].onceInMiliSec) * 0.4 + sizeRelationToOriginal;
-      drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black");
+      drawPath_V2(pointShapes[i].path, pointShapes[i].position.x, pointShapes[i].position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", color);
     }
     // fill scale path
     // drawPath_V2(thing  , 125, 100, scale2, time / 3000 * Math.PI, "", "black");
@@ -2519,7 +2593,7 @@ function renderLoop(time) {
 }
 
 
-function createPath(...points) {
+function createPath(points, randomMapCreator, middle) {
     var cx = 0; cy = 0;
     for (const p of points) {
         cx += p.x;
@@ -2530,7 +2604,8 @@ function createPath(...points) {
 
     const path = new Path2D;
     for (const p of points) {
-        path.lineTo(p.x - cx , p.y - cy);
+      if (randomMapCreator) path.lineTo(p.x - middle.x, p.y - middle.y);
+      else path.lineTo(p.x - cx , p.y - cy);
     }
     path.closePath();
     return path;
