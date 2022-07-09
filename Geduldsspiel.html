@@ -1302,7 +1302,7 @@
             secs = "0" + secs;
           }
           stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
-          if (stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
+          if (stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
             new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
             stopClockText.style.color = "red";
           }
