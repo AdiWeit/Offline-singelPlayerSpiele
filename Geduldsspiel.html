@@ -6,7 +6,7 @@
 <html>
 
 <head>
-  <title>game of caution</title>
+  <title>game of patience (Chinese puzzle)</title>
   <div>
     <h1 id="stopClockText" style="color: green; position: absolute; left: 13px; top: 13px"></h1>
   </div>
@@ -42,7 +42,9 @@
 }
 </style>
   </head>
-  <input id="easyMaps" checked="true" onchange="if (checked) {level.normal.levelType = 'easyMaps';} else level.normal.levelType = 'vorgefertigt'; courceSelected(); showLevels();" type="checkbox"> easy map versions
+  <button onclick="showGameInstructions();">how to play</button>
+  <br>
+  <input id="easyMaps" checked="true" onchange="difficultyChanged(checked);" type="checkbox"> easy map versions
   <button onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2>sensibility: </h2>
   <a id="sensibilityTitleLeft">high (fast)</a>
@@ -765,6 +767,11 @@
         if (!wall.changing) wall.changing = wall.start;
       }
     }
+    if (!localStorage.getItem('gameInstructionsGeduldspiel')) showGameInstructions();
+    function showGameInstructions() {
+      alert("Hold your device flat like it is lying on a table and tilt it to move! Do not touch the black and try to reach the yellow goal!");
+      localStorage.setItem("gameInstructionsGeduldspiel", true);
+    }
     var highscores = {}
     var AblageListe = [];
     AblageListe[5] = window.innerHeight;
@@ -823,6 +830,13 @@
       stopClockText.style.color = "green";
       goToCheckpoint();
     }
+    function difficultyChanged(pEasyMaps, doNotSelectCource) {
+      if (pEasyMaps) level.normal.levelType = 'easyMaps';
+      else level.normal.levelType = 'vorgefertigt'; 
+      if (!doNotSelectCource) courceSelected(); 
+      showLevels();
+      easyMaps.checked = pEasyMaps;
+    }
     var currentLevel;
     function courceSelected() {
       bullets = [];
@@ -856,6 +870,13 @@
         }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
           alert("every vorgefertigt level finished! That was the last one :(  )");
+          if (easyMaps.checked) {
+            alert("Try to beat the hard version of the levels now, if you did not do that already!");
+            difficultyChanged(false, true);
+          }
+          level.normal.number = 1;
+          document.getElementById('courceSelection').value = "1. map";
+          courceSelected();
         }
         if (checkpoints[level.mode][currentLevel.levelNr]) {
           checkpoint = checkpoints[level.mode][currentLevel.levelNr][checkpoints[level.mode][currentLevel.levelNr].length - 1];
@@ -1042,6 +1063,7 @@
           wall.changing.visible = !wall.changing.visible;
           if (wall.changing.visible) wall.changing.timeUntilChange = wall.timeVisible;
           else wall.changing.timeUntilChange = wall.timeInvisible;
+          Layout();
         }
       }
     }
@@ -1051,7 +1073,7 @@
       x2 = 0;
       courceSelection.options[level.normal.number - 1].innerHTML = "✅ " +  level.normal.number + ". map";
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
-        alert("every vorgefertigt level finished! That was the last one :(  )");
+        alert("every level finished! That was the last one :(  )");
       }
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
@@ -1135,6 +1157,7 @@
       strokeStyle && (canvas.strokeStyle = strokeStyle, canvas.stroke(path));
     }
     function drawRechteck(x, y, width, height, angle) {
+      canvas.fillStyle = "black";
       canvas.setTransform(1, 0, 0, 1, x, y);
       canvas.rotate(angle);
       canvas.fillRect(-width/2, -height/2, width, height);
