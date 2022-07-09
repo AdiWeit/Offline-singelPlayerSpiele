@@ -79,7 +79,7 @@ Seite Ziel
   <!-- <option id="oppositeSelection" value="opposite">opposite</option> -->
   <option value="showScores">show scores</option>
 </select>
-<input id="easyMaps" onchange="difficultyChanged(checked);" checked="true" type="checkbox"> easy map versions
+<input id="easyMaps" onchange="if (randomMapCreator.style.display == 'none') difficultyChanged(checked);" checked="true" type="checkbox"> easy map versions
 <br>
 <input type="checkbox" onchange="inOrAgainstDirection *= -1; setupLevel(true);" id="oppositeCheck"> opposite
 <br>
@@ -106,7 +106,7 @@ Seite Ziel
   <option value="on end">on end (better for your posture)</option>
 </select>
 <br>
-<input type="checkbox" onchange="if (checked) {randomMapCreator.style.display = 'block'; currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}}; checkpointManager.style.display = 'none'; refreshBallSize();} else randomMapCreator.style.display = 'none';"> show random map creator
+<input type="checkbox" onchange="mapCreatorVisChanged(checked);"> show random map creator
 <div id="ball">
   <style>
     .shape {
@@ -1258,6 +1258,16 @@ Seite Ziel
         }
       }
     }
+  }
+  function mapCreatorVisChanged(checked) {
+    if (checked) {
+      randomMapCreator.style.display = 'block';
+      currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}};
+      sensibility = {x: 5, y: 5};
+      checkpointManager.style.display = 'none';
+      refreshBallSize();
+      } 
+      else randomMapCreator.style.display = 'none';
   }
   var alertWhenFinishedSaving = false;
 var name = '';
