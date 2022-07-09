@@ -2,7 +2,7 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<div id="puzzleManager" class="tutorialCard tutorialGeneral">
+<div id="puzzleManager" class="card cardGeneral">
   <h1>Puzzle verwalten</h1>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/database_import_icon.png" title="Bereits erstellte Puzzle fortfahren" draggable="false" >
   <li id="puzzleSelection"></li>
@@ -25,7 +25,7 @@
   </p>
 </div>
 <div id="imageSettings">
-<div class="tutorialCard tutorialGeneral">
+<div class="card cardGeneral">
 <h1 id="selectSourceHeader" style="color: red;">Quelle auswählen</h1>
 <br>
 <input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
@@ -46,13 +46,13 @@
 <input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze live Kamera</a></button>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 </div>
-<div id="tilesSizeDiv" class="tutorialCard tutorialGeneral">
+<div id="tilesSizeDiv" class="card cardGeneral">
   <h3>Anzahl der Puzzleteile</h3>
   <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> Teile x-Achse
   <br>
   <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> Teile y-Achse
 </div>
-<div id="editCanvasDiv" class="tutorialCard tutorialGeneral">
+<div id="editCanvasDiv" class="card cardGeneral">
 <h2>Bild bearbeiten</h2>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
 <br>
@@ -126,9 +126,9 @@
     padding: 100px;
   }
 </style>
-<div id="settings" style="display: none;" class="tutorialCard tutorialGeneral">
+<div id="settings" style="display: none;" class="card cardGeneral">
   <h2 id="modeHeadline">Modus: </h2>
-  <div id="modeDiv" class="tutorialCard tutorialGeneral">
+  <div id="modeDiv" class="card cardGeneral">
   <select onchange="modeSelected(value);" id="modeSelection">
     <option value="traditional">traditionell</option>
     <option value="exchange">austauschen</option>
@@ -152,7 +152,7 @@
     Ist dies geschehen, können Sie die Teile durch Klicken auf das zu verschiebende Teil (und unter Umständen die gewünschte Zielposition) so verschieben, dass wieder das Originalbild entsteht.
   </p>
   <div id="futureModeSettingsHeader"></div>
-  <div class="tutorialCard tutorialGeneral" id="traditionalSettings">
+  <div class="card cardGeneral" id="traditionalSettings">
     <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: <br> </b>
     <br>
     <input id="clipOptionsSound" checked="true" type="checkbox"> akustisches Feedback (Audio bei Verbindungsmöglichkeiten)
@@ -182,7 +182,7 @@
       <b style="font-size: 25px;">Einstellungen zu der Verteilung der Teile:</b>
       <br>
     </a>
-    <div style="display: none" class="tutorialCard tutorialGeneral" id="EmptyTileBarDiv">
+    <div style="display: none" class="card cardGeneral" id="EmptyTileBarDiv">
       <br>
       <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">mit leerer Liste starten
       <div style="display: none;" id="emptyTileBarSettings">
@@ -193,7 +193,7 @@
         </select>
       </div>
       <div id="emptyTilebarTileGap"></div>
-      <div id="tilesGapS" class="tutorialCard tutorialGeneral" style="display: none;">
+      <div id="tilesGapS" class="card cardGeneral" style="display: none;">
         <br>
         Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
         <br>
@@ -231,7 +231,7 @@
       <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
       <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
       <a>
-    <div style="display: none;" class="tutorialCard tutorialGeneral" id="listTilesS">
+    <div style="display: none;" class="card cardGeneral" id="listTilesS">
       <h3>Einstellungen zur Teilleiste: </h3>
       <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
       <br>
@@ -250,10 +250,10 @@
     </div>
     <br>
   </div>
-  <div id="exchangeSettings" class="tutorialCard tutorialGeneral" style="display: none">
+  <div id="exchangeSettings" class="card cardGeneral" style="display: none">
   <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
   </div>
-  <p id="schiebenSettings" class="tutorialCard tutorialGeneral">
+  <p id="schiebenSettings" class="card cardGeneral">
     <br>
     <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
     <br>
@@ -292,7 +292,7 @@
       <br>
     </div>
     <input onchange="if (checked) {userMovementPlayer.style.display = 'block'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
-    <div class="tutorialgeneral tutorialCard" style="display: none;" id="userMovementPlayer">
+    <div class="cardGeneral card" style="display: none;" id="userMovementPlayer">
       <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
       <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
       <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
@@ -303,11 +303,11 @@
     <input id="showRemovedTiles" type="checkbox"> gelöschte Teile als Anhaltspunkte an richtiger Position anzeigen (vorrausgesetzt kein Teil wurde auf die Position geschoben)
   </a>
   </div>
-  <div id="generalSettings" class="tutorialCard tutorialGeneral">
+  <div id="generalSettings" class="card cardGeneral">
   <h2>allgemeine Einstellungen: </h2>
     <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'block'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
     <!-- <h3>general</h3> -->
-    <div id="rightMarkerSettings" class="tutorialCard tutorialGeneral">
+    <div id="rightMarkerSettings" class="card cardGeneral">
       <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
       <br>
   <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
@@ -316,7 +316,7 @@
     </div>
     <br>
   <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'block'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
-  <div id="randSettings" class="tutorialCard tutorialGeneral">
+  <div id="randSettings" class="card cardGeneral">
     <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
     <br>
     <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
@@ -333,7 +333,7 @@
   <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
-  <div style="display: none;" class="tutorialCard tutorialGeneral" id="videoControls">
+  <div style="display: none;" class="card cardGeneral" id="videoControls">
     <h3>video controls</h3>
     <a id="timeChangeDiv">
     <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> ⟲ Wiederholen
@@ -546,7 +546,7 @@ display: block;
       overflow-y: scroll;
       scroll-behavior: smooth;
     }
-    .tutorialCard {
+    .card {
       box-shadow: 2px 2px 10px #855d5d;
       padding-top: 5px;
       padding-bottom: 5px;
@@ -554,7 +554,7 @@ display: block;
       margin-bottom: 7px;
       /* display: none; */
     }
-    .tutorialGeneral {
+    .cardGeneral {
       border-radius: 10px;
       padding-left: 10px;
       padding-right: 10px;
@@ -584,9 +584,9 @@ display: block;
   background: rgba(0,0,0,0);
 }
   </style>
-  <div id="tutorial" class="tutorialGeneral">
+  <div id="tutorial" class="cardGeneral">
     <a id="scrollToTutorial"></a>
-    <div class="tutorialCard tutorialGeneral">
+    <div class="card cardGeneral">
       <b>Einstellungen während des Tutorials</b>
       <br>
       Sie können fast alle Einstellungen während des Tutorials ändern! Auf die Wichtigen wird zwar im Tutorial aufmerksam gemacht, aber Sie können auch gerne selber reinschauen oder ausprobieren. 
@@ -594,24 +594,24 @@ display: block;
     <div id="traditionalTutorial">
       <!-- PC -->
     <div style="display: none;" id="traditionalTutorialPC">
-    <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
+    <div class="card cardGeneral section" id="moveTutorial">
       <h2>Teile bewegen und drehen</h2>
       <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-      <div class="tutorialCard tutorialGeneral">
+      <div class="card cardGeneral">
         <b>Informationen zum Teile drehen</b>
         <br>
         Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie die Teile zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
         <br>
         Zudem können Sie auch in der später erwähnten Teilliste die Teile mit den Pfeiltasten rotieren, während Sie die Maustaste gedrückt haben bzw. auf das Touchpad einen Doppelklick ausgeführt haben. 
       </div>
-      <div class="tutorialCard tutorialGeneral" id="moveStandardPC">
+      <div class="card cardGeneral" id="moveStandardPC">
         <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" name="moveStyle"> <b>Standard</b>
         <div id="tileClickMoveTutorialDiv"><input type="checkbox" id="tileClickMoveTutorial" onclick="checked = !checked"> Klicken Sie auf das gewünschte Teil. </div>
         <div id="moveMouseMoveTutorialDiv"><input type="checkbox" id="moveMouseMoveTutorial" onclick="checked = !checked"> Bewegen Sie dann den Mauszeiger, um das Teil zu bewegen. </div>
         <div id="rotateTileTutorialDiv"><input type="checkbox" id="rotateTileTutorial" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren.</div>
         <div id="clickUnselectMoveTutorialDiv"><input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> Durch einen erneuten Mausklick auf das Teil können Sie es wieder loslassen bzw. abwählen.</div>
       </div>
-      <div class="tutorialCard tutorialGeneral" id="moveAlternativePC">
+      <div class="card cardGeneral" id="moveAlternativePC">
         <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" name="moveStyle"> <b>Alternative</b>
         <div id="holdMouseMoveTutorialDiv"><input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Halten Sie die Maustaste gedrückt (oder doppelklicken Sie und lassen Sie Ihren Finger auf dem Touchpad).</div>
         <div id="moveMouseMoveTutorialAlternativeDiv"><input type="checkbox" id="moveMouseMoveTutorialAlternative" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um das Teil zu bewegen. </div>
@@ -620,23 +620,23 @@ display: block;
       </div>
       <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie oben im Tutorial, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern. </div>
     </div>
-      <div class="tutorialCard tutorialGeneral section" id="clippTutorial">
+      <div class="card cardGeneral section" id="clippTutorial">
       <h2>Teile verbinden und lösen</h2>
-      <div class="tutorialCard tutorialGeneral" id="connectTiles">
+      <div class="card cardGeneral" id="connectTiles">
         <h3>Teile verbinden</h3>
         <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <div id="clippingInfos">
-            <div class="tutorialCard tutorialGeneral">
+            <div class="card cardGeneral">
               <b style="font-size: 15px;">Hitboxen</b>
               <br>
               In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
             </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden standardmäßig nicht angeboten</b>
             <br>
             Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
           </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b style="font-size: 15px;">nicht passende und richtige markieren</b>
             <br>
             Wenn Teile sich zu ähnlich sind, können Sie diese im Vorfeld entfernen oder nicht passende markieren lassen, wenn eine Verbindung vorgeschlagen wird. 
@@ -644,22 +644,22 @@ display: block;
             Standardmäßig wird nur markiert, ob ein Teil richtig ist (alle nötigen Teile drum herum)
           </div>
         </div>
-        <div class="tutorialCard tutorialGeneral">
+        <div class="card cardGeneral">
         <div id="selectTileConnectTileTutorialDiv"><input type="checkbox" id="selectTileConnectTileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
         <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
         <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab (Finger vom Bildschirm lösen), wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
         </div>
         <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weiteres Teil zu den bereis verbudenen. </div>
       </div>
-      <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
+      <div class="card cardGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
         <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-        <div class="tutorialCard tutorialgeneral">
+        <div class="card cardGeneral">
           <b style="font-size: 15px;">Information Shift Taste</b>
           <br>
           Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
         </div>
-        <div id="moveStyleStandardUnclipp" class="tutorialCard tutorialGeneral">
+        <div id="moveStyleStandardUnclipp" class="card cardGeneral">
           <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" id="unclippStandard" name="unclippStyle"><b> Standard (verbunden mit Standard für Bewegen der Teile) </b>
           <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
           <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich), welches mit einem anderen verbunden ist. </div>
@@ -667,7 +667,7 @@ display: block;
           <div id="unclippStandardTutorialDiv"><input type="checkbox" id="unclippStandardTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
           <div id="unselectUnclippStandardTutorialDiv"><input type="checkbox" id="unselectUnclippStandardTutorial" onclick="checked = !checked"> Klicken Sie, um die ausgewählten Teile abzuwählen. </div>
         </div>
-        <div id="moveStyleAlternativeUnclipp" class="tutorialCard tutorialGeneral">
+        <div id="moveStyleAlternativeUnclipp" class="card cardGeneral">
           <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" id="unclippAlternative" name="unclippStyle"> <b>Alternative (verbunden mit Alternative für Bewegen der Teile)</b>
           <div id="pressShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="pressShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
           <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich, Maustaste drücken und halten oder Doppelklick auf Touchpad). Das Teil muss mit mindestens einem weiteren verbunden sein, damit es von diesem abgetrennt werden kann.  </div>
@@ -677,23 +677,23 @@ display: block;
         </div>
       </div>
     </div>
-    <div class="tutorialCard tutorialGeneral section" id="generalSkills">
+    <div class="card cardGeneral section" id="generalSkills">
       <h2>allgemeine Fertigkeiten</h2>
       <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-      <div class="tutorialCard tutorialGeneral">
+      <div class="card cardGeneral">
         <h3>Zoomen</h3>
         Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das Übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
       </div>
-      <div id="scrollTutorial" class="tutorialCard tutorialGeneral">
+      <div id="scrollTutorial" class="card cardGeneral">
         <b style="font-size: 21px;">scroling</b>
         <br>
-        <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
+        <div class="card cardGeneral" id="manualScrollingTutorial">
           <h3>manuell scrollen</h3>
           <div id="selectTileScrollingTutorialDiv"><input type="checkbox" id="selectTileScrollingTutorial" onclick="checked = !checked">Teil anwählen (wenn Sie 2 Finger Geste nutzen wollen mit der linken Maustaste)</div> 
           <div id="manuallyScrollingTutorialDiv"><input type="checkbox" id="manuallyScrollingTutorial" onclick="checked = !checked">scrollen (z.B. mit 2 Finger Geste auf dem Touchpad oder mit dem Mausrad)</div> 
           <div id="unselectTileScrollingTutorialDiv"><input type="checkbox" id="unselectTileScrollingTutorial" onclick="checked = !checked">Teil abwählen</div> 
         </div>
-        <div class="tutorialCard tutorialGeneral" id="autoScrollTutorial">
+        <div class="card cardGeneral" id="autoScrollTutorial">
           <h3>automatisch scrollen</h3>
           <div id="selectTileAutomaticScrollingTutorialDiv"><input type="checkbox" id="selectTileAutomaticScrollingTutorial" onclick="checked = !checked">Teil anwählen</div> 
           <div id="automaticScrollingTutorialDiv"><input type="checkbox" id="automaticScrollingTutorial" onclick="checked = !checked">Teil so weit nach unten schieben, dass mehr als die Hälfte des Teils den Bildschirm verlassen hat (außerhalb des tutorials alle Richtungen möglich)</div> 
@@ -702,23 +702,23 @@ display: block;
         </div>
       </div>
     </div>
-      <div class="tutorialCard tutorialGeneral section" id="tileSelectionBarTutorial">
+      <div class="card cardGeneral section" id="tileSelectionBarTutorial">
         <h3>Die Teilliste</h3>
-        <div class="tutorialCard tutorialGeneral">
+        <div class="card cardGeneral">
           <b>Informationen zur aufbereitung der Teile (ink. Teilliste)</b>
           <br>
           In den Einstellungen können Sie auswählen, wie die Teile aufbereitet werden. Sie können verteil werden (mit Überlappen), in die Teilliste gebracht werden, um die es im Folgenden geht, oder auf dem Spielfeld nebeneinander gelegt werden. Zudem können Sie mit leerer Liste starten, sodass Sie die Teile sortiert dort ablegen oder auf dem Spielfeld behalten können. 
         </div>
-        <div class="tutorialCard tutorialGeneral">
+        <div class="card cardGeneral">
           <b>zusätzliche Einstellungen</b>
           <br>
           Für die Teilliste gibt es zusätzliche Einstellungen, die Sie jetzt einsehen können. 
         </div>
-        <div class="tutorialCard tutorialGeneral" id="controlTileBarScrollTutorial">
+        <div class="card cardGeneral" id="controlTileBarScrollTutorial">
           <h3>Scrolling in der Teilliste</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten (halbtransparenten) Pfeile an den Rändern des Bildschirms (werden sichtbarer, wenn man sie mit der Maus berührt)</div> 
-          <div class="tutorialCard tutorialGeneral" id="scrollWithMouse">
+          <div class="card cardGeneral" id="scrollWithMouse">
             <h4 id="scrollTilelistSwipeTutorial">Scrollen mit der Maustaste</h4>
             <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
             <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Zeiger bewegen, um die Liste in die entsprechende Richtung zu bewegen </div> 
@@ -726,35 +726,35 @@ display: block;
           </div>
           <div id="ScrollkeyTileBarTutorialDiv"><input type="checkbox" id="ScrollkeyTileBarTutorial" onclick="checked = !checked">Scrollen durch drücken der linken bzw. rechten Pfeiltaste (Mauszeiger muss auf Liste sein)</div> 
         </div>
-        <div class="tutorialCard tutorialGeneral section" id="leaveTileBarTutorial">
+        <div class="card cardGeneral section" id="leaveTileBarTutorial">
           <h3>Teile auf "Spielfeld" bringen</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b style="font-size: 15px;">automatisch nächste Teil auswählen</b>
             <br>
             Am PC wird standardmäßig das nächste Teil in der Teilliste ausgewählt, am Handy nicht. Solange Sie auf dem "Spielfeld" ein Teil angewählt haben, wird kein Teil aus der Teilliste genommen. Sie können auch dies in den Einstellungen ändern. 
           </div>
-          <div class="tutorialCard tutorialGeneral" id="leaveTileBarTutorial">
+          <div class="card cardGeneral" id="leaveTileBarTutorial">
             <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil in der Liste, um es anzuwählen.</div> 
             <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Klicken Sie auf das "Spielfeld", um das Teil dort "abzulegen". </div> 
             <div id="unselecTileAfterTileBarTilePlacementTutorialDiv"><input type="checkbox" id="unselecTileAfterTileBarTilePlacementTutorial" onclick="checked = !checked">Wählen Sie das Teil ab.</div> 
           </div>
           <div id="SecondPlaceTileTutorialDiv"><input type="checkbox" id="SecondPlaceTileTutorial" onclick="checked = !checked">Legen Sie ein weiteres Teil auf dem Spielfeld ab.</div> 
         </div>
-        <div class="tutorialCard tutorialGeneral section" id="backToBarTutorial">
+        <div class="card cardGeneral section" id="backToBarTutorial">
           <h3>Teile zurück in Teilliste bringen</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-          <div class="tutorialCard tutorialGeneral" id="backToBarPlusBTutorial">
+          <div class="card cardGeneral" id="backToBarPlusBTutorial">
             <h4>mit "+"-Button</h4>
             <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Klicken Sie auf einen der "+"-Bottons</div> 
             <div id="backToTileBarPlusBTutorialDiv"><input type="checkbox" id="backToTileBarPlusBTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil, um es an der ausgewählten Stelle zurück in die Teilliste zu bringen. </div> 
           </div>
-          <div class="tutorialCard tutorialGeneral" id="backToBarBTutorial">
+          <div class="card cardGeneral" id="backToBarBTutorial">
             <h4>mit "zurück in Leiste"-Button</h4>
             <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählten Teil wird das neue Teil eingereiht werden. </div> 
             <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton (oben links auf dem Bildschirm, lässt sich nur aktivieren, wenn ein Teil auf dem "Spielfeld" liegt). </div> 
             <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
-            <div class="tutorialCard tutorialGeneral">
+            <div class="card cardGeneral">
               <b style="font-size: 15px;">automatische Positionsauswahl</b>
               <br>
               Wenn Sie kein Teil ausgewählt haben und trotdem den Button drücken, wird das danach ausgewähle Teil an das Ende der Liste angehängt. 
@@ -765,48 +765,48 @@ display: block;
     </div>
     <!-- Handy -->
     <div id="traditionalTutorialHandy" style="display: none;">
-      <div class="tutorialCard tutorialGeneral section" id="moveTutorial">
+      <div class="card cardGeneral section" id="moveTutorial">
         <h2>Teile bewegen</h2>
         <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-        <div class="tutorialCard tutorialGeneral">
+        <div class="card cardGeneral">
           <div id="selectTileMobileTurorialDiv"><input type="checkbox" id="selectTileMobileTurorial" onclick="checked = !checked"> Legen Sie Ihren Finger auf ein Teil. </div>
           <div id="moveTileMobileTutorialDiv"><input type="checkbox" id="moveTileMobileTutorial" onclick="checked = !checked"> Bewegen Sie dann den Finger, um das Teil zu bewegen. </div>
           <div id="releaseTileMobileTutorialDiv"><input type="checkbox" id="releaseTileMobileTutorial" onclick="checked = !checked"> Heben Sie den Finger vom Bildschirm an, um das Teil abzuwählen. </div>
         </div>
       </div>
-        <div class="tutorialCard tutorialGeneral section" id="clippTutorial">
+        <div class="card cardGeneral section" id="clippTutorial">
         <h2>Teile verbinden und lösen</h2>
-        <div class="tutorialCard tutorialGeneral" id="connectTiles">
+        <div class="card cardGeneral" id="connectTiles">
           <h3>Teile verbinden</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <div id="clippingInfosMobile"></div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
           <div id="selectTileConnectTileMobileTutorialDiv"><input type="checkbox" id="selectTileConnectTileMobileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
           <div id="getClippingOptionConnectTileMobileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileMobileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
           <div id="clipTileMobileTutorialDiv"><input type="checkbox" id="clipTileMobileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab, wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
           </div>
           <div id="clippSecondMobileTutorialDiv"><input id="clippSecondMobileTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie drei weitere Teile zu den bereits verbundenen. </div>
         </div>
-        <div class="tutorialCard tutorialGeneral section" id="disconnectTiles">
+        <div class="card cardGeneral section" id="disconnectTiles">
           <h3>Teile lösen</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b style="font-size: 15px;">Allgemeiner Hinweis</b>
             <br>
             Wenn Sie Probleme mit dem Anklicken der Elemente oben in der leiste haben (scrollen, rotieren, Shift Taste), versuchen Sie, ein wenig weiter unten zu klicken, selbst wenn Sie außerhalb des angezeigten Elements klicken, kann das genau die richtige Stelle für das Klicken sein. 
           </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b style="font-size: 15px;">Information Shift Taste</b>
             <br>
             Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
           </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <div id="pressShiftMobileUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
             <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf ein Teil, welches mit einem anderen verbunden ist. </div>
             <div id="moveTileShiftUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftUnclippTutorial" onclick="checked = !checked"> Bewegen Sie ein Teil mit dem Finger. </div>
             <div id="releaseFingerMobileShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
           </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b>Mehrfachauswahl (auch ohne Abtrennen möglich)</b>
             <br>
             <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
@@ -816,7 +816,7 @@ display: block;
             <div id="moveTileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Bewegen Sie eins der ausgewähltenTeile mit dem Finger. </div>
             <div id="releaseFingerMobileMultiShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileMultiShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
           </div>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Legen Sie zwei Finger auf das Teil, das Sie lösen wollen. (muss mit mindestens einem weiteren Teil verbunden sein)</div>
             <div id="releaseTwoFingersUnclippTutorialDiv"><input type="checkbox" id="releaseTwoFingersUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Finger wieder vom Bildschirm los. </div>
             <div id="selectTileMobileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileTwoFingersUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf das abgelöste Teil. </div>
@@ -825,16 +825,16 @@ display: block;
           </div>
         </div>
       </div>
-      <div class="tutorialCard tutorialGeneral section" id="generalSkills">
+      <div class="card cardGeneral section" id="generalSkills">
         <h2>allgemeine Fertigkeiten</h2>
-        <div id="scrollTutorial" class="tutorialCard tutorialGeneral">
+        <div id="scrollTutorial" class="card cardGeneral">
           <b style="font-size: 21px;">scrollen und zoomen</b>
           <br>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <br>
-          <div class="tutorialCard tutorialGeneral" id="manualScrollingTutorial">
+          <div class="card cardGeneral" id="manualScrollingTutorial">
             <h3>manuell scrollen und zoomen</h3>
-            <div class="tutorialCard tutorialGeneral">
+            <div class="card cardGeneral">
               <b style="font-size: 15px;">auf leerem Hintergrund</b>
               <br>
               In den Einstellungen haben Sie die Möglichkeit auszustellen, dass Sie auf leerem bzw. weißem Hintergrund immer scrollen können (ohne den Haken bei "scroll" zu setzen)
@@ -847,10 +847,10 @@ display: block;
           </div>
           <div id="autoScrollMobileTutorial"></div>
         </div>
-        <div class="tutorialCard tutorialGeneral section">
+        <div class="card cardGeneral section">
           <h3>rotieren</h3>
           <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-          <div class="tutorialCard tutorialGeneral">
+          <div class="card cardGeneral">
             <b>Informationen zum Teile drehen</b>
             <br>
             Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
@@ -870,17 +870,17 @@ display: block;
       <input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.
     </div>
 </div>
-<div id="exchangeTutorial" style="display: none;" class="tutorialGeneral">
-  <div class="tutorialCard tutorialGeneral section">
+<div id="exchangeTutorial" style="display: none;" class="cardGeneral">
+  <div class="card cardGeneral section">
     <h1>Teile austauschen</h1>
-    <div class="tutorialCard tutorialGeneral">
-      <div id="moveStyleStandardExchangeDiv" class="tutorialCard tutorialGeneral">
+    <div class="card cardGeneral">
+      <div id="moveStyleStandardExchangeDiv" class="card cardGeneral">
         <input type="radio" id="moveStyleStandardExchange" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
       <b>Standard Steuerung</b>
       <div id="selectFirstExchangeNormalTutorialDiv"><input type="checkbox" id="selectFirstExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
       <div id="selectSecondExchangeNormalTutorialDiv"><input type="checkbox" id="selectSecondExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
     </div>
-    <div id="moveStyleAlternativeExchange" class="tutorialCard tutorialGeneral">
+    <div id="moveStyleAlternativeExchange" class="card cardGeneral">
       <input type="radio" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
       <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
       <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
@@ -888,44 +888,44 @@ display: block;
       <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustaste bzw. den Bildschirm los.</div>
     </div>
     <h1>Auswahl abwählen</h1>
-    <div id="standardUnselectExchangeTutorial" class="tutorialCard tutorialGeneral">
+    <div id="standardUnselectExchangeTutorial" class="card cardGeneral">
       <b>Standard Steuerung</b>
       <div id="selectTileUnselectStandardTutorialDiv"><input type="checkbox" id="selectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
       <div id="unselectTileUnselectStandardTutorialDiv"><input type="checkbox" id="unselectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie es erneut an, um es wieder abzuwählen. </div>
     </div>
-    <div id="alternativeUnselectExchangeTutorial" class="tutorialCard tutorialGeneral">
+    <div id="alternativeUnselectExchangeTutorial" class="card cardGeneral">
       <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
         <div id="mouseDownUnselectAlternativeTutorialDiv"><input type="checkbox" id="mouseDownUnselectAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
         <div id="moveMouseOutUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseOutUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf ein anderes Teil.</div>
         <div id="moveMouseInUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseInUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf das zuerst ausgewählte Teil.</div>
         <div id="releaseMouseUnselectAlternativeTutorialDiv"><input type="checkbox" id="releaseMouseUnselectAlternativeTutorial" onclick="checked = !checked"> Lassen Sie auf dem Teil, auf dem Sie angefangen haben wieder los, um die Auswahl abzuwählen.</div>
-        <div class="tutorialCard tutorialGeneral">
+        <div class="card cardGeneral">
           Wenn Sie sich noch auf dem als erstes ausgewählen Teil befinden, können Sie auch die Maustaste bzw. den Finger sofort loslassen und erneut klicken, um das Teil abzuwählen. 
         </div>
     </div>
   </div>
 </div>
 </div>
-<div id="schiebenTutorial" style="display: none;" class="tutorialGeneral">
-  <div class="tutorialCard tutorialGeneral section">
+<div id="schiebenTutorial" style="display: none;" class="cardGeneral">
+  <div class="card cardGeneral section">
     <h1>Teile schieben</h1>
-    <div class="tutorialCard tutorialGeneral">
+    <div class="card cardGeneral">
       <b>Schieben eine Option</b>
       <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Klicken Sie ein Teil neben der Lücke an, um es in die Lücke zu schieben.</div>
     </div>
-    <div id="moveMultipleOptionsSchiebenTutorial" class="tutorialCard tutorialGeneral">
+    <div id="moveMultipleOptionsSchiebenTutorial" class="card cardGeneral">
       <b>Schieben mehrere Optionen</b>
       <div id="schiebenSelectTileMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectTileMoveMultipleTurorial" onclick="checked = !checked"> Wenn Sie ein Teil in mehrere Lücken verschieben können, müssen Sie <b>erneut zuerst das Teil anwählen</b>.</div>
       <div id="schiebenSelectGapMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectGapMoveMultipleTurorial" onclick="checked = !checked"> Nun müssen Sie jedoch zusätzlich auf die Lücke klicken, in die das Teil geschoben werden soll.</div>
     </div>
-    <div class="tutorialCard tutorialGeneral">
+    <div class="card cardGeneral">
       <b>Informationen Einstellungen</b>
-      <div class="tutorialCard tutorialGeneral">
+      <div class="card cardGeneral">
         <b>Züge rückgängig machen</b>
         <br>
         In den Einstellungen können Sie Ihre Züge rückgängig machen und zuvor wählen, ob die dafür notwendigen Züge für die Statistik zählen sollen. 
       </div>
-      <div class="tutorialCard tutorialGeneral">
+      <div class="card cardGeneral">
         <b>Züge des PC angucken</b>
         <br>
         Zudem können Sie sich angucken, wie der PC das Puzzle löst. Er nimmt zwar nicht immer die kürzeste Route, aber immerhin weiß er eine. Wenn sie sich mit Ihrer überschneidet, können Sie sogar ab Ihrer Position im Spiel gucken, wie man das Puzzle lösen kann. 
@@ -3943,7 +3943,7 @@ function goTutorialSteps(steps) {
     tutorial.index += direction;
     tutorial.state = tutorialSteps[tutorial.index].id;
   // }
-  if (!tutorialSteps.filter(x => document.getElementById(x.id + 'Div').className.includes('currentTutorialStep')).length) document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
+  if (!tutorialSteps.filter(x => document.getElementById(x.id + 'Div').className.includes('currentTutorialStep')).length) document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep cardGeneral";
     setTimeout(() => {
         if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
             document.getElementById(tutorial.state + 'Div').parentElement.parentElement.scrollIntoView();
@@ -4062,7 +4062,7 @@ function goTutorialSteps(steps) {
 //     }
 //     tutorial.index += steps;
 //     tutorial.state = document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
-//     document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep tutorialGeneral";
+//     document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep cardGeneral";
 //     setTimeout(() => {
 //         if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
 //             document.getElementById(tutorial.state + 'Div').parentElement.parentElement.scrollIntoView();
