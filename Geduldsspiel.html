@@ -990,10 +990,10 @@
         if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
         else sphere1.style.display = "none";
         var numbers = [
-          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - 7, y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2],
-          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1 - 8],
-          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2, y1 + JSON.parse(sphere1.style.height.replace("px", "")) - 7],
-          [x1 - 10, y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2]
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))]
         ]
         for (var i = 0; i < 4; i++) {
           // canvas.fillStyle = "red";
@@ -1005,7 +1005,7 @@
           alpha = data.data[3];
           if ((joyStick != "place" || !joyStickPlay.checked) && ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177))) {
             console.log("Fail!");
-            deathMarkers.push({x: x1 - (textur.getBoundingClientRect().top + scrollY), y: y1 - (textur.getBoundingClientRect().left + scrollX), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), visibility: 0.5});
+            deathMarkers.push({x: x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX) + 1, y: y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), visibility: 0.5});
             restartLevel();
           }
           if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
@@ -1166,7 +1166,7 @@
     }
 
     function renderLoop(time) {
-      canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
+      Layout();
       canvas.fillStyle = "black";
       drawJoystick();
       //  canvas.clearRect(0, 0, textur.width, textur.height);
@@ -1260,9 +1260,9 @@
     }
 
     function Layout() {
-      if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
+      // if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
-      }
+      // }
       // visualize blinkWalls
       canvas.fillStyle = "black";
       for (let i = 0; i < currentLevel?.blinkWall?.length; i++) {
@@ -1274,7 +1274,7 @@
         canvas.fillRect(marker.x, marker.y, marker.width, marker.height);
         marker.visibility -= 0.0075;
       }
-      deathMarkers.filter(x => x.visibility > 0);
+      deathMarkers = deathMarkers.filter(x => x.visibility > 0);
     }
     // stopWatch:
     var time = 0;
