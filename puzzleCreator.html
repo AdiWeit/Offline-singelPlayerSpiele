@@ -2936,7 +2936,7 @@ var puzzles = {};
     }
     // #potentialErrorCause
     if ((state.removeTile || ((swipeSteuerung.checked || modeSelection.value != "exchange"))) && ev.touches[0]) {
-      var pTexturLeft = textur.getBoundingClientRect().left;
+      var pTexturLeft = textur.getBoundingClientRect().left + scrollX;
       if (pTexturLeft < 0) pTexturLeft = 0;
       mausx = ev.touches[0]["pageX"] - pTexturLeft + state.rightScroll;
       mausy = ev.touches[0]["pageY"] - texturTop + state.upScroll;// - 32;
