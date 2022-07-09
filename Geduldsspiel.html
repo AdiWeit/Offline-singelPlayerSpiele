@@ -819,6 +819,7 @@
       });
       courceSelection.value = value;
     }
+    var deathMarkers = [];
     function restartLevel() {
       if (level.mode == "growing") {
         modeSelected("growing");
@@ -1004,6 +1005,7 @@
           alpha = data.data[3];
           if ((joyStick != "place" || !joyStickPlay.checked) && ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177))) {
             console.log("Fail!");
+            deathMarkers.push({x: x1 - (textur.getBoundingClientRect().top + scrollY), y: y1 - (textur.getBoundingClientRect().left + scrollX), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), visibility: 0.5});
             restartLevel();
           }
           if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
@@ -1034,7 +1036,7 @@
         }
           if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
         }
-        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) Layout();
+        if ((joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) || deathMarkers.length) Layout();
         drawJoystick();
         if (currentLevel.blinkWall) blinkWall();
       }, 25);
@@ -1267,6 +1269,12 @@
         var wall = currentLevel.blinkWall[i];
         if (wall.changing.visible) canvas.fillRect(wall.x, wall.y, wall.width, wall.height);
       }
+      for (const marker of deathMarkers) {
+        canvas.fillStyle = "hsla(240, 100%, 50%, " + marker.visibility + ")";
+        canvas.fillRect(marker.x, marker.y, marker.width, marker.height);
+        marker.visibility -= 0.0075;
+      }
+      deathMarkers.filter(x => x.visibility > 0);
     }
     // stopWatch:
     var time = 0;
