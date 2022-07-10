@@ -9,7 +9,7 @@
   <b>edit elements</b>
   <br>
   <button onclick="createRandomMap();">create/extend</button>
-  <button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; tileUnselectedOrDeleted(); layoutObjs();">delete all objects</button>
+  <button onclick="deleteAllElements();">delete all objects</button>
   <button onclick="removeElement();">delete selected element</button>
 </div>
 <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
@@ -72,6 +72,7 @@
     <input oninput="currentLevel.sizes.schieber.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
   </div>
 </div>
+create new level when goal reached: <input id="newRandomLevelAfterGoal" checked="true" type="checkbox">
 </div>
 <div id="objSettings" class="card"> 
     <b>set amount and maximum size of objects</b>
@@ -1780,7 +1781,13 @@ function tablePositionModeSelected() {
         sphere.ball.style.left = "0px";
         ball.x = 0;
         ball.y = 0;
-        if (randomMapCreatorVisable.checked) alert("You reached your set goal!");
+        if (randomMapCreatorVisable.checked) {
+          if (newRandomLevelAfterGoal.checked) {
+            deleteAllElements();
+            createRandomMap();
+          }
+          else alert("You reached the goal!");
+        }
         else {
           goalReached = true;
           i = 8;
@@ -2492,6 +2499,12 @@ else level.mode = mode;
     tileUnselectedOrDeleted();
     layoutObjs();
   }
+  function deleteAllElements() {
+    objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; 
+    rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; 
+    tileUnselectedOrDeleted(); 
+    layoutObjs();
+  }
   var selected = {};
   var collideCount = 0;
   function collides(a, b) {
@@ -2526,10 +2539,10 @@ else level.mode = mode;
         }
       }
     }
-    canvas.fillStyle = "yellow";
+    canvas.fillStyle = "rgb(255, 242, 0)";
     canvas.fillRect(goalHitbox.x, goalHitbox.y, goalHitbox.width, goalHitbox.height);
   }
-  var goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};;
+  var goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
   var highscoresDisplayedBefore = {};
   function showScores(highscores) {
     scores.style.display = "inline";
@@ -2635,7 +2648,7 @@ setTimeout(function () {
     if (easyMaps.checked) level.mode += ' easy maps';
     if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
     if (!joyStickPlay.checked) level.mode += ' (' + tabletPositionModeSelection.value + ')'; 
-    if (stopClockText.style.color != "red" && highscores[level.mode] && highscores[level.mode][level.aktuell] < mins + ":" + secs + ":" + "0" + tenths) {
+    if (!randomMapCreatorVisable.checked && stopClockText.style.color != "red" && highscores[level.mode] && highscores[level.mode][level.aktuell] < mins + ":" + secs + ":" + "0" + tenths) {
       new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
       stopClockText.style.color = "red";
   }

@@ -42,6 +42,96 @@
 }
 </style>
   </head>
+  <div id="randomMapCreator" class="card" style="display: none;">
+    <div class="card">
+    <b>edit elements</b>
+    <br>
+    <button onclick="createRandomMap();">create/extend</button>
+    <button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; tileUnselectedOrDeleted(); layoutObjs();">delete all objects</button>
+    <button onclick="removeElement();">delete selected element</button>
+  </div>
+  <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
+  <div id="rotateSettings" class="card" style="display: none;">
+    <b>rotation settings</b>
+    <br>
+    <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sec. per rotation
+    <br>
+    scale in relation to the original object (%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number">
+    <br>
+    starting angle: <input oninput="changeRotateParam('angle', parseInt(value));" value="0" id="rotatingRandomObjStartingAngle" type="number">
+  </div>
+  <div id="generalLevelSettings" class="card">
+    <b>general level settings</b>
+    <br>
+    <div class="card">
+      <b>set spawnpoints (click to set the position after clicking the button)</b>
+      <br>
+      <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';" style="border-radius: 2px; border-style: solid; border-color: blue;">set blue ball spawnpoint</button>
+    </div>
+    <!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
+  <br> -->
+  <div class="card">
+    <input type="number" style="width: 66px;" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0"> level width
+    <br>
+    <input type="number" style="width: 66px;" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0"> level height
+    <br>
+    <input type="number" style="width: 66px;" min="1" value="66" id="minimalDistance" min="0"> minimal distance between objects
+  </div>
+  <div class="card">
+    <b>goal side</b>
+    <br>
+    <input id="goalTop" onchange="goalSideChanged();" name="goalSide" type="radio">top
+    <br>
+    <input id="goalLeft" onchange="goalSideChanged();" name="goalSide" type="radio">left
+    <input id="goalRight" onchange="goalSideChanged();" checked="true" name="goalSide" type="radio">right
+    <br>
+    <input id="goalBottom" onchange="goalSideChanged();" name="goalSide" type="radio">bottom
+  </div>
+  <div id="ballSettings" class="card">
+    <b>ball size:</b> 
+    <br>
+    <div class="card">
+      <b>blue ball:</b> 
+      <br>
+      width: 
+      <input oninput="sphere1.style.width = value;" type="range" min="1" max="100">
+      <br>
+      height: 
+      <input oninput="sphere1.style.height = value;" type="range" min="1" max="100">
+    </div>
+  </div>
+  </div>
+  <div id="objSettings" class="card"> 
+      <b>set amount and maximum size of objects</b>
+      <div id="circleSettings" class="card">
+        <input type="number" style="width: 44px;" value="2" id="circleAmount" min="0"> <b>circles</b>
+        <br>
+        maximum radius: 
+        <input id="maxCircleSize" type="range">
+      </div>
+      <!-- <br> -->
+      <div id="triangleSettings" class="card">
+        <input type="number" style="width: 44px;" value="2" id="triangleAmount" min="0"> <b>triangles</b>
+        <br>
+        maximum width: 
+        <input id="maxTriangleWidth" type="range">
+        <br>
+        maximum height: 
+        <input id="maxTriangleHeight" type="range">
+        <!-- <br> -->
+      </div>
+      <div id="rectangleSettings" class="card">
+        <input type="number" style="width: 44px;" value="4" id="rectangleAmount" min="0"> <b>rectangle</b>
+        <br>
+        maximum width: 
+        <input id="maxRectangleWidth" type="range">
+        <br>
+        maximum height: 
+        <input id="maxRectangleHeight" type="range">
+      </div>
+    </div>
+  <br>
+  </div>
   <button onclick="showGameInstructions();">how to play</button>
   <br>
   <input id="easyMaps" checked="true" onchange="difficultyChanged(checked);" type="checkbox"> easy map versions
@@ -74,6 +164,9 @@
   </div>
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
+  <br>
+  <a id="randomMapCreatorVisableA"><input type="checkbox" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
+  <br>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
   <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentSensibility = currentLevel.joyStickSensibility} else level.currentSensibility = currentLevel.sensibility;" id="joyStickPlay"> joystick control </p>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
@@ -759,6 +852,258 @@
       if (pLevel.blinkWall) initializeBlinkWall(pLevel.blinkWall);
       if (level.normal.easyMaps[key].blinkWall) initializeBlinkWall(level.normal.easyMaps[key].blinkWall);
     }
+    // random map creator stuff: 
+    function mapCreatorVisChanged(checked) {
+    if (checked) {
+      randomMapCreator.style.display = 'block';
+      // currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}};
+      sensibility = {x: 5, y: 5};
+      checkpointManagement.style.display = 'none';
+      randomMapCreator.prepend(randomMapCreatorVisableA);
+      // refreshBallSize();
+      } 
+      else {
+        randomMapCreator.style.display = 'none';
+        oldMapCreatorPosition.prepend(randomMapCreatorVisableA);
+        levelSelected(levelSelector.value);
+      }
+  }
+  function changeIfRotates(checked) {
+    if (checked) {
+      if (!selected.obj.rotated) showPresetRotationSettings();
+      selected.obj.rotated = true;
+      rotateSettings.style.display = 'block';
+      rotatingObj[selected.type].push(selected.obj);
+      if (!currentLevel.rotating) currentLevel.rotating = [];
+        var newRotating = {shape: "randomMapCreator", path: selected.obj.path, position: selected.obj.middle, miliSecsPerRotation: parseInt(miliSecPerRotationNumber.value), sizeRelationToOriginal: parseFloat(rotatingRandomObjScale.value), angle: parseInt(rotatingRandomObjStartingAngle.value), objType: selected.type, objNumber: selected.obj.number};
+        currentLevel.rotating.push(newRotating);
+        if (currentLevel.rotating.length == 1) requestAnimationFrame(renderLoop);
+      objects[selected.type] = objects[selected.type].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
+      layoutObjs();
+    }
+    else {
+      rotateSettings.style.display = 'none';
+      currentLevel.rotating = currentLevel.rotating.filter(x => x.objNumber != selected.obj.number);
+      objects[selected.type].push(selected.obj);
+      rotatingObj[selected.type] = rotatingObj[selected.type].filter(x => x.number != selected.obj.number);
+    }
+  }
+  function changeRotateParam(param, value) {
+    for (const obj of currentLevel.rotating) {
+      if (obj.objNumber == selected.obj.number) obj[param] = value;
+    }
+  }
+  function goalSideChanged() {
+    if (goalTop.checked) goalHitbox = {x: 0, y: 0, width: textur.width, height: 33};
+    if (goalLeft.checked)  goalHitbox = {x: 0, y: 0, width: 33, height: textur.height};
+    if (goalBottom.checked)  goalHitbox = {x: 0, y: textur.height - 33, width: textur.width, height: 33};
+    if (goalRight.checked)  goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
+    layoutObjs();
+  }
+  function showPresetRotationSettings() {
+    miliSecPerRotationNumber.value = 10000;
+    rotatingRandomObjScale.value = 1;
+    rotatingRandomObjStartingAngle.value = 0;
+
+  }
+  var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
+  var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
+  handleMaxSizeSlider(true);
+  function handleMaxSizeSlider(changeValue) {
+    maxCircleSize.max = canvasWidth.value/2;
+    maxTriangleWidth.max = canvasWidth.value;
+    maxTriangleHeight.max = canvasHeight.value;
+    maxRectangleWidth.max = canvasWidth.value;
+    maxRectangleHeight.max = canvasHeight.value;
+    if (changeValue) {
+      maxCircleSize.value = canvasWidth.value/2;
+      maxTriangleWidth.value = canvasWidth.value;
+      maxTriangleHeight.value = canvasHeight.value;
+      maxRectangleWidth.value = canvasWidth.value;
+      maxRectangleHeight.value = canvasHeight.value;
+    }
+  }
+  function createRandomMap() {
+    textur.width = canvasWidth.value;
+    textur.height = canvasHeight.value;
+    goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
+    collideCount = 0;
+    createCircles();
+    createTriangles();
+    createRectangles();
+    layoutObjs();
+    setSpawnPoints();
+  }
+  function createCircles() {
+    for (let i = 0; i < circleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), radius: Math.round(Math.random()*maxCircleSize.value), number: objects.circles.length};
+      newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.circles.push(newObj);
+    }
+  }
+  function createTriangles() {
+    for (let i = 0; i < triangleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), direction: Math.round(Math.random()*3), number: objects.triangles.length};
+      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      newObj.middle = {x: newObj.hitbox.x + newObj.hitbox.width/2, y: newObj.hitbox.y + newObj.hitbox.height/2};
+      if (!newObj.direction) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width/2, newObj.y + newObj.height)], true, newObj.middle);
+      // pointing left
+      if (newObj.direction == 1) newObj.path = createPath([point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height/2)], true, newObj.middle);
+      // pointing up
+      if (newObj.direction == 2) newObj.path = createPath([point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x + newObj.width/2, newObj.y)], true, newObj.middle);
+      // pointing right
+      if (newObj.direction == 3) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height/2)], true, newObj.middle);
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.triangles.push(newObj);
+    }
+  }
+  function createRectangles() {
+    for (let i = 0; i < rectangleAmount.value; i++) {
+      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), number: objects.rectangles.length};
+      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
+      newObj.middle = {x: newObj.x + newObj.width/2, y: newObj.y + newObj.height/2};
+      newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height)], true, newObj.middle);
+      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
+      else if (collideCount >= 9999) break;
+      else objects.rectangles.push(newObj);
+    }
+  }
+  // function createSquares() {
+    
+  // }
+  function setSpawnPoints(time, parts) {
+    if (!time) time = 0;
+    checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
+    currentLevel.spawnPoint = checkpoint.position;
+    sphere1.style.left = checkpoint.position.x + "px";
+    sphere1.style.top = checkpoint.position.y + "px";
+    if (time < 5000) {
+    if (collides({x: checkpoint.position.x, y: checkpoint.position.y, width: cssToNumber(sphere1.style.width), height: cssToNumber((sphere1.style.height))}, goalHitbox)) setSpawnPoints(time + 1, ["ball"]);
+    // setTimeout(() => {
+      var minimalDistanceStored = minimalDistance.value;
+      minimalDistance.value = 0;
+      if (newCollidesOthers({hitbox: {x: checkpoint.position.x, y: checkpoint.position.y, width: cssToNumber(sphere1.style.width), height: cssToNumber((sphere1.style.height))}})) {
+        setSpawnPoints(time + 1);
+      }
+        minimalDistance.value = minimalDistanceStored;
+      // }, 1);
+    }
+  }
+  function newCollidesOthers(newObj) {
+    for (const objType of Object.keys(objects)) {
+      for (const obj of objects[objType]) {
+        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value  || Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))) {
+          collideCount++;
+          return true;
+        }
+      }
+    }
+  }
+  if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
+  function canvasClicked() {
+    if (setSchieberSpawnPoint.style.backgroundColor != "") {
+      checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, timeNeededToReach: 0};
+      setSchieberSpawnPoint.style.backgroundColor = "";
+      level.checkpoint = 0;
+      restartLevel();
+    }
+    var newSelection = false;
+    if (randomMapCreatorVisable.checked) {
+      for (const objType of Object.keys(objects)) {
+        for (const obj of objects[objType]) {
+          if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
+            selected.obj = obj;
+            selected.type = objType;
+            newSelection = true;
+            layoutObjs();
+            rotateTile.checked = false;
+          }
+        }
+      }
+      for (const objType of Object.keys(rotatingObj)) {
+        for (const obj of rotatingObj[objType]) {
+          if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
+            selected.obj = obj;
+            selected.type = objType;
+            newSelection = true;
+            layoutObjs();
+            rotateTile.checked = true;
+            miliSecPerRotationNumber.value = currentLevel.rotating.filter(x => x.objNumber == obj.number)[0].miliSecsPerRotation;
+          }
+        }
+      }
+      if (newSelection && selected.type != "circles") {
+        rotateTileA.style.display = "inline";
+        if (!rotateTile.checked) rotateSettings.style.display = 'none';
+        else rotateSettings.style.display = 'block';
+    }
+    else tileUnselectedOrDeleted(true);
+  }
+    if (!newSelection) {
+      if (!selected.obj && gerät == "Handy") togglePause();
+      if ((!selected.obj || !randomMapCreatorVisable.checked) && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "") {
+        joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
+      }
+      if (randomMapCreatorVisable.checked) tileUnselectedOrDeleted();
+    }
+  }
+  function tileUnselectedOrDeleted(doNotDelete) {
+    if (!doNotDelete) delete selected.obj;
+    rotateTileA.style.display = "none";
+    rotateSettings.style.display = 'none';
+    layoutObjs();
+  }
+  function removeElement() {
+    if (!selected.obj) alert("Please select an element (click on it) before clicking this button to remove it!");
+    for (const objType of Object.keys(objects)) {
+      objects[objType] = objects[objType].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
+      currentLevel.rotating = currentLevel.rotating?.filter(x => x.objNumber != selected.obj.number);
+      rotatingObj[selected.type] = rotatingObj[selected.type].filter(x => x.number != selected.obj.number);
+    }
+    tileUnselectedOrDeleted();
+    layoutObjs();
+  }
+  var selected = {};
+  var collideCount = 0;
+  function collides(a, b) {
+      return /*{boolean: */!(
+        ((a.y + a.height) < (b.y)) ||
+        (a.y > (b.y + b.height)) ||
+        ((a.x + a.width) < b.x) ||
+        (a.x > (b.x + b.width))
+        )/*, area: Math.abs(a.x - b.x) + Math.abs(a.width - b.width) + Math.abs(a.y - b.y) + Math.abs(a.height - b.height)}*/;
+  }
+  function layoutObjs() {
+    canvas.clearRect(0, 0, textur.width, textur.height);
+    for (const objType of Object.keys(objects)) {
+      for (const obj of objects[objType]) {
+        if (JSON.stringify(obj) == JSON.stringify(selected.obj)) {
+          canvas.fillStyle = "red";
+        }
+        else {
+          canvas.fillStyle = "black";
+        }
+        if (objType == "circles") {
+          canvas.beginPath();
+          canvas.arc(obj.x, obj.y, obj.radius, 0, 2 * Math.PI, false);
+          canvas.fill();
+        }
+        if (objType == "rectangles") canvas.fillRect(obj.x, obj.y, obj.width, obj.height);
+        if (objType == "triangles") {
+          canvas.save();
+          canvas.translate(obj.middle.x, obj.middle.y);
+          canvas.fill(obj.path);
+          canvas.restore();
+        }
+      }
+    }
+    canvas.fillStyle = "yellow";
+    canvas.fillRect(goalHitbox.x, goalHitbox.y, goalHitbox.width, goalHitbox.height);
+  }
+  var goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
     function initializeBlinkWall(walls) {
       for (const wall of walls) {
         if (!wall.start) wall.start = {};
@@ -1044,6 +1389,7 @@
             if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
         }
       }
+      if ((randomMapCreatorVisable.checked && joyStickPlay)) layoutObjs();
         if ((joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) || deathMarkers.length) Layout();
         drawJoystick();
         if (currentLevel.blinkWall) blinkWall();
@@ -1157,8 +1503,8 @@
       x,
       y
     });
-    const triangle = createPath(point(0, -25), point(-50, -75), point(-100, -25));
-    var rectangle = createPath(point(0,-25), point(-50,-25), point(-50,-125), point(0,-125));
+    var triangle = createPath([point(0,-25), point(-50,-75), point(-100,-25)]);
+    var rectangle = createPath([point(0,-25), point(-50,-25), point(-50,-125), point(0,-125)]);
 
     function drawPath_V2(path, x, y, scale, angle, strokeStyle, fillStyle) {
       canvas.setTransform(scale, 0, 0, scale, x, y);
@@ -1174,7 +1520,7 @@
     }
 
     function renderLoop(time) {
-      Layout();
+      Layout(true);
       canvas.fillStyle = "black";
       drawJoystick();
       //  canvas.clearRect(0, 0, textur.width, textur.height);
@@ -1191,6 +1537,11 @@
       for (const wall of currentLevel.rotatingWall) {
         drawRechteck(wall.x, wall.y, wall.width, wall.height, time / (wall.timeFor360GradRotation/2) * Math.PI + wall.angle*Math.PI/180);
       }
+    }
+    for (const obj of currentLevel.rotating) {
+      var color = "black";
+      if (selected.obj?.number == obj.objNumber) color = "red";
+      if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, obj.sizeRelationToOriginal, (time / (obj.miliSecsPerRotation/2) * Math.PI) + obj.angle*Math.PI/180, "", color); //360 every 4 second
     }
       canvas.setTransform(1, 0, 0, 1, 0, 0);
       // bullets animation
@@ -1210,27 +1561,27 @@
         canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
       }
       bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      if (currentLevel.cannons || currentLevel.rotatingDreieck || currentLevel.rotatingWall) {
+      if (currentLevel.cannons || currentLevel.rotatingDreieck || currentLevel.rotatingWall || currentLevel.rotating) {
         requestAnimationFrame(renderLoop);
       }
     }
-    function createPath(...points) {
-      var cx = 0;
-      cy = 0;
-      for (const p of points) {
+    function createPath(points, randomMapCreator, middle) {
+    var cx = 0; cy = 0;
+    for (const p of points) {
         cx += p.x;
         cy += p.y;
-      }
-      cx /= points.length;
-      cy /= points.length;
-
-      const path = new Path2D;
-      for (const p of points) {
-        path.lineTo(p.x - cx, p.y - cy);
-      }
-      path.closePath();
-      return path;
     }
+    cx /= points.length;
+    cy /= points.length;
+
+    const path = new Path2D;
+    for (const p of points) {
+      if (randomMapCreator) path.lineTo(p.x - middle.x, p.y - middle.y);
+      else path.lineTo(p.x - cx , p.y - cy);
+    }
+    path.closePath();
+    return path;
+}
 
     function boundingBoxCheck() {
       if (x1 < 0) {
@@ -1267,20 +1618,22 @@
       }
     }
 
-    function Layout() {
-      // if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
-        canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
-      // }
-      // visualize blinkWalls
-      canvas.fillStyle = "black";
-      for (let i = 0; i < currentLevel?.blinkWall?.length; i++) {
-        var wall = currentLevel.blinkWall[i];
-        if (wall.changing.visible) canvas.fillRect(wall.x, wall.y, wall.width, wall.height);
+    function Layout(calledByRotateLoop) {
+      if (!randomMapCreatorVisable.checked) {
+        // if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
+          canvas.drawImage(Bild, 0, 0/*, window.innerWidth, AblageListe[5]*/);
+        // }
+        // visualize blinkWalls
+        canvas.fillStyle = "black";
+        for (let i = 0; i < currentLevel?.blinkWall?.length; i++) {
+          var wall = currentLevel.blinkWall[i];
+          if (wall.changing.visible) canvas.fillRect(wall.x, wall.y, wall.width, wall.height);
+        }
       }
       for (const marker of deathMarkers) {
         canvas.fillStyle = "hsla(240, 100%, 50%, " + marker.visibility + ")";
         canvas.fillRect(marker.x, marker.y, marker.width, marker.height);
-        marker.visibility -= 0.0075;
+        if (!calledByRotateLoop) marker.visibility -= 0.0075;
       }
       deathMarkers = deathMarkers.filter(x => x.visibility > 0);
     }
@@ -1327,12 +1680,6 @@
       }
     }
 
-    if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
-    function canvasClicked() {
-      if (/*joyStick == "place" && */gerät == "PC") {
-        joyStick = {coordinates : {x: mausx, y: mausy}};
-      }
-    }
 
     function readMouseMove(e) {
       mausx = e.clientX + scrollX;
