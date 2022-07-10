@@ -72,7 +72,12 @@
     <input oninput="currentLevel.sizes.schieber.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
   </div>
 </div>
-create new level when goal reached: <input id="newRandomLevelAfterGoal" checked="true" type="checkbox">
+<div class="card">
+  create new level when goal reached: <input id="newRandomLevelAfterGoal" onchange="if (checked) newRandomLevelOnGoalSettings.style.display = 'block'; else newRandomLevelOnGoalSettings.style.display = 'none';" checked="true" type="checkbox">
+  <div id="newRandomLevelOnGoalSettings">
+    fill screen (many objects)<input id="fillScreenAutoNewLevel" type="checkbox">
+  </div>
+</div>
 </div>
 <div id="objSettings" class="card"> 
     <b>set amount and maximum size of objects</b>
@@ -1737,7 +1742,7 @@ function tablePositionModeSelected() {
     // if (directionBeforeScrolling.y > y1 && (y1 > window.innerHeight/2 - 17 && y1 < window.innerHeight/2 + 17) || (scrollY > 0)) window.scroll(scrollX, scrollY - (directionBeforeScrolling.y - y1));
     // if (directionBeforeScrolling.y < y1 && (y1 > window.innerHeight/2 - 17 && y1 < window.innerHeight/2 + 17) || (scrollY > 0)) window.scroll(scrollX, scrollY +  (y1 - directionBeforeScrolling.y));
     // directionBeforeScrolling = {x: x1, y: y1};
-    var texturOffset = {x: (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y: textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0])};
+    var texturOffset = {x: (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y: textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY};
     var numbers = [
       [x1 + cssToNumber(sphere.schieber.style.width), y1 + cssToNumber(sphere.schieber.style.height) / 2],
       [x1 + cssToNumber(sphere.schieber.style.width) / 2, y1],
@@ -1782,9 +1787,10 @@ function tablePositionModeSelected() {
         ball.x = 0;
         ball.y = 0;
         if (randomMapCreatorVisable.checked) {
+          time = 0;
           if (newRandomLevelAfterGoal.checked) {
             deleteAllElements();
-            createRandomMap();
+            automaticallyCreateNewRandomMap(0);
           }
           else alert("You reached the goal!");
         }
@@ -1851,6 +1857,15 @@ function tablePositionModeSelected() {
     sphere.ball.style.left = ball.x + "px";
     sphere.ball.style.top = ball.y + "px";
   }
+  function automaticallyCreateNewRandomMap(equalAmoutOfObj) {
+      var objectsBefore = Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0);
+      createRandomMap(true);
+      setTimeout(() => {
+        if (Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0) == objectsBefore) equalAmoutOfObj++;
+        if (fillScreenAutoNewLevel.checked && equalAmoutOfObj < 7) automaticallyCreateNewRandomMap(equalAmoutOfObj);
+        else setSpawnPoints();
+      }, 1);
+    }
   function setHighscores(pNextLevel) {
     if (!mapsFinished.includes(levelSelector.value.split('. ')[0])) mapsFinished.push(levelSelector.value.split('. ')[0]);
     if (oppositeCheck.checked) level.mode += ' opposite';
@@ -2325,13 +2340,15 @@ else level.mode = mode;
   var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
   handleMaxSizeSlider(true);
   function handleMaxSizeSlider(changeValue) {
-    maxCircleSize.max = canvasWidth.value/2;
+    if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.max = canvasWidth.value/2 - minimalDistance.value;
+    else maxCircleSize.max = canvasHeight.value/2 - minimalDistance.value;
     maxTriangleWidth.max = canvasWidth.value;
     maxTriangleHeight.max = canvasHeight.value;
     maxRectangleWidth.max = canvasWidth.value;
     maxRectangleHeight.max = canvasHeight.value;
     if (changeValue) {
-      maxCircleSize.value = canvasWidth.value/2;
+      if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.value = canvasWidth.value/2 - minimalDistance.value;
+      else maxCircleSize.value = canvasHeight.value/2 - minimalDistance.value;
       maxTriangleWidth.value = canvasWidth.value;
       maxTriangleHeight.value = canvasHeight.value;
       maxRectangleWidth.value = canvasWidth.value;
