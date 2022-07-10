@@ -1601,10 +1601,12 @@
         drawRechteck(wall.x, wall.y, wall.width, wall.height, time / (wall.timeFor360GradRotation/2) * Math.PI + wall.angle*Math.PI/180);
       }
     }
-    for (const obj of currentLevel.rotating) {
-      var color = "black";
-      if (selected.obj?.number == obj.objNumber) color = "red";
-      if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, obj.sizeRelationToOriginal, (time / (obj.miliSecsPerRotation/2) * Math.PI) + obj.angle*Math.PI/180, "", color); //360 every 4 second
+    if (currentLevel.rotating) {
+      for (const obj of currentLevel.rotating) {
+        var color = "black";
+        if (selected.obj?.number == obj.objNumber) color = "red";
+        if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, obj.sizeRelationToOriginal, (time / (obj.miliSecsPerRotation/2) * Math.PI) + obj.angle*Math.PI/180, "", color); //360 every 4 second
+      }
     }
       canvas.setTransform(1, 0, 0, 1, 0, 0);
       // bullets animation
