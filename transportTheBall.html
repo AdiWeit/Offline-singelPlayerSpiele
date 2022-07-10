@@ -3,7 +3,7 @@
 <div>
   <h1 id="stopClockText" style="color: green; background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px"></h1>
 </div>
-<canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
+<canvas id="textur" style="border-width: 3px; border-style: solid; border-color: orange;" onclick="canvasClicked();" width="1582" height="740"></canvas>
 <div id="randomMapCreator" class="card" style="display: none;">
   <div class="card">
   <b>edit elements</b>
@@ -1376,7 +1376,7 @@ function tablePositionModeSelected() {
       // joy-stick:
       var nextCoordinates = {x: 0, y: 0};
       if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores"/* && !pause*/) {
-        if (level.aktuell != "winnerScreen" && !currentLevel.rotating) Layout();
+        // if (level.aktuell != "winnerScreen" && !currentLevel.rotating) Layout();
         if (joyStick && joyStick.coordinates) {
           if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x*3), y: y1 + (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y*3)};
           else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x*3), y: y1 - (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y*3)};
@@ -1758,6 +1758,8 @@ function tablePositionModeSelected() {
       }
       if (!pause && !goalReached && (/*schwarzer Rand*/(red == 0 && blue == 0 && alpha == 255 && green == 0) || /*onGreen*/ (joyStickPlay.checked && red == 34 && blue == 76 && green == 177) || /*Durchlass Schieber*/ (red == 47 && green == 54 && blue == 153 && i > 3) || /*Durchlass Ball*/ (red == 237 && green == 28 && blue == 36 && i < 4))) {
         console.log("Fail!");
+        if (i < 4) deathMarkers.push({x: x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX) + 1, y: y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), color: 'rgba(0, 0, 255, ', visibility: 0.5});
+        else deathMarkers.push({x: ball.x - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX) + 1, y: ball.y - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY), width: ball.width, height: ball.height, color: 'rgba(255, 0, 0, ', visibility: 0.5});
         time = 0;
         if (checkpoint.length > 1) time = checkpoint[level.checkpoint].timeNeededToReach;
         zaehler = "newLevel";
@@ -1941,6 +1943,13 @@ function tablePositionModeSelected() {
     }
   }
   if (joyStickPlay.checked && randomMapCreator.style.display != 'none') layoutObjs();
+  for (const marker of deathMarkers) {
+    // canvas.fillStyle = "hsla(240, 100%, 50%, " + marker.visibility + ")";
+    canvas.fillStyle = marker.color + marker.visibility + ")";
+    canvas.fillRect(marker.x, marker.y, marker.width, marker.height);
+    marker.visibility -= 0.0075;
+  }
+  deathMarkers = deathMarkers.filter(x => x.visibility > 0);
   }
   var ball = {
     x: 0,
@@ -1948,7 +1957,7 @@ function tablePositionModeSelected() {
     width: 50,
     height: 50
   };
-
+  deathMarkers = [];
   function restartLevel(value) {
     geteiltDurch = 1;
     stopClockText.style.color = "green";
