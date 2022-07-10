@@ -1,5 +1,8 @@
-<title>transport the ball</title>
 <meta charset="utf-8">
+<title>transport the ball</title>
+<div>
+  <h1 id="stopClockText" style="color: green; background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px"></h1>
+</div>
 <canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
 <div id="randomMapCreator" class="card" style="display: none;">
   <div class="card">
@@ -1948,6 +1951,7 @@ function tablePositionModeSelected() {
 
   function restartLevel(value) {
     geteiltDurch = 1;
+    stopClockText.style.color = "green";
     var valueBefore = checkpointSelection.value;
     // if (valueBefore == "" && checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) valueBefore = (checkpoints[level.mode][level.aktuell].length - 1) + ". checkpoint";
     if (valueBefore == "") valueBefore = "start";
@@ -2108,6 +2112,7 @@ function tablePositionModeSelected() {
       if (checkpoint.length > 1) checkpointManager.style.display = "inline"; 
       else checkpointManager.style.display = "none"; 
     }, 100);
+    stopClockText.style.color = "green";
   }
   var directionBefore = [];
 
@@ -2608,6 +2613,18 @@ setTimeout(function () {
   if (secs < 10) {
     secs = "0" + secs;
   }
+  stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
+  if (oppositeCheck.checked) level.mode += ' opposite';
+    if (easyMaps.checked) level.mode += ' easy maps';
+    if (joyStickPlay.checked && !level.mode.includes('joystick')) level.mode += ' (joystick)'; 
+    if (!joyStickPlay.checked) level.mode += ' (' + tabletPositionModeSelection.value + ')'; 
+    if (stopClockText.style.color != "red" && highscores[level.mode] && highscores[level.mode][level.aktuell] < mins + ":" + secs + ":" + "0" + tenths) {
+      new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
+      stopClockText.style.color = "red";
+  }
+  level.mode = level.mode.replace(' opposite', '');
+  level.mode = level.mode.replace(' easy maps', '');
+  level.mode = level.mode.replace(' (joystick)', '');
   increment();
 }, 100);
 }
