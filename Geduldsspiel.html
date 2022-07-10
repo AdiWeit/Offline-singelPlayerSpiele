@@ -1365,30 +1365,24 @@
         // if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
         // else sphere1.style.display = "none";
         var numbers = [
-          // [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
-          // [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
-          // [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
-          // [x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))]
-          canvas.getImageData(x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0])), JSON.parse(sphere1.style.width.replace("px", "")), 1),
-          canvas.getImageData(x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0])), 1, JSON.parse(sphere1.style.height.replace("px", ""))),
-          canvas.getImageData(x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0])) + JSON.parse(sphere1.style.height.replace("px", "")), JSON.parse(sphere1.style.width.replace("px", "")), 1),
-          canvas.getImageData(x1 + JSON.parse(sphere1.style.width.replace("px", "")) - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0])), 1, JSON.parse(sphere1.style.height.replace("px", ""))),
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
+          [x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))]
         ]
         for (var i = 0; i < 4; i++) {
           // canvas.fillStyle = "red";
           // canvas.fillRect(numbers[i][0] - 10, numbers[i][1] - 10, 10, 10);
-          for (let i1 = 0; i1 < numbers[i].data.length; i1 += 4) {
-            data = numbers[i];
-            red = data.data[i1];
-            green = data.data[i1 + 1];
-            blue = data.data[i1 + 2];
-            alpha = data.data[i1 + 3];
+            data = canvas.getImageData(numbers[i][0], numbers[i][1], 1, 1);
+            red = data.data[0];
+            green = data.data[1];
+            blue = data.data[2];
+            alpha = data.data[3];
             if ((joyStick != "place" || !joyStickPlay.checked) && ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177))) {
               console.log("Fail!");
               i = 4;
               deathMarkers.push({x: x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX) + 1, y: y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), visibility: 0.5});
               restartLevel();
-              break;
             }
             if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
             if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
@@ -1429,9 +1423,7 @@
               }
               else zielErreicht();
               i = 4;
-              break;
             }
-        }
       }
       if ((randomMapCreatorVisable.checked && joyStickPlay)) layoutObjs();
         if ((joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !currentLevel.rotatingWall && !currentLevel.rotatingDreieck) || deathMarkers.length) Layout();
@@ -1464,7 +1456,6 @@
     }
     document.onkeydown = (event) => {
       if (event.key == "p") togglePause();
-      // TODO: pause
     }
     var pause = false;
     function togglePause() {
