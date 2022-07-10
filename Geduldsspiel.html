@@ -38,8 +38,20 @@
   <head>
     <style>
       table, td {
-  border: 1px solid black;
-}
+        border: 1px solid black;
+      }
+      .card {
+      box-shadow: 2px 2px 10px #855d5d;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      margin-top: 7px;
+      margin-bottom: 7px;
+      /* display: none; */
+
+      border-radius: 10px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
 </style>
   </head>
   <div id="randomMapCreator" class="card" style="display: none;">
@@ -47,7 +59,7 @@
     <b>edit elements</b>
     <br>
     <button onclick="createRandomMap();">create/extend</button>
-    <button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; tileUnselectedOrDeleted(); layoutObjs();">delete all objects</button>
+    <button onclick="deleteAllElements();">delete all objects</button>
     <button onclick="removeElement();">delete selected element</button>
   </div>
   <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
@@ -64,7 +76,7 @@
     <b>general level settings</b>
     <br>
     <div class="card">
-      <b>set spawnpoints (click to set the position after clicking the button)</b>
+      <b>set spawnpoint (click to set the position after clicking the button)</b>
       <br>
       <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';" style="border-radius: 2px; border-style: solid; border-color: blue;">set blue ball spawnpoint</button>
     </div>
@@ -90,16 +102,17 @@
   <div id="ballSettings" class="card">
     <b>ball size:</b> 
     <br>
-    <div class="card">
+    <div id="ballSizeSettings" class="card">
       <b>blue ball:</b> 
       <br>
       width: 
-      <input oninput="sphere1.style.width = value;" type="range" min="1" max="100">
+      <input oninput="sphere1.style.width = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
       <br>
       height: 
-      <input oninput="sphere1.style.height = value;" type="range" min="1" max="100">
+      <input oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
     </div>
   </div>
+  create new level when goal reached: <input id="newRandomLevelAfterGoal" checked="true" type="checkbox">
   </div>
   <div id="objSettings" class="card"> 
       <b>set amount and maximum size of objects</b>
@@ -134,7 +147,7 @@
   </div>
   <button onclick="showGameInstructions();">how to play</button>
   <br>
-  <input id="easyMaps" checked="true" onchange="difficultyChanged(checked);" type="checkbox"> easy map versions
+  <input id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> easy map versions
   <button onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2>sensibility: </h2>
   <a id="sensibilityTitleLeft">high (fast)</a>
@@ -165,6 +178,7 @@
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
   <br>
+  <div id="oldMapCreatorPosition"></div>
   <a id="randomMapCreatorVisableA"><input type="checkbox" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
   <br>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
@@ -857,15 +871,17 @@
     if (checked) {
       randomMapCreator.style.display = 'block';
       // currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}};
-      sensibility = {x: 5, y: 5};
+      sensibilityAcc = {x: 5, y: 5};
       checkpointManagement.style.display = 'none';
       randomMapCreator.prepend(randomMapCreatorVisableA);
       // refreshBallSize();
+      courceSelection.style.display = "none";
       } 
       else {
         randomMapCreator.style.display = 'none';
         oldMapCreatorPosition.prepend(randomMapCreatorVisableA);
-        levelSelected(levelSelector.value);
+        courceSelected();
+        courceSelection.style.display = "inline";
       }
   }
   function changeIfRotates(checked) {
@@ -1066,6 +1082,12 @@
     tileUnselectedOrDeleted();
     layoutObjs();
   }
+  function deleteAllElements() {
+    objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; 
+    rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; 
+    tileUnselectedOrDeleted(); 
+    layoutObjs();
+  }
   var selected = {};
   var collideCount = 0;
   function collides(a, b) {
@@ -1100,7 +1122,7 @@
         }
       }
     }
-    canvas.fillStyle = "yellow";
+    canvas.fillStyle = "rgb(255, 242, 0)";
     canvas.fillRect(goalHitbox.x, goalHitbox.y, goalHitbox.width, goalHitbox.height);
   }
   var goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
@@ -1173,6 +1195,7 @@
       x1 = currentLevel.spawnPoint.x;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       time = 0;
+      rotationStartTime = rotationTime;
       stopClockText.style.color = "green";
       goToCheckpoint();
     }
@@ -1215,7 +1238,7 @@
           }
         }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
-          alert("every vorgefertigt level finished! That was the last one :(  )");
+          alert("every level finished! That was the last one :(  )");
           if (easyMaps.checked) {
             alert("Try to beat the hard version of the levels now, if you did not do that already!");
             difficultyChanged(false, true);
@@ -1274,7 +1297,7 @@
 
     sphere1.style.width = 50 + "px";
     sphere1.style.height = 50 + "px";
-    if (window.DeviceMotionEvent != undefined || joyStick.coordinates) {
+    if ((window.DeviceMotionEvent != undefined || joyStick.coordinates) && !pause) {
       window.ondevicemotion = function(e) {
         if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
         else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
@@ -1292,7 +1315,7 @@
       setInterval(function() {
         // joy-stick:
         var nextCoordinates = {x: 0, y: 0};
-        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores") {
+        if (joyStickPlay.checked && document.getElementById('courceSelection').value != "show Scores" && !pause) {
           if (joyStick && joyStick.coordinates) {
             if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 + (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
             else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/(JSON.parse(document.getElementById('sensibility').value)*3), y: y1 - (mausy - joyStick.coordinates.y)/(JSON.parse(document.getElementById('sensibility').value)*3)};
@@ -1322,7 +1345,7 @@
         x2 = parseInt(x2 + vx2 / 30);
         //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
         boundingBoxCheck();
-        if (joyStickPlay.checked) {
+        if (joyStickPlay.checked && !pause) {
           x1 = nextCoordinates.x;
           y1 = nextCoordinates.y;
           if (x1 < 0) x1 = 0;
@@ -1332,8 +1355,8 @@
         }
         sphere1.style.top = y1 + "px";
         sphere1.style.left = x1 + "px";
-        if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
-        else sphere1.style.display = "none";
+        // if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
+        // else sphere1.style.display = "none";
         var numbers = [
           // [x1 + JSON.parse(sphere1.style.width.replace("px", "")) - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 + JSON.parse(sphere1.style.height.replace("px", "")) / 2 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
           // [x1 + JSON.parse(sphere1.style.width.replace("px", "")) / 2 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX), y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]))],
@@ -1386,7 +1409,20 @@
             opt.text = level.checkpoint + ". checkpoint";
             checkpointManagement.style.display = "inline";
           }
-            if (red == 255 && blue == 0 && alpha == 255 && green == 242) zielErreicht();
+            if (red == 255 && blue == 0 && alpha == 255 && green == 242) {
+              x1 = 0;
+              y1 = 0;
+              if (randomMapCreatorVisable.checked) {
+                if (newRandomLevelAfterGoal.checked) {
+                  deleteAllElements();
+                  createRandomMap();
+                }
+                else alert("You reached the goal!");
+              }
+              else zielErreicht();
+              i = 4;
+              break;
+            }
         }
       }
       if ((randomMapCreatorVisable.checked && joyStickPlay)) layoutObjs();
@@ -1409,8 +1445,16 @@
           canvas.closePath();
         }
     }
-    document.onkeydown = () => {
+    document.onkeydown = (event) => {
+      if (event.key == "p") togglePause();
       // TODO: pause
+    }
+    var pause = false;
+    function togglePause() {
+      pause = !pause;
+      if (!pause) {
+        increment();
+      }
     }
     function blinkWall() {
       for (const wall of currentLevel.blinkWall) {
@@ -1425,8 +1469,6 @@
     }
 
     function zielErreicht() {
-      x1 = 0;
-      x2 = 0;
       courceSelection.options[level.normal.number - 1].innerHTML = "✅ " +  level.normal.number + ". map";
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
         alert("every level finished! That was the last one :(  )");
@@ -1518,8 +1560,12 @@
       canvas.rotate(angle);
       canvas.fillRect(-width/2, -height/2, width, height);
     }
-
+    var rotationStartTime = 0;
+    var rotationTime = 0;
     function renderLoop(time) {
+      if (pause) rotationStartTime += (time - rotationTime);
+      rotationTime = time;
+      time -= rotationStartTime;
       Layout(true);
       canvas.fillStyle = "black";
       drawJoystick();
@@ -1671,11 +1717,11 @@
             secs = "0" + secs;
           }
           stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
-          if (stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
+          if (!randomMapCreatorVisable.checked && stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
             new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
             stopClockText.style.color = "red";
           }
-          increment();
+          if (!pause) increment();
         }, 100);
       }
     }
