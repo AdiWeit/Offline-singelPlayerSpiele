@@ -25,8 +25,8 @@
   <div class="card">
     <b>set spawnpoints (click to set the position after clicking the button)</b>
     <br>
-    <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint blue ball</button>
-    <button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint red ball</button>
+    <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';" style="border-radius: 2px; border-style: solid; border-color: blue;">set blue ball spawnpoint</button>
+    <button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';" style="border-radius: 2px; border-style: solid; border-color: red;">set red ball spawnpoint</button>
   </div>
   <!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
 <br> -->
@@ -128,7 +128,7 @@
 <br> -->
 <h3>sensibility</h3>
 <a id="sensibilityTitleLeft">high (fast)</a>
-<input type="range" min="1" onchange="sensibility = {x: value, y: value};" max="35" value="17" class="slider" id="sensibilityRange">
+<input type="range" min="1" onchange="sensibility = {x: value, y: value};" max="35" value="7" class="slider" id="sensibilityRange">
 <a id="sensibilityTitleRight">low (slow)</a>
 <button type="button" id="normalSensibility" onclick="normalSensibility();" name="button">back to normal</button>
 <br>
@@ -218,8 +218,7 @@
   }
   function normalSensibility() {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
-    else if (tabletPositionModeSelection.value != "flat") sensibility = {x: 7, y: 7};
-    else if (!currentLevel.sensibility) sensibility = {x: 17, y: 17};
+    else if (tabletPositionModeSelection.value != "flat" || !currentLevel.sensibility) sensibility = {x: 7, y: 7};
     else sensibility = currentLevel.sensibility;
     document.getElementById('sensibility').value = sensibility.x;
   }
@@ -1353,14 +1352,16 @@ function tablePositionModeSelected() {
   //   }
   //   else scrolling = false;
   // }
-  var sensibility = {x: 17, y: 17};
+  var sensibility = {x: 7, y: 7};
   if (window.DeviceMotionEvent != undefined || joyStick.coordinates) {
     window.ondevicemotion = function(e) {
-      if (tabletPositionModeSelection.value == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
-      else if (tabletPositionModeSelection.value == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
-      else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibility.x);
-      if (tabletPositionModeSelection.value == "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
-      else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
+      if (!joyStickPlay.checked) {
+        if (tabletPositionModeSelection.value == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibility.x;
+        else if (tabletPositionModeSelection.value == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibility.x);
+        else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibility.x);
+        if (tabletPositionModeSelection.value == "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
+        else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibility.y;
+      }
     }
     setInterval(function() {
       if (!pause) { 
@@ -1369,9 +1370,9 @@ function tablePositionModeSelected() {
       if (joyStickPlay.checked && document.getElementById('gameModeSelection').value != "show Scores"/* && !pause*/) {
         if (level.aktuell != "winnerScreen" && !currentLevel.rotating) Layout();
         if (joyStick && joyStick.coordinates) {
-          if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x - 11), y: y1 + (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y - 11)};
-          else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x - 11), y: y1 - (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y - 11)};
-          nextCoordinates = {x: nextCoordinates.x - scrollX/Math.abs(sensibility.x - 11), y: nextCoordinates.y - scrollY/Math.abs(sensibility.y - 11)};
+          if (!oppositeCheck.checked) var nextCoordinates = {x: x1 + (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x*3), y: y1 + (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y*3)};
+          else var nextCoordinates = {x: x1 - (mausx - joyStick.coordinates.x)/Math.abs(sensibility.x*3), y: y1 - (mausy - joyStick.coordinates.y)/Math.abs(sensibility.y*3)};
+          nextCoordinates = {x: nextCoordinates.x - scrollX/Math.abs(sensibility.x*3), y: nextCoordinates.y - scrollY/Math.abs(sensibility.y*3)};
         }
       }
       if (pause) newCoordinates = {x: ball.x, y: ball.y};
@@ -2090,7 +2091,7 @@ function tablePositionModeSelected() {
   }
   function setupLevel(direction) {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
-    else sensibility = {x: 17, y: 17};
+    else sensibility = {x: 7, y: 7};
     sensibilityRange.value = sensibility.x;
     level.checkpoint = 0;
     if (!direction) checkpoint = [{schieber: {x: currentLevel.spawnPoint.schieber.x, y: currentLevel.spawnPoint.schieber.y}, ball: {x: currentLevel.spawnPoint.ball.x, y: currentLevel.spawnPoint.ball.y}}];
@@ -2402,13 +2403,15 @@ else level.mode = mode;
       checkpoint[0].ball = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
       setBallSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
+      restartLevel();
     }
     if (setSchieberSpawnPoint.style.backgroundColor != "") {
       checkpoint[0].schieber = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
+      restartLevel();
     }
-    var newSelection = false
+    var newSelection = false;
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
         if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
@@ -2439,6 +2442,7 @@ else level.mode = mode;
     }
     else tileUnselectedOrDeleted(true);
     if (!newSelection) {
+      if (!selected.obj && gerät == "Handy") togglePause();
       if (!selected.obj && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "" && setBallSpawnPoint.style.backgroundColor == "") {
         joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
       }
@@ -2712,14 +2716,15 @@ function cssToNumber(string) {
 return JSON.parse(string.toString().split("px")[0]);
 }
 var pause = false;
-document.onkeydown = function(event) {
-  if (event.key == "p") {
-    pause = !pause;
-      if (!pause) {
-      increment();
-      heartBeatFunc();
-    }
+function togglePause() {
+  pause = !pause;
+  if (!pause) {
+    increment();
+    heartBeatFunc();
   }
+}
+document.onkeydown = function(event) {
+  if (event.key == "p") togglePause();
 }
 getDatabase();
 </script>
