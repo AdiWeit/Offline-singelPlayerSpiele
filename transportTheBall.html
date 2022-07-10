@@ -120,6 +120,8 @@
   <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
   <button name="button" id="removeCheckpointB" onclick="removeCheckpoint();">remove last checkpoint</button>
 </div>
+<div id="oldMapCreatorPosition"></div>
+<a id="mapCreatorVisableA"><input type="checkbox" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
 <br>
 <button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
 <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none'; else joyStick = undefined;" id="joyStickPlay"> joystick control </p>
@@ -138,7 +140,6 @@
   <option value="on end">on end (better for your posture)</option>
 </select>
 <br>
-<input type="checkbox" onchange="mapCreatorVisChanged(checked);"> show random map creator
 <div id="ball">
   <style>
     .shape {
@@ -1313,9 +1314,13 @@
       currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}};
       sensibility = {x: 5, y: 5};
       checkpointManager.style.display = 'none';
+      randomMapCreator.prepend(mapCreatorVisableA);
       refreshBallSize();
       } 
-      else randomMapCreator.style.display = 'none';
+      else {
+        randomMapCreator.style.display = 'none';
+        oldMapCreatorPosition.prepend(mapCreatorVisableA);
+      }
   }
   var alertWhenFinishedSaving = false;
 var name = '';
