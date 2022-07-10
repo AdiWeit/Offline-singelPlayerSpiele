@@ -1,73 +1,105 @@
 <title>transport the ball</title>
 <meta charset="utf-8">
 <canvas id="textur" onclick="canvasClicked();" width="1582" height="740"></canvas>
-<div id="randomMapCreator" style="display: none;">
-  <input type="number" style="width: 44px;" value="2" id="circleAmount" min="0"> Kreise
-<br>
-maximaler Radius: 
-<input id="maxCircleSize" type="range">
-<br>
-<input type="number" style="width: 44px;" value="2" id="triangleAmount" min="0"> Dreiecke
-<br>
-maximale Breite: 
-<input id="maxTriangleWidth" type="range">
-<br>
-maximale Höhe: 
-<input id="maxTriangleHeight" type="range">
-<br>
-<input type="number" style="width: 44px;" value="4" id="rectangleAmount" min="0"> Rechtecke
-<br>
-maximale Breite: 
-<input id="maxRectangleWidth" type="range">
-<br>
-maximale Höhe: 
-<input id="maxRectangleHeight" type="range">
-<br>
-<!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
-<br> -->
-<input type="number" style="width: 66px;" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0"> Breite Level
-<br>
-<input type="number" style="width: 66px;" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0"> Höhe level
-<br>
-<input type="number" style="width: 66px;" min="1" value="66" id="minimalDistance" min="0"> minimaler Abstand
-<br>
-<button onclick="createRandomMap();">erstellen/erweitern</button>
-<button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; rotatingObj = []; tileUnselectedOrDeleted(); layoutObjs();">löschen</button>
-<button onclick="removeElement();">Element löschen</button>
-<br>
-<a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="changeIfRotates(checked);" type="checkbox"> Teil rotieren lassen</a>
-<div id="rotateSettings" style="display: none;">
-  <b>Einstellungen zum Rotieren</b>
+<div id="randomMapCreator" class="card" style="display: none;">
+  <div class="card">
+  <b>edit elements</b>
   <br>
-  <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotationSpeed(parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sek. pro Rotation
+  <button onclick="createRandomMap();">create/extend</button>
+  <button onclick="objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; currentLevel.rotating = []; rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/}; tileUnselectedOrDeleted(); layoutObjs();">delete all objects</button>
+  <button onclick="removeElement();">delete selected element</button>
 </div>
+<a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
+<div id="rotateSettings" class="card" style="display: none;">
+  <b>rotation settings</b>
+  <br>
+  <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sec. per rotation
+  <br>
+  scale in relation to the original object (%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number">
+  <br>
+  starting angle: <input oninput="changeRotateParam('angle', parseInt(value));" value="0" id="rotatingRandomObjStartingAngle" type="number">
+</div>
+<div id="generalLevelSettings" class="card">
+  <b>general level settings</b>
+  <br>
+  <div class="card">
+    <b>set spawnpoints (click to set the position after clicking the button)</b>
+    <br>
+    <button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint blue ball</button>
+    <button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint red ball</button>
+  </div>
+  <!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
+<br> -->
+<div class="card">
+  <input type="number" style="width: 66px;" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0"> level width
+  <br>
+  <input type="number" style="width: 66px;" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0"> level height
+  <br>
+  <input type="number" style="width: 66px;" min="1" value="66" id="minimalDistance" min="0"> minimal distance between objects
+</div>
+<div class="card">
+  <b>goal side</b>
+  <br>
+  <input id="goalTop" onchange="goalSideChanged();" name="goalSide" type="radio">top
+  <br>
+  <input id="goalLeft" onchange="goalSideChanged();" name="goalSide" type="radio">left
+  <input id="goalRight" onchange="goalSideChanged();" checked="true" name="goalSide" type="radio">right
+  <br>
+  <input id="goalBottom" onchange="goalSideChanged();" name="goalSide" type="radio">bottom
+</div>
+<div id="ballSettings" class="card">
+  <b>ball size:</b> 
+  <br>
+  <div class="card">
+    <b>red ball:</b> 
+    <br>
+    width: 
+    <input oninput="currentLevel.sizes.ball.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+    <br>
+    height: 
+    <input oninput="currentLevel.sizes.ball.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+  </div>
+  <div class="card">
+    <b>blue ball:</b> 
+    <br>
+    width: 
+    <input oninput="currentLevel.sizes.schieber.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+    <br>
+    height: 
+    <input oninput="currentLevel.sizes.schieber.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
+  </div>
+</div>
+</div>
+<div id="objSettings" class="card"> 
+    <b>set amount and maximum size of objects</b>
+    <div id="circleSettings" class="card">
+      <input type="number" style="width: 44px;" value="2" id="circleAmount" min="0"> <b>circles</b>
+      <br>
+      maximum radius: 
+      <input id="maxCircleSize" type="range">
+    </div>
+    <!-- <br> -->
+    <div id="triangleSettings" class="card">
+      <input type="number" style="width: 44px;" value="2" id="triangleAmount" min="0"> <b>triangles</b>
+      <br>
+      maximum width: 
+      <input id="maxTriangleWidth" type="range">
+      <br>
+      maximum height: 
+      <input id="maxTriangleHeight" type="range">
+      <!-- <br> -->
+    </div>
+    <div id="rectangleSettings" class="card">
+      <input type="number" style="width: 44px;" value="4" id="rectangleAmount" min="0"> <b>rectangle</b>
+      <br>
+      maximum width: 
+      <input id="maxRectangleWidth" type="range">
+      <br>
+      maximum height: 
+      <input id="maxRectangleHeight" type="range">
+    </div>
+  </div>
 <br>
-<button id="setSchieberSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint blue ball</button>
-<button id="setBallSpawnPoint" onclick="style.backgroundColor = '#00fbff';">set spawnpoint red ball</button>
-<br>
-Ballgröße: 
-<br>
-roter Ball: 
-<br>
-Breite: 
-<input oninput="currentLevel.sizes.ball.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
-Höhe: 
-<input oninput="currentLevel.sizes.ball.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
-<br>
-blauer Ball: 
-<br>
-Breite: 
-<input oninput="currentLevel.sizes.schieber.width = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
-Höhe: 
-<input oninput="currentLevel.sizes.schieber.height = parseInt(value); refreshBallSize();" type="range" min="1" max="100">
-Seite Ziel
-<br>
-<input id="goalTop" onchange="goalSideChanged();" name="goalSide" type="radio">oben
-<br>
-<input id="goalLeft" onchange="goalSideChanged();" name="goalSide" type="radio">links
-<input id="goalRight" onchange="goalSideChanged();" checked="true" name="goalSide" type="radio">rechts
-<br>
-<input id="goalBottom" onchange="goalSideChanged();" name="goalSide" type="radio">unten
 </div>
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <br>
@@ -90,7 +122,7 @@ Seite Ziel
 </div>
 <br>
 <button type="button" onclick="scrollingInterac.user = false;" name="button">autoscroll again</button>
-<p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none';" id="joyStickPlay"> joystick control </p>
+<p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) textur.style.touchAction = 'none'; else joyStick = undefined;" id="joyStickPlay"> joystick control </p>
 <br>
 <!-- <button onclick="joyStick = 'place';">move joystick position</button>
 <br> -->
@@ -127,6 +159,23 @@ Seite Ziel
       border-radius: 50px;
       background-color: red;
     }
+    .card {
+      box-shadow: 2px 2px 10px #855d5d;
+      padding-top: 5px;
+      padding-bottom: 5px;
+      margin-top: 7px;
+      margin-bottom: 7px;
+      /* display: none; */
+
+      border-radius: 10px;
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    /* .cardGeneral { */
+      /* border-radius: 10px;
+      padding-left: 10px;
+      padding-right: 10px;
+    } */
   </style>
 </div>
 <div id="content">
@@ -2221,9 +2270,9 @@ else level.mode = mode;
       rotatingObj[selected.type] = rotatingObj[selected.type].filter(x => x.number != selected.obj.number);
     }
   }
-  function changeRotationSpeed(speed) {
+  function changeRotateParam(param, value) {
     for (const obj of currentLevel.rotating) {
-      if (obj.objNumber == selected.obj.number) obj.miliSecsPerRotation = speed;
+      if (obj.objNumber == selected.obj.number) obj[param] = value;
     }
   }
   function goalSideChanged() {
@@ -2235,6 +2284,9 @@ else level.mode = mode;
   }
   function showPresetRotationSettings() {
     miliSecPerRotationNumber.value = 10000;
+    rotatingRandomObjScale.value = 1;
+    rotatingRandomObjStartingAngle.value = 0;
+
   }
   var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
   var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
@@ -2380,11 +2432,12 @@ else level.mode = mode;
         }
       }
     }
-    if (newSelection) {
+    if (newSelection && selected.type != "circles") {
       rotateTileA.style.display = "inline";
       if (!rotateTile.checked) rotateSettings.style.display = 'none';
       else rotateSettings.style.display = 'block';
     }
+    else tileUnselectedOrDeleted(true);
     if (!newSelection) {
       if (!selected.obj && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "" && setBallSpawnPoint.style.backgroundColor == "") {
         joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
@@ -2392,14 +2445,14 @@ else level.mode = mode;
       tileUnselectedOrDeleted();
     }
   }
-  function tileUnselectedOrDeleted() {
-    delete selected.obj;
+  function tileUnselectedOrDeleted(doNotDelete) {
+    if (!doNotDelete) delete selected.obj;
     rotateTileA.style.display = "none";
     rotateSettings.style.display = 'none';
     layoutObjs();
   }
   function removeElement() {
-    if (!selected.obj) alert("Bitte wählen Sie zuerst das Teil aus, das Sie löschen wollen. ");
+    if (!selected.obj) alert("Please select an element (click on it) before clicking this button to remove it!");
     for (const objType of Object.keys(objects)) {
       objects[objType] = objects[objType].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
       currentLevel.rotating = currentLevel.rotating?.filter(x => x.objNumber != selected.obj.number);
@@ -2568,6 +2621,7 @@ var myReq;
 var rotationStartTime = 0;
 var rotationTime = 0;
 function renderLoop(time) {
+  if (!joyStickPlay.checked && randomMapCreator.style.display != "none") layoutObjs();
     //canvas.clearRect(0, 0, textur.width, textur.height);
     if (pause) rotationStartTime += (time - rotationTime);
     rotationTime = time;
@@ -2592,7 +2646,7 @@ function renderLoop(time) {
         if (obj.shape && obj.shape == "rectangle") drawPath_V2(rectangle, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", "black"); //360 every 4 second
         var color = "black";
         if (selected.obj?.number == obj.objNumber) color = "red";
-        if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle, "", color); //360 every 4 second
+        if (obj.shape && obj.shape == "randomMapCreator") drawPath_V2(obj.path, obj.position.x, obj.position.y, scale2, (time / (miliSecsPerRotation/2) * Math.PI) + angle*Math.PI/180, "", color); //360 every 4 second
       }
     }
     for (var i = 0; i < pointShapes.length; i++) {
