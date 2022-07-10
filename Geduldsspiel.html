@@ -112,7 +112,12 @@
       <input oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
     </div>
   </div>
-  create new level when goal reached: <input id="newRandomLevelAfterGoal" checked="true" type="checkbox">
+  <div class="card">
+    create new level when goal reached: <input id="newRandomLevelAfterGoal" onchange="if (checked) newRandomLevelOnGoalSettings.style.display = 'block'; else newRandomLevelOnGoalSettings.style.display = 'none';" checked="true" type="checkbox">
+    <div id="newRandomLevelOnGoalSettings">
+      fill screen (many objects)<input id="fillScreenAutoNewLevel" type="checkbox">
+    </div>
+  </div>
   </div>
   <div id="objSettings" class="card"> 
       <b>set amount and maximum size of objects</b>
@@ -134,7 +139,7 @@
         <!-- <br> -->
       </div>
       <div id="rectangleSettings" class="card">
-        <input type="number" style="width: 44px;" value="4" id="rectangleAmount" min="0"> <b>rectangle</b>
+        <input type="number" style="width: 44px;" value="2" id="rectangleAmount" min="0"> <b>rectangle</b>
         <br>
         maximum width: 
         <input id="maxRectangleWidth" type="range">
@@ -869,6 +874,7 @@
     // random map creator stuff: 
     function mapCreatorVisChanged(checked) {
     if (checked) {
+      handleMaxSizeSlider(true);
       randomMapCreator.style.display = 'block';
       // currentLevel = {sizes: {schieber: {width: 50, height: 50}, ball: {width: 50, height: 50}}};
       sensibilityAcc = {x: 5, y: 5};
@@ -924,22 +930,23 @@
   }
   var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
   var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
-  handleMaxSizeSlider(true);
   function handleMaxSizeSlider(changeValue) {
-    maxCircleSize.max = canvasWidth.value/2;
+    if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.max = canvasWidth.value/2 - minimalDistance.value;
+    else maxCircleSize.max = canvasHeight.value/2 - minimalDistance.value;
     maxTriangleWidth.max = canvasWidth.value;
     maxTriangleHeight.max = canvasHeight.value;
     maxRectangleWidth.max = canvasWidth.value;
     maxRectangleHeight.max = canvasHeight.value;
     if (changeValue) {
-      maxCircleSize.value = canvasWidth.value/2;
+      if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.value = canvasWidth.value/2 - minimalDistance.value;
+      else maxCircleSize.value = canvasHeight.value/2 - minimalDistance.value;
       maxTriangleWidth.value = canvasWidth.value;
       maxTriangleHeight.value = canvasHeight.value;
       maxRectangleWidth.value = canvasWidth.value;
       maxRectangleHeight.value = canvasHeight.value;
     }
   }
-  function createRandomMap() {
+  function createRandomMap(noNewSpawnpoint) {
     textur.width = canvasWidth.value;
     textur.height = canvasHeight.value;
     goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
@@ -948,7 +955,7 @@
     createTriangles();
     createRectangles();
     layoutObjs();
-    setSpawnPoints();
+    if (!noNewSpawnpoint) setSpawnPoints();
   }
   function createCircles() {
     for (let i = 0; i < circleAmount.value; i++) {
@@ -1413,9 +1420,10 @@
               x1 = 0;
               y1 = 0;
               if (randomMapCreatorVisable.checked) {
+                time = 0;
                 if (newRandomLevelAfterGoal.checked) {
                   deleteAllElements();
-                  createRandomMap();
+                  automaticallyCreateNewRandomMap(0);
                 }
                 else alert("You reached the goal!");
               }
@@ -1430,6 +1438,15 @@
         drawJoystick();
         if (currentLevel.blinkWall) blinkWall();
       }, 25);
+    }
+    function automaticallyCreateNewRandomMap(equalAmoutOfObj) {
+      var objectsBefore = Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0);
+      createRandomMap(true);
+      setTimeout(() => {
+        if (Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0) == objectsBefore) equalAmoutOfObj++;
+        if (fillScreenAutoNewLevel.checked && equalAmoutOfObj < 7) automaticallyCreateNewRandomMap(equalAmoutOfObj);
+        else setSpawnPoints();
+      }, 1);
     }
     function drawJoystick() {
       if (joyStick && joyStick.coordinates && joyStickPlay.checked) {
