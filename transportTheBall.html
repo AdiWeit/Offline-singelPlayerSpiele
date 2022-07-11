@@ -2453,7 +2453,7 @@ else level.mode = mode;
   function newCollidesOthers(newObj) {
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
-        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value  || Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))) {
+        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || ((!(newObj.hitbox.y > obj.hitbox.y + obj.hitbox.height + parseInt(minimalDistance.value) || newObj.hitbox.y + newObj.hitbox.height + parseInt(minimalDistance.value) < obj.hitbox.y) && (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value))  || (!(newObj.hitbox.x > obj.hitbox.x + obj.hitbox.width + parseInt(minimalDistance.value) || newObj.hitbox.x + newObj.hitbox.width + parseInt(minimalDistance.value) < obj.hitbox.x) && (Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))))) {
           collideCount++;
           return true;
         }
