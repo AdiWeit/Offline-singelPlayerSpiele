@@ -1304,13 +1304,15 @@
 
     sphere1.style.width = 50 + "px";
     sphere1.style.height = 50 + "px";
-    if ((window.DeviceMotionEvent != undefined || joyStick.coordinates) && !pause) {
+    if ((window.DeviceMotionEvent != undefined || joyStick.coordinates)) {
       window.ondevicemotion = function(e) {
-        if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
-        else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
-        else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibilityAcc.x);
-        if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibilityAcc.y;
-        else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
+        if (!pause) {
+          if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
+          else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
+          else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibilityAcc.x);
+          if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibilityAcc.y;
+          else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
+       }
       }
       function goToCheckpoint() {
         if (checkpoint) {
@@ -1329,6 +1331,7 @@
           }
         }
         // else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
+        if (!pause) {
         var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
         if (landscapeOrientation) {
           vx1 = vx1 + ay1;
@@ -1352,16 +1355,17 @@
         x2 = parseInt(x2 + vx2 / 30);
         //  if (scrollY > 0) document.getElementById('sphere1').style.display = "none";
         boundingBoxCheck();
-        if (joyStickPlay.checked && !pause) {
-          x1 = nextCoordinates.x;
-          y1 = nextCoordinates.y;
-          if (x1 < 0) x1 = 0;
-          if (x1 > textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""))) x1 = textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""));
-          if (y1 < 0) y1 = 0;
-          if (y1 > textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""));
+          if (joyStickPlay.checked) {
+            x1 = nextCoordinates.x;
+            y1 = nextCoordinates.y;
+            if (x1 < 0) x1 = 0;
+            if (x1 > textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""))) x1 = textur.getBoundingClientRect().right - JSON.parse(sphere1.style.height.replace("px", ""));
+            if (y1 < 0) y1 = 0;
+            if (y1 > textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom - JSON.parse(sphere1.style.height.replace("px", ""));
+          }
+          sphere1.style.top = y1 + "px";
+          sphere1.style.left = x1 + "px";
         }
-        sphere1.style.top = y1 + "px";
-        sphere1.style.left = x1 + "px";
         // if ( /*y1 <= AblageListe[5]*/ scrollY == 0) sphere1.style.display = "inline";
         // else sphere1.style.display = "none";
         var numbers = [
