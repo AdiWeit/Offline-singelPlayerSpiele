@@ -882,6 +882,7 @@
       randomMapCreator.prepend(randomMapCreatorVisableA);
       // refreshBallSize();
       courceSelection.style.display = "none";
+      if (!Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0).length) createRandomMap();
       } 
       else {
         randomMapCreator.style.display = 'none';
@@ -957,21 +958,25 @@
     layoutObjs();
     if (!noNewSpawnpoint) setSpawnPoints();
   }
+  var objNumber = 0;
   function createCircles() {
     for (let i = 0; i < circleAmount.value; i++) {
       var radius = Math.round(Math.random()*(maxCircleSize.value - 5)) + 5;
-      var newObj = {x: Math.round(Math.random()*(textur.width - radius)), y: Math.round(Math.random()*(textur.height - radius)), radius: radius, number: objects.circles.length};
+      var newObj = {x: Math.round(Math.random()*(textur.width - radius)), y: Math.round(Math.random()*(textur.height - radius)), radius: radius, number: objNumber};
       newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
-      else objects.circles.push(newObj);
+      else {
+        objects.circles.push(newObj);
+        objNumber++;
+      }
     }
   }
   function createTriangles() {
     for (let i = 0; i < triangleAmount.value; i++) {
       var width = Math.round(Math.random()*maxTriangleWidth.value);
       var height = Math.round(Math.random()*maxTriangleHeight.value);
-      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, direction: Math.round(Math.random()*3), number: objects.triangles.length};
+      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, direction: Math.round(Math.random()*3), number: objNumber};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
       newObj.middle = {x: newObj.hitbox.x + newObj.hitbox.width/2, y: newObj.hitbox.y + newObj.hitbox.height/2};
       if (!newObj.direction) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width/2, newObj.y + newObj.height)], true, newObj.middle);
@@ -983,20 +988,26 @@
       if (newObj.direction == 3) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height/2)], true, newObj.middle);
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
-      else objects.triangles.push(newObj);
+      else {
+        objects.triangles.push(newObj);
+        objNumber++;
+      }
     }
   }
   function createRectangles() {
     for (let i = 0; i < rectangleAmount.value; i++) {
       var width = Math.round(Math.random()*maxTriangleWidth.value);
       var height = Math.round(Math.random()*maxTriangleHeight.value);
-      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, number: objects.rectangles.length};
+      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, number: objNumber};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
       newObj.middle = {x: newObj.x + newObj.width/2, y: newObj.y + newObj.height/2};
       newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height)], true, newObj.middle);
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
-      else objects.rectangles.push(newObj);
+      else {
+        objects.rectangles.push(newObj);
+        objNumber++;
+      }
     }
   }
   // function createSquares() {
@@ -1034,12 +1045,8 @@
           collideCount++;
           return true;
         }
-        // else {
-        //   console.log("debug pls");
-        // }
       }
     }
-    console.log("debug pls");
   }
   if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
   function canvasClicked() {
@@ -1460,7 +1467,7 @@
       createRandomMap(true);
       setTimeout(() => {
         if (Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0) == objectsBefore) equalAmoutOfObj++;
-        if (fillScreenAutoNewLevel.checked && equalAmoutOfObj < 7) automaticallyCreateNewRandomMap(equalAmoutOfObj);
+        if (fillScreenAutoNewLevel.checked && !equalAmoutOfObj) automaticallyCreateNewRandomMap(equalAmoutOfObj);
         else setSpawnPoints();
       }, 1);
     }
