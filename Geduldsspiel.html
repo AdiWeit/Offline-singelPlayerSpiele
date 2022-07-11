@@ -1043,11 +1043,13 @@
   }
   if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
   function canvasClicked() {
+    var newSpawnpoint = false;
     if (setSchieberSpawnPoint.style.backgroundColor != "") {
       checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, timeNeededToReach: 0};
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
       restartLevel();
+      newSpawnpoint = true;
     }
     var newSelection = false;
     if (randomMapCreatorVisable.checked) {
@@ -1082,9 +1084,11 @@
     else tileUnselectedOrDeleted(true);
   }
     if (!newSelection) {
-      if (!selected.obj && gerät == "Handy") togglePause();
-      if ((!selected.obj || !randomMapCreatorVisable.checked) && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "") {
-        joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
+      if (!newSpawnpoint) {
+        if (!selected.obj && gerät == "Handy") togglePause();
+        if ((!selected.obj || !randomMapCreatorVisable.checked) && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "") {
+          joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
+        }
       }
       if (randomMapCreatorVisable.checked) tileUnselectedOrDeleted();
     }
