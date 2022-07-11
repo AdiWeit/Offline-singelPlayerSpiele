@@ -1327,6 +1327,7 @@
       checkpointManager.style.display = 'none';
       randomMapCreator.prepend(randomMapCreatorVisableA);
       refreshBallSize();
+      handleMaxSizeSlider(true);
       } 
       else {
         randomMapCreator.style.display = 'none';
@@ -1657,41 +1658,41 @@ function tablePositionModeSelected() {
   var bounceCoordinates;
   var scrolling = false;
   function invisibleDirectionCheck(nextCoordinates) {
-    var invisibleDirection = invisible.direction;
-    invisible.direction = {};
-    if (x1 > nextCoordinates.x) invisible.direction.left = x1 - nextCoordinates.x;// = "left";
-    if (x1 < nextCoordinates.x) invisible.direction.right = nextCoordinates.x - x1;// = "right";
-    if (y1 > nextCoordinates.y) invisible.direction.up = y1 - nextCoordinates.y;// = "up";
-    if (y1 < nextCoordinates.y) invisible.direction.down = nextCoordinates.y - y1;// = "down";
-    var highestDirection = {number: 0};
-    for (var i = 0; i < Object.keys(invisible.direction).length; i++) {
-      if (invisible.direction[Object.keys(invisible.direction)[i]] > highestDirection.number && Object.keys(invisible.direction)[i] != invisible.mainDirection) {highestDirection.number = invisible.direction[Object.keys(invisible.direction)[i]]; highestDirection.string = Object.keys(invisible.direction)[i];}
-    }
-    if (currentLevel != undefined && invisibleDirection != undefined && highestDirection.string != undefined && currentLevel.invisible && currentLevel.invisible.amStück && invisibleDirection != highestDirection.string && ((invisible.boolean == true && currentLevel.invisible.amStück.invisible == true) || (invisible.boolean == false && currentLevel.invisible.amStück.visible == true))) {
-      for (var i = 0; i < 4; i++) {
-        /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
-      }
-    }
-    invisible.direction = highestDirection.string;
-    y1 = nextCoordinates.y;
-    x1 = nextCoordinates.x;
-
-    vx2 = vx2 * 0.98;
-    vy2 = vy2 * 0.98;
-    y2 = parseInt(y2 + vy2 / 30);
-    x2 = parseInt(x2 + vx2 / 30);
-    boundingBoxCheck();
-    if (joyStickPlay.checked && joyStick.coordinates) {
-      x1 = nextCoordinates.x;
-      y1 = nextCoordinates.y;
-      if (x1 < 0) x1 = 0;
-      if (x1 > textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""))) x1 = textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""));
-      if (y1 < 0) y1 = 0;
-      if (y1 > textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""));
-    }
     if (!pause) {
-    sphere.schieber.style.top = y1 + "px";
-    sphere.schieber.style.left = x1 + "px";
+      var invisibleDirection = invisible.direction;
+      invisible.direction = {};
+      if (x1 > nextCoordinates.x) invisible.direction.left = x1 - nextCoordinates.x;// = "left";
+      if (x1 < nextCoordinates.x) invisible.direction.right = nextCoordinates.x - x1;// = "right";
+      if (y1 > nextCoordinates.y) invisible.direction.up = y1 - nextCoordinates.y;// = "up";
+      if (y1 < nextCoordinates.y) invisible.direction.down = nextCoordinates.y - y1;// = "down";
+      var highestDirection = {number: 0};
+      for (var i = 0; i < Object.keys(invisible.direction).length; i++) {
+        if (invisible.direction[Object.keys(invisible.direction)[i]] > highestDirection.number && Object.keys(invisible.direction)[i] != invisible.mainDirection) {highestDirection.number = invisible.direction[Object.keys(invisible.direction)[i]]; highestDirection.string = Object.keys(invisible.direction)[i];}
+      }
+      if (currentLevel != undefined && invisibleDirection != undefined && highestDirection.string != undefined && currentLevel.invisible && currentLevel.invisible.amStück && invisibleDirection != highestDirection.string && ((invisible.boolean == true && currentLevel.invisible.amStück.invisible == true) || (invisible.boolean == false && currentLevel.invisible.amStück.visible == true))) {
+        for (var i = 0; i < 4; i++) {
+          /*if (Object.keys(invisible.directions)[i] != invisible.direction) */invisible.directions[Object.keys(invisible.directions)[i]] = 0;
+        }
+      }
+      invisible.direction = highestDirection.string;
+      y1 = nextCoordinates.y;
+      x1 = nextCoordinates.x;
+
+      vx2 = vx2 * 0.98;
+      vy2 = vy2 * 0.98;
+      y2 = parseInt(y2 + vy2 / 30);
+      x2 = parseInt(x2 + vx2 / 30);
+      boundingBoxCheck();
+      if (joyStickPlay.checked && joyStick.coordinates) {
+        x1 = nextCoordinates.x;
+        y1 = nextCoordinates.y;
+        if (x1 < 0) x1 = 0;
+        if (x1 > textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""))) x1 = textur.getBoundingClientRect().right + scrollX - JSON.parse(sphere1.style.height.replace("px", ""));
+        if (y1 < 0) y1 = 0;
+        if (y1 > textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""))) y1 = textur.getBoundingClientRect().bottom + scrollY - JSON.parse(sphere1.style.height.replace("px", ""));
+      }
+      sphere.schieber.style.top = y1 + "px";
+      sphere.schieber.style.left = x1 + "px";
    }
   }
   window.onscroll = function (e) {
@@ -2338,7 +2339,6 @@ else level.mode = mode;
   }
   var objects = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
   var rotatingObj = {circles: [], triangles: [], rectangles: []/*, squares: []*/};
-  handleMaxSizeSlider(true);
   function handleMaxSizeSlider(changeValue) {
     if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.max = canvasWidth.value/2 - minimalDistance.value;
     else maxCircleSize.max = canvasHeight.value/2 - minimalDistance.value;
@@ -2448,17 +2448,20 @@ else level.mode = mode;
   joyStick = "place";
   var joyStick;
   function canvasClicked() {
+    var newSpawnPoint = false;
     if (setBallSpawnPoint.style.backgroundColor != "") {
       checkpoint[0].ball = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
       setBallSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
       restartLevel();
+      newSpawnPoint = true;
     }
     if (setSchieberSpawnPoint.style.backgroundColor != "") {
       checkpoint[0].schieber = {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY), timeNeededToReach: 0};
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
       restartLevel();
+      newSpawnPoint = true;
     }
     var newSelection = false;
     if (randomMapCreatorVisable.checked) {
@@ -2492,7 +2495,7 @@ else level.mode = mode;
     }
     else tileUnselectedOrDeleted(true);
   }
-    if (!newSelection) {
+    if (!newSelection && !newSpawnPoint) {
       if (!selected.obj && gerät == "Handy") togglePause();
       if ((!selected.obj || !randomMapCreatorVisable.checked) && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "" && setBallSpawnPoint.style.backgroundColor == "") {
         joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
