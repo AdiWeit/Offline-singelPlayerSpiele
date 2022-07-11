@@ -122,14 +122,14 @@
   <div id="objSettings" class="card"> 
       <b>set amount and maximum size of objects</b>
       <div id="circleSettings" class="card">
-        <input type="number" style="width: 44px;" value="2" id="circleAmount" min="0"> <b>circles</b>
+        <input type="number" style="width: 44px;" value="5" id="circleAmount" min="0"> <b>circles</b>
         <br>
         maximum radius: 
         <input id="maxCircleSize" type="range">
       </div>
       <!-- <br> -->
       <div id="triangleSettings" class="card">
-        <input type="number" style="width: 44px;" value="2" id="triangleAmount" min="0"> <b>triangles</b>
+        <input type="number" style="width: 44px;" value="5" id="triangleAmount" min="0"> <b>triangles</b>
         <br>
         maximum width: 
         <input id="maxTriangleWidth" type="range">
@@ -139,7 +139,7 @@
         <!-- <br> -->
       </div>
       <div id="rectangleSettings" class="card">
-        <input type="number" style="width: 44px;" value="2" id="rectangleAmount" min="0"> <b>rectangle</b>
+        <input type="number" style="width: 44px;" value="5" id="rectangleAmount" min="0"> <b>rectangle</b>
         <br>
         maximum width: 
         <input id="maxRectangleWidth" type="range">
@@ -933,10 +933,10 @@
   function handleMaxSizeSlider(changeValue) {
     if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.max = canvasWidth.value/2 - minimalDistance.value;
     else maxCircleSize.max = canvasHeight.value/2 - minimalDistance.value;
-    maxTriangleWidth.max = canvasWidth.value;
-    maxTriangleHeight.max = canvasHeight.value;
-    maxRectangleWidth.max = canvasWidth.value;
-    maxRectangleHeight.max = canvasHeight.value;
+    maxTriangleWidth.max = canvasWidth.value - minimalDistance.value;
+    maxTriangleHeight.max = canvasHeight.value - minimalDistance.vlaue;
+    maxRectangleWidth.max = canvasWidth.value - minimalDistance.value;
+    maxRectangleHeight.max = canvasHeight.value - minimalDistance.value;
     if (changeValue) {
       if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.value = canvasWidth.value/2 - minimalDistance.value;
       else maxCircleSize.value = canvasHeight.value/2 - minimalDistance.value;
@@ -949,7 +949,7 @@
   function createRandomMap(noNewSpawnpoint) {
     textur.width = canvasWidth.value;
     textur.height = canvasHeight.value;
-    goalHitbox = {x: textur.width - 33, y: 0, width: 33, height: textur.height};
+    goalSideChanged();
     collideCount = 0;
     createCircles();
     createTriangles();
@@ -959,7 +959,8 @@
   }
   function createCircles() {
     for (let i = 0; i < circleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), radius: Math.round(Math.random()*maxCircleSize.value), number: objects.circles.length};
+      var radius = Math.round(Math.random()*(maxCircleSize.value - 5)) + 5;
+      var newObj = {x: Math.round(Math.random()*(textur.width - radius)), y: Math.round(Math.random()*(textur.height - radius)), radius: radius, number: objects.circles.length};
       newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
       if (newCollidesOthers(newObj) && collideCount < 9999) i--;
       else if (collideCount >= 9999) break;
@@ -968,7 +969,9 @@
   }
   function createTriangles() {
     for (let i = 0; i < triangleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), direction: Math.round(Math.random()*3), number: objects.triangles.length};
+      var width = Math.round(Math.random()*maxTriangleWidth.value);
+      var height = Math.round(Math.random()*maxTriangleHeight.value);
+      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, direction: Math.round(Math.random()*3), number: objects.triangles.length};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
       newObj.middle = {x: newObj.hitbox.x + newObj.hitbox.width/2, y: newObj.hitbox.y + newObj.hitbox.height/2};
       if (!newObj.direction) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width/2, newObj.y + newObj.height)], true, newObj.middle);
@@ -985,7 +988,9 @@
   }
   function createRectangles() {
     for (let i = 0; i < rectangleAmount.value; i++) {
-      var newObj = {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height), width: Math.round(Math.random()*maxTriangleWidth.value), height: Math.round(Math.random()*maxTriangleHeight.value), number: objects.rectangles.length};
+      var width = Math.round(Math.random()*maxTriangleWidth.value);
+      var height = Math.round(Math.random()*maxTriangleHeight.value);
+      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, number: objects.rectangles.length};
       newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
       newObj.middle = {x: newObj.x + newObj.width/2, y: newObj.y + newObj.height/2};
       newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height)], true, newObj.middle);
@@ -997,20 +1002,27 @@
   // function createSquares() {
     
   // }
-  function setSpawnPoints(time, parts) {
+  function setSpawnPoints(time, startDistance) {
     if (!time) time = 0;
-    checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
+    if (!startDistance) startDistance = 50;
+    if (goalLeft.checked) checkpoint = {position: {x: textur.width - Math.round(Math.random()*(startDistance)), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
+    if (goalTop.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: textur.height - Math.round(Math.random()*(startDistance))}, timeNeededToReach: 0};
+    if (goalRight.checked) checkpoint = {position: {x: Math.round(Math.random()*startDistance), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
+    if (goalBottom.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*startDistance)}, timeNeededToReach: 0};
+    // checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
     currentLevel.spawnPoint = checkpoint.position;
     sphere1.style.left = checkpoint.position.x + "px";
     sphere1.style.top = checkpoint.position.y + "px";
-    if (time < 5000) {
-    if (collides({x: checkpoint.position.x, y: checkpoint.position.y, width: cssToNumber(sphere1.style.width), height: cssToNumber((sphere1.style.height))}, goalHitbox)) setSpawnPoints(time + 1, ["ball"]);
+    if (!(time/50 + "").includes('.')) startDistance += 50;
+    if (time < 500) {
+    if (collides({x: checkpoint.position.x, y: checkpoint.position.y, width: cssToNumber(sphere1.style.width), height: cssToNumber((sphere1.style.height))}, goalHitbox)) setSpawnPoints(time + 1, startDistance);
     // setTimeout(() => {
       var minimalDistanceStored = minimalDistance.value;
       minimalDistance.value = 0;
       if (newCollidesOthers({hitbox: {x: checkpoint.position.x, y: checkpoint.position.y, width: cssToNumber(sphere1.style.width), height: cssToNumber((sphere1.style.height))}})) {
-        setSpawnPoints(time + 1);
+        setSpawnPoints(time + 1, startDistance);
       }
+      else restartLevel();
         minimalDistance.value = minimalDistanceStored;
       // }, 1);
     }
@@ -1018,12 +1030,16 @@
   function newCollidesOthers(newObj) {
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
-        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value  || Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))) {
+        if (JSON.stringify(newObj) != JSON.stringify(obj) && (collides(obj.hitbox, newObj.hitbox) || ((!(newObj.hitbox.y > obj.hitbox.y + obj.hitbox.height + parseInt(minimalDistance.value) || newObj.hitbox.y + newObj.hitbox.height + parseInt(minimalDistance.value) < obj.hitbox.y) && (Math.abs(obj.hitbox.x + obj.hitbox.width - newObj.hitbox.x) < minimalDistance.value || Math.abs(newObj.hitbox.x + newObj.hitbox.width - obj.hitbox.x) < minimalDistance.value))  || (!(newObj.hitbox.x > obj.hitbox.x + obj.hitbox.width + parseInt(minimalDistance.value) || newObj.hitbox.x + newObj.hitbox.width + parseInt(minimalDistance.value) < obj.hitbox.x) && (Math.abs(obj.hitbox.y + obj.hitbox.height - newObj.hitbox.y) < minimalDistance.value || Math.abs(newObj.hitbox.y + newObj.hitbox.height - obj.hitbox.y) < minimalDistance.value))))) {
           collideCount++;
           return true;
         }
+        // else {
+        //   console.log("debug pls");
+        // }
       }
     }
+    console.log("debug pls");
   }
   if (gerät == "PC") alert("please click to place a joy-stick!"); joyStick = "place";
   function canvasClicked() {
@@ -1415,9 +1431,9 @@
             checkpointManagement.style.display = "inline";
           }
             if (red == 255 && blue == 0 && alpha == 255 && green == 242) {
-              x1 = 0;
-              y1 = 0;
               if (randomMapCreatorVisable.checked) {
+                x1 = checkpoint.position.x;
+                y1 = checkpoint.position.y;
                 time = 0;
                 if (newRandomLevelAfterGoal.checked) {
                   deleteAllElements();
@@ -1481,6 +1497,8 @@
     }
 
     function zielErreicht() {
+      x1 = 0;
+      y1 = 0;
       courceSelection.options[level.normal.number - 1].innerHTML = "✅ " +  level.normal.number + ". map";
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
         alert("every level finished! That was the last one :(  )");
