@@ -83,11 +83,20 @@
     <!-- <input type="number" style="width: 44px;" id="squareAmount" min="0"> Anzahl Quadrate
   <br> -->
   <div class="card">
-    <input type="number" style="width: 66px;" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0"> level width
+    <div class="form">
+      <input type="number" style="width: 90px;" autocomplete="off" placeholder=" " class="form_input" value="1520" onchange="handleMaxSizeSlider();" id="canvasWidth" min="0">
+      <label for="input" class="form_label" onclick="selectTextBox(this);">level width</label>
+    </div>
     <br>
-    <input type="number" style="width: 66px;" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0"> level height
+    <div class="form">
+      <input type="number" placeholder=" " style="width: 94px;" class="form_input" value="747" onchange="handleMaxSizeSlider();" id="canvasHeight" min="0">
+      <label for="input" class="form_label" onclick="selectTextBox(this);">level height</label>
+    </div>
     <br>
-    <input type="number" style="width: 66px;" min="1" value="66" id="minimalDistance" min="0"> minimal distance between objects
+    <div class="form">
+      <input type="number" placeholder=" " style="width: 219px;" class="form_input" value="747" onchange="handleMaxSizeSlider();" id="minimalDistance" min="0">
+      <label for="input" class="form_label" onclick="selectTextBox(this);">minimal distance between objects</label>
+    </div>
   </div>
   <div class="card">
     <b>goal side</b>
@@ -204,7 +213,59 @@
     <option>almost on end (slopes away from you a bit, best? for your posture)</option>
     <option>on end (better for your posture)</option>
   </select>
+  <style>
+      .form_input {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 30px;
+    /* width: 100%;
+    height: 100%; */
+  }
+  /* .form_input:hover {
+    border-color: hsl(181, 100%, 50%);
+  }
+  .form_input:focus {
+    border-color: hsl(177, 100%, 50%);
+  } */
+  .form_input:focus ~ .form_label,
+  .form_input:not(:placeholder-shown) ~ .form_label {
+   /* top: -0.5rem;
+    font-size: 0.8rem; */
+    top: 7px; /* 10 was good */
+    font-size: 15px;
+    /* left: -1px; */
+    /* left: 0.8rem; */
+  } 
+  .form_label {
+    position: absolute;
+    /* left: 1rem; */
+    /* top: 0.8rem; */
+    top: calc(0.3rem + 15px);
+    /* everything in one line */
+    width: max-content;
+    padding: 0 1px;
+    left: 10px;
+    background-color: white;
+    cursor: text;
+    transition: top 200ms ease-in,
+      left 200ms ease-in,
+      font-size 200ms ease-in;
+  }
+  .form {
+    position: relative;
+    /* top: 10px; */
+    padding-top: 15px;
+    display: inline-block;
+    padding-bottom: 3px;
+  }
+  </style>
   <script type="text/javascript">
+  function selectTextBox(pThis) {
+    setTimeout(() => {
+      pThis.parentElement.querySelector('input').select();
+    }, 1);
+  }
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
