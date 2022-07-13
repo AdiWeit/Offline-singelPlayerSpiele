@@ -2,48 +2,50 @@
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
 <div id="settings">
   <!-- <button type="button" style="display:none" id="startButton" onclick="style.display = 'inline'; settings.style.display = 'none'; textur.style.display = 'inline'" name="button">start</button> -->
-auch welche, bei denen ich am besten bin zeigen<input id="showFinished" onchange="getDatabase();" checked="true" type="checkbox">
+auch welche, bei denen ich am besten bin, zeigen<input id="showFinished" onchange="getDatabase();" checked="true" type="checkbox">
 <ul id="settingsL" font-size:30px></ul>
-Breite<input type="text" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="breite" value="7">
+Breite<input type="number" style="width: 44px;" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="breite" value="7">
 <br>
-Höhe<input type="text" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="hoehe" value="7">
+Höhe<input type="number" style="width: 44px;" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" id="hoehe" value="7">
 <br>
-anzahl Geraden<input id="anzahlGeraden" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="16">
+anzahl Geraden<input id="anzahlGeraden" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="number" style="width: 44px;" value="16">
 <br>
-anzahl Puffer<input id="anzahlPuffer" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="2">
+anzahl Puffer<input id="anzahlPuffer" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="number" style="width: 44px;" value="2">
 <br>
-anzahl Bahnhöfe<input id="anzahlBahnhoefe" type="text" value="1">
+anzahl Bahnhöfe<input id="anzahlBahnhoefe" type="number" style="width: 44px;" value="1">
 <br>
-anzahl Kurven<input id="anzahlKurven" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="24">
+anzahl Kurven<input id="anzahlKurven" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="number" style="width: 44px;" value="24">
 <br>
-anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="text" value="7">
+anzahl Weichen<input id="anzahlWeichen" onchange="verteilung.innerHTML = 'sie müssen noch ' + (JSON.parse(breite.value)*JSON.parse(hoehe.value) - JSON.parse(anzahlGeraden.value) - JSON.parse(anzahlPuffer.value) - JSON.parse(anzahlWeichen.value) - JSON.parse(anzahlKurven.value)) + ' Segment(e) verteilen, damit so viele Segmente wie die Höhe und Breite hergeben vorhanden sind.'" type="number" style="width: 44px;" value="7">
 <h2 id="verteilung"></h2>
+<br>
+In beide Richtungen rotieren können<input type="checkbox" id="rotateBothDirections">
 <br>
 auch beim Test rotieren<input id="rotateInRound" type="checkbox">
 <br>
-spawnpoint ändern erlaubt: <input type="checkbox" checked="true" id="changeSpawnPoint">
+spawnpoint ändern erlaubt<input type="checkbox" checked="true" id="changeSpawnPoint">
 <br>
 <br>
 beenden, wenn alle Bahnhöfe grün/alle Personen mitgenommen <input type="checkbox" id="justBahnhoefe">
 <br>
-Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="text">
+Anzahl Züge<input id="anzahlZuege" value="1" style="width:44px;" onchange="if (value > 1) everybodyBahnhofAccessP.style.display = 'inline'; else everybodyBahnhofAccessP.style.display = 'none';" type="number">
 <div id="everybodyBahnhofAccessP">
   <br>
-  mili sek (1000 = 1 sek.) zwischen dem Losfahren der Züge am Spawnpoint<input id="timeBetweenTrains" value="1000" type="text">
+  mili sek (1000 = 1 sek.) zwischen dem Losfahren der Züge am Spawnpoint<input id="timeBetweenTrains" value="1000" type="number" style="width: 64px">
   <br>
-  mili sek (1000 = 1 sek.) bis zufällig plazierte Züge losfahren<input id="timeBetweenRandomTrains" value="1000" type="text">
+  mili sek (1000 = 1 sek.) bis zufällig plazierte Züge losfahren<input id="timeBetweenRandomTrains" value="1000" type="number" style="width: 64px">
   <br>
-  <input id="anzahlRandomTrains" value="0" onchange="if (JSON.parse(value) <= JSON.parse(anzahlBahnhoefe.value)) randomTrainsAtBahnhof.value = value;" type="text">der Züge sollen nur zur Behinderung zufällig spawnen
+  <input id="anzahlRandomTrains" value="0" onchange="if (JSON.parse(value) <= JSON.parse(anzahlBahnhoefe.value)) randomTrainsAtBahnhof.value = value;" type="number" style="width: 64px">der Züge sollen nur zur Behinderung zufällig spawnen
   <br>
-  <p><input value="0" id="randomTrainsAtBahnhof" type="text">der zufälligen Züge sollen an einem Bahnhof spawnen</p>
+  <p><input value="0" id="randomTrainsAtBahnhof" type="number" style="width: 64px">der zufälligen Züge sollen an einem Bahnhof spawnen</p>
   <br>
-  auch zweiträngige Züge (braun) können kollidierenden <input type="checkbox" id="brownCollide" checked="true">
+  auch zweiträngige Züge (braun, alle außer der, der als erstes den Spawnpoint verlässt) können kollidierenden <input type="checkbox" id="brownCollide" checked="true">
   <br>
   Kollision auch mit Zügen möglich, die noch nicht losgefahren sind, aber auch nicht beim Spawnpoint des 1. Zuges warten <input type="checkbox" id="stayingTrainCollision">
   <br>
   alle Züge können Personen mitnehmen/Bahnhöfe grün machen<input type="checkbox" id="everybodyBahnhofAccess">
   <br>
-  keine zweiträngige Züge (braun) dürfen einen Banhof anfahren <input type="checkbox" id="justTrainBahnhof">
+  keine zweiträngige Züge (braun, alle außer der, der als erstes den Spawnpoint verlässt) dürfen einen Banhof anfahren <input type="checkbox" id="justTrainBahnhof">
   <br>
   alle Züge müssen das Ziel erreichen<input type="checkbox" id="everybodyMustFinish">
   <br>
@@ -68,6 +70,8 @@ Anzahl Züge<input id="anzahlZuege" value="1" onchange="if (value > 1) everybody
 <p id="pSaveAutomaticly"><input type="checkbox" onchange="localStorage.setItem('saveAutomaticlyHelpTheTrain', checked);" id="saveAutomaticly">autosave</p>
 <br>
 <button type="button" style="font-size: 77px" id="test" onclick="testTrain(innerHTML);" name="button">test</button>
+<br>
+click to confirm tile to rotate <input id="clickRotation" type="checkbox">
 <br>
 play train audio<input onchange="playTrainAudio(true);" checked="true" id="trainAudio" type="checkbox">
 <br>
@@ -602,17 +606,31 @@ window.onscroll = function (e) {
   }
   //if (scrollY < 10 && scrollX < 10) scrollingInterac.user = false;
 }
-function canvasClicked() {
+function coordCheck() {
   for (var i = 0; i < field.length; i++) {
-  for (var i1 = 0; i1 < field[0].length; i1++) {
-    // 10 + 50*document.body.style.zoom*3*i, 10 + 50*document.body.style.zoom*3*i1
-    for (var i2 = 0; i2 < 3; i2++) {
-      for (var i3 = 0; i3 < 3; i3++) {
-        // if (xMaus > 10 + 50*document.body.style.zoom*i2*i && xMaus < 10 + 50*document.body.style.zoom*i2*i  + 130 && yMaus > 10 + 50*document.body.style.zoom*i3*i1  && yMaus < 10 + 50*document.body.style.zoom*i3*i1  + 130 && player.movement == "movingPlayer" && checkMovementPossibe(player.movingPlayer.x, player.movingPlayer.y, player.movingPlayer.i2, player.movingPlayer.i3)) {
-        //       field[i][i1][i2][i3].player = player.myNumber
-        //       field[player.movingPlayer.x][player.movingPlayer.y][i2][i3].player = false;
-        //     }
-        if ((/*gerät == "PC" && */xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom) /*|| (gerät == "Handy" && xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus - scrollY > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus - scrollY < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom)*/) {
+for (var i1 = 0; i1 < field[0].length; i1++) {
+  // 10 + 50*document.body.style.zoom*3*i, 10 + 50*document.body.style.zoom*3*i1
+  for (var i2 = 0; i2 < 3; i2++) {
+    for (var i3 = 0; i3 < 3; i3++) {
+      // if (xMaus > 10 + 50*document.body.style.zoom*i2*i && xMaus < 10 + 50*document.body.style.zoom*i2*i  + 130 && yMaus > 10 + 50*document.body.style.zoom*i3*i1  && yMaus < 10 + 50*document.body.style.zoom*i3*i1  + 130 && player.movement == "movingPlayer" && checkMovementPossibe(player.movingPlayer.x, player.movingPlayer.y, player.movingPlayer.i2, player.movingPlayer.i3)) {
+      //       field[i][i1][i2][i3].player = player.myNumber
+      //       field[player.movingPlayer.x][player.movingPlayer.y][i2][i3].player = false;
+      //     }
+      if ((/*gerät == "PC" && */xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom) /*|| (gerät == "Handy" && xMaus > 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 && xMaus < 10 + 50*document.body.style.zoom*3*i + 50*document.body.style.zoom*i2 + 50*document.body.style.zoom && yMaus - scrollY > 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 && yMaus - scrollY < 10 + 50*document.body.style.zoom*3*i1 + 50*document.body.style.zoom*i3 + 50*document.body.style.zoom)*/) {
+        console.log(xMaus + ' - ' + yMaus);
+        console.log(i + ' - ' + i1 + ' - ' + i2 + ' - ' + i3);
+        return [i, i1, i2, i3];
+      }
+    }
+  }
+}
+}
+}
+function canvasClicked() {
+  var i = coordCheck()[0];
+  var i1 = coordCheck()[1];
+  var i2 = coordCheck()[2];
+  var i3 = coordCheck()[3];
           console.log(i + "- " + i1 + " - " + i2 + " - " + i3);
           if (changeSpawnPoint.checked && !inRound && i == train[0].spawnPoint.x && i1 == train[0].spawnPoint.y && i2 == train[0].spawnPoint.i2 && i3 == train[0].spawnPoint.i3)  {
             var moveTrain = true;
@@ -637,10 +655,13 @@ function canvasClicked() {
             field[i][i1].straight = false;
           }
         }
-          else if (!inRound || rotateInRound.checked) {
+          else if ((!inRound || rotateInRound.checked) && (!clickRotation.checked || !rotateBothDirections.checked)) {
             field[i][i1] = turn("right", field[i][i1], i, i1);
             var audio = new Audio("https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/turn.mp3").play();
           }
+          else if (clickRotation.checked || gerät == "PC ") {
+            selected = {type: "tile", coord: {x: i, y: i1, i2: i2, i3: i3}, scrollY: scrollY, selected: true}
+        }
           Layout();
         }
         else if (field[i][i1][i2][i3].type == "way" && i == 0 && !moveTrain) {
@@ -651,15 +672,10 @@ function canvasClicked() {
           selected.type = "";
           Layout();
         }
-      }
-      }
-    }
-  }
-}
 // (7*3*50*document.body.style.zoom)/ 2 + 10, 7*3*50*document.body.style.zoom + 10, 40, 40
 if (xMaus > (field.length*3*50*document.body.style.zoom)/ 2 + 10 && xMaus < (field.length*3*50*document.body.style.zoom)/ 2 + 10 + 40 && yMaus > field[0].length*3*50*document.body.style.zoom + 10 && yMaus < field[0].length*3*50*document.body.style.zoom + 10 + 40) selected.type = "train";
 }
-var selected = {type: ""};
+var selected = {type: "", coord: {}};
 var inRound = false;
 document.body.style.zoom = 1.0;
 function moveTrain() {
@@ -898,4 +914,35 @@ function playTrainAudio(demo) {
     }
   }
 }
+document.onkeydown = function(event) {
+  console.log(event.key);
+  if ((!inRound || rotateInRound.checked) && (event.key == "ArrowLeft" || event.key == "ArrowRight") && selected.type == "tile") {
+    field[selected.coord.x][selected.coord.y] = turn(event.key.split('Arrow')[1].toLowerCase(), field[selected.coord.x][selected.coord.y], selected.coord.x, selected.coord.y);
+    Layout();
+    selected.type = "";
+  }
+}
+document.addEventListener('touchstart', touch);
+document.addEventListener('touchmove', touch);
+document.addEventListener('touchend', touch);
+function touch(ev) {
+  if (ev.type == "touchstart" && rotateBothDirections.checked && textur.style.display == "inline") selected.coord.swipeX = ev.touches[0]["pageX"];
+  if (!clickRotation.checked && ev.type == "touchstart" && rotateBothDirections.checked && textur.style.display == "inline") {
+    xMaus = ev.touches[0]["pageX"];
+    yMaus = ev.touches[0]["pageY"];
+    var i = coordCheck();
+    selected.type = "tile";
+    selected.coord = {x: i[0], y: i[1], i2: i[2], i3:  i[3], swipeX: ev.touches[0]["pageX"]};
+    selected.scrollY = scrollY;
+  }
+  else if (ev.type == "touchmove") selected.coord.swipteXLater = ev.touches[0]["pageX"];
+  if (ev.type == "touchend" && selected.coord.swipteXLater != undefined && (selected.selected || !clickRotation.checked) && selected.type == "tile" && selected.scrollY == scrollY && (!inRound || rotateInRound.checked) && !field[selected.coord.x][selected.coord.y][selected.coord.i2][selected.coord.i3].active) {
+    if (selected.coord.swipteXLater > selected.coord.swipeX) field[selected.coord.x][selected.coord.y] = turn("right", field[selected.coord.x][selected.coord.y], selected.coord.x, selected.coord.y);
+    else field[selected.coord.x][selected.coord.y] = turn("left", field[selected.coord.x][selected.coord.y], selected.coord.x, selected.coord.y);
+    Layout();
+    // selected = {type: "", coord: {}};
+    selected.selected = false;
+  }
+}
+
 </script>
