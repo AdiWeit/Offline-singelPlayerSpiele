@@ -707,7 +707,8 @@
       },
       11: {
         checkpointWhen_touches: "schieber",
-        checkpointSize: 50
+        checkpointSize: 60,
+        backstepCheckpoints: false
       },
       12: {
         heart: {
@@ -1362,6 +1363,7 @@
         if (!level[mode][pLevel].sizes) level[mode][pLevel].sizes = {ball: {width: 50, height: 50}, schieber: {width: 50, height: 50}};
         if (!level[mode][pLevel].checkpointWhen_touches) level[mode][pLevel].checkpointWhen_touches = "ball";
         if (!level[mode][pLevel].checkpointSize) level[mode][pLevel].checkpointSize = 100;
+        if (level[mode][pLevel].backstepCheckpoints == undefined) level[mode][pLevel].backstepCheckpoints = true;
         if (!level[mode][pLevel].spawnPoint) level[mode][pLevel].spawnPoint =     {
           schieber: {
             x: 155,
@@ -1879,27 +1881,24 @@ function tablePositionModeSelected() {
         }, 500);
       }
       var newCheckpoint = 0;
-      checkpoint.forEach((pCheckpoint, i1) => {
+      for (let i1 = checkpoint.length - 1; i1 >= 0; i1--) {
+        const pCheckpoint = checkpoint[i1];
       if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && (Math.abs(pCheckpoint.schieber.x - x1) > currentLevel.checkpointSize || Math.abs(pCheckpoint.schieber.y - y1) > currentLevel.checkpointSize)) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && (Math.abs(pCheckpoint.ball.x - ball.x) > currentLevel.checkpointSize || Math.abs(pCheckpoint.ball.y - ball.y) > currentLevel.checkpointSize))))) {
         newCheckpoint++;
       }
         if ((((red == 168 && green == 230 && blue == 29) || (onTeleporter().checkpoint && (onTeleporter().ball || onTeleporter().schieber))) && ((currentLevel.checkpointWhen_touches == "schieber" && i < 4 && Math.abs(pCheckpoint.schieber.x - x1) < currentLevel.checkpointSize && Math.abs(pCheckpoint.schieber.y - y1) < currentLevel.checkpointSize) || (currentLevel.checkpointWhen_touches == "ball" && i > 3 && Math.abs(pCheckpoint.ball.x - ball.x) < currentLevel.checkpointSize && Math.abs(pCheckpoint.ball.y - ball.y) < currentLevel.checkpointSize)))) {
-        if (i1) checkpointSelection.value = i1 + '. checkpoint';
-        else checkpointSelection.value = 'start';
-        level.checkpoint = i1;
+        if (currentLevel.backstepCheckpoints) {
+          if (i1) checkpointSelection.value = i1 + '. checkpoint';
+          else checkpointSelection.value = 'start';
+          level.checkpoint = i1;
+        }
+        else if ((!pCheckpoint.checkpointNumbers || !pCheckpoint.checkpointNumbers.includes(i1)) && i1 != level.checkpoint) {
+          registerNewCheckpoint(i1);
+        }
       }
-      });
+      }
       if (newCheckpoint == checkpoint.length) {
-        console.log("checkpoint!!!");
-        if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
-        checkpoint.push({schieber: {x: x1, y: y1, width: sphere.schieber.style.width.replace('px', ''), height: sphere.schieber.style.height.replace('px', '')}, ball: {x: ball.x, y: ball.y, width: ball.width, height: ball.height}, timeNeededToReach: time})
-        level.checkpoint++;
-        checkpoints[level.mode][level.aktuell] = checkpoint;
-        opt = document.createElement("option");
-        document.getElementById("checkpointSelection").options.add(opt);
-        opt.text = level.checkpoint + ". checkpoint";
-        checkpointManager.style.display = "inline";
-        localStorage.setItem('checkpointsTransportTheBall', JSON.stringify(checkpoints));
+        registerNewCheckpoint();
       }
     }
      numbers = [
@@ -1918,6 +1917,25 @@ function tablePositionModeSelected() {
     }
     sphere.ball.style.left = ball.x + "px";
     sphere.ball.style.top = ball.y + "px";
+  }
+  function registerNewCheckpoint(i1) {
+    if (i1) checkpoint[i1]?.checkpointNumbers.push(checkpoint.length);
+    if (!i1) i1 = checkpoint.length;
+    var checkpointNumbers = checkpoint[i1]?.checkpointNumbers;
+    if (!checkpointNumbers) checkpointNumbers = [];
+    checkpointNumbers.push(i1);
+    console.log("checkpoint!!!");
+    if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
+    checkpoint.push({schieber: {x: x1, y: y1, width: sphere.schieber.style.width.replace('px', ''), height: sphere.schieber.style.height.replace('px', '')}, ball: {x: ball.x, y: ball.y, width: ball.width, height: ball.height}, timeNeededToReach: time, checkpointNumbers: checkpointNumbers})
+    // level.checkpoint++;
+    level.checkpoint = checkpoint.length - 1;
+    checkpoints[level.mode][level.aktuell] = checkpoint;
+    opt = document.createElement("option");
+    document.getElementById("checkpointSelection").options.add(opt);
+    opt.text = level.checkpoint + ". checkpoint";
+    checkpointSelection.value = level.checkpoint + ". checkpoint";
+    checkpointManager.style.display = "inline";
+    localStorage.setItem('checkpointsTransportTheBall', JSON.stringify(checkpoints));
   }
   function automaticallyCreateNewRandomMap(equalAmoutOfObj) {
       var objectsBefore = Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0);
@@ -2089,6 +2107,8 @@ function tablePositionModeSelected() {
       sphere.schieber.style.width = checkpoint[level.checkpoint].schieber.width + "px";
       sphere.schieber.style.height = checkpoint[level.checkpoint].schieber.height + "px";
     }
+    time = checkpoint[level.checkpoint].timeNeededToReach;
+    if (!time) time = 0;
     // for (var i = 0; i < Bild.width; i++) {
       // if (!scrollingInterac.user && x1 > window.innerWidth + scrollX - currentLevel.sizes.schieber.width*5) {
       //   window.scroll(scrollX + 3, scrollY);
@@ -2301,6 +2321,7 @@ function tablePositionModeSelected() {
       else checkpointSelection.value = level.checkpoint + '. checkpoint';
       restartLevel();
       time = checkpoint[level.checkpoint].timeNeededToReach;
+      if (!time) time = 0;
     }
   }
   if (currentLevel.rotating) {
