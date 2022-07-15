@@ -137,6 +137,7 @@
 <div id="checkpointManager">
   <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
   <button name="button" id="removeCheckpointB" onclick="removeCheckpoint();">remove last checkpoint</button>
+  <button name="button" id="removeAllFurtherCheckpointsB" onclick="removeAllFurtherCheckpoint();">remove all checkpoints after this one</button>
 </div>
 <div id="oldMapCreatorPosition"></div>
 <a id="randomMapCreatorVisableA"><input type="checkbox" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
@@ -287,7 +288,7 @@
   function difficultyChanged(checked) {
     if (checked) currentLevel = level.easyMaps[level.mode][level.aktuell];
     else currentLevel = level[level.mode][level.aktuell];
-    setupLevel();
+    setupLevel(true);
   }
   function normalSensibility() {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
@@ -1977,8 +1978,8 @@ function tablePositionModeSelected() {
     return onTeleporterObj;
   }
   var goalReached = false;
-  function removeCheckpoint() {
-    if (checkpoint.length > 1 && confirm('Are you sure you want to delete the last checkpoint (' + (checkpoint.length - 1) + '.) ?')) {
+  function removeCheckpoint(noConfirmationNeeded) {
+    if (checkpoint.length > 1 && (noConfirmationNeeded || confirm('Are you sure you want to delete the last checkpoint (' + (checkpoint.length - 1) + '.) ?'))) {
       if (level.checkpoint == checkpoint.length - 1) level.checkpoint--;
       checkpoint.pop();
       checkpoints[level.mode][level.aktuell] = checkpoint;
@@ -1991,6 +1992,13 @@ function tablePositionModeSelected() {
         checkpointManager.style.display = "none";
       }
       restartLevel();
+   }
+  }
+  function removeAllFurtherCheckpoint() {
+    if (checkpoint.length > 1 && confirm('Are you sure you want to delete checkpoints' + (level.checkpoint + 1) + '-' + checkpoint.length + '?')) {
+      for (let i = 0; i < checkpoint.length - (level.checkpoint - 1); i++) {
+        removeCheckpoint(true);
+      }
    }
   }
   function boundingBoxCheck() {
@@ -2082,15 +2090,6 @@ function tablePositionModeSelected() {
       else opt.text = "start";
     }
     checkpointSelection.value = valueBefore;
-    // TODO: why highscore checks?
-    if (document.getElementById('checkpointSelection').options.length > 0/* && highscores[level.mode] && highscores[level.mode][Object.keys(level[level.mode]).length]*/) {
-      checkpointSelection.style.display = 'inline';
-      removeCheckpointB.style.display = 'inline';
-    }
-    else {
-      checkpointSelection.style.display = 'none';
-      removeCheckpointB.style.display = 'none';
-    }
     x1 = checkpoint[level.checkpoint].schieber.x;
     y1 = checkpoint[level.checkpoint].schieber.y;
     ball.x = checkpoint[level.checkpoint].ball.x;
@@ -2217,12 +2216,12 @@ function tablePositionModeSelected() {
     sphere.ball.style.width = ball.width + "px";
     sphere.ball.style.height = ball.height + "px";
   }
-  function setupLevel(direction) {
+  function setupLevel(doNotresetCheckpoints) {
     if (oppositeCheck.checked) sensibility = {x: 1, y: 1};
     else sensibility = {x: 7, y: 7};
     sensibilityRange.value = sensibility.x;
     level.checkpoint = 0;
-    if (!direction) checkpoint = [{schieber: {x: currentLevel.spawnPoint.schieber.x, y: currentLevel.spawnPoint.schieber.y}, ball: {x: currentLevel.spawnPoint.ball.x, y: currentLevel.spawnPoint.ball.y}}];
+    if (!doNotresetCheckpoints) checkpoint = [{schieber: {x: currentLevel.spawnPoint.schieber.x, y: currentLevel.spawnPoint.schieber.y}, ball: {x: currentLevel.spawnPoint.ball.x, y: currentLevel.spawnPoint.ball.y}}];
     restartLevel();
     refreshBallSize();
     if (!direction && currentLevel.heart != undefined) {sphere.schieber.direction = 1; /*sphere.*/ball.direction = 1; heartBeatFunc(true);}
