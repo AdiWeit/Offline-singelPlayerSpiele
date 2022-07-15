@@ -322,11 +322,11 @@
     }
   }
   function deleteCheckpoint() {
-    if (levelCheckpoints.length > 1 && level.checkpoint && confirm('Are you sure you want to delete the latest checkpoint (' + (levelCheckpoints.length - 1) + '.) ?')) {
+    if (levelCheckpoints.length > 1 && confirm('Are you sure you want to delete the latest checkpoint (' + (levelCheckpoints.length - 1) + '.) ?')) {
       levelCheckpoints.pop();
-      document.getElementById('checkpointSelection').options[level.checkpoint] = undefined;
-      level.checkpoint--;
-      if (!level.checkpoint) {
+      document.getElementById('checkpointSelection').options[levelCheckpoints.length] = undefined;
+      if (!levelCheckpoints[level.checkpoint]) {
+        level.checkpoint--;
         checkpointManagement.style.display = "none";
       }
       checkpoint = levelCheckpoints[level.checkpoint];
