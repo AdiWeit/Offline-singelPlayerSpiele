@@ -314,23 +314,23 @@
   }
   function checkpointSelected(value) {
     if (value == "start") {
-      checkpoint = checkpoints[level.mode][currentLevel.levelNr][0];
+      checkpoint = levelCheckpoints[0];
       level.checkpoint = 0;
     }
     else {
-      checkpoint = checkpoints[level.mode][currentLevel.levelNr][parseInt(value.split('. ')[0])];
+      checkpoint = levelCheckpoints[parseInt(value.split('. ')[0])];
       level.checkpoint = parseInt(value.split('. ')[0]);
     }
   }
   function deleteCheckpoint() {
-    if (checkpoints[level.mode][currentLevel.levelNr].length > 1 && level.checkpoint && confirm('Are you sure you want to delete the latest checkpoint (' + (checkpoints[level.mode][currentLevel.levelNr].length - 1) + '.) ?')) {
-      checkpoints[level.mode][currentLevel.levelNr].pop();
+    if (levelCheckpoints.length > 1 && level.checkpoint && confirm('Are you sure you want to delete the latest checkpoint (' + (levelCheckpoints.length - 1) + '.) ?')) {
+      levelCheckpoints.pop();
       document.getElementById('checkpointSelection').options[level.checkpoint] = undefined;
       level.checkpoint--;
       if (!level.checkpoint) {
         checkpointManagement.style.display = "none";
       }
-      checkpoint = checkpoints[level.mode][currentLevel.levelNr][level.checkpoint];
+      checkpoint = levelCheckpoints[level.checkpoint];
       localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
       if (level.checkpoint) checkpointSelection.value = level.checkpoint + '. checkpoint';
       else checkpointSelection.value = "start";
@@ -1343,19 +1343,20 @@
           courceSelected();
         }
         if (checkpoints[level.mode][currentLevel.levelNr]) {
-          checkpoint = checkpoints[level.mode][currentLevel.levelNr][checkpoints[level.mode][currentLevel.levelNr].length - 1];
+          levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr];
+          checkpoint = levelCheckpoints[levelCheckpoints.length - 1];
         }
         else checkpoint = undefined;
         while (document.getElementById('checkpointSelection').options.length > 0) {
           document.getElementById('checkpointSelection').options[0] = undefined;
         }
-        for (var i = 0; checkpoint && i < checkpoints[level.mode][currentLevel.levelNr].length; i++) {
+        for (var i = 0; checkpoint && i < levelCheckpoints.length; i++) {
           opt = document.createElement("option");
           document.getElementById("checkpointSelection").options.add(opt);
           if (i > 0) opt.text = i + ". checkpoint";
           else opt.text = "start";
         }
-        if (checkpoints[level.mode][currentLevel.levelNr]?.length > 1) checkpointManagement.style.display = "inline";
+        if (levelCheckpoints?.length > 1) checkpointManagement.style.display = "inline";
         else checkpointManagement.style.display = "none";
         document.getElementById('textur').style.display = "inline";
         Layout();
@@ -1477,9 +1478,12 @@
               restartLevel();
             }
             if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
-            if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
+            if (!levelCheckpoints) {
+              checkpoints[level.mode][currentLevel.levelNr] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
+              levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr];
+            }
             var newCheckpoint = 0;
-            checkpoints[level.mode][currentLevel.levelNr].forEach((pCheckpoint, i1) => {
+            levelCheckpoints.forEach((pCheckpoint, i1) => {
               
           if ((red == 168 && green == 230 && blue == 29) && Math.abs(x1 - pCheckpoint.position.x) > 100 || Math.abs(y1 - pCheckpoint.position.y) > 100) {
             newCheckpoint++;
@@ -1488,14 +1492,14 @@
             if (i1) checkpointSelection.value = i1 + '. checkpoint';
             else checkpointSelection.value = 'start';
             level.checkpoint = i1;
-            checkpoint = checkpoints[level.mode][currentLevel.levelNr][i1];
+            checkpoint = levelCheckpoints[i1];
           }
           });
-          if (newCheckpoint == checkpoints[level.mode][currentLevel.levelNr].length && (red == 168 && green == 230 && blue == 29)) {
+          if (newCheckpoint == levelCheckpoints.length && (red == 168 && green == 230 && blue == 29)) {
             console.log("checkpoint!!!");
-            checkpoints[level.mode][currentLevel.levelNr].push({position: {x: x1, y: y1}, timeNeededToReach: time})
+            levelCheckpoints.push({position: {x: x1, y: y1}, timeNeededToReach: time})
             level.checkpoint++;
-            checkpoint = checkpoints[level.mode][currentLevel.levelNr][level.checkpoint];
+            checkpoint = levelCheckpoints[level.checkpoint];
             localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
             opt = document.createElement("option");
             document.getElementById("checkpointSelection").options.add(opt);
