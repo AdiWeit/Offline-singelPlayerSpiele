@@ -191,7 +191,11 @@
   </div>
   <select name="course" id="courceSelection" onchange="courceSelected()">
   </select>
-  <br>
+  <div id="checkpointManagement">
+    <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
+    <button onclick="deleteCheckpoint();">delete latest checkpoint</button>
+    <br>
+  </div>
   <div id="oldMapCreatorPosition"></div>
   <a id="randomMapCreatorVisableA"><input type="checkbox" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
   <br>
@@ -202,11 +206,6 @@
     <option value="growing">growing</option>
     <option value="survive">survive</option>
   </select>
-  <div id="checkpointManagement">
-    <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
-    <button onclick="deleteCheckpoint();">delete latest checkpoint</button>
-    <br>
-  </div>
   <!-- <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button> -->
   <select id="tabletPositionModeSelection">
     <option>flat (most natural)</option>
@@ -1300,6 +1299,7 @@
       if (!doNotSelectCource) courceSelected(); 
       showLevels();
       easyMaps.checked = pEasyMaps;
+      checkpointSelected(checkpointSelection.value);
     }
     var currentLevel;
     function courceSelected() {
@@ -1324,8 +1324,9 @@
           currentLevel = level.normal[level.normal.levelType][level[level.mode].number];
           level.currentSensibility = currentLevel.sensibility;
           if (joyStickPlay.checked) level.currentSensibility = currentLevel.joyStickSensibility;
-          if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = [];
-          checkpoints[level.mode][currentLevel.levelNr][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
+          if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
+          if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [];
+          checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
           // start blinkWalls
           for (let i = 0; i < currentLevel.blinkWall?.length; i++) {
             var wall = currentLevel.blinkWall[i];
@@ -1342,8 +1343,8 @@
           document.getElementById('courceSelection').value = "1. map";
           courceSelected();
         }
-        if (checkpoints[level.mode][currentLevel.levelNr]) {
-          levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr];
+        if (checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) {
+          levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked];
           checkpoint = levelCheckpoints[levelCheckpoints.length - 1];
         }
         else checkpoint = undefined;
@@ -1478,9 +1479,10 @@
               restartLevel();
             }
             if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
-            if (!levelCheckpoints) {
-              checkpoints[level.mode][currentLevel.levelNr] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
-              levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr];
+            if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
+            if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) {
+              checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
+              levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked];
             }
             var newCheckpoint = 0;
             levelCheckpoints.forEach((pCheckpoint, i1) => {

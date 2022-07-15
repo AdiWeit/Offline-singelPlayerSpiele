@@ -288,6 +288,7 @@
   function difficultyChanged(checked) {
     if (checked) currentLevel = level.easyMaps[level.mode][level.aktuell];
     else currentLevel = level[level.mode][level.aktuell];
+    levelSelected(levelSelector.value);
     setupLevel(true);
   }
   function normalSensibility() {
@@ -1930,7 +1931,8 @@ function tablePositionModeSelected() {
     checkpoint.push({schieber: {x: x1, y: y1, width: sphere.schieber.style.width.replace('px', ''), height: sphere.schieber.style.height.replace('px', '')}, ball: {x: ball.x, y: ball.y, width: ball.width, height: ball.height}, timeNeededToReach: time, checkpointNumbers: checkpointNumbers})
     // level.checkpoint++;
     level.checkpoint = checkpoint.length - 1;
-    checkpoints[level.mode][level.aktuell] = checkpoint;
+    if (!checkpoints[level.mode][level.aktuell]) checkpoints[level.mode][level.aktuell] = {};
+    checkpoints[level.mode][level.aktuell][easyMaps.checked] = checkpoint;
     opt = document.createElement("option");
     document.getElementById("checkpointSelection").options.add(opt);
     opt.text = level.checkpoint + ". checkpoint";
@@ -1979,10 +1981,10 @@ function tablePositionModeSelected() {
   }
   var goalReached = false;
   function removeCheckpoint(noConfirmationNeeded) {
-    if (checkpoint.length > 1 && (noConfirmationNeeded || confirm('Are you sure you want to delete the last checkpoint (' + (checkpoint.length - 1) + '.) ?'))) {
+    if (checkpoint.length > 1 && (noConfirmationNeeded || confirm('Are you sure you want to delete the last checkpoint (' + (checkpoint.length + 1) + '.) ?'))) {
       if (level.checkpoint == checkpoint.length - 1) level.checkpoint--;
       checkpoint.pop();
-      checkpoints[level.mode][level.aktuell] = checkpoint;
+      checkpoints[level.mode][level.aktuell][easyMaps.checked] = checkpoint;
       localStorage.setItem('checkpointsTransportTheBall', JSON.stringify(checkpoints));
       // sphere.ball.style.left = checkpoint[level.checkpoint].ball.x + "px";
       // sphere.ball.style.top = checkpoint[level.checkpoint].ball.y + "px";
@@ -2078,18 +2080,18 @@ function tablePositionModeSelected() {
     geteiltDurch = 1;
     stopClockText.style.color = "green";
     var valueBefore = checkpointSelection.value;
-    // if (valueBefore == "" && checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) valueBefore = (checkpoints[level.mode][level.aktuell].length - 1) + ". checkpoint";
     if (valueBefore == "") valueBefore = "start";
     while (document.getElementById('checkpointSelection').options.length > 0) {
       document.getElementById('checkpointSelection').options[0] = undefined;
     }
-    for (var i = 0; checkpoints[level.mode] && checkpoints[level.mode][level.aktuell] && i < checkpoints[level.mode][level.aktuell].length; i++) {
+    for (var i = 0; checkpoints[level.mode] && checkpoints[level.mode][level.aktuell] && checkpoints[level.mode][level.aktuell][easyMaps.checked] && i < checkpoints[level.mode][level.aktuell][easyMaps.checked].length; i++) {
       opt = document.createElement("option");
       document.getElementById("checkpointSelection").options.add(opt);
       if (i > 0) opt.text = i + ". checkpoint";
       else opt.text = "start";
     }
     checkpointSelection.value = valueBefore;
+    if (document.getElementById('checkpointSelection').options.length > 1) checkpointSelection.style.display = "inline"; 
     x1 = checkpoint[level.checkpoint].schieber.x;
     y1 = checkpoint[level.checkpoint].schieber.y;
     ball.x = checkpoint[level.checkpoint].ball.x;
@@ -2313,8 +2315,9 @@ function tablePositionModeSelected() {
     if (running == 0) startPause();
     else time = 0;
     setupLevel();
-    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell]) {
-      checkpoint = JSON.parse(JSON.stringify(checkpoints[level.mode][level.aktuell])); 
+    // if (!checkpoints[level.mode][level.aktuell][easyMaps.checked]) checkpoints[level.mode][level.aktuell][easyMaps.checked] = [];
+    if (checkpoints[level.mode] && checkpoints[level.mode][level.aktuell] && checkpoints[level.mode][level.aktuell][easyMaps.checked]) {
+      checkpoint = JSON.parse(JSON.stringify(checkpoints[level.mode][level.aktuell][easyMaps.checked])); 
       level.checkpoint = checkpoint.length - 1;
       if (!level.checkpoint) level.checkpoint = 0;
       else checkpointSelection.value = level.checkpoint + '. checkpoint';
