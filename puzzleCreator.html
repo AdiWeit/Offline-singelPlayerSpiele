@@ -1147,10 +1147,6 @@ display: block;
   function changeTileBarHeight(value) {
     tileBarHeight.value = value;
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
-    // tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
-    // if (!lengthPerTeil.sizeAdapted) lengthPerTeil.sizeAdapted = JSON.parse(JSON.stringify(lengthPerTeil.edit));
-    // tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x - (Math.abs(lengthPerTeil.edit.y - (JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)))), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)};
-    // tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x - (Math.abs(lengthPerTeil.edit.y - (JSON.parse(value) - 10))), height: JSON.parse(value) - 10};
     if (lengthPerTeil.edit.x > lengthPerTeil.edit.y && rotateTiles.checked) {
       tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x*(((JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)))/lengthPerTeil.edit.x), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
     }
@@ -1158,6 +1154,11 @@ display: block;
       tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x*(((JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)))/lengthPerTeil.edit.y), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)};
     }
     lengthPerTeil.sizeAdapted = {x: tileSelectionBar.pictureSize.width, y: tileSelectionBar.pictureSize.height};
+    if (lengthPerTeil.sizeAdapted.y > lengthPerTeil.sizeAdapted.x && rotateTiles.checked) {
+      var ablage = JSON.parse(JSON.stringify(lengthPerTeil.edit.x));
+      lengthPerTeil.edit.x = lengthPerTeil.edit.y;
+      lengthPerTeil.edit.y = ablage;
+    }
     tileSelectionCanvas.width = (lengthPerTeil.edit.x + 10)*positions.wrong.length;
     layout();
     for (var i = 0; i < document.getElementsByClassName('backToTileB').length; i++) {
@@ -1177,20 +1178,19 @@ display: block;
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
   }
   function originalDisplayChanged(checked) {
-    if (aufgebenId.style.display == "inline") {
-      startPause('viewOriginal');
       if (checked) stats.viewOriginal.times++;
       if (checked) {
         if (sourceIsPicture.checked) preview.style.display = "inline";
         else videoPreview.style.display = "inline";
+        if (!stopClock.viewOriginal.running) startPause('viewOriginal');
         showOriginal.scrollIntoView();
       }
       else {
         if (sourceIsPicture.checked) preview.style.display = "none";
         else videoPreview.style.display = "none";
+        if (stopClock.viewOriginal.running) startPause('viewOriginal');
       }
       adaptExpandButtonPosition();
-    }
   }
   // section 2: actions followed by element change/user input
   function goToTutorialIndex(bElm) {
@@ -1733,7 +1733,7 @@ var pScrollY = scrollY;
           }
           position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
           if (!rotateTiles.checked) position.original.degree = 0;
-          if (position.original.degree == 270) stats.minimumRotations += 90;
+          if (position.original.degree == 270) stats.minimumRotations++;
           else stats.minimumRotations += Math.abs(position.original.degree/90);
       });
       if (emptyTileBar.checked) {
@@ -2592,7 +2592,7 @@ var puzzles = {};
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (stats.preOrdered == "pending") stats.preOrdered = richtige;
-    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished && !state.restorePuzzle && createPuzzleButton.style.display == "none") {
+    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished && !state.restorePuzzle && imageSettings.style.display == "none") {
       if (doStorePuzzle.checked && settings.style.display != "inline") {
         delete puzzles[puzzleName.value];
         localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
