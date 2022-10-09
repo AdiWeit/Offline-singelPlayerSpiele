@@ -1808,13 +1808,8 @@ var pScrollY = scrollY;
 }
   texturLeft = textur.getBoundingClientRect().left + scrollX;
   if (gerät == "Handy") autoSelectTileBar.checked = false;
-  // var pTileBarHeight = lengthPerTeil.edit.y + 10;
-  // if (lengthPerTeil.edit.x > lengthPerTeil.edit.y && rotateTiles.checked) pTileBarHeight = lengthPerTeil.edit.x + 10;
-  // tileSelectionBar.height = pTileBarHeight;
   tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
   setDefaultSelectionBarHeight();
-  // changeTileBarHeight(pTileBarHeight);
-  // tileSelectionCanvas.height = pTileBarHeight;
   backToBarBWidth.max = lengthPerTeil.edit.x;
   backToBarBHeight.max = lengthPerTeil.edit.y;
   backToBarBWidth.value = lengthPerTeil.edit.x/7;
@@ -4062,89 +4057,4 @@ function goTutorialSteps(steps) {
     }
   }
 }
-// function goTutorialSteps(steps) {
-//   if (tutorial.state != "") document.getElementById(tutorial.state + 'Div').className = "";
-//   try {
-//     if (steps > 0)  {
-//       for (let i = 0; i < steps; i++) {
-//        document.getElementById(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + i].id).checked = true;
-//      }
-//      if (!angular.equals(getSectionElm(document.getElementById(tutorial.state + 'Div')), getSectionElm(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + steps]))) {
-//       // tutorial.index -= getSectionElm(document.getElementById(tutorial.state + 'Div')).querySelectorAll('input[type="checkbox"]').length;
-//       // getSectionElm(document.getElementById(tutorial.state + 'Div')).style.display = "none";
-//       state.scrollToSection = true;
-//       setTimeout(() => {
-//         getSectionElm(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index + steps]).scrollIntoView();
-//         setTimeout(() => {
-//           state.scrollToSection = false;
-//         }, 1000);
-//       }, 100);
-//     }
-//   }
-//   if (steps < 0) {
-//       for (let i = tutorial.index - 1; i > tutorial.index + steps - 1; i--) {
-//        document.getElementById(document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[i].id).checked = false;
-//       }
-//     }
-//     tutorial.index += steps;
-//     tutorial.state = document.getElementById(modeSelection.value + 'Tutorial' + gerät).querySelectorAll('input[type="checkbox"]')[tutorial.index].id;
-//     document.getElementById(tutorial.state + 'Div').className = "currentTutorialStep cardGeneral";
-//     setTimeout(() => {
-//         if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
-//             document.getElementById(tutorial.state + 'Div').parentElement.parentElement.scrollIntoView();
-//           setTimeout(() => {
-//             if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height - 40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
-//                 document.getElementById(tutorial.state + 'Div').parentElement.scrollIntoView();
-//               setTimeout(() => {
-//               if (!state.scrollToSection && !collides({x: visualViewport.offsetLeft, y: visualViewport.offsetTop + 20, width: visualViewport.width, height: visualViewport.height -40}, document.getElementById(tutorial.state + 'Div').getBoundingClientRect()).boolean) {
-//                   document.getElementById(tutorial.state + 'Div').scrollIntoView();
-//               }
-//             }, 1000);
-//           }
-//           }, 1000);
-//       }
-//     }, 300);
-//     if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
-//     if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined) goTutorialSteps(1);
-//     if (tutorial.state == "pressShiftMobileUnclippTutorial") {
-//       selectMultipleTitle.innerHTML = "Shift Taste";
-//       selectMultipleTitle.style.display = "inline";
-//     }
-//     if (tutorial.state == "activateRotateLeftTutorial") rotateLeftTitle.style.display = "inline";
-//     else rotateLeftTitle.style.display = "none";
-//     if (tutorial.state == "activateRotateRightTutorial") rotateRightTitle.style.display = "inline";
-//     else rotateRightTitle.style.display = "none";
-//     if (steps < 0 && ["pressShiftMobileUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state)) {
-//       selected.tiles = [];
-//       layout(true);
-//     }
-//     if (tutorial.state == "scrollArrowTileBarTutorial") {
-//       for (const elm of document.getElementsByClassName('backToTileB')) {
-//         elm.style.display = "inline";
-//       }
-//       tileSelectionCanvas.style.display = "inline";
-//       selectBackToBarB.style.display = "inline";
-//       listTilesS.style.display = "block";
-//       for (var i = 0; i < 16; i++) {
-//         tileSelectionBar.tiles.splice(0, 0, i);
-//         unclipp(i);
-//         mouseDown();
-//       }
-//       scrollTileSelection(1);
-//     }
-//     if (tutorial.state == "mouseDownSelectFirstExchangeAlternativeTutorial") swipeSteuerung.checked = true;
-//     if (tutorial.state == "selectTileUnselectStandardTutorial") {
-//       setTimeout(() => {
-//         swipeSteuerung.checked = false;
-//       }, 10);
-//     }
-//     if (tutorial.state == "mouseDownUnselectAlternativeTutorial") swipeSteuerung.checked = true;
-//   }
-//   catch (err) {
-//     console.log('tutorial finished!');
-//     console.log(tutorial.state);
-//     console.error(err)
-//     tutorial.state = "finished";
-//   }
-// }
 </script>
