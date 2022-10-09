@@ -35,7 +35,7 @@
 <input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="URL (drag and drop möglich)" id="sourceURL">
 <br>
 <p id="URLInfo" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren!
+  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren! Alternativ können Sie das Bild in das obrige Feld ziehen oder stattdessen auf "Bild im neuen Tab öffnen" klicken, und dort die Adresse/URL kopieren.
   <br>
 </p>
 <a style="display: none; border-radius: 3px; border-style: double; background-color: darkorange; width: max-content; height: max-content;" id="sourceCheckboxes">
@@ -257,7 +257,7 @@
     <br>
     <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
     <br>
-    Male PC verschieben: <input type="number" min="2" style="width: 55px;" id="anzahlVerschieben">
+    Lasse PC <input type="number" min="2" style="width: 55px;" id="anzahlVerschieben"> Mal verschieben: 
     <br>
     <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="number" style="width:55px;" max="14" min="0" id="anzahlRichtige" value="10"> an origineller Stelle
     <br>
@@ -370,11 +370,11 @@
 <br>
 </div>
 <button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">Fertig</button>
-<div id="futureTexturPosition"></div>
 <a id="tileStatusOptions" style="display: none; position: fixed; background-color: rgba(205, 218, 199, 0.77); border-radius: 5px;">
 <input type="radio" id="pRemoveTile" checked="true" style="accent-color: red;" name="tileStatus"> Teil löschen
 <input type="radio" id="doNotMoveTile" style="accent-color: blue;" name="tileStatus"> Teil beim Mischen nicht bewegen
 </a>
+<div id="futureTexturPosition"></div>
 <br>
 <br>
 <button onclick="expandSide('top');" style="height: 55px;" class="expandButtons" id="expandTop">+</button>
@@ -536,7 +536,7 @@ display: block;
   </style>
   <style>
     #tutorial {
-      background-color: rgba(205, 218, 199, 0.77);;
+      background-color: rgba(205, 218, 199, 0.77);
       position: fixed;
       right: 0px;
       top: 0px;
@@ -1148,7 +1148,11 @@ display: block;
     tileBarHeight.value = value;
     tileSelectionCanvas.style.height = JSON.parse(value) + 'px';
     // TODO: handle sides seperately
-    tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
+    // tileSelectionBar.pictureSize = {width: JSON.parse(value - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.x)};
+    // if (!lengthPerTeil.sizeAdapted) lengthPerTeil.sizeAdapted = JSON.parse(JSON.stringify(lengthPerTeil.edit));
+    // tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x - (Math.abs(lengthPerTeil.edit.y - (JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)))), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)};
+    // tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x - (Math.abs(lengthPerTeil.edit.y - (JSON.parse(value) - 10))), height: JSON.parse(value) - 10};
+    tileSelectionBar.pictureSize = {width: lengthPerTeil.edit.x*(((JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)))/lengthPerTeil.edit.y), height:JSON.parse(value) - 10*(JSON.parse(value - 10)/lengthPerTeil.edit.y)};
     lengthPerTeil.sizeAdapted = {x: tileSelectionBar.pictureSize.width, y: tileSelectionBar.pictureSize.height};
     tileSelectionCanvas.width = (lengthPerTeil.edit.x + 10)*positions.wrong.length;
     layout();
@@ -1169,18 +1173,20 @@ display: block;
     scrollTileSelectionLeft.style.bottom = lengthPerTeil.sizeAdapted.y/2 - scrollTileSelectionLeft.getBoundingClientRect().height/2 + "px";
   }
   function originalDisplayChanged(checked) {
-    startPause('viewOriginal');
-    if (checked) stats.viewOriginal.times++;
-    if (checked) {
-      if (sourceIsPicture.checked) preview.style.display = "inline";
-      else videoPreview.style.display = "inline";
-      showOriginal.scrollIntoView();
+    if (aufgebenId.style.display == "inline") {
+      startPause('viewOriginal');
+      if (checked) stats.viewOriginal.times++;
+      if (checked) {
+        if (sourceIsPicture.checked) preview.style.display = "inline";
+        else videoPreview.style.display = "inline";
+        showOriginal.scrollIntoView();
+      }
+      else {
+        if (sourceIsPicture.checked) preview.style.display = "none";
+        else videoPreview.style.display = "none";
+      }
+      adaptExpandButtonPosition();
     }
-    else {
-      if (sourceIsPicture.checked) preview.style.display = "none";
-      else videoPreview.style.display = "none";
-    }
-    adaptExpandButtonPosition();
   }
   // section 2: actions followed by element change/user input
   function goToTutorialIndex(bElm) {
@@ -1722,8 +1728,9 @@ var pScrollY = scrollY;
             tileSelectionBar.tiles.push(i);
           }
           position.original = {x: position.original.x, y: position.original.y, degree: [0, 90, 180, 270][Math.round(Math.random()*3)]};
-          stats.minimumRotations += Math.abs(position.original.degree/90);
           if (!rotateTiles.checked) position.original.degree = 0;
+          if (position.original.degree == 270) stats.minimumRotations += 90;
+          else stats.minimumRotations += Math.abs(position.original.degree/90);
       });
       if (emptyTileBar.checked) {
         state.modelEmptybar = true;
@@ -2576,7 +2583,7 @@ var puzzles = {};
       stats.highestRight = {right: richtige, turns: stats.turns};
     }
     if (stats.preOrdered == "pending") stats.preOrdered = richtige;
-    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished && !state.restorePuzzle) {
+    if (richtige == positions.wrong?.length && !removeTilesScreen && !finished && !state.restorePuzzle && createPuzzleButton.style.display == "none") {
       if (doStorePuzzle.checked && settings.style.display != "inline") {
         delete puzzles[puzzleName.value];
         localStorage.setItem('puzzleCreatorPuzzles', JSON.stringify(puzzles));
@@ -3363,9 +3370,9 @@ layout(false, true);
       if (event.key == "F1") {
         if (tutorial.state == "") {
           if (!event.changeElement) {
+            state.helpTutorial = true;
             startTutorial(true);
             showTutorialB.innerHTML = showTutorialB.innerHTML.replace('anzeigen', 'verstecken');
-            state.helpTutorial = true;
           }
           if (shuffleStyle.value != "listTiles") tileSelectionBarTutorial.style.display = "none";
           // traditional mode: standard/alternative visibility
@@ -3597,7 +3604,7 @@ layout(false, true);
     for (let i = 0; i < positions.wrong.length; i++) {
       positions.wrong[i].tempI = i;
     }
-    var possiblePositions = positions.wrong.filter(x => Math.abs(x.edit.x - positions.wrong[tile].edit.x) < lengthPerTeil.edit.x + 11 && Math.abs(x.edit.y - positions.wrong[tile].edit.y) < lengthPerTeil.edit.y + 11);
+    var possiblePositions = positions.wrong.filter(x => Math.abs(x.edit.x - positions.wrong[tile].edit.x) < pLengthPerTeil.edit.x + 11 && Math.abs(x.edit.y - positions.wrong[tile].edit.y) < pLengthPerTeil.edit.y + 11);
     for (const pos of possiblePositions) {
       var obj = {all: pos.edit, slc: positions.wrong[tile].edit};
       var selectedObj = {
@@ -4030,10 +4037,12 @@ function goTutorialSteps(steps) {
     if (steps != 0) goTutorialSteps(steps + direction*(-1));
   }
   catch (err) {
-    console.log('tutorial finished!');
-    console.log(tutorial.state);
-    console.error(err)
-    tutorial.state = "finished";
+    if (!state.helpTutorial) {
+      console.log('tutorial finished!');
+      console.log(tutorial.state);
+      console.error(err)
+      tutorial.state = "finished";
+    }
   }
 }
 // function goTutorialSteps(steps) {
