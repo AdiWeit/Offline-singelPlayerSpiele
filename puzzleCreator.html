@@ -2,8 +2,9 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<div id="puzzleManager" class="card cardGeneral">
-  <h1>Puzzle verwalten</h1>
+<img id="puzzleManagerIcon" class="button" onclick="if (puzzleManager.style.display != 'none') puzzleManager.style.display = 'none'; else puzzleManager.style.display = 'block';" draggable="false" title="Puzzles verwalten" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/save_and_load.png">
+<div style="display: none" id="puzzleManager" class="card cardGeneral">
+  <h3>Puzzles verwalten</h3>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/database_import_icon.png" title="Bereits erstellte Puzzle fortfahren" draggable="false" >
   <li id="puzzleSelection"></li>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/saveicon.png" title="im Folgenden erstellte Puzzle speichern" draggable="false" >
@@ -35,7 +36,9 @@
 <input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="URL (drag and drop möglich)" id="sourceURL">
 <br>
 <p id="URLInfo" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren! Alternativ können Sie das Bild in das obrige Feld ziehen oder stattdessen auf "Bild im neuen Tab öffnen" klicken, und dort die Adresse/URL kopieren.
+  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren! 
+  <br>
+  Alternativ können Sie das Bild in das obrige Feld ziehen oder stattdessen auf "Bild im neuen Tab öffnen" klicken, und dort die Adresse/URL kopieren.
   <br>
 </p>
 <a style="display: none; border-radius: 3px; border-style: double; background-color: darkorange; width: max-content; height: max-content;" id="sourceCheckboxes">
@@ -43,17 +46,28 @@
   <input id="sourceIsVideo" onchange="state.userSource = 'Video';" name="mediaType" type="radio">Video
   <br>
 </a>
-<input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze live Kamera</a></button>
+<input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze angeschlossene oder verbaute (live) Kamera</a></button>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 </div>
-<div id="tilesSizeDiv" class="card cardGeneral">
+<img onclick="if (tilesSizeDiv.style.display != 'none') tilesSizeDiv.style.display = 'none'; else {tilesSizeDiv.style.display = 'block';}" class="button" title="Anzahl der Puzzleteile" style=" outline-width: 2px; outline-color: black" draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/pieceAmount_V2.png">
+<div style="display: none;" id="tilesSizeDiv" onmouseover="tilesSizeDiv.appendChild(textur);" class="card cardGeneral">
   <h3>Anzahl der Puzzleteile</h3>
   <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> Teile x-Achse
   <br>
   <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> Teile y-Achse
+  <br>
+  <br>
+  <a id="rotateTilesAdaptionSettings">
+    <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true); drawTileGrid();" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
+      und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
+    <br>
+  </a>
 </div>
-<div id="editCanvasDiv" class="card cardGeneral">
-<h2>Bild bearbeiten</h2>
+<br>
+<img onclick="if (editCanvasDiv.style.display != 'none') editCanvasDiv.style.display = 'none'; else {editCanvasDiv.style.display = 'block'; editCanvasDiv.appendChild(textur)}" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/edit_image.png" title="Bild bearbeiten" class="button" draggable="false" width="50px" height="50px">
+<br>
+<div style="display: none" id="editCanvasDiv" onmouseover="editCanvasDiv.appendChild(textur); " class="card cardGeneral">
+<h3>Bild bearbeiten</h3>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
 <br>
 <p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
@@ -69,11 +83,6 @@
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
-<a id="rotateTilesAdaptionSettings">
-  <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true); drawTileGrid();" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
-    und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
-  <br>
-</a>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 </div>
@@ -117,6 +126,7 @@
   .button {
     width: 50px; 
     border: 3px solid hsla(0, 0%, 2%, 0.4); 
+    border-radius: 10px;
     background: rgb(200, 200, 200);
   }
   .mobileControlsElm {
@@ -164,7 +174,7 @@
     <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionsettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
+    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
     </p>
     <input id="markWrong" style="accent-color: red;" type="checkbox" > markiere nicht passende
     <a id="shuffleStyleLable">
@@ -249,6 +259,9 @@
       </div>
     </div>
     <br>
+    <b>Transparenz der Teile</b>
+    <br>
+    <input type="range" value="1" oninput="layout(true, true);" id="tileTransparencySlider" max="1" min="0.01" step="0.01">
   </div>
   <div id="exchangeSettings" class="card cardGeneral" style="display: none">
   <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
@@ -649,7 +662,7 @@ display: block;
         <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
         <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab (Finger vom Bildschirm lösen), wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
         </div>
-        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weiteres Teil zu den bereis verbudenen. </div>
+        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weitere Teile mit den bereis verbudenen. </div>
       </div>
       <div class="card cardGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
@@ -1469,6 +1482,7 @@ function drawTileGrid(doNotDrawPicture) {
   }
     // create the puzzle
     function create() {
+      puzzleManager.style.display = "block";
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else if (!state.removeTile) {
       if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('Sie haben diesen Spielmodus anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle in diesem Modus spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie als zu dem kompletten Tutorial zum Modus ' + modeSelection.value + ' gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
@@ -1579,6 +1593,7 @@ function drawTileGrid(doNotDrawPicture) {
         startTutorialButton.style.display = "none";
         EmptyTileBarDiv.style.display = "none";
         texturTop = textur.getBoundingClientRect().top + scrollY;
+        futurePuzzleManager.appendChild(puzzleManagerIcon);
         futurePuzzleManager.appendChild(puzzleManager);
         automaticTileSelectionReset.checked = true;
       }
@@ -2638,6 +2653,7 @@ var puzzles = {};
     }
     pCanvas.rotate(position.original.degree*Math.PI/180);
     if (tileTransparency) canvas.globalAlpha = tileTransparency;
+    if (modeSelection.value == "traditional") canvas.globalAlpha = parseFloat(tileTransparencySlider.value);
     if (sourceIsPicture.checked) pCanvas.drawImage(document.getElementById('preview'), /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     else pCanvas.drawImage(video, /*xFromPixture*/segmentPosition.original.x, /*yFromPicture*/segmentPosition.original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, /*xFromPlacement*/-(lengthPerTeil.edit.x/2), /*yFromPlacement*/-(lengthPerTeil.edit.y/2), lengthPerTeil.edit.x, lengthPerTeil.edit.y);
     // pCanvas.restore();
