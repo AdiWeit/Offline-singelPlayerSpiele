@@ -124,6 +124,10 @@
     Pfeil
   </div>
 </div>
+<div id="unclippPCHelp" style="opacity: 0; z-index: 2; size: 25%; background-color: hsla(0, 0%, 50%, 0.352); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 10px; padding: 10px; transition: opacity 1s; display: none;">
+  <h2>Shift (⇧) drücken, um Teile zu trennen</h2>
+  <button style="position: relative; left: 50%; transform: translate(-50%, -50%); top: 50%;" onclick="showUnclippTutorial();">siehe Tutorial für Details</button>
+</div>
 <style>
   .button {
     width: 50px; 
@@ -173,7 +177,7 @@
       <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> automatisch Teile/Auswahl abwählen (Alternative)
+    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> drag and drop Steuerung (Teile loslassen, wenn Maustaste losgelassen wird; <b>"Alternative"</b>)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
@@ -627,7 +631,7 @@ display: block;
         <div id="clickUnselectMoveTutorialDiv"><input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> Durch einen erneuten Mausklick auf das Teil können Sie es wieder loslassen bzw. abwählen.</div>
       </div>
       <div class="card cardGeneral" id="moveAlternativePC">
-        <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" name="moveStyle"> <b>Alternative</b>
+        <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" name="moveStyle"> <b>Alternative (drag and drop)</b>
         <div id="holdMouseMoveTutorialDiv"><input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Halten Sie die Maustaste gedrückt (oder doppelklicken Sie und lassen Sie Ihren Finger auf dem Touchpad).</div>
         <div id="moveMouseMoveTutorialAlternativeDiv"><input type="checkbox" id="moveMouseMoveTutorialAlternative" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um das Teil zu bewegen. </div>
         <div id="rotateTileTutorialAlternativeDiv"><input type="checkbox" id="rotateTileTutorialAlternative" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren. </div>
@@ -668,7 +672,7 @@ display: block;
       </div>
       <div class="card cardGeneral section" id="disconnectTiles">
         <h3>Teile lösen</h3>
-        <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+        <button id="contineTutorialUnclippPC" onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
         <div class="card cardGeneral">
           <b style="font-size: 15px;">Information Shift Taste</b>
           <br>
@@ -804,7 +808,7 @@ display: block;
         </div>
         <div class="card cardGeneral section" id="disconnectTiles">
           <h3>Teile lösen</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <button id="contineTutorialUnclippMobile" onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
           <div class="card cardGeneral">
             <b style="font-size: 15px;">Allgemeiner Hinweis</b>
             <br>
@@ -1003,7 +1007,7 @@ display: block;
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
-  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie als zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
     setTimeout(() => {
       setupTutorial();
     }, 100);
@@ -1491,7 +1495,7 @@ function drawTileGrid(doNotDrawPicture) {
       puzzleManager.style.display = "block";
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else if (!state.removeTile) {
-      if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('Sie haben diesen Spielmodus anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle in diesem Modus spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie als zu dem kompletten Tutorial zum Modus ' + modeSelection.value + ' gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+      if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('Sie haben diesen Spielmodus anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle in diesem Modus spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus ' + modeSelection.value + ' gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
         setupTutorial();
       }
       else {
@@ -2962,6 +2966,7 @@ var puzzles = {};
       automaticTileSelectionReset.disabled = true;
       if (localStorage.getItem('tileListVisHybridDevice')) mobileControls.style.display = localStorage.getItem('tileListVisHybridDevice');
       if (mobileControls.style.display == "none") showMobileControls.style.display = 'inline';
+      adaptTitlesPosition();
     }
     else showMobileControls.style.display = 'none';
     document.querySelector("#closeMobileControls").disabled = !mouseSupported
@@ -3068,6 +3073,7 @@ var puzzles = {};
     if (state.mouse == "up" && !automaticTileSelectionReset.checked && state.removeTile) state.mouse = "downNow";
     if (state.mouse != "downNow") state.mouse = "down";
     if (((selected.tiles.length && !state.shift) || state.removeTile) && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
+      trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
       mouseUp(true);
       if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || ["unselectUnclippStandardTutorial", "unselecTileAfterTileBarTilePlacementTutorial"].includes(tutorial.state)) {
         goTutorialSteps(1);
@@ -3184,7 +3190,11 @@ var puzzles = {};
     }
   }
   }
+  if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked) {
+    trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
+  }
 }
+var trackActivity = {mouseDown: {position: {x: 0, y: 0}}, unclipp: {counter: 0, tiles: []}}
   // #importantUserInput
   function folgenMouseMove(calledBy) {
     if (modeSelection.value == "exchange" && JSON.stringify(checkSelected()) != JSON.stringify(selected.coord)) {
@@ -3281,6 +3291,34 @@ var puzzles = {};
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
+    if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked && Math.abs(trackActivity.mouseDown.position.x - mausx) > 7 && Math.abs(trackActivity.mouseDown.position.y - mausy) > 7 && confirm('Ihre Steuerung des Spiels weist darauf hin, dass Sie die drag and drop Steuerung nutzen wollen. Soll der Steuerungsmodus umgestellt werden? \n Sie können dies jederzeit in den Einstellungen ändern. Außerdem können Sie um die aktuell ausgewählte Steuerungsart zu verstehen auf Hilfe (Steuerung anzeigen)" klicken oder f1 drücken. ')) {
+      automaticTileSelectionReset.checked = true;
+    }
+    trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
+    console.log(selected.tiles);
+    if (selected.tiles.length > 1 && (JSON.stringify(selected.tiles) == JSON.stringify(trackActivity.unclipp.tiles) || !trackActivity.unclipp.tiles.length) && !byUnselection) {
+      trackActivity.unclipp.counter++;
+      trackActivity.unclipp.tiles = JSON.parse(JSON.stringify(selected.tiles));
+      if (trackActivity.unclipp.counter > 2) {
+        if (mobileControls.style.display == "inline") showTitle("selectMultipleSymbol", "none");
+        else {
+          unclippPCHelp.style.display = "inline";
+          unclippPCHelp.style.opacity = 1;
+          setTimeout(() => {
+            unclippPCHelp.style.opacity = 0;
+            setTimeout(() => {
+              unclippPCHelp.style.display = "none";
+            }, 1000);
+          }, 5555);
+        }
+        trackActivity.unclipp.counter = 0;
+        trackActivity.unclipp.tiles = [];
+      }
+    }
+    if (JSON.stringify(selected.tiles) != JSON.stringify(trackActivity.unclipp.tiles) && selected.tiles.length > 0) {
+      trackActivity.unclipp.counter = 0;
+      trackActivity.unclipp.tiles = [];
+    }
     if (["moveMouseMoveTutorialAlternative", "moveMouseScrollTileSelectionBarTutorial", "moveTileMobileTutorial", "getClippingOptionConnectTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state)) {
       if (tutorial.state == "moveTileTwoFingersUnclippTutorial") selected.tiles = [];
       goTutorialSteps(-1);
@@ -3949,6 +3987,12 @@ function setupTutorial() {
       }, 777);
   }
   var tutorialSteps = [];
+  function showUnclippTutorial() {
+    document.onkeydown({key: 'F1'}); 
+    setTimeout(() => {
+      goToTutorialIndex(document.getElementById('contineTutorialUnclipp' + gerät));
+    }, 1000);
+  }
 function startTutorial() {
   showTutorialB.innerHTML = "Tutorial verstecken";
   var mode = modeSelection.value;
