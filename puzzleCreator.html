@@ -92,6 +92,7 @@
 <button id="showTutorialB" style="display: none;" onclick="document.onkeydown({key: 'F1'});">Hilfe (Steuerung anzeigen)</button>
 <br>
 <img src="https://adi.nicolaiweitkemper.de/Bilder/settings.png" id="showSettings" class="button" title="mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)" onmouseup="changeSettingsVis();"  draggable="false" >
+<button id="showMobileControls" onclick="style.display = 'none'; mobileControls.style.display = 'inline'; localStorage.setItem('tileListVisHybridDevice', 'inline');" style="display: none; font-size: x-large;">Steuerungsleiste für Mobilgeräte anzeigen</button>
 <br>
 <button style="position: fixed; display: none; z-index: 3;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
@@ -104,6 +105,7 @@
     </a>
   </p>
     <input class="mobileControlsElm" type="checkbox" id="scrollable" onclick=" if ((tutorial.state == 'selectScrollScrollingTutorial' && checked) || (tutorial.state == 'unselectScrollScrollingTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'scrollMobileScrollingTutorial' && !checked) goTutorialSteps(-1); if (tutorial.state == 'zoomInTutorial' && !checked) goTutorialSteps(-2); if (tutorial.state == 'zoomOutTutorial' && !checked) goTutorialSteps(-3);" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
+  <button style="width:10px; margin-right: 7px;" id="closeMobileControls" onclick="if (mouseSupported) {mobileControls.style.display = 'none'; showMobileControls.style.display = 'inline'; localStorage.setItem('tileListVisHybridDevice', 'none')}">X</button>
 </p2>
 <div id="tileElements">
   <div id="rotateLeftTitle" style="display: none;" class="speech top">
@@ -952,6 +954,7 @@ display: block;
     console.log("Leave Website");
       return 'Are you sure you want to leave?';
   };
+  var mouseSupported = false;
   if (navigator.userAgent.match(/Android/i) ||
     navigator.userAgent.match(/webOS/i) ||
     navigator.userAgent.match(/iPhone/i) ||
@@ -975,11 +978,14 @@ display: block;
     ScrollkeyTileBarTutorialDiv.remove();
   } else {
     var gerät = "PC"
+    mouseSupported = true;
     console.log("PC");
     swipeSteuerungP.innerHTML = swipeSteuerungP.innerHTML.replace('beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen', 'drücken Sie die Maustaste runter oder vollführen Sie einen Doppelklick beim ersten Teil und lassen Sie beim 2. Teil los. ');
     scrollOnBlancP.style.display = "none";
     vibrateA.style.display = "none";
   }
+  document.querySelector("#closeMobileControls").disabled = !mouseSupported;
+  // changeControlMode();
   exchangeTutorial.id += gerät;
   schiebenTutorial.id += gerät;
   gapSizeChanged(tilesGap.value);
@@ -1822,6 +1828,7 @@ var pScrollY = scrollY;
   expandBottom.style.top = textur.getBoundingClientRect().bottom + scrollY;// texturTop + scrollY + textur.height + 6 + 'px'; 
 }
   texturLeft = textur.getBoundingClientRect().left + scrollX;
+  // TODO
   if (gerät == "Handy") autoSelectTileBar.checked = false;
   tileBarHeight.max = window.innerHeight - texturTop - lengthPerTeil.edit.y;
   setDefaultSelectionBarHeight();
@@ -2913,6 +2920,8 @@ var puzzles = {};
       elm.style.width = 44/(visualViewport.scale); 
       elm.style.height = 44/(visualViewport.scale); 
     }
+    closeMobileControls.style.fontSize = 33/(visualViewport.scale);
+    closeMobileControls.style.width = 33/(visualViewport.scale);
     var pos = {x: visualViewport.offsetLeft, y: visualViewport.offsetTop};
     setTimeout(() => {
       if (pos.x != visualViewport.offsetLeft || pos.y != visualViewport.offsetTop) adaptMobileControlsPosition();
@@ -2928,6 +2937,39 @@ var puzzles = {};
     document.getElementById('tutorial').style.maxHeight = window.innerHeight - mobileControls.getBoundingClientRect().bottom - 10;
     if (modeSelection.value != "traditional") document.getElementById('tutorial').style.maxHeight = window.innerHeight;
   }
+  function changeControlMode(device) {
+    if (gerät == device) return;
+    if (device == "PC") mouseSupported = true;
+    gerät = device;
+    mobileControls.style.display = "none";
+    rotateControls.style.display = "none";
+    automaticTileSelectionReset.disabled = false;
+    if (localStorage.getItem("automaticTileSelectionResetPuzzleCreator")) automaticTileSelectionReset.checked = JSON.parse(localStorage.getItem("automaticTileSelectionResetPuzzleCreator"));
+    selectBackToBarB.style.fontSize = '';
+    if (gerät == "Handy") {
+      mobileControls.style.display = "inline";
+      selectBackToBarB.style.fontSize = '5vh';
+      // zoom out: 
+      // var newElm = document.createElement('meta');
+      // newElm.name = "viewport";
+      // newElm.id = "zoomLevelControler";
+      // newElm.content = "initial-scale=1";
+      // document.getElementsByTagName('head')[0].appendChild(newElm);
+      // TODO: add "x" to close them
+      rotateControls.style.display = "inline";
+      // adaptMobileControlsPosition();
+      automaticTileSelectionReset.checked = true;
+      automaticTileSelectionReset.disabled = true;
+      if (localStorage.getItem('tileListVisHybridDevice')) mobileControls.style.display = localStorage.getItem('tileListVisHybridDevice');
+      if (mobileControls.style.display == "none") showMobileControls.style.display = 'inline';
+    }
+    else showMobileControls.style.display = 'none';
+    document.querySelector("#closeMobileControls").disabled = !mouseSupported
+  }
+  document.addEventListener('pointerdown', (event) => {
+    if (event.pointerType == "mouse") changeControlMode("PC");
+    else changeControlMode("Handy");
+  });
   // #importantUserInputs
   function readMouseMove(e) {
     mausx = e.clientX + scrollX - texturLeft + state.rightScroll;
