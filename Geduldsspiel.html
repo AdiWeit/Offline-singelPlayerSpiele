@@ -159,15 +159,16 @@
     </div>
   <br>
   </div>
-  <button onclick="showGameInstructions();">how to play</button>
+  <button style="font-size: 50px;" onclick="showGameInstructions();">how to play</button>
   <br>
-  <input id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> easy map versions
-  <button onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
-  <h2>sensibility: </h2>
-  <a id="sensibilityTitleLeft">high (fast)</a>
-  <input type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
-  <a id="sensibilityTitleRight">low (slow)</a>
-  <button type="button" id="normalSensibility" onclick="sensibility(level.currentSensibility, true)" name="button">back to normal</button>
+  <input style="width: 50px; height: 50px" id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> <a style="font-size: 50px;">easy map versions</a>
+  <br>
+  <button style="font-size: 50px;" onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
+  <h2 style="font-size: 50px;">sensibility: </h2>
+  <a style="font-size: 40px;" id="sensibilityTitleLeft">high (fast)</a>
+  <input style="height: 50px;" type="range" min="1" onchange="sensibility(document.getElementById('sensibility').value)" max="25" value="5" class="slider" id="sensibility">
+  <a style="font-size: 40px;" id="sensibilityTitleRight">low (slow)</a>
+  <button type="button" id="normalSensibility" onclick="sensibility(level.currentSensibility, true)" style="font-size: 50px;" name="button">back to normal</button>
   <table id="scores">
     <!-- <tr>
     <td>Row1 cell1</td>
@@ -189,18 +190,18 @@
       {{ title }}
     </li>
   </div>
-  <select name="course" id="courceSelection" onchange="courceSelected()">
+  <select name="course" id="courceSelection" style="font-size: 50px;" onchange="courceSelected()">
   </select>
   <div id="checkpointManagement">
     <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
-    <button onclick="deleteCheckpoint();">delete latest checkpoint</button>
+    <button onclick="deleteCheckpoint();" style="font-size: 50px;">delete latest checkpoint</button>
     <br>
   </div>
   <div id="oldMapCreatorPosition"></div>
-  <a id="randomMapCreatorVisableA"><input type="checkbox" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> show random map creator</a>
+  <a id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> <a style="font-size: 50px;">show random map creator</a>
   <br>
-  <input type="checkbox" onchange="inOrAgainstDirection *= -1;" id="oppositeCheck"> opposite
-  <p id="joyStickPlayP"> <input type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentSensibility = currentLevel.joyStickSensibility} else level.currentSensibility = currentLevel.sensibility;" id="joyStickPlay"> joystick control </p>
+  <input type="checkbox" onchange="inOrAgainstDirection *= -1;" style="width: 50px; height: 50px" id="oppositeCheck"> <a style="font-size: 50px;">opposite movement direction</a>
+  <p style="font-size: 50px;" id="joyStickPlayP"> <input style="width: 50px; height: 50px" type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentSensibility = currentLevel.joyStickSensibility} else level.currentSensibility = currentLevel.sensibility;" id="joyStickPlay"> joystick control </p>
   <select name="course" id="modeSelection" style="display:none" value="move" onchange="modeSelected(value);">
     <option value="normal">normal</option>
     <option value="growing">growing</option>
