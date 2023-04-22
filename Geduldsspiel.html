@@ -1196,6 +1196,8 @@
   }
   function layoutObjs() {
     canvas.clearRect(0, 0, textur.width, textur.height);
+    canvas.fillStyle = "#787878";
+    canvas.fillRect(0, 0, textur.width, textur.height)
     for (const objType of Object.keys(objects)) {
       for (const obj of objects[objType]) {
         if (JSON.stringify(obj) == JSON.stringify(selected.obj)) {
@@ -1473,7 +1475,7 @@
             green = data.data[1];
             blue = data.data[2];
             alpha = data.data[3];
-            if ((joyStick != "place" || !joyStickPlay.checked) && ((red == 0 && blue == 0 && alpha == 255 && green == 0) || (joyStickPlay.checked && red == 34 && blue == 76 && green == 177))) {
+            if ((joyStick != "place" || !joyStickPlay.checked) && (((red == 0 && blue == 0 && alpha == 255 && green == 0) || (red == 34 && blue == 76 && green == 177)))) {
               console.log("Fail!");
               i = 4;
               deathMarkers.push({x: x1 - (textur.getBoundingClientRect().left + parseInt(textur.style.borderWidth.split("px")[0]) + scrollX) + 1, y: y1 - (textur.getBoundingClientRect().top + parseInt(textur.style.borderWidth.split("px")[0]) + scrollY), width: JSON.parse(sphere1.style.width.replace("px", "")), height: JSON.parse(sphere1.style.height.replace("px", "")), visibility: 0.5});
