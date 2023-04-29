@@ -161,7 +161,9 @@
   </div>
   <button style="font-size: 50px;" onclick="showGameInstructions();">how to play</button>
   <br>
-  <input style="width: 50px; height: 50px" id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> <a style="font-size: 50px;">easy map versions</a>
+  <button style="font-size: 50px;" onclick="calibrate();">calibrate (tilting direction)</button>
+  <br>
+  <input style="width: 50px; height: 50px" id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> <a style="font-size: 50px;">easy level versions</a>
   <br>
   <button style="font-size: 50px;" onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2 style="font-size: 50px;">sensibility: </h2>
@@ -1232,7 +1234,30 @@
         if (!wall.changing) wall.changing = wall.start;
       }
     }
+    var calibratedDirection = 1;
+    if ([null, "undefined", "null"].includes(localStorage.getItem("calibratedDirection"))) {
+      calibrate();
+    }
+    else {
+      calibratedDirection = Number(localStorage.getItem("calibratedDirection"));
+    }
+    function calibrate() {
+      alert("calibrating! Please tilt the device towards you so a ball on your screen would roll in your direction and then click OK.");
+      setTimeout(() => {
+        calibratedDirection = 1;
+          window.addEventListener("deviceorientation", detectDeviceOrientation);
+      }, 777);
+    }
     if (!localStorage.getItem('gameInstructionsGeduldspiel')) showGameInstructions();
+    function detectDeviceOrientation(event) {
+      if (event.gamma > 5) {
+        calibratedDirection = -1;
+      }
+      localStorage.setItem("calibratedDirection", calibratedDirection);
+      setTimeout(() => {
+        window.removeEventListener("deviceorientation", detectDeviceOrientation);
+      }, 777);
+    }
     function showGameInstructions() {
       alert("Hold your device flat like it is lying on a table and tilt it to move! Do not touch the black and try to reach the yellow goal!");
       localStorage.setItem("gameInstructionsGeduldspiel", true);
@@ -1400,12 +1425,15 @@
     if ((window.DeviceMotionEvent != undefined || joyStick.coordinates)) {
       window.ondevicemotion = function(e) {
         if (!pause) {
-          if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
-          else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
-          else ax1 = inOrAgainstDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibilityAcc.x);
-          if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * 1.88 * sensibilityAcc.y;
-          else ay1 = inOrAgainstDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
+          if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * calibratedDirection * event.accelerationIncludingGravity.x * sensibilityAcc.x;
+          else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * calibratedDirection * (event.accelerationIncludingGravity.z - 1) * (-sensibilityAcc.x);
+          else ax1 = inOrAgainstDirection * calibratedDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensibilityAcc.x);
+          if (tabletPositionModeSelection.value.split(' (')[0] != "flat") ay1 = inOrAgainstDirection * calibratedDirection * event.accelerationIncludingGravity.y * 1.88 * sensibilityAcc.y;
+          else ay1 = inOrAgainstDirection * calibratedDirection * event.accelerationIncludingGravity.y * sensibilityAcc.y;
        }
+      }
+      screen.orientation.onchange = (event) => {
+        inOrAgainstDirection *= -1;
       }
       function goToCheckpoint() {
         if (checkpoint) {
