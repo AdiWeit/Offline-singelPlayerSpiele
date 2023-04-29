@@ -195,12 +195,12 @@
   <select name="course" id="courceSelection" style="font-size: 50px;" onchange="courceSelected()">
   </select>
   <div id="checkpointManagement">
-    <select id="checkpointSelection" onchange="checkpointSelected(value);"></select>
+    <select style="font-size: 50px;" id="checkpointSelection" onchange="checkpointSelected(value);"></select>
     <button onclick="deleteCheckpoint();" style="font-size: 50px;">delete latest checkpoint</button>
     <br>
   </div>
   <div id="oldMapCreatorPosition"></div>
-  <a id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> <a style="font-size: 50px;">show random map creator</a>
+  <a id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> <a style="font-size: 50px;">show random level creator</a>
   <br>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" style="width: 50px; height: 50px" id="oppositeCheck"> <a style="font-size: 50px;">opposite movement direction</a>
   <p style="font-size: 50px;" id="joyStickPlayP"> <input style="width: 50px; height: 50px" type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentSensibility = currentLevel.joyStickSensibility} else level.currentSensibility = currentLevel.sensibility;" id="joyStickPlay"> joystick control </p>
@@ -470,7 +470,11 @@
             width: 1366,
             height: 17,
             angle: 90
-          }]
+          }],
+          spawnPoint: {
+            x: 50, 
+            y: 399
+          }
         },
         15: {
           rotatingDreieck: [{
@@ -698,6 +702,10 @@
             height: 17,
             angle: 135
           }],
+          spawnPoint: {
+            x: 50, 
+            y: 399
+          },
           levelNr: 14
         },
         16: {
@@ -1595,7 +1603,9 @@
     }
     function blinkWall() {
       for (const wall of currentLevel.blinkWall) {
-        wall.changing.timeUntilChange -= 25;
+        if (!pause) {
+          wall.changing.timeUntilChange -= 25;
+        }
         if (wall.changing.timeUntilChange <= 0) {
           wall.changing.visible = !wall.changing.visible;
           if (wall.changing.visible) wall.changing.timeUntilChange = wall.timeVisible;
@@ -1697,7 +1707,7 @@
       canvas.fillStyle = "black";
       canvas.setTransform(1, 0, 0, 1, x, y);
       canvas.rotate(angle);
-      canvas.fillRect(-width/2, -height/2, width, height);
+      canvas.fillRect(Math.floor(-width/2), Math.floor(-height/2), width, height);
     }
     var rotationStartTime = 0;
     var rotationTime = 0;
