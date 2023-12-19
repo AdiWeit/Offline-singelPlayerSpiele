@@ -1361,6 +1361,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
     }
     var deathMarkers = [];
     function restartLevel() {
+      vx1 = vx2 = vy1 = vy2 = 0;
       if (level.mode == "growing") {
         modeSelected("growing");
         startPause();
