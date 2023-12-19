@@ -161,8 +161,6 @@
   </div>
   <button style="font-size: 50px;" onclick="showGameInstructions();">how to play</button>
   <br>
-  <button style="font-size: 50px;" onclick="calibrate();">calibrate (tilting direction)</button>
-  <br>
   <input style="width: 50px; height: 50px" id="easyMaps" checked="true" onchange="if (!randomMapCreatorVisable.checked) difficultyChanged(checked);" type="checkbox"> <a style="font-size: 50px;">easy level versions</a>
   <br>
   <button style="font-size: 50px;" onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
@@ -246,7 +244,9 @@ input[id='sensitivity']::-webkit-slider-thumb {
     <option value="growing">growing</option>
     <option value="survive">survive</option>
   </select>
-  <!-- <button type="button" id="saveMaps" onclick="saveMapsVorgefertigt()" name="button">save vorgefertigt maps and other data on device for offline mode</button> -->
+  <br>
+  <button style="font-size: 50px;" onclick="calibrate();">calibrate (tilting direction)</button>
+  <br>
   <select id="tabletPositionModeSelection">
     <option>flat (most natural)</option>
     <option>almost on end (slopes away from you a bit, best? for your posture)</option>
