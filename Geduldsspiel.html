@@ -1292,7 +1292,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
       }
     }
     function calibrate() {
-      alert("calibrating! Please tilt the device towards you so a ball on your screen would roll in your direction and then click OK.");
+      alert("calibrating! Please hold your device horizontally (like you should while playing) and tilt the device towards you so a ball on your screen would roll in your direction and then click OK.");
       setTimeout(() => {
         calibratedDirection = 1;
           window.addEventListener("deviceorientation", detectDeviceOrientation);
@@ -1309,7 +1309,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
       }, 777);
     }
     function showGameInstructions() {
-      alert("Hold your device flat like it is lying on a table and tilt it to move! Do not touch the black and try to reach the yellow goal!");
+      alert("Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
       localStorage.setItem("gameInstructionsGeduldspiel", true);
     }
     var highscores = {}
@@ -1412,9 +1412,9 @@ input[id='sensitivity']::-webkit-slider-thumb {
           }
         }
         else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
-          alert('every level finished! That was the last one :(  If you can not get enough of this game you can try out the random level creator or check out the game "transport the ball", which is pretty similar but a bit more complicated and difficult. ');
+          alert('every level finished! That was the last one :(  If you can not get enough of this game you can try out the random level creator, increase the sensitivity or check out the game "transport the ball", which is pretty similar but a bit more complicated and difficult. ');
           if (easyMaps.checked) {
-            alert("But first, you can try to beat the hard version of the levels now, if you did not do so already!");
+            alert('But first, you can try to beat the hard version of the levels now, if you did not do so already! Just uncheck "easy level versions". ');
             difficultyChanged(false, true);
           }
           level.normal.number = 1;
