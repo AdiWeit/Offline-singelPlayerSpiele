@@ -1286,6 +1286,11 @@ input[id='sensitivity']::-webkit-slider-thumb {
     else {
       calibratedDirection = Number(localStorage.getItem("calibratedDirection"));
     }
+    if ([0, 180].includes(window.orientation)) {
+      if (confirm('The browser Chrome is recommended. Please hold your device horizontally (in landscape mode) to start playing. If you have trouble with the detection of the screen orientation, you can click on "cancel" or something like that')) {
+        window.location.reload()
+      }
+    }
     function calibrate() {
       alert("calibrating! Please tilt the device towards you so a ball on your screen would roll in your direction and then click OK.");
       setTimeout(() => {
