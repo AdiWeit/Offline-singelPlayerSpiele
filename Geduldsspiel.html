@@ -1464,7 +1464,10 @@ input[id='sensitivity']::-webkit-slider-thumb {
       textur.height = Bild.height;
       Layout();
     }, 777);
+    if (automaticResetsensitivity.checked) {
       document.getElementById('sensitivity').value = level.currentsensitivity;
+    }
+    sensitivityAcc = {x: level.currentsensitivity, y: level.currentsensitivity};
     if (currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) requestAnimationFrame(renderLoop);
     if (currentLevel.rotatingWall && !levelBefore?.rotatingWall) requestAnimationFrame(renderLoop);
     }
