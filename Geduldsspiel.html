@@ -1287,12 +1287,12 @@ input[id='sensitivity']::-webkit-slider-thumb {
       calibratedDirection = Number(localStorage.getItem("calibratedDirection"));
     }
     if ([0, 180].includes(window.orientation)) {
-      if (confirm('The browser Chrome is recommended. Please hold your device horizontally (in landscape mode) to start playing. If you have trouble with the detection of the screen orientation, you can click on "cancel" or something like that')) {
+      if (confirm('Please hold your device horizontally (in landscape mode) to start playing. If you have trouble with the detection of the screen orientation, you can click on "cancel". Otherwise please change the orientation and click on "OK')) {
         window.location.reload()
       }
     }
     function calibrate() {
-      alert("calibrating! Please hold your device horizontally (like you should while playing) and tilt the device towards you so a ball on your screen would roll in your direction and then click OK.");
+      alert("calibrating! Please hold your device horizontally (in landscape mode) and tilt the device towards you so a ball on your screen would roll in your direction and the screen faces you. and then click OK.");
       setTimeout(() => {
         calibratedDirection = 1;
           window.addEventListener("deviceorientation", detectDeviceOrientation);
@@ -1309,7 +1309,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
       }, 777);
     }
     function showGameInstructions() {
-      alert("Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
+      alert("The browser Chrome is recommended. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
       localStorage.setItem("gameInstructionsGeduldspiel", true);
     }
     var highscores = {}
@@ -1467,8 +1467,8 @@ input[id='sensitivity']::-webkit-slider-thumb {
     }, 777);
     if (automaticResetsensitivity.checked) {
       document.getElementById('sensitivity').value = level.currentsensitivity;
+      sensitivityAcc = {x: level.currentsensitivity, y: level.currentsensitivity};
     }
-    sensitivityAcc = {x: level.currentsensitivity, y: level.currentsensitivity};
     if (currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) requestAnimationFrame(renderLoop);
     if (currentLevel.rotatingWall && !levelBefore?.rotatingWall) requestAnimationFrame(renderLoop);
     }
