@@ -1677,12 +1677,14 @@ input[id='sensitivity']::-webkit-slider-thumb {
         alert("every level finished! That was the last one :(  )");
       }
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
-        if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
-        if (!highscores[level.mode][joyStickPlay.checked][easyMaps.checked]) highscores[level.mode][joyStickPlay.checked][easyMaps.checked] = {};
-        if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
-          if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr]) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
-          highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
-          localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
+        if (sensitivityAcc.x == currentLevel.sensitivity) {
+          if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
+          if (!highscores[level.mode][joyStickPlay.checked][easyMaps.checked]) highscores[level.mode][joyStickPlay.checked][easyMaps.checked] = {};
+          if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
+            if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr]) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
+            highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
+            localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
+          }
         }
         level[level.mode].number++;
         document.getElementById('courceSelection').value = level[level.mode].number + ". map";
