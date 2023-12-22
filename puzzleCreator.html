@@ -2402,8 +2402,8 @@ var puzzles = {};
     modeSelected(puzzle.mode);
     if (!sourceLoaded) {
       if (puzzle.fileName) {
-        fileB.click();
         alert('Bitte wählen Sie die von Ihnen genutzte Datei mit dem Namen "' + puzzle.fileName + '" aus.');
+        fileB.click();
       }
       if (puzzle.URL) {
         sourceURL.value = puzzle.URL;
