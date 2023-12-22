@@ -1395,6 +1395,10 @@ display: block;
   function resetImageSize() {
     größeAnpassenX.value = preview.naturalWidth;
     größeAnpassenY.value = preview.naturalHeight;
+    if (sourceIsVideo.checked) {
+      größeAnpassenX.value = video.videoWidth;
+      größeAnpassenY.value = video.videoHeight;
+    }
     zeigeGröße();
   }
   // Seitenverhältnisse des Bildes anpassen
@@ -2210,7 +2214,10 @@ function canvasClicked(calledBy) {
   }
   video.addEventListener('loadeddata', function() {
     startVideo();
-    loadImage(video.videoWidth, video.videoHeight);
+    preview.width = video.videoWidth;
+    preview.height = video.videoHeight;
+    originalSize.width = video.videoWidth;
+    originalSize.height = video.videoHeight;
   }, false);
   var originalSize = {};
   function loadImage(width, height) {
