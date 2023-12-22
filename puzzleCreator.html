@@ -2218,8 +2218,24 @@ function canvasClicked(calledBy) {
     preview.height = video.videoHeight;
     originalSize.width = video.videoWidth;
     originalSize.height = video.videoHeight;
+    loadPuzzle();
+    // TODO: kann weg? (KA wofür)
   }, false);
   var originalSize = {};
+  function loadPuzzle() {
+    if (state.restorePuzzle) {
+        größeAnpassenX.max =  state.restorePuzzle.width;
+        größeAnpassenY.max =  state.restorePuzzle.height;
+        größeAnpassenX.value = state.restorePuzzle.width;
+        größeAnpassenY.value = state.restorePuzzle.height;
+        if (state.restorePuzzle.tileBarTiles) shuffleStyle.value = "listTiles";
+        else shuffleStyle.value = "nextToEachOther";
+        create();
+        shufflePuzzle();
+        restorePuzzle(state.restorePuzzle);
+        delete state.restorePuzzle;
+      }
+  }
   function loadImage(width, height) {
     setTimeout(function () {
       URLInfo.style.display = 'none';
@@ -2239,18 +2255,8 @@ function canvasClicked(calledBy) {
         changeAdaptedSizeMax(width, height);
         zuAngepassterBildschirmgröße();
       } 
-       if (state.restorePuzzle) {
-        größeAnpassenX.max =  state.restorePuzzle.width;
-        größeAnpassenY.max =  state.restorePuzzle.height;
-        größeAnpassenX.value = state.restorePuzzle.width;
-        größeAnpassenY.value = state.restorePuzzle.height;
-        if (state.restorePuzzle.tileBarTiles) shuffleStyle.value = "listTiles";
-        else shuffleStyle.value = "nextToEachOther";
-        create();
-        shufflePuzzle();
-        restorePuzzle(state.restorePuzzle);
-        delete state.restorePuzzle;
-       }
+      loadPuzzle();
+      resetImageSize();
     }, 500);
     selectSourceHeader.style.color = "green";
     createPuzzleButton.style.backgroundColor = "green";
