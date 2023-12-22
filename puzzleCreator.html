@@ -29,7 +29,7 @@
 <div class="card cardGeneral">
 <h1 id="selectSourceHeader" style="color: red;">Quelle auswählen</h1>
 <br>
-<input type="file" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
+<input type="file" accept="image/*,video/*" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
 <br>
 <input onchange="useURL();" id="useURLCheck" type="radio" name="source">
