@@ -1230,6 +1230,9 @@ display: block;
   }
   function showInformation() {
     var puzzle = puzzles[selected.puzzle];
+    if (puzzle.fileName) alert('Das Puzzle nutzt das Bild "' + puzzle.fileName + '"');
+    else if (puzzle.URL) alert('Das Puzzle nutzt das Bild/Video von der Website "' + puzzle.URL + '"');
+    else alert('Das Bild nutzt die Live-Kamera "' + puzzle.liveCam + '"');
     alert(`Dieses Puzzle nutzt den Modus "${puzzle.mode}". Sie haben bereits ${getTimeString(puzzle.completionTime)} Minuten mit dem Puzzle verbracht. Das Puzzle enthält ${puzzle.positions.wrong.length} Teile. `);
     document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
   }
