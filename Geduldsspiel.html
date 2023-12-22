@@ -1466,6 +1466,9 @@ input[id='sensitivity']::-webkit-slider-thumb {
       textur.width = Bild.width;
       textur.height = Bild.height;
       Layout();
+        if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
+        levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked];
+      }, 1111);
     }, 777);
     if (automaticResetsensitivity.checked) {
       document.getElementById('sensitivity').value = level.currentsensitivity;
