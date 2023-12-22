@@ -10,7 +10,7 @@
   <div>
     <h1 id="stopClockText" style="color: green; background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px;"></h1>
   </div>
-  <canvas id="textur" width="1582" style="border-width: 3px; border-style: solid; border-color: orange;" onclick="canvasClicked();" height="740"></canvas>
+  <canvas id="textur" style="border-width: 3px; border-style: solid; border-color: orange;" onclick="canvasClicked();"></canvas>
   <meta name="viewport" id="scaleControler">
   <div id="ball">
     <style>
@@ -301,6 +301,8 @@ input[id='sensitivity']::-webkit-slider-thumb {
   }
   </style>
   <script type="text/javascript">
+  // in full screen mode black by default
+  document.body.style.backgroundColor = "white"
   function selectTextBox(pThis) {
     setTimeout(() => {
       pThis.parentElement.querySelector('input').select();
