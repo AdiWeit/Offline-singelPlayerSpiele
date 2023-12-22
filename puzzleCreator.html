@@ -64,9 +64,9 @@
   </a>
 </div>
 <br>
-<img onclick="if (editCanvasDiv.style.display != 'none') editCanvasDiv.style.display = 'none'; else {editCanvasDiv.style.display = 'block'; editCanvasDiv.appendChild(textur)}" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/edit_image.png" title="Bild bearbeiten" class="button" draggable="false" width="50px" height="50px">
+<img onclick="if (editCanvasDiv.style.display != 'none') editCanvasDiv.style.display = 'none'; else {editCanvasDiv.style.display = 'block'; editCanvasDiv.insertBefore(textur, videoControls)}" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/edit_image.png" title="Bild bearbeiten" class="button" draggable="false" width="50px" height="50px">
 <br>
-<div style="display: none" id="editCanvasDiv" onmouseover="editCanvasDiv.appendChild(textur); " class="card cardGeneral">
+<div style="display: none" id="editCanvasDiv" onmouseover="editCanvasDiv.appendChild(textur); editCanvasDiv.insertBefore(textur, videoControls);" class="card cardGeneral">
 <h3>Bild bearbeiten</h3>
 <input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
 <br>
@@ -1011,7 +1011,7 @@ display: block;
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
-  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Sie können die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. Auch in den Einstellungen kann man zu den Tutorials zum jeweiligen Spielmodus gelangen. ')) {
     setTimeout(() => {
       setupTutorial();
     }, 100);
@@ -1534,23 +1534,6 @@ function drawTileGrid(doNotDrawPicture) {
         rotateTilesP.style.display = "none";
         missing = [];
         if (gerät == "Handy") mobileControls.style.display = "inline";
-        if (sourceIsVideo.checked) {
-          videoControls.style.display = 'block';
-          videoPosition.max = video.duration;
-          settings.style.display = 'block';
-          videoPosition.style.width = window.innerWidth;
-          while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
-            videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
-          }
-          videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
-          playVideo.style.width = playVideo.getBoundingClientRect().width;
-          settings.style.display = 'none';
-          if (video.srcObject) {
-            for (const elm of timeChangeDiv) {
-              elm.style.display = 'none';
-            }
-          }
-        }
         originalSize.width = preview.width;
         originalSize.height = preview.height;
         preview.width = größeAnpassenX.value;
@@ -2155,12 +2138,13 @@ function canvasClicked(calledBy) {
     stopLiveFeed();
     if (!state.restorePuzzle || state.restorePuzzle.fileName == input.files[0].name || confirm("Sie haben wohl das falsche Puzzle ausgewählt. Wenn Sie trotzdem fortfahren wollen, klicken Sie auf OK o.ä. (andernfalls klicken Sie auf abbrechen o.ä. und erneut auf den Namen des Bildes, um das rictige Bild auszuwählen. )")) {
       reader.onload = function (e) {
-        if (sourceIsPicture.checked) document.getElementById('preview').setAttribute("src", e.target.result);
+        if (sourceIsPicture.checked) {
+          document.getElementById('preview').setAttribute("src", e.target.result);
+          videoControls.style.display = "none";
+        }
         else {
           video.setAttribute("src", e.target.result);
-          setTimeout(function () {
-            loadImage(video.videoWidth, video.videoHeight);
-          }, 1000);
+          loadImage(video.videoWidth, video.videoHeight);
         }
       };
     }
@@ -2180,7 +2164,27 @@ function canvasClicked(calledBy) {
     fileName = input.files[0].name;
     setTimeout(() => {
       if (state.waitForPictureSelection) startTutorial();
+      editCanvasDiv.insertBefore(textur, videoControls)
     }, 1111);
+  }
+  function adaptVideoControlElements() {
+    if (!useLiveCam.checked) videoControls.style.display = 'block';
+    editCanvasDiv.style.display = "block";
+    videoPosition.max = video.duration;
+    settings.style.display = 'block';
+    videoPosition.style.width = window.innerWidth;
+    while (timeText.getBoundingClientRect().x < videoPosition.getBoundingClientRect().x + convertStyle(videoPosition.style.width)) {
+      videoPosition.style.width = (convertStyle(videoPosition.style.width) - 1) + 'px';
+    }
+    videoPosition.style.width = (convertStyle(videoPosition.style.width) - 15) + 'px';
+    playVideo.style.width = playVideo.getBoundingClientRect().width;
+    settings.style.display = 'none';
+    editCanvasDiv.style.display = "none"
+    if (video.srcObject) {
+      for (const elm of timeChangeDiv) {
+        elm.style.display = 'none';
+      }
+    }
   }
   var fileName;
   var video = document.createElement("video");
@@ -2188,7 +2192,10 @@ function canvasClicked(calledBy) {
     useURLCheck.checked = true;
     sourceCheckboxes.style.display = 'none';
     if (sourceURL.value.includes('.mp4') || sourceURL.value.includes('.move')) sourceIsVideo.checked = true;
-    else if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) sourceIsPicture.checked = true;
+    else if (sourceURL.value.includes('.png') || sourceURL.value.includes('.jpg') || sourceURL.value.includes('.jpeg')) {
+      sourceIsPicture.checked = true;
+      videoControls.style.display = "none";
+    }
     else {
      document.getElementById('sourceIs' + state.userSource).checked = true;
      sourceCheckboxes.style.display = 'block';
@@ -2207,6 +2214,7 @@ function canvasClicked(calledBy) {
   else {
     video.src = sourceURL.value;
   }
+  adaptVideoControlElements();
   }
   function startVideo() {
     video.play();  // start playing
@@ -2214,12 +2222,20 @@ function canvasClicked(calledBy) {
   }
   video.addEventListener('loadeddata', function() {
     startVideo();
+    adaptVideoControlElements();
+    // TODO: vereinheitlichen?
     preview.width = video.videoWidth;
     preview.height = video.videoHeight;
     originalSize.width = video.videoWidth;
     originalSize.height = video.videoHeight;
+    setTimeout(() => {
+      resetImageSize();
+    }, 500);
+    selectSourceHeader.style.color = "green";
+    createPuzzleButton.style.backgroundColor = "green";
     loadPuzzle();
     // TODO: kann weg? (KA wofür)
+    // loadImage(video.videoWidth, video.videoHeight);
   }, false);
   var originalSize = {};
   function loadPuzzle() {
@@ -3066,8 +3082,30 @@ var puzzles = {};
   }
     }
     adaptMobileControlsPosition();
+    // rotaiton gesture
+    // if (ev.type == "touchstart") rotationGesture = [{x: 0, y: 0}, {x: 0, y: 0}];
+    // if (ev.type == "touchmove" && ev.touches[1] && !ev.touches[2]) {
+    //   if (rotationGesture[0].x) {
+    //     var positions = {start: [rotationGesture[0], rotationGesture[1]], now: [{x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"]}, {x: ev.touches[1]["pageX"], y: ev.touches[1]["pageY"]}]};
+    //     if (rotationGesture[0].y > rotationGesture[1].y) {
+    //       positions = {start: [rotationGesture[1], rotationGesture[0]], now: [{x: ev.touches[1]["pageX"], y: ev.touches[1]["pageY"]}, {x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"]}]};
+    //     }
+    //     if (positions.now[0]["pageX"] - position.start[0].x < -30 && positions.now[0]["pageY"] - position.start[0].y > 30 && /*TODO: weiter checken*/ positions.now[1]["pageX"] - position.start[1].x > 30 && positions.now[1]["pageY"] - position.start[1].y < -30) {
+    //       console.log("rotate left");
+    //     }
+    //     if (positions.now[0]["pageX"] - position.start[0].x > 30 && positions.now[0]["pageY"] - position.start[0].y > 30 && positions.now[1]["pageX"] - position.start[1].x < -30 && positions.now[1]["pageY"] - position.start[1].y < -30) {
+    //       console.log("rotate right");
+    //     }
+    //   }
+    //   else rotationGesture = [{x: ev.touches[0]["pageX"], y: ev.touches[0]["pageY"]}, {x: ev.touches[1]["pageX"], y: ev.touches[1]["pageY"]}];
+    // }
+    // try {
+    //   console.log(ev.touches[0]["pageX"] + " - " + ev.touches[0]["pageY"]);
+    //   // console.log(ev.touches[1]["pageX"] + " - " + ev.touches[1]["pageY"]);
+    // } catch (e) {}
   }
   // }
+  var rotationGesture = [{x: 0, y: 0}, {x: 0, y: 0}];
   function tileSelected() {
     for (var i1 = positions.layoutOrder.length - 1; !state.removeTile && i1 >= 0; i1--) {
       var i = positions.layoutOrder[i1];
