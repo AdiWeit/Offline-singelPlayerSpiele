@@ -245,7 +245,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
     <option value="survive">survive</option>
   </select>
   <br>
-  <button style="font-size: 50px;" onclick="calibrate();">calibrate (tilting direction)</button>
+  <button style="font-size: 50px;" id="manuelCalibrate" onclick="calibrate();">calibrate (tilting direction)</button>
   <br>
   <select id="tabletPositionModeSelection">
     <option>flat (most natural)</option>
@@ -324,6 +324,8 @@ input[id='sensitivity']::-webkit-slider-thumb {
     tabletPositionModeSelection.style.display = "none";
     joyStickPlay.checked = true;
     console.log("PC");
+    // calibrating on PC not needed, because you can only play with JoyStick (no motion control)
+    manuelCalibrate.style.display = "none";
   }
   var inOrAgainstDirection = 1;
   window.onbeforeunload = function(){
@@ -1280,7 +1282,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
       }
     }
     var calibratedDirection = 1;
-    if ([null, "undefined", "null"].includes(localStorage.getItem("calibratedDirection"))) {
+    if ([null, "undefined", "null"].includes(localStorage.getItem("calibratedDirection")) && gerät == "Handy") {
       calibrate();
     }
     else {
