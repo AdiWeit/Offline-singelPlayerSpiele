@@ -27,13 +27,13 @@
 </div>
 <div id="imageSettings">
 <div class="card cardGeneral">
-<h1 id="selectSourceHeader" style="color: red;">Quelle auswählen</h1>
+<h1 id="selectSourceHeader" style="color: red;">Quelle (Foto oder Video) auswählen</h1>
 <br>
 <input type="file" accept="image/*,video/*" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
 <input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
 <br>
 <input onchange="useURL();" id="useURLCheck" type="radio" name="source">
-<input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="URL (drag and drop möglich)" id="sourceURL">
+<input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="Link (drag and drop möglich)" id="sourceURL">
 <br>
 <p id="URLInfo" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
   Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren! 
