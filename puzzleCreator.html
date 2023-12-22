@@ -83,8 +83,37 @@
 <button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
 <button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
 <br>
-<br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
+<br>
+<div style="display: none;" class="card cardGeneral" id="videoControls">
+  <h3>video controls</h3>
+  <a id="timeChangeDiv">
+  <!-- TODO: stoppt automatisch, kann also weg? -->
+  <input id="loop" checked="true" onchange="playPauseVideo('play');" type="checkbox"> ⟲ Wiederholen
+  <br>
+  <input type="checkbox" onclick="video.muted = checked;">mute</input>
+  <!-- TODO: stoppt automatisch, kann also weg? -->
+  <!-- <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a> -->
+  <br>
+  beginne bei <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
+  <button onclick="if (timeText.innerHTML.split(' / ')[0] < loopEnding.value || loopEnding.value == '') {loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button> 
+  und ende bei <input id="loopEnding" oninput="if (value < loopBeginning.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" type="text">
+   <button onclick="if (timeText.innerHTML.split(' / ')[0] > loopBeginning.value || loopBeginning.value == '') {loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button>
+  <br>
+  <p id="timeSlotWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
+    Sie haben das Ende des Ausschnittes vor den Anfang gesetzt! Bitte setzen Sie den Startpunkt weiter vorne oder das Ende weiter hinten, damit Ihre Änderung übernommen wird.
+    <br>
+  </p>
+  <button onclick="video.currentTime -= 10;"><<</button>
+  </a>
+  <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
+  <a id="timeChangeDiv">
+  <button onclick="video.currentTime += 10;">>></button>
+  <!-- Stoppen nach Springen im Video eher hindelrich -->
+  <input oninput="video.currentTime = value;" step="0.01" type="range" id="videoPosition" min="0">
+  <a id="timeText"></a>
+  </a>
+</div>
 </div>
 <button type="button" style="font-size: 33px;color: white; background-color: red; border: 10px;border-style: double;" onclick="create();" id="createPuzzleButton" name="button">erstelle Puzzle</button>
 </div>
@@ -352,32 +381,7 @@
   <br>
   <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
   <br>
-  <div style="display: none;" class="card cardGeneral" id="videoControls">
-    <h3>video controls</h3>
-    <a id="timeChangeDiv">
-    <input id="loop" checked="true" onchange="if (checked) stopAtEndP.style.display = 'none'; else stopAtEndP.style.display = 'inline'; playPauseVideo('play');" type="checkbox"> ⟲ Wiederholen
-    <br>
-    <input type="checkbox" onclick="video.muted = checked;">mute</input>
-    <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a>
-    <br>
-    beginne bei <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
-    <button onclick="if (timeText.innerHTML.split(' / ')[0] < loopEnding.value || loopEnding.value == '') {loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button> 
-    und ende bei <input id="loopEnding" oninput="if (value < loopBeginning.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" type="text">
-     <button onclick="if (timeText.innerHTML.split(' / ')[0] > loopBeginning.value || loopBeginning.value == '') {loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button>
-    <br>
-    <p id="timeSlotWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-      Sie haben das Ende des Ausschnittes vor den Anfang gesetzt! Bitte setzen Sie den Startpunkt weiter vorne oder das Ende weiter hinten, damit Ihre Änderung übernommen wird.
-      <br>
-    </p>
-    <button onclick="video.currentTime -= 10;"><<</button>
-    </a>
-    <button onclick="playPauseVideo(innerHTML);" id="playVideo">pause</button>
-    <a id="timeChangeDiv">
-    <button onclick="video.currentTime += 10;">>></button>
-    <input oninput="video.currentTime = value; playPauseVideo('pause');" step="0.01" type="range" id="videoPosition" min="0">
-    <a id="timeText"></a>
-    </a>
-</div>
+  <div id="videoControlsInSettings"></div>
 <p id="showOriginalP" style="display:none">
   <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
   <br>
@@ -1493,6 +1497,7 @@ function drawTileGrid(doNotDrawPicture) {
   }
     // create the puzzle
     function create() {
+      videoControlsInSettings.appendChild(videoControls);
       puzzleManager.style.display = "block";
     if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
     else if (!state.removeTile) {
