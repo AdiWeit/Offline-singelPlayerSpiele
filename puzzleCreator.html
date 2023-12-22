@@ -2313,8 +2313,9 @@ function updateVideo(){
       if (loopEnding.value > loopBeginning.value || loopEnding.value == "" || loopBeginning.value == "") video.play();
     }
     else if (video.currentTime >= convertTime(loopEnding.value, 'loopEnding')) {
-      if (stopAtEnd.checked) playPauseVideo('pause');
-      else if(video.currentTime >= video.duration) playVideo.innerHTML = 'play';
+      // TODO: stoppt automatisch, kann also weg?
+      // if (stopAtEnd.checked) playPauseVideo('pause');
+      /*else */if(video.currentTime >= video.duration) playVideo.innerHTML = 'play';
     }
     if (sourceIsVideo.checked) requestAnimationFrame(updateVideo); // wait for the browser to be ready to present another animation fram.
     else video.pause();
