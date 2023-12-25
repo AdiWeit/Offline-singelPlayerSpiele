@@ -2,86 +2,86 @@
 <meta name="viewport" id="preventAutomaticZoom">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
-<img id="puzzleManagerIcon" class="button" onclick="if (puzzleManager.style.display != 'none') puzzleManager.style.display = 'none'; else puzzleManager.style.display = 'block';" draggable="false" title="Puzzles verwalten" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/save_and_load.png">
+<img id="puzzleManagerIcon" class="button" onclick="if (puzzleManager.style.display != 'none') puzzleManager.style.display = 'none'; else puzzleManager.style.display = 'block';" draggable="false" title="manage saved puzzles" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/save_and_load.png">
 <div style="display: none" id="puzzleManager" class="card cardGeneral">
-  <h3>Puzzles verwalten</h3>
+  <h3>manage saved puzzles</h3>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/database_import_icon.png" title="Bereits erstellte Puzzle fortfahren" draggable="false" >
   <li id="puzzleSelection"></li>
   <img src="https://adi.nicolaiweitkemper.de/Bilder/saveicon.png" title="im Folgenden erstellte Puzzle speichern" draggable="false" >
   <div style="display: none;" onmouseout="checkOut();"  class="dropdown-content" id="editPuzzleManager">
-    <a onclick="restorePuzzleSource(selected.puzzle);">öffnen/fortfahren</a>
-    <a onclick="editPuzzleName();">Name bearbeiten</a>
-    <a onclick="deletePuzzle();">löschen</a>
-    <a onclick="showInformation();">mehr Informationen</a>
+    <a onclick="restorePuzzleSource(selected.puzzle);">open/continue</a>
+    <a onclick="editPuzzleName();">edit name</a>
+    <a onclick="deletePuzzle();">delete</a>
+    <a onclick="showInformation();">more information</a>
   </div>
   <br>
   <a id="storePuzzleManager">
-    <input id="doStorePuzzle" type="checkbox"> im Folgenden erstellte Puzzle unter dem Namen 
+    <input id="doStorePuzzle" type="checkbox"> save the puzzle I will create as 
     <input oninput="if (Object.keys(puzzles).includes(value)) puzzleNameWarning.style.display = 'inline'; else puzzleNameWarning.style.display = 'none'; doStorePuzzle.checked = true;" id="puzzleName" type="text"> 
-    automatisch speichern
+    automatically
     <br>
   </a>
   <p id="puzzleNameWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-    Sie haben ein Puzzle bereits so benannt. Bitte wählen Sie einen anderen Namen! Andernfalls wird das Puzzle das bisher so hieß überschrieben bzw. gelöscht!!!
+    You have already stored a puzzle with this name. Please choose another name! If you don't, the older puzzle with this name will be overwritten with the current one!!!
   </p>
 </div>
 <div id="imageSettings">
 <div class="card cardGeneral">
-<h1 id="selectSourceHeader" style="color: red;">Quelle (Foto oder Video) auswählen</h1>
+<h1 id="selectSourceHeader" style="color: red;">select source (image or video)</h1>
 <br>
 <input type="file" accept="image/*,video/*" onchange="readImg(this);" style="position: absolute; left: -10000px;" id="fileB">
-<input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">Datei (Foto oder Video) auswählen</a></input>
+<input id="sourceIsFile" onclick="fileB.click();" style="font-size: 55px;" type="radio" name="source"><a onclick="fileB.click(); sourceIsFile.checked = true;">choose file (image or video)</a></input>
 <br>
 <input onchange="useURL();" id="useURLCheck" type="radio" name="source">
 <input type="text" style="height: 50px;" oninput="useURL();" height="100px" placeholder="Link (drag and drop möglich)" id="sourceURL">
 <br>
 <p id="URLInfo" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-  Die URL muss direkt auf das Bild/Video verweisen! Führen Sie dafür einen Rechtsklick auf das gewünschte Bild aus und klicken Sie auf "Bildadresse kopieren", um die richtige Adresse/URL zu kopieren! 
+  The URL has to directly point to the image/video! Please rightclick on the wished image and click on "copy image adress", to copy the right adress/url. Also, Youtube videos are not supported. 
   <br>
-  Alternativ können Sie das Bild in das obrige Feld ziehen oder stattdessen auf "Bild im neuen Tab öffnen" klicken, und dort die Adresse/URL kopieren.
+  Alternatively, you can drag-and-drop the image in the text filed above. 
   <br>
 </p>
 <a style="display: none; border-radius: 3px; border-style: double; background-color: darkorange; width: max-content; height: max-content;" id="sourceCheckboxes">
-  <input id="sourceIsPicture" onchange="state.userSource = 'Picture';" checked="true" name="mediaType" type="radio">Bild
-  <input id="sourceIsVideo" onchange="state.userSource = 'Video';" name="mediaType" type="radio">Video
+  <input id="sourceIsPicture" onchange="state.userSource = 'Picture';" checked="true" name="mediaType" type="radio">image
+  <input id="sourceIsVideo" onchange="state.userSource = 'Video';" name="mediaType" type="radio">video
   <br>
 </a>
-<input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">nutze angeschlossene oder verbaute (live) Kamera</a></button>
+<input id="useLiveCam" type="radio" name="source" onchange="changeCamera(cameraSelection.value);"><a onclick="useLiveCam.checked = true; changeCamera(cameraSelection.value);">use connected or built in (live) camera</a></button>
 <select id="cameraSelection" onchange="changeCamera(value);"></select>
 </div>
 <img onclick="if (tilesSizeDiv.style.display != 'none') tilesSizeDiv.style.display = 'none'; else {tilesSizeDiv.style.display = 'block';}" class="button" title="Anzahl der Puzzleteile" style=" outline-width: 2px; outline-color: black" draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/pieceAmount_V2.png">
 <div style="display: none;" id="tilesSizeDiv" onmouseover="tilesSizeDiv.appendChild(textur);" class="card cardGeneral">
-  <h3>Anzahl der Puzzleteile</h3>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> Teile x-Achse
+  <h3>amount of puzzle pieces</h3>
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> pieces x-axis
   <br>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> Teile y-Achse
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> pieces y-axis
   <br>
   <br>
   <a id="rotateTilesAdaptionSettings">
-    <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true); drawTileGrid();" name="adaptionStyle"> Anzahl Puzzleteile anpassen, sodass Breite und Höhe der Teile übereinstimmen (quadratische Teile)</button>
-      und insgesamt mindestens <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> Teile erstellt werden.
+    <button type="radio" id="bAdaptAmount" onclick="if (checked) adaptTileAmount(true); drawTileGrid();" name="adaptionStyle"> Adapt amount of pieces, so width and height of each piece are equal (quadratic pieces)</button>
+      and in total at least <input id="minTileAmount" oninput="adaptTileAmount();" style="width: 45px;" value="16" min="2" type="number"> pieces are created.
     <br>
   </a>
 </div>
 <br>
-<img onclick="if (editCanvasDiv.style.display != 'none') editCanvasDiv.style.display = 'none'; else {editCanvasDiv.style.display = 'block'; editCanvasDiv.insertBefore(textur, videoControls)}" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/edit_image.png" title="Bild bearbeiten" class="button" draggable="false" width="50px" height="50px">
+<img onclick="if (editCanvasDiv.style.display != 'none') editCanvasDiv.style.display = 'none'; else {editCanvasDiv.style.display = 'block'; editCanvasDiv.insertBefore(textur, videoControls)}" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/edit_image.png" title="edit image" class="button" draggable="false" width="50px" height="50px">
 <br>
 <div style="display: none" id="editCanvasDiv" onmouseover="editCanvasDiv.appendChild(textur); editCanvasDiv.insertBefore(textur, videoControls);" class="card cardGeneral">
-<h3>Bild bearbeiten</h3>
-<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> Bild/Video spiegeln
+<h3>edit image/video</h3>
+<input id="mirrorInput" onclick="mirrorCanvas(checked);" type="checkbox"> mirror image/video
 <br>
-<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> maximale Größe des Bildes: Bildschirmgröße</p1>
+<p1 id="screenIsMaxP"><input id="screenIsMax" onchange="changeAdaptedSizeMax(originalSize.width, originalSize.height);" checked="true" type="checkbox"> max. image/video size: screen size</p1>
 <br>
-<input id="percentSizeAdaption" oninput="größeAnpassenX.value = größeAnpassenX.max*value; größeAnpassenY.value = größeAnpassenY.max*value; zeigeGröße(true);" min="0.01" step="0.01" max="1" type="range"> Breite und Höhe prozentual anpassen
+<input id="percentSizeAdaption" oninput="größeAnpassenX.value = größeAnpassenX.max*value; größeAnpassenY.value = größeAnpassenY.max*value; zeigeGröße(true);" min="0.01" step="0.01" max="1" type="range"> change width and height the same amount
 <br>
-<input type="range" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> Breite des Bildes
+<input type="range" oninput="zeigeGröße(true);" placeholder="Pixelanzahl x achse" id="größeAnpassenX"> image/video width
 <br>
-<input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> Höhe des Bildes
+<input type="range" max="window.innerHeight" oninput="zeigeGröße(true);" placeholder="Pixelanzahl y achse" id="größeAnpassenY"> image/video height
 <br>
-<button type="button" onclick="resetImageSize();" name="button">⟲ Originalgröße des Bildes</button>
-<button type="button" onclick="zuBildschirmgröße();" name="button">Größe auf Bildschirmgröße anpassen</button>
-<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button">Größenverhältnis angleichen (quadratische Teile)</button>
-<button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">Größenverhältnis optimieren</button>
+<button type="button" onclick="resetImageSize();" name="button">⟲ original size</button>
+<button type="button" onclick="zuBildschirmgröße();" name="button">image/video screen size</button>
+<button type="button" onclick="zuAngepassterBildschirmgröße();" name="button"> adjust size ratio Größenverhältnis angleichen (square pieces)</button>
+<button type="button" onclick="zuOptimalerBildschirmgröße();" title="verkelinert sowohl Höhe als auch Breite des Bildes solange, bis beides auf den Bildschirm passt. " name="button">optimize size ratio</button>
 <br>
 <canvas onmousedown="mouseDown(true);" onmouseup="mouseUp();" style="border-width: 3px; border-style: solid; touch-action: manipulation;" id="textur" width="1" onclick="canvasClicked('elm');" height="1"></canvas>
 <br>
@@ -89,19 +89,19 @@
   <h3>video controls</h3>
   <a id="timeChangeDiv">
   <!-- TODO: stoppt automatisch, kann also weg? -->
-  <input id="loop" checked="true" onchange="playPauseVideo('play');" type="checkbox"> ⟲ Wiederholen
+  <input id="loop" checked="true" onchange="playPauseVideo('play');" type="checkbox"> ⟲ repeat
   <br>
   <input type="checkbox" onclick="video.muted = checked;">mute</input>
   <!-- TODO: stoppt automatisch, kann also weg? -->
   <!-- <a id="stopAtEndP" style="display: none;"><input id="stopAtEnd" type="checkbox"> am Ende stoppen</a> -->
   <br>
-  beginne bei <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
-  <button onclick="if (timeText.innerHTML.split(' / ')[0] < loopEnding.value || loopEnding.value == '') {loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button> 
-  und ende bei <input id="loopEnding" oninput="if (value < loopBeginning.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" type="text">
-   <button onclick="if (timeText.innerHTML.split(' / ')[0] > loopBeginning.value || loopBeginning.value == '') {loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">nimm aktuelle Zeit</button>
+ start at <input type="text" oninput="if (value > loopEnding.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" id="loopBeginning"> 
+  <button onclick="if (timeText.innerHTML.split(' / ')[0] < loopEnding.value || loopEnding.value == '') {loopBeginning.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">take current time</button> 
+  and end at <input id="loopEnding" oninput="if (value < loopBeginning.value) {playPauseVideo('pause'); timeSlotWarning.style.display = 'inline';} else timeSlotWarning.style.display = 'none';" type="text">
+   <button onclick="if (timeText.innerHTML.split(' / ')[0] > loopBeginning.value || loopBeginning.value == '') {loopEnding.value = timeText.innerHTML.split(' / ')[0] + ':' + Math.floor((video.currentTime - Math.floor(video.currentTime))*100); timeSlotWarning.style.display = 'none';} else timeSlotWarning.style.display = 'block';">take current time</button>
   <br>
   <p id="timeSlotWarning" style="background-color: #f44336; border-radius: 3px; border-style: double; width: max-content; display: none;">
-    Sie haben das Ende des Ausschnittes vor den Anfang gesetzt! Bitte setzen Sie den Startpunkt weiter vorne oder das Ende weiter hinten, damit Ihre Änderung übernommen wird.
+    The timestamp to end at is before the timestamp to begin at! Please move the startingpoint Please set the start point further forward or the end point further back so that your change is accepted.
     <br>
   </p>
   <button onclick="video.currentTime -= 10;"><<</button>
@@ -115,15 +115,15 @@
   </a>
 </div>
 </div>
-<button type="button" style="font-size: 33px;color: white; background-color: red; border: 10px;border-style: double;" onclick="create();" id="createPuzzleButton" name="button">erstelle Puzzle</button>
+<button type="button" style="font-size: 33px;color: white; background-color: red; border: 10px;border-style: double;" onclick="create();" id="createPuzzleButton" name="button">create puzzle</button>
 </div>
 <!-- <button type="button" id="showSettings" onclick="changeSettingsVis();" name="button">mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)</button> -->
-<button id="showTutorialB" style="display: none;" onclick="document.onkeydown({key: 'F1'});">Hilfe (Steuerung anzeigen)</button>
+<button id="showTutorialB" style="display: none;" onclick="document.onkeydown({key: 'F1'});">help (show control instructions)</button>
 <br>
 <img src="https://adi.nicolaiweitkemper.de/Bilder/settings.png" id="showSettings" class="button" title="mehr Einstellungsmöglichkeiten (Moduswahl, Anzeigemöglichkeiten und mehr)" onmouseup="changeSettingsVis();"  draggable="false" >
-<button id="showMobileControls" onclick="style.display = 'none'; mobileControls.style.display = 'inline'; localStorage.setItem('tileListVisHybridDevice', 'inline');" style="display: none; font-size: x-large;">Steuerungsleiste für Mobilgeräte anzeigen</button>
+<button id="showMobileControls" onclick="style.display = 'none'; mobileControls.style.display = 'inline'; localStorage.setItem('tileListVisHybridDevice', 'inline');" style="display: none; font-size: x-large;">show control pannel for mobile devices</button>
 <br>
-<button style="position: fixed; display: none; z-index: 3;" id="selectBackToBarB" onclick="generalBackToBar(this);">zurück in Leiste</button>
+<button style="position: fixed; display: none; z-index: 3;" id="selectBackToBarB" onclick="generalBackToBar(this);">back to piece list</button>
 <p2 style="position: fixed; top: -7px; left: 377px; background-color: rgba(205, 218, 199, 0.77); font-size: 5vh; padding-bottom: 15px; border-radius: 5px; z-index: 2;" id="mobileControls">
   <p id="rotateControls" style="display: none;">
     <a style="display: none;" id="traditionalModeMobileControls">
@@ -138,24 +138,24 @@
 </p2>
 <div id="tileElements">
   <div id="rotateLeftTitle" style="display: none;" class="speech top">
-    Teil pro Klick um 90° nach links drehen 
+    rotate piece by 90° per click to the left 
   </div>
   <div id="rotateRightTitle" style="display: none;" class="speech top">
-    Teil pro Klick um 90° nach rechts drehen 
+    rotate piece by 90° per click to the right 
   </div>
   <div id="selectMultipleTitle" style="display: none;" class="speech top">
-    Mehrfachauswahl durch Klicken auf Teile und Teile abtrennen durch Bewegen eines der ausgewählten Teile
+    multi-selection by clicking on pieces and detach pieces by moving one of the selected pieces
   </div>
   <div id="swipeTitle" style="display: none;" class="speech top">
-    Scrollen und Zoomen ermöglichen
+    enable scroll and zoom
   </div>
   <div id="scrollTileBarTitle" style="display: none;" class="speech bottom">
-    Pfeil
+    arrow
   </div>
 </div>
 <div id="unclippPCHelp" style="opacity: 0; z-index: 2; size: 25%; background-color: hsla(0, 0%, 50%, 0.352); position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); border-radius: 10px; padding: 10px; transition: opacity 1s; display: none;">
-  <h2>Shift (⇧) drücken, um Teile zu trennen</h2>
-  <button style="position: relative; left: 50%; transform: translate(-50%, -50%); top: 50%;" onclick="showUnclippTutorial();">siehe Tutorial für Details</button>
+  <h2>press shift (⇧) to detach pieces</h2>
+  <button style="position: relative; left: 50%; transform: translate(-50%, -50%); top: 50%;" onclick="showUnclippTutorial();">see tutorial für details</button>
 </div>
 <style>
   .button {
@@ -172,153 +172,153 @@
   }
 </style>
 <div id="settings" style="display: none;" class="card cardGeneral">
-  <h2 id="modeHeadline">Modus: </h2>
+  <h2 id="modeHeadline">mode: </h2>
   <div id="modeDiv" class="card cardGeneral">
   <select onchange="modeSelected(value);" id="modeSelection">
-    <option value="traditional">traditionell</option>
-    <option value="exchange">austauschen</option>
-    <option value="schieben">nur schieben</option>
+    <option value="traditional">traditionel</option>
+    <option value="exchange">exchange</option>
+    <option value="schieben">sliding</option>
   </select>
   <br>
-  <p id="traditionalDescription">Die Puzzleteile werden verteilt. Nun müssen Sie die Teile wieder zusammensetzen. 
+  <p id="traditionalDescription">The pieces are spread out. It is your task to put them back together to form the image/video you put in! 
     <br>
-    Wo die Teile zusammengesetzt werden ist egal.
+    It doesn't matter where you put them back together, but you might have to rotate them. 
     <div id="startTutorialButton">
       <br>
       <button onclick="setupTutorial();">tutorial</button>
     </div>
   </p>
   <p style="display: none;" id="exchangeDescription">
-    Die Positionen der Puzzleteile wird ausgetauscht. Danach haben Sie die Aufgabe, durch Klicken auf zwei Teile diese auszutauschen, bis das Originalbild wiederhergestellt ist.
+    The position of the pieces is shuffles. It is your task to exchange the position of two tiles until the pieces form the original image/video you put in!
   </p>
   <p style="display: none;" id="schiebenDescription">
-    Mindestens ein Puzzleteil muss gelöscht werden. Danach vermischt das Programm die Teile durch Schieben.
+    At least one puzzle piece has to be deleted. After that, the programm will slide the pieces in a random order.
     <br>
-    Ist dies geschehen, können Sie die Teile durch Klicken auf das zu verschiebende Teil (und unter Umständen die gewünschte Zielposition) so verschieben, dass wieder das Originalbild entsteht.
+    After that, you can slide the pieces by clicking on the piece you want to move (you may have to click on the position you want it to be) until the pieces form the original image/video you put in!. 
   </p>
   <div id="futureModeSettingsHeader"></div>
   <div class="card cardGeneral" id="traditionalSettings">
-    <b style="font-size: 25px;" id="modeSettingsHeading">modusspezifische Einstellungen: <br> </b>
+    <b style="font-size: 25px;" id="modeSettingsHeading">mode specific settings: <br> </b>
     <br>
-    <input id="clipOptionsSound" checked="true" type="checkbox"> akustisches Feedback (Audio bei Verbindungsmöglichkeiten)
+    <input id="clipOptionsSound" checked="true" type="checkbox"> acoustic feedback (play audio when an new option to connect puzzle peaces is suggested)
     <a id="vibrateA">
       <br>
-      <input id="vibrate" type="checkbox"> haptisches Feedback (bei neuer Verbindungsmöglichkeit vibrieren)
+      <input id="vibrate" type="checkbox"> haptic Feedback (vibrate when an new option to connect puzzle peaces is suggested)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> drag and drop Steuerung (Teile loslassen, wenn Maustaste losgelassen wird; <b>"Alternative"</b>)
+    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> drag and drop control (release pieces when mouse button is released; <b>"alternative"</b>)
     <br>
     <p style="margin-bottom: 6px;" id="rotateTilesP">
     <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
     </p>
-    <input id="markWrong" style="accent-color: red;" type="checkbox" > markiere nicht passende
+    <input id="markWrong" style="accent-color: red;" type="checkbox" > mark wrong connection suggestions
     <a id="shuffleStyleLable">
       <br>
-      Art der Verteilung der Teile: 
+      type of shuffling: 
     </a>
     <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
-      <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
-      <option value="listTiles">Teile nebeneinander auflisten (Teilliste)</option>
-      <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
+      <option value="overlapTiles">spread pieces and let them overlap</option>
+      <option value="listTiles">list pieces next to each other (pieces list)</option>
+      <option value="nextToEachOther">put pieces next to each other with some distance</option>
     </select>
     <a id="shuffleHeadline" style="display: none;">
       <br>
       <br>
-      <b style="font-size: 25px;">Einstellungen zu der Verteilung der Teile:</b>
+      <b style="font-size: 25px;">settings to the shuffling of the pieces:</b>
       <br>
     </a>
     <div style="display: none" class="card cardGeneral" id="EmptyTileBarDiv">
       <br>
-      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">mit leerer Liste starten
+      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">start with empty list
       <div style="display: none;" id="emptyTileBarSettings">
-        dabei folgendermaßen die Teile mischen: 
+        shuffle the pieces in the following way: 
         <select onchange="emptyTileBarShuffleStyleSelected(value);" id="shuffleStyleBar">
-          <option value="overlapTiles">Teile verstreuen und überlappen lassen</option>
-          <option value="nextToEachOther">Teile mit Abstand nebeneinander legen</option>
+          <option value="overlapTiles">spread pieces and let them overlap</option>
+          <option value="nextToEachOther">put pieces next to each other with some distance</option>
         </select>
       </div>
       <div id="emptyTilebarTileGap"></div>
       <div id="tilesGapS" class="card cardGeneral" style="display: none;">
         <br>
-        Abstand (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
+        distance (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
         <br>
         <br>
         <canvas id="gapCanvas"></canvas>
         <br>
-        <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> Bildschirm füllen
+        <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> fill screen
         <br>
         <a style="display: none" id="aScrollXTileGap">
-          <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> Teile nebeneinander
+          <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> tiles next to each other
           <br>
         </a>
       </div>
       <br>
     </div>
     <div id="shuffleStyleTileGap"></div>
-      <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>zeige Einstellung zur Modifizierung der Hitboxen zwischen den Teilen</b></a>
+      <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>show setting to edit hitboxes between pieces (to connect them)</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
         <input onchange="if (checked) {showHitboxes(); shortHaltColliderDiv.style.display = 'inline';} else shortHaltColliderDiv.style.display = 'none';" id="doHitboxAnimation" type="checkbox"> animation
         <br>
-        <input id="highHitboxVisibility" type="checkbox"> blaue Linie auf dem "Spielfeld" immer an gesamtem Teil anzeigen
-        <div id="shortHaltColliderDiv" style="display: none;"><input id="shortHaltCollider" type="checkbox"> stoppe kurz bei Anfangspunkt und Endpunkt der Kollision</div>
+        <input id="highHitboxVisibility" type="checkbox"> Always display the blue line on the entire piece
+        <div id="shortHaltColliderDiv" style="display: none;"><input id="shortHaltCollider" type="checkbox">stop briefly at the start point and end point of the collision</div>
         <br>
-        Hitbox Breite: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
+        hitbox width: <input type="range" min="1" oninput="showHitboxes();" id="hitboxWidth">
         <br>
-        Hitbox Höhe: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
+        hitbox height: <input type="range" min="1" oninput="showHitboxes();" id="hitboxHeight">
         <br>
         <canvas id="hitboxTextur"></canvas>
       </a>
       <br>
-      <input id="collideClip" checked="true" type="checkbox"> Teile an verdeckte Ränder nicht anknüpfen lassen
+      <input id="collideClip" checked="true" type="checkbox"> Do not allow pieces to attach to covered edges
       <br>
-      <input checked="true" onchange="if (checked)  connectableSlightOverlap.value = 10; else connectableSlightOverlap.value = 0;" type="checkbox"> Verbindungsoptionen auch bei leichter Überlappung der Teile anbieten
+      <input checked="true" onchange="if (checked)  connectableSlightOverlap.value = 10; else connectableSlightOverlap.value = 0;" type="checkbox"> Offer connection options even if the pieces overlap slightly
       <input type="number" id="connectableSlightOverlap" value="10" style="display: none;">
-      <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> scrollen auf leerem Hintergrund erlauben</p>
+      <p id="scrollOnBlancP"><input id="scrollOnBlanc" checked="true" type="checkbox"> Allow scrolling on empty background</p>
       <a>
-    <div style="display: none;" class="card cardGeneral" id="listTilesS">
-      <h3>Einstellungen zur Teilleiste: </h3>
-      <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> Buttons für Zurückführung der Teile in die Leiste unten
+        <div style="display: none;" class="card cardGeneral" id="listTilesS">
+      <h3>Settings for the pieces list: </h3>
+      <input type="checkbox" checked="true" onchange="backToBarVis(checked)"; id="BackToBarB"> buttons to bring pieces back into the list at the bottom
       <br>
       <div id="backToBarBSize">
-        <input id="backToBarBWidth" oninput="changeBackToBarB('width', value)" type="range"> Breite der Buttons
+        <input id="backToBarBWidth" oninput="changeBackToBarB('width', value)" type="range"> width of the buttons
         <br>
-        <input id="backToBarBHeight" oninput="changeBackToBarB('height', value)" type="range"> Höhe der Buttons
+        <input id="backToBarBHeight" oninput="changeBackToBarB('height', value)" type="range"> height of the buttons
       </div>
       <br>
-      <a id="tileBarHeightText">Höhe der Leiste</a>
+      <a id="tileBarHeightText">height of the pieces list</a>
       <button onclick="setDefaultSelectionBarHeight();" id="resetBarSize">reset</button>
       <input type="range" oninput="changeTileBarHeight(value);" min="25" id="tileBarHeight">
       <div id="autoSelectTileBarP">
-        <input type="checkbox" checked="true" id="autoSelectTileBar"> automatisch nächstes Element in Auflistung anwählen
+        <input type="checkbox" checked="true" id="autoSelectTileBar">automatically select next piece in list
       </div>
     </div>
     <br>
-    <b>Transparenz der Teile</b>
+    <b>trasparency of pieces</b>
     <br>
     <input type="range" value="1" oninput="layout(true, true);" id="tileTransparencySlider" max="1" min="0.01" step="0.01">
   </div>
   <div id="exchangeSettings" class="card cardGeneral" style="display: none">
-  <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen</p>
+  <p id="swipeSteuerungP"><input type="checkbox" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none';" id="swipeSteuerung"> begin swipe at first piece and end it at the second one to exchange their position</p>
   </div>
   <p id="schiebenSettings" class="card cardGeneral">
     <br>
-    <strong style="font-size:15px;">mit der Anzahl der Schiebevorgänge, die der PC vornimmt, kann die Schwierigkeit am leichtesten kontrolliert werden</strong>
+    <strong style="font-size:15px;">the easiest way to control the difficulty is to change the amount of slides the computer does</strong>
     <br>
-    Lasse PC <input type="number" min="2" style="width: 55px;" id="anzahlVerschieben"> Mal verschieben: 
+    let PC slide <input type="number" min="2" style="width: 55px;" id="anzahlVerschieben"> times: 
     <br>
-    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> verschieben, bis höchstens<input type="number" style="width:55px;" max="14" min="0" id="anzahlRichtige" value="10"> an origineller Stelle
+    <input type="checkbox" onchange="if (checked) {anzahlVerschieben.style.display = 'none'; innerHTML.replace('_', ''); } else {anzahlVerschieben.style.display = 'inline'; innerHTML += '__'}" id="richtigeCheck"> slide until at most<input type="number" style="width:55px;" max="14" min="0" id="anzahlRichtige" value="10"> pieces stay at the original position
     <br>
-    <input type="checkbox" id="zurrückVermeiden" checked="true"> <font size="5">leeres Feld 2 Mal an selber Stelle nach <input type="number" id="anzahlVerboten" value="3" style="width: 42px;"> Malen verboten (einfacher, weil immer direkt nebeneinander)</font>
+    <input type="checkbox" id="zurrückVermeiden" checked="true"> <font size="5"> empty field 2 times in the same position prohibited after <input type="number" id="anzahlVerboten" value="3" style="width: 42px;"> times (raising this number makes it more difficult))</font>
     <!-- <input type="checkbox" id="difficultSchieben"> niemals eine verschiebng rückgängig machen (schwierig, weil immer viel verändert wird) -->
   </p>
   <a style="display: none;" id="turnsHistoryS">
     <br>
     <div id="movementPlayer" style="display: none;">
-      <input onchange="changeMovementPlayerVis(checked);" type="checkbox"><b>Züge des PCs ansehen</b>
+      <input onchange="changeMovementPlayerVis(checked);" type="checkbox"><b>look at computer moves</b>
       <div id="innerMovementPlayer" style="display: none;">
         <br>
-        <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> kürzeste Lösung, die der PC weiß
+        <input id="distinctMovement" onchange="movementStepsChanged(checked);" checked="true" onchange="" type="checkbox"> shortest solution the PC knows of
         <br>
         <button id="movementDirectionLeft" onclick="changeMovementDirection(-1);"><<</button>
         <button onclick="playMovementPos(objMovementPlayer.position - 1);"><</button>
@@ -327,63 +327,63 @@
         <button onclick="playMovementPos(objMovementPlayer.position + 1);">></button>
         <button id="movementDirectionRight" style="background-color: hsla(180, 100%, 50%, 1);" onclick="changeMovementDirection(1);">>></button>
         <br>
-        <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> Position
-        <button onclick="playMovementPos(getPlayerPosition());">zu Ihrer Positionierung (falls vorhanden)</button>
+        <input id="movementPosition" oninput="playMovementPos(value);" min="0" type="range"> position
+        <button onclick="playMovementPos(getPlayerPosition());">go to your current position/game state (if existing)</button>
         <br>
-        <b>Geschwindigkeit</b>
+        <b>speed</b>
         <br>
-        schnell <input min="155" value="500" max="1000" id="movementPlayerSpeed" type="range"> langsam
-        <button onclick="movementPlayerSpeed.value = 500;">zurücksetzen</button>
+        quick <input min="155" value="500" max="1000" id="movementPlayerSpeed" type="range"> slow
+        <button onclick="movementPlayerSpeed.value = 500;">reset</button>
         <br>
         <canvas id="movementPlayerTextur"></canvas>
       </div>
       <br>
     </div>
-    <input onchange="if (checked) {userMovementPlayer.style.display = 'block'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>zu vorherigen Zug zurückkehren:</b>
+    <input onchange="if (checked) {userMovementPlayer.style.display = 'block'; generalSettings.style.display = 'none';} else {userMovementPlayer.style.display = 'none'; generalsettings.style.display = 'block';}" type="checkbox"> <b>go back to prior move:</b>
     <div class="cardGeneral card" style="display: none;" id="userMovementPlayer">
       <button onclick="if (userMovement.index - 1 >= 0) {userMovement.index--; playMovementPos(userMovement.index, null, null, userMovement.moves);}"><</button>
       <input id="playerMovementSlider" oninput="playMovementPos(value, null, null, userMovement.moves);" min="0" max="0" type="range">
       <button onclick="if (userMovement.index < userMovement.moves.length) {userMovement.index++; playMovementPos(userMovement.index, null, null, userMovement.moves);}">></button>
       <br>
-      <input id="goBackAsTurns" type="checkbox"> als extra Züge werten
+      <input id="goBackAsTurns" type="checkbox"> count as extra move
     </div>
     <br>
-    <input id="showRemovedTiles" type="checkbox"> gelöschte Teile als Anhaltspunkte an richtiger Position anzeigen (vorrausgesetzt kein Teil wurde auf die Position geschoben)
+    <input id="showRemovedTiles" type="checkbox"> Display deleted pieces as reference points in the correct position (if no piece has been moved to the position)
   </a>
   </div>
   <div id="generalSettings" class="card cardGeneral">
-  <h2>allgemeine Einstellungen: </h2>
-    <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'block'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> markiere richtig plazierte
+  <h2>general settings: </h2>
+    <input type="checkbox" onchange="adaptExpandButtonPosition(); if (checked) rightMarkerSettings.style.display = 'block'; else rightMarkerSettings.style.display = 'none'; layout(true);" id="richtigPlazierte" style="accent-color: green;" checked="true"> mark correctly placed pieces
     <!-- <h3>general</h3> -->
     <div id="rightMarkerSettings" class="card cardGeneral">
-      <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius von Mitte (in %)
+      <input type="range" step="0.01" value="1" oninput="layout(true);" min="0.01" max="1" id="rightMarkerRadius"> radius from the middle (in %)
       <br>
-  <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> Transparenz (in %)
+  <input min="0.01" max="1" step="0.01" value="0.3" oninput="layout(true)" id="rightMarkerTransparence" type="range"> transparency (in %)
   <br>
-  Farbe: <input type="color" oninput="layout();" id="markRightColor" value="#00FF00">
+  color: <input type="color" oninput="layout();" id="markRightColor" value="#00FF00">
     </div>
     <br>
-  <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'block'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> zeige Ränder</font>
+  <input type="checkbox" id="raender" onchange="adaptExpandButtonPosition(); if (checked) randSettings.style.display = 'block'; else randSettings.style.display = 'none'; if (preview.src != '') layout(true, true);"> <font size="5"> show edges of puzzle</font>
   <div id="randSettings" class="card cardGeneral">
-    <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> Breite des Randes
+    <input type="range" min="1" value="13" oninput="randPosition.max = ((lengthPerTeil.edit.x + lengthPerTeil.edit.y)/2)/3 - value; layout();" id="breiteRand"> width of the shown edges
     <br>
-    <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> Position des Randes
+    <input type="range" min="0" value="0" oninput="layout();" id="randPosition"> position of the edges
     <br>
-    <input type="range" min="0.01" max="1" step="0.01" value="0.35" oninput="layout();" id="borderTransparency"> Transparenz des Randes
+    <input type="range" min="0.01" max="1" step="0.01" value="0.35" oninput="layout();" id="borderTransparency"> transparancy of the edges
     <br>
-    Farbe: <input type="color" id="borderColor" oninput="layout();" value="#0000FF">
+    color: <input type="color" id="borderColor" oninput="layout();" value="#0000FF">
   </div>
   <!-- <input type="checkbox" onchange="if (checked == true) {schiebensettings.style.display = 'block'; swipeSteuerungP.style.display = 'none';} else {schiebenSettings.style.display = 'none'; swipeSteuerungP.style.display = 'inline';}" id="schieben"> <font size="5">nur schieben</font> -->
   <br>
-  <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">Lade die Seite automatisch neu, kurz nachdem das Puzzle fertig ist
+  <input id="reloadWhenFinished" onchange="localStorage.setItem('reloadWhenFinished', checked)" type="checkbox">reload the page automatically shortly after finishing a puzzle
   <br>
-  <input id="keepScrolling" checked="true" type="checkbox"> am Rand scrollen bis Teil abgewählt oder vom Rand entfernt
+  <input id="keepScrolling" checked="true" type="checkbox"> automatic scrolling (scroll in the direction of the edge until the piece is unselected or away from the edge)
   <br>
-  <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">vorläufige bzw. beste Ergebnis ansehen</button>
+  <button type="button" id="aufgebenId" onclick="showCurrentStats(modeSelection.value);" name="button">view current statistics</button>
   <br>
   <div id="videoControlsInSettings"></div>
 <p id="showOriginalP" style="display:none">
-  <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> Original anzeigen
+  <input id="showOriginal"  onchange="originalDisplayChanged(checked)" type="checkbox"> view original
   <br>
   <img style="display: none;" id="preview">
   <canvas style="display: none;" id="videoPreview"></canvas>
@@ -392,10 +392,10 @@
 </div>
 <br>
 </div>
-<button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">Fertig</button>
+<button type="button" id="removeTilesFinishedB" style="display: none; font-size: 33px" onclick="shufflePuzzle();" name="button">done</button>
 <a id="tileStatusOptions" style="display: none; position: fixed; background-color: rgba(205, 218, 199, 0.77); border-radius: 5px;">
-<input type="radio" id="pRemoveTile" checked="true" style="accent-color: red;" name="tileStatus"> Teil löschen
-<input type="radio" id="doNotMoveTile" style="accent-color: blue;" name="tileStatus"> Teil beim Mischen nicht bewegen
+<input type="radio" id="pRemoveTile" checked="true" style="accent-color: red;" name="tileStatus"> delete piece
+<input type="radio" id="doNotMoveTile" style="accent-color: blue;" name="tileStatus"> don't move piece when shuffling
 </a>
 <div id="futureTexturPosition"></div>
 <br>
@@ -606,181 +606,185 @@ display: block;
 ::-webkit-scrollbar-corner {
   background: rgba(0,0,0,0);
 }
+/* TODO: option to change settings in tutorial itself */
   </style>
   <div id="tutorial" class="cardGeneral">
     <a id="scrollToTutorial"></a>
     <div class="card cardGeneral">
-      <b>Einstellungen während des Tutorials</b>
+      <!-- TODO: weiter übersetzen -->
+      <b>Settings during the tutorial</b>
       <br>
-      Sie können fast alle Einstellungen während des Tutorials ändern! Auf die Wichtigen wird zwar im Tutorial aufmerksam gemacht, aber Sie können auch gerne selber reinschauen oder ausprobieren. 
+      You can change almost all settings during the tutorial! The tutorial will draw your attention to the important ones, but you are welcome to have a look or try them out yourself.
     </div>
     <div id="traditionalTutorial">
       <!-- PC -->
     <div style="display: none;" id="traditionalTutorialPC">
     <div class="card cardGeneral section" id="moveTutorial">
-      <h2>Teile bewegen und drehen</h2>
-      <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+      <h2>Move and rotate pieces</h2>
+      <button onclick="goToTutorialIndex(this);">start here or continue</button>
       <div class="card cardGeneral">
-        <b>Informationen zum Teile drehen</b>
+        <!-- TODO: standardmäßig quadratische Teile oder Originalgröße einstellbar (ausversehen auf Originalgröße abgeändert) -->
+        <b>Information on rotating pieces</b>
         <br>
-        Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie die Teile zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+        If it is not edited in the settings, the pieces must be rotated to fit. Therefore, when loading an image or video, the width and height are automatically equalized. If you change the width or height of the image or video, you can still rotate the pieces, but only connect them on the logical two sides.
         <br>
-        Zudem können Sie auch in der später erwähnten Teilliste die Teile mit den Pfeiltasten rotieren, während Sie die Maustaste gedrückt haben bzw. auf das Touchpad einen Doppelklick ausgeführt haben. 
+        You can also rotate the pieces in the pieces list mentioned later using the arrow keys while holding down the mouse button or double-clicking on the touchpad.
       </div>
       <div class="card cardGeneral" id="moveStandardPC">
         <input type="radio" id="moveStyleStandard" onclick="unclippStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" name="moveStyle"> <b>Standard</b>
-        <div id="tileClickMoveTutorialDiv"><input type="checkbox" id="tileClickMoveTutorial" onclick="checked = !checked"> Klicken Sie auf das gewünschte Teil. </div>
-        <div id="moveMouseMoveTutorialDiv"><input type="checkbox" id="moveMouseMoveTutorial" onclick="checked = !checked"> Bewegen Sie dann den Mauszeiger, um das Teil zu bewegen. </div>
-        <div id="rotateTileTutorialDiv"><input type="checkbox" id="rotateTileTutorial" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren.</div>
-        <div id="clickUnselectMoveTutorialDiv"><input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> Durch einen erneuten Mausklick auf das Teil können Sie es wieder loslassen bzw. abwählen.</div>
+        <div id="tileClickMoveTutorialDiv"><input type="checkbox" id="tileClickMoveTutorial" onclick="checked = !checked"> Click on the desired tile. </div>
+        <div id="moveMouseMoveTutorialDiv"><input type="checkbox" id="moveMouseMoveTutorial" onclick="checked = !checked"> Then move the mouse pointer to move the piece. </div>
+        <div id="rotateTileTutorialDiv"><input type="checkbox" id="rotateTileTutorial" onclick="checked = !checked"> Press the left or right arrow key to rotate the piece to the left or right.</div>
+        <div id="clickUnselectMoveTutorialDiv"><input type="checkbox" id="clickUnselectMoveTutorial" onclick="checked = !checked"> You can release/unselect the piece by clicking on it again.</div>
       </div>
       <div class="card cardGeneral" id="moveAlternativePC">
         <input type="radio" id="moveStyleAlternative" onclick="unclippAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {goTutorialSteps(1); automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" name="moveStyle"> <b>Alternative (drag and drop)</b>
-        <div id="holdMouseMoveTutorialDiv"><input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Halten Sie die Maustaste gedrückt (oder doppelklicken Sie und lassen Sie Ihren Finger auf dem Touchpad).</div>
-        <div id="moveMouseMoveTutorialAlternativeDiv"><input type="checkbox" id="moveMouseMoveTutorialAlternative" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um das Teil zu bewegen. </div>
-        <div id="rotateTileTutorialAlternativeDiv"><input type="checkbox" id="rotateTileTutorialAlternative" onclick="checked = !checked"> Drücken Sie die linke bzw. rechte Pfeiltaste, um das Teil nach links bzw. rechts zu rotieren. </div>
-        <div id="releaseMoveTutorialDiv"><input type="checkbox" id="releaseMoveTutorial" onclick="checked = !checked"> Lassen Sie die Taste bzw. das Touchpad los. </div>
+        <div id="holdMouseMoveTutorialDiv"><input type="checkbox" id="holdMouseMoveTutorial" onclick="checked = !checked"> Hold down the mouse button (or double-click and keep your finger on the touchpad).</div>
+        <div id="moveMouseMoveTutorialAlternativeDiv"><input type="checkbox" id="moveMouseMoveTutorialAlternative" onclick="checked = !checked"> Move the mouse pointer to move the piece. </div>
+        <div id="rotateTileTutorialAlternativeDiv"><input type="checkbox" id="rotateTileTutorialAlternative" onclick="checked = !checked"> Press the left or right arrow key to rotate the piece to the left or right. </div>
+        <div id="releaseMoveTutorialDiv"><input type="checkbox" id="releaseMoveTutorial" onclick="checked = !checked"> Release the button or touchpad. </div>
       </div>
-      <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Wählen Sie oben im Tutorial, ob Sie standardmäßig den Standard oder die Alternative haben wollen. Sie können diese Einstellung jederzeit in dem Einstellungsmenü ändern. </div>
+      <div id="moveStyleSettingChosenDiv"><input id="moveStyleSettingChosen" type="checkbox" onclick="checked = !checked"> Select above whether you want the default or the alternative. You can change this setting at any time in the settings menu. </div>
     </div>
       <div class="card cardGeneral section" id="clippTutorial">
-      <h2>Teile verbinden und lösen</h2>
+      <h2>Connecting and disconnecting pieces</h2>
       <div class="card cardGeneral" id="connectTiles">
-        <h3>Teile verbinden</h3>
-        <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+        <h3>Connect pieces</h3>
+        <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <div id="clippingInfos">
             <div class="card cardGeneral">
-              <b style="font-size: 15px;">Hitboxen</b>
+              <b style="font-size: 15px;">Hitboxes</b>
               <br>
-              In den Einstellungen haben Sie die Möglichkeit, die Hitboxen zu verkleinern, wodurch Sie näher am Teil sein müssen, damit die Verbindung angeboten wird. Dies kann beispielsweise helfen, wenn Sie mit den vielen Verbindungsvorschlägen überfordert sind oder häufig ausversehen Teile verbinden. Andersrum können Sie die Hitbox auch vergrößern, damit Sie die Teile nicht so weit bewegen müssen.
+              In the settings, you have the option of reducing the size of the hitboxes, which means you have to be closer to the piece for the connection to be offered. This can help, for example, if you are overwhelmed by the amount of suggestions or frequently connect pieces by mistake. Conversely, you can also enlarge the hitbox so that you don't have to move the pieces so far.
             </div>
           <div class="card cardGeneral">
-            <b style="font-size: 15px;">Verbindungsmöglichkeiten bei Teilkollisionen werden standardmäßig nicht angeboten</b>
+            <b style="font-size: 15px;">Connection options for piece collisions are not offered by default</b>
             <br>
-            Standardmäßig werden Verbindungsmöglichkeiten von Teilen, an dessen Rand ein Teil angeknüpft werden soll und unter einem anderen Teil liegen, nicht angeboten. Falls Sie dies stört, können Sie auch das in den Einstellungen ändern ("Teile an verdeckte Ränder nicht anknüpfen lassen")
+            If a piece is lying on top of the edge of another tile you want to connect to, it won't sugest the connection by default, but if you want it to, you can change the option in the settings ("Do not allow pieces to attach to covered edges")
           </div>
           <div class="card cardGeneral">
-            <b style="font-size: 15px;">nicht passende und richtige markieren</b>
+            <b style="font-size: 15px;">Mark incorrect and correct</b>
             <br>
-            Wenn Teile sich zu ähnlich sind, können Sie diese im Vorfeld entfernen oder nicht passende markieren lassen, wenn eine Verbindung vorgeschlagen wird. 
+            If pieces are too similar, you can remove them in advance or have them marked as not matching when a connection is suggested.
             <br>
-            Standardmäßig wird nur markiert, ob ein Teil richtig ist (alle nötigen Teile drum herum)
+            By default, only whether a piece is correct is marked (all necessary pieces must already be around it)
           </div>
         </div>
         <div class="card cardGeneral">
-        <div id="selectTileConnectTileTutorialDiv"><input type="checkbox" id="selectTileConnectTileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
-        <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
-        <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab (Finger vom Bildschirm lösen), wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
+        <div id="selectTileConnectTileTutorialDiv"><input type="checkbox" id="selectTileConnectTileTutorial" onclick="checked = !checked"> Select a piece. </div>
+        <div id="getClippingOptionConnectTileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileTutorial" onclick="checked = !checked"> Approach another piece. </div>
+        <div id="clipTileTutorialDiv"><input type="checkbox" id="clipTileTutorial" onclick="checked = !checked"> Unselect the piece (release your finger from the screen) when you see a blue line to connect it to the other piece. </div>
         </div>
-        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie zwei weitere Teile mit den bereis verbudenen. </div>
+        <div id="clippSecondTutorialDiv"><input id="clippSecondTutorial" type="checkbox" onclick="checked = !checked"> Connect two more pieces to the already connected ones. </div>
       </div>
       <div class="card cardGeneral section" id="disconnectTiles">
-        <h3>Teile lösen</h3>
-        <button id="contineTutorialUnclippPC" onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+        <h3>Disconnect pieces</h3>
+        <button id="contineTutorialUnclippPC" onclick="goToTutorialIndex(this);">start here or continue</button>
         <div class="card cardGeneral">
-          <b style="font-size: 15px;">Information Shift Taste</b>
+          <b style="font-size: 15px;">Information shift button</b>
           <br>
-          Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
+          As long as you press the shift key, you can select as many pieces as you like and then move them. They can only be unselected again after you have released the button.
         </div>
         <div id="moveStyleStandardUnclipp" class="card cardGeneral">
-          <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" id="unclippStandard" name="unclippStyle"><b> Standard (verbunden mit Standard für Bewegen der Teile) </b>
-          <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
-          <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich), welches mit einem anderen verbunden ist. </div>
-          <div id="releaseShiftStandardUnclippTutorialDiv"><input type="checkbox" id="releaseShiftStandardUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
-          <div id="unclippStandardTutorialDiv"><input type="checkbox" id="unclippStandardTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
-          <div id="unselectUnclippStandardTutorialDiv"><input type="checkbox" id="unselectUnclippStandardTutorial" onclick="checked = !checked"> Klicken Sie, um die ausgewählten Teile abzuwählen. </div>
+          <input type="radio" onclick="moveStyleStandard.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial'; automaticTileSelectionReset.checked = !checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', !checked);" id="unclippStandard" name="unclippStyle"><b> Default (linked to default for moving the pieces) </b>
+          <div id="pressShiftStandardUnclippTutorialDiv"><input type="checkbox" id="pressShiftStandardUnclippTutorial" onclick="checked = !checked"> Press the shift key. </div>
+          <div id="selectTileStandardUnclippTutorialDiv"><input type="checkbox" id="selectTileStandardUnclippTutorial" onclick="checked = !checked"> Select a piece (any amount possible outside the tutorial) that is connected to another. </div>
+          <div id="releaseShiftStandardUnclippTutorialDiv"><input type="checkbox" id="releaseShiftStandardUnclippTutorial" onclick="checked = !checked"> Release the shift key. </div>
+          <div id="unclippStandardTutorialDiv"><input type="checkbox" id="unclippStandardTutorial" onclick="checked = !checked"> Move the mouse pointer to release the pieces. </div>
+          <div id="unselectUnclippStandardTutorialDiv"><input type="checkbox" id="unselectUnclippStandardTutorial" onclick="checked = !checked"> Click to unselect the selected pieces. </div>
         </div>
         <div id="moveStyleAlternativeUnclipp" class="card cardGeneral">
-          <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial';  automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" id="unclippAlternative" name="unclippStyle"> <b>Alternative (verbunden mit Alternative für Bewegen der Teile)</b>
-          <div id="pressShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="pressShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Drücken Sie die Shift Taste. </div>
-          <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Wählen Sie ein Teil aus (außerhalb des Tutorials beliebige Anzahl möglich, Maustaste drücken und halten oder Doppelklick auf Touchpad). Das Teil muss mit mindestens einem weiteren verbunden sein, damit es von diesem abgetrennt werden kann.  </div>
-          <div id="unclippTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="unclippTileAlternativeUnclippTutorial" onclick="checked = !checked"> Bewegen Sie den Mauszeiger, um die Teile zu lösen. </div>
-          <div id="releaseShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="releaseShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Shift Taste los. </div>
-          <div id="unselectAlternativeUnclippTutorialDiv"><input type="checkbox" id="unselectAlternativeUnclippTutorial" onclick="checked = !checked"> Lassen Sie das Touchpad bzw. die Maustaste los, um das Teil abzuwählen. </div>
+          <input type="radio" onclick="moveStyleAlternative.checked = checked; moveStyleSettingChosen.checked = true; if (tutorial.state == 'moveStyleSettingChosen' || tutorial.state == 'selectTileConnectTileTutorial') {tutorial.state = 'selectTileConnectTileTutorial'; automaticTileSelectionReset.checked = checked;} localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" id="unclippAlternative" name="unclippStyle"> <b>Alternative (connected with alternative for moving the pieces)</b>
+          <div id="pressShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="pressShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Press the shift key. </div>
+          <div id="selectTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="selectTileAlternativeUnclippTutorial" onclick="checked = !checked"> Select a piece (any amount possible outside the tutorial) that is connected to another one and hold the left mouse key down</div>
+          <div id="unclippTileAlternativeUnclippTutorialDiv"><input type="checkbox" id="unclippTileAlternativeUnclippTutorial" onclick="checked = !checked"> Move the mouse pointer to detach the pieces. </div>
+          <div id="releaseShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="releaseShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Release the shift key. </div>
+          <div id="unselectAlternativeUnclippTutorialDiv"><input type="checkbox" id="unselectAlternativeUnclippTutorial" onclick="checked = !checked"> Release the touchpad or mouse button to unselect the piece. </div>
         </div>
       </div>
     </div>
     <div class="card cardGeneral section" id="generalSkills">
-      <h2>allgemeine Fertigkeiten</h2>
-      <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+      <h2>General skills</h2>
+      <button onclick="goToTutorialIndex(this);">start here or continue</button>
       <div class="card cardGeneral">
-        <h3>Zoomen</h3>
-        Wie auch auf jeder anderen Website, können Sie rein- und rauszoomen. Das Übliche ist Str. + "-" zum Rauszoomen und Str. + "+" zum Reinzoomen (es kann auch das Mausrad statt plus und minus benutzt werden). Dadurch können Sie das "Spielfeld" besser überblicken, haben jedoch auch kleinere Teile und umgekehrt. 
+        <h3>zoom</h3>
+        As on any other website, you can zoom in and out. The usual is Ctrl + "-" to zoom out and Ctrl + "+" to zoom in (you can also use the mouse wheel instead of plus and minus). This gives you a better overview of the "playing field", but you also have smaller pieces and vice versa.
       </div>
       <div id="scrollTutorial" class="card cardGeneral">
-        <b style="font-size: 21px;">scroling</b>
+        <b style="font-size: 21px;">scrolling</b>
         <br>
         <div class="card cardGeneral" id="manualScrollingTutorial">
-          <h3>manuell scrollen</h3>
-          <div id="selectTileScrollingTutorialDiv"><input type="checkbox" id="selectTileScrollingTutorial" onclick="checked = !checked">Teil anwählen (wenn Sie 2 Finger Geste nutzen wollen mit der linken Maustaste)</div> 
-          <div id="manuallyScrollingTutorialDiv"><input type="checkbox" id="manuallyScrollingTutorial" onclick="checked = !checked">scrollen (z.B. mit 2 Finger Geste auf dem Touchpad oder mit dem Mausrad)</div> 
-          <div id="unselectTileScrollingTutorialDiv"><input type="checkbox" id="unselectTileScrollingTutorial" onclick="checked = !checked">Teil abwählen</div> 
+          <h3>manual scrolling</h3>
+          <div id="selectTileScrollingTutorialDiv"><input type="checkbox" id="selectTileScrollingTutorial" onclick="checked = !checked">Select piece (if you want to use 2 finger gesture with the left mouse button)</div>
+          <div id="manuallyScrollingTutorialDiv"><input type="checkbox" id="manuallyScrollingTutorial" onclick="checked = !checked">Scroll (e.g. with 2 finger gesture on the touchpad or with the mouse wheel)</div>
+          <div id="unselectTileScrollingTutorialDiv"><input type="checkbox" id="unselectTileScrollingTutorial" onclick="checked = !checked">Unselect piece</div>
         </div>
         <div class="card cardGeneral" id="autoScrollTutorial">
-          <h3>automatisch scrollen</h3>
-          <div id="selectTileAutomaticScrollingTutorialDiv"><input type="checkbox" id="selectTileAutomaticScrollingTutorial" onclick="checked = !checked">Teil anwählen</div> 
-          <div id="automaticScrollingTutorialDiv"><input type="checkbox" id="automaticScrollingTutorial" onclick="checked = !checked">Teil so weit nach unten schieben, dass mehr als die Hälfte des Teils den Bildschirm verlassen hat (außerhalb des tutorials alle Richtungen möglich)</div> 
-          <!-- TODO: vom Rand weg bewegen -->
-          <div id="stopScrollingAutomaticScrollingTutorialDiv"><input type="checkbox" id="stopScrollingAutomaticScrollingTutorial" onclick="checked = !checked">Teil abwählen oder vom Rand weg bewegen, um das Scrolling zu stoppen</div> 
+          <h3>automatic scrolling</h3>
+          <div id="selectTileAutomaticScrollingTutorialDiv"><input type="checkbox" id="selectTileAutomaticScrollingTutorial" onclick="checked = !checked">Select piece</div>
+          <div id="automaticScrollingTutorialDiv"><input type="checkbox" id="automaticScrollingTutorial" onclick="checked = !checked">move the piece down so that more than half of the piece has left the screen (all directions possible outside the tutorial)</div>
+          <!-- TODO: move away from the edge -->
+          <div id="stopScrollingAutomaticScrollingTutorialDiv"><input type="checkbox" id="stopScrollingAutomaticScrollingTutorial" onclick="checked = !checked">Unselect the piece or move it away from the edge to stop scrolling</div>
         </div>
       </div>
     </div>
       <div class="card cardGeneral section" id="tileSelectionBarTutorial">
-        <h3>Die Teilliste</h3>
+        <h3>The pieces list</h3>
         <div class="card cardGeneral">
-          <b>Informationen zur aufbereitung der Teile (ink. Teilliste)</b>
+          <b>Information on the preparation of the pieces (incl. pieces list)</b>
           <br>
-          In den Einstellungen können Sie auswählen, wie die Teile aufbereitet werden. Sie können verteil werden (mit Überlappen), in die Teilliste gebracht werden, um die es im Folgenden geht, oder auf dem Spielfeld nebeneinander gelegt werden. Zudem können Sie mit leerer Liste starten, sodass Sie die Teile sortiert dort ablegen oder auf dem Spielfeld behalten können. 
+          In the settings, you can select how the pieces are prepared. They can be distributed (with overlapping), placed in the pieces list, which is the subject of the following section, or placed next to each other on the playing field. You can also start with an empty list so that you can sort the pieces in the list or keep selected ones on the playing field.
         </div>
         <div class="card cardGeneral">
-          <b>zusätzliche Einstellungen</b>
+          <b>Additional settings</b>
           <br>
-          Für die Teilliste gibt es zusätzliche Einstellungen, die Sie jetzt einsehen können. 
+          There are additional settings for the pieces list that you can now view.
         </div>
         <div class="card cardGeneral" id="controlTileBarScrollTutorial">
-          <h3>Scrolling in der Teilliste</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
-          <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scrollen durch Anklicken der roten (halbtransparenten) Pfeile an den Rändern des Bildschirms (werden sichtbarer, wenn man sie mit der Maus berührt)</div> 
+          <h3>Scrolling in the pieces list</h3>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scroll by clicking on the red (semi-transparent) arrows at the edges of the screen (become more visible when you touch them with the mouse)</div>
           <div class="card cardGeneral" id="scrollWithMouse">
-            <h4 id="scrollTilelistSwipeTutorial">Scrollen mit der Maustaste</h4>
-            <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Maustaste drücken oder auf Touchpad doppelklicken und gedrückt halten bzw. Finger auf Touchpad lassen</div> 
-            <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Zeiger bewegen, um die Liste in die entsprechende Richtung zu bewegen </div> 
-            <div id="stopScrollingTileBarTutorialDiv"><input type="checkbox" id="stopScrollingTileBarTutorial" onclick="checked = !checked">Maustaste bzw. Touchpad loslassen</div> 
+            <h4 id="scrollTilelistSwipeTutorial">Scrolling with the mouse button</h4>
+            <div id="MouseDownScrollTileBarTutorialDiv"><input type="checkbox" id="MouseDownScrollTileBarTutorial" onclick="checked = !checked">Press the mouse button or double-click on the touchpad and hold it down or leave your finger on the touchpad</div>
+            <div id="moveMouseScrollTileSelectionBarTutorialDiv"><input type="checkbox" id="moveMouseScrollTileSelectionBarTutorial" onclick="checked = !checked">Move the pointer to move the list in the corresponding direction </div>
+            <div id="stopScrollingTileBarTutorialDiv"><input type="checkbox" id="stopScrollingTileBarTutorial" onclick="checked = !checked">Release the mouse button or touchpad</div>
           </div>
-          <div id="ScrollkeyTileBarTutorialDiv"><input type="checkbox" id="ScrollkeyTileBarTutorial" onclick="checked = !checked">Scrollen durch drücken der linken bzw. rechten Pfeiltaste (Mauszeiger muss auf Liste sein)</div> 
+          <div id="ScrollkeyTileBarTutorialDiv"><input type="checkbox" id="ScrollkeyTileBarTutorial" onclick="checked = !checked">Scroll by pressing the left or right arrow key (mouse pointer must be on list)</div>
         </div>
         <div class="card cardGeneral section" id="leaveTileBarTutorial">
-          <h3>Teile auf "Spielfeld" bringen</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <h3>Move pieces to "playing field"</h3>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <div class="card cardGeneral">
-            <b style="font-size: 15px;">automatisch nächste Teil auswählen</b>
+            <b style="font-size: 15px;">automatically select next piece</b>
             <br>
-            Am PC wird standardmäßig das nächste Teil in der Teilliste ausgewählt, am Handy nicht. Solange Sie auf dem "Spielfeld" ein Teil angewählt haben, wird kein Teil aus der Teilliste genommen. Sie können auch dies in den Einstellungen ändern. 
+            <!-- TODO: besser ausdrücken -->
+            On the PC, the next piece in the pieces list is selected by default, but not on mobile devices. As long as you have selected a piece on the "playing field", no piece will be removed from the pieces list. You can also change this in the settings.
           </div>
           <div class="card cardGeneral" id="leaveTileBarTutorial">
-            <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil in der Liste, um es anzuwählen.</div> 
-            <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Klicken Sie auf das "Spielfeld", um das Teil dort "abzulegen". </div> 
-            <div id="unselecTileAfterTileBarTilePlacementTutorialDiv"><input type="checkbox" id="unselecTileAfterTileBarTilePlacementTutorial" onclick="checked = !checked">Wählen Sie das Teil ab.</div> 
+            <div id="selectTileBarTileTutorialDiv"><input type="checkbox" id="selectTileBarTileTutorial" onclick="checked = !checked">Click on a piece in the list to select it.</div>
+            <div id="placeTileOnFiledTutorialDiv"><input type="checkbox" id="placeTileOnFiledTutorial" onclick="checked = !checked">Click on the "field" to "place" the piece there. </div>
+            <div id="unselecTileAfterTileBarTilePlacementTutorialDiv"><input type="checkbox" id="unselecTileAfterTileBarTilePlacementTutorial" onclick="checked = !checked">Unselect the piece.</div>
           </div>
-          <div id="SecondPlaceTileTutorialDiv"><input type="checkbox" id="SecondPlaceTileTutorial" onclick="checked = !checked">Legen Sie ein weiteres Teil auf dem Spielfeld ab.</div> 
+          <div id="SecondPlaceTileTutorialDiv"><input type="checkbox" id="SecondPlaceTileTutorial" onclick="checked = !checked">Drop another tile on the playing field.</div>
         </div>
         <div class="card cardGeneral section" id="backToBarTutorial">
-          <h3>Teile zurück in Teilliste bringen</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <h3>Bring pieces back to the pieces list</h3>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <div class="card cardGeneral" id="backToBarPlusBTutorial">
-            <h4>mit "+"-Button</h4>
-            <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Klicken Sie auf einen der "+"-Bottons</div> 
-            <div id="backToTileBarPlusBTutorialDiv"><input type="checkbox" id="backToTileBarPlusBTutorial" onclick="checked = !checked">Klicken Sie auf ein Teil, um es an der ausgewählten Stelle zurück in die Teilliste zu bringen. </div> 
+            <h4>with "+" button</h4>
+            <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Click on one of the "+" buttons</div>
+            <div id="backToTileBarPlusBTutorialDiv"><input type="checkbox" id="backToTileBarPlusBTutorial" onclick="checked = !checked">Click on a piece to bring it back into the pieces list at the selected position. </div>
           </div>
           <div class="card cardGeneral" id="backToBarBTutorial">
-            <h4>mit "zurück in Leiste"-Button</h4>
-            <div id="selectTileTileBarZurückInLeisteTutorialDiv"><input type="checkbox" id="selectTileTileBarZurückInLeisteTutorial" onclick="checked = !checked">Wählen Sie ein Teil in der Teilleiste an. Rechts von dem ausgewählten Teil wird das neue Teil eingereiht werden. </div> 
-            <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Klicken Sie auf den "zurück in Leiste"-Botton (oben links auf dem Bildschirm, lässt sich nur aktivieren, wenn ein Teil auf dem "Spielfeld" liegt). </div> 
-            <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Klicken Sie das Teil an, das Sie zurückholen wollen. </div> 
+            <h4>with "back to piece list" button</h4>
+            <div id="selectTileTileBarBackToBarTutorialDiv"><input type="checkbox" id="selectTileTileBarBackToBarTutorial" onclick="checked = !checked">Select a piece in the pieces list. The new piece will be added to the right of the selected piece. </div>
+            <div id="clickBackToBarBTurotialDiv"><input type="checkbox" id="clickBackToBarBTurotial" onclick="checked = !checked">Click on the "back to piece list" button (top left of the screen, can only be activated if a piece is on the "playing field"). </div>
+            <div id="selectBackToBarTileZurückInLeisteTutorialDiv"><input type="checkbox" id="selectBackToBarTileZurückInLeisteTutorial" onclick="checked = !checked">Click on the piece you want to retrieve. </div>
             <div class="card cardGeneral">
-              <b style="font-size: 15px;">automatische Positionsauswahl</b>
+              <b style="font-size: 15px;">automatic position selection</b>
               <br>
-              Wenn Sie kein Teil ausgewählt haben und trotdem den Button drücken, wird das danach ausgewähle Teil an das Ende der Liste angehängt. 
+              If you have not selected a piece and still press the button, the selected piece will be appended to the end of the list.
             </div>
           </div>
         </div>
@@ -789,141 +793,143 @@ display: block;
     <!-- Handy -->
     <div id="traditionalTutorialHandy" style="display: none;">
       <div class="card cardGeneral section" id="moveTutorial">
-        <h2>Teile bewegen</h2>
-        <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+        <h2>Move pieces</h2>
+        <button onclick="goToTutorialIndex(this);">start here or continue</button>
         <div class="card cardGeneral">
-          <div id="selectTileMobileTurorialDiv"><input type="checkbox" id="selectTileMobileTurorial" onclick="checked = !checked"> Legen Sie Ihren Finger auf ein Teil. </div>
-          <div id="moveTileMobileTutorialDiv"><input type="checkbox" id="moveTileMobileTutorial" onclick="checked = !checked"> Bewegen Sie dann den Finger, um das Teil zu bewegen. </div>
-          <div id="releaseTileMobileTutorialDiv"><input type="checkbox" id="releaseTileMobileTutorial" onclick="checked = !checked"> Heben Sie den Finger vom Bildschirm an, um das Teil abzuwählen. </div>
+          <div id="selectTileMobileTurorialDiv"><input type="checkbox" id="selectTileMobileTurorial" onclick="checked = !checked"> Place your finger on a piece. </div>
+          <div id="moveTileMobileTutorialDiv"><input type="checkbox" id="moveTileMobileTutorial" onclick="checked = !checked"> Then move your finger to move the piece. </div>
+          <div id="releaseTileMobileTutorialDiv"><input type="checkbox" id="releaseTileMobileTutorial" onclick="checked = !checked"> Lift your finger off the screen to unselect the piece. </div>
         </div>
       </div>
         <div class="card cardGeneral section" id="clippTutorial">
-        <h2>Teile verbinden und lösen</h2>
+        <h2>Connecting and disconnecting pieces</h2>
         <div class="card cardGeneral" id="connectTiles">
-          <h3>Teile verbinden</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <h3>Connect tiles</h3>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <div id="clippingInfosMobile"></div>
           <div class="card cardGeneral">
-          <div id="selectTileConnectTileMobileTutorialDiv"><input type="checkbox" id="selectTileConnectTileMobileTutorial" onclick="checked = !checked"> Wählen Sie ein Teil an. </div>
-          <div id="getClippingOptionConnectTileMobileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileMobileTutorial" onclick="checked = !checked"> Nähern Sie sich einem anderen Teil. </div>
-          <div id="clipTileMobileTutorialDiv"><input type="checkbox" id="clipTileMobileTutorial" onclick="checked = !checked"> Wählen Sie das Teil ab, wenn Sie einen blauen Strich sehen, um es mit dem anderen zu verbinden. </div>
+          <div id="selectTileConnectTileMobileTutorialDiv"><input type="checkbox" id="selectTileConnectTileMobileTutorial" onclick="checked = !checked"> Select a piece. </div>
+          <div id="getClippingOptionConnectTileMobileTutorialDiv"><input type="checkbox" id="getClippingOptionConnectTileMobileTutorial" onclick="checked = !checked"> Approach another piece. </div>
+          <div id="clipTileMobileTutorialDiv"><input type="checkbox" id="clipTileMobileTutorial" onclick="checked = !checked"> unselect the piece when you see a blue line to connect it to the other piece. </div>
           </div>
-          <div id="clippSecondMobileTutorialDiv"><input id="clippSecondMobileTutorial" type="checkbox" onclick="checked = !checked"> Verbinden Sie drei weitere Teile zu den bereits verbundenen. </div>
+          <div id="clippSecondMobileTutorialDiv"><input id="clippSecondMobileTutorial" type="checkbox" onclick="checked = !checked"> Connect three more pieces to the ones already connected. </div>
         </div>
         <div class="card cardGeneral section" id="disconnectTiles">
-          <h3>Teile lösen</h3>
-          <button id="contineTutorialUnclippMobile" onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <h3>Disconnect tiles</h3>
+          <button id="contineTutorialUnclippMobile" onclick="goToTutorialIndex(this);">start here or continue</button>
           <div class="card cardGeneral">
-            <b style="font-size: 15px;">Allgemeiner Hinweis</b>
+            <b style="font-size: 15px;">General note</b>
             <br>
-            Wenn Sie Probleme mit dem Anklicken der Elemente oben in der leiste haben (scrollen, rotieren, Shift Taste), versuchen Sie, ein wenig weiter unten zu klicken, selbst wenn Sie außerhalb des angezeigten Elements klicken, kann das genau die richtige Stelle für das Klicken sein. 
+            If you have trouble clicking on the elements at the top of the bar (scroll, rotate, shift key), try clicking a little further down, even if you click outside the displayed element, that may be just the right place to click.
           </div>
           <div class="card cardGeneral">
-            <b style="font-size: 15px;">Information Shift Taste</b>
+            <b style="font-size: 15px;">Information shift button</b>
             <br>
-            Solange Sie die Shift Taste drücken, können Sie beliebig viele Teile anwählen und diese danach bewegen. Sie können erst wieder abgewählt werden, nachdem Sie die Taste losgelassen haben. 
+            As long as you press the shift key, you can select as many pieces as you like and then move them. They can only be deselected again after you have released the button.
           </div>
           <div class="card cardGeneral">
-            <div id="pressShiftMobileUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
-            <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf ein Teil, welches mit einem anderen verbunden ist. </div>
-            <div id="moveTileShiftUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftUnclippTutorial" onclick="checked = !checked"> Bewegen Sie ein Teil mit dem Finger. </div>
-            <div id="releaseFingerMobileShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
+            <div id="pressShiftMobileUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileUnclippTutorial" onclick="checked = !checked"> Press the "shift key". </div>
+            <div id="selectTileMobileShiftUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftUnclippTutorial" onclick="checked = !checked"> Place your finger on a piece that is connected to another. </div>
+            <div id="moveTileShiftUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftUnclippTutorial" onclick="checked = !checked"> Move the piece with your finger. </div>
+            <div id="releaseFingerMobileShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileShiftTutorial" onclick="checked = !checked"> Release your finger from the screen.</div>
           </div>
           <div class="card cardGeneral">
-            <b>Mehrfachauswahl (auch ohne Abtrennen möglich)</b>
+            <b>Multiple selection (also possible without detaching)</b>
             <br>
-            <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+            <button onclick="goToTutorialIndex(this);">start here or continue</button>
             <br>
-            <div id="pressShiftMobileMultipleUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileMultipleUnclippTutorial" onclick="checked = !checked"> Drücken Sie die "Shift Taste". </div>
-            <div id="selectTileMobileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Klicken Sie auf zwei Teile, welche miteinander verbunden sind und eine Verbindung zu einem weiteren Teil haben (außerhalb des Tutorials beliebige Anzahl möglich), die Sie von dem Rest abtrennen wollen. </div>
-            <div id="moveTileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Bewegen Sie eins der ausgewähltenTeile mit dem Finger. </div>
-            <div id="releaseFingerMobileMultiShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileMultiShiftTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
+            <div id="pressShiftMobileMultipleUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileMultipleUnclippTutorial" onclick="checked = !checked"> Press the "shift key". </div>
+            <div id="selectTileMobileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Click on two pieces that are connected to each other and have a connection to another piece (any number possible outside the tutorial) that you want to separate from the rest. </div>
+            <div id="moveTileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="moveTileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Move one of the selected pieces with your finger. </div>
+            <div id="releaseFingerMobileMultiShiftTutorialDiv"><input type="checkbox" id="releaseFingerMobileMultiShiftTutorial" onclick="checked = !checked"> Release your finger from the screen.</div>
           </div>
           <div class="card cardGeneral">
-            <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Legen Sie zwei Finger auf das Teil, das Sie lösen wollen. (muss mit mindestens einem weiteren Teil verbunden sein)</div>
-            <div id="releaseTwoFingersUnclippTutorialDiv"><input type="checkbox" id="releaseTwoFingersUnclippTutorial" onclick="checked = !checked"> Lassen Sie die Finger wieder vom Bildschirm los. </div>
-            <div id="selectTileMobileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileTwoFingersUnclippTutorial" onclick="checked = !checked"> Legen Sie den Finger auf das abgelöste Teil. </div>
-            <div id="moveTileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="moveTileTwoFingersUnclippTutorial" onclick="checked = !checked"> Bewegen Sie das abgelöste Teil mit dem Finger. </div>
-            <div id="releaseFingerMobileTwoFingersTutorialDiv"><input type="checkbox" id="releaseFingerMobileTwoFingersTutorial" onclick="checked = !checked"> Lassen Sie den Finger wieder vom Bildschrim los.</div>
+            <div id="twoFingersDownUnclippTutorialDiv"><input type="checkbox" id="twoFingersDownUnclippTutorial" onclick="checked = !checked"> Place two fingers on the piece you want to unclip. (must be connected to at least one other piece)</div>
+            <div id="releaseTwoFingersUnclippTutorialDiv"><input type="checkbox" id="releaseTwoFingersUnclippTutorial" onclick="checked = !checked"> Release your fingers from the screen. </div>
+            <div id="selectTileMobileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileTwoFingersUnclippTutorial" onclick="checked = !checked"> Place your finger on the detached piece. </div>
+            <div id="moveTileTwoFingersUnclippTutorialDiv"><input type="checkbox" id="moveTileTwoFingersUnclippTutorial" onclick="checked = !checked"> Move the detached piece with your finger. </div>
+            <div id="releaseFingerMobileTwoFingersTutorialDiv"><input type="checkbox" id="releaseFingerMobileTwoFingersTutorial" onclick="checked = !checked"> Release the finger from the screen.</div>
           </div>
         </div>
       </div>
       <div class="card cardGeneral section" id="generalSkills">
-        <h2>allgemeine Fertigkeiten</h2>
+        <h2>General skills</h2>
         <div id="scrollTutorial" class="card cardGeneral">
-          <b style="font-size: 21px;">scrollen und zoomen</b>
+          <b style="font-size: 21px;">scroll and zoom</b>
           <br>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <br>
           <div class="card cardGeneral" id="manualScrollingTutorial">
-            <h3>manuell scrollen und zoomen</h3>
+            <h3>Manual scrolling and zooming</h3>
             <div class="card cardGeneral">
-              <b style="font-size: 15px;">auf leerem Hintergrund</b>
+              <b style="font-size: 15px;">on an empty background</b>
               <br>
-              In den Einstellungen haben Sie die Möglichkeit auszustellen, dass Sie auf leerem bzw. weißem Hintergrund immer scrollen können (ohne den Haken bei "scroll" zu setzen)
+              In the settings, you have the option to set that you can always scroll on an empty or white background (without checking the "scroll" box)
             </div>
-            <div id="selectScrollScrollingTutorialDiv"><input type="checkbox" id="selectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" an</div> 
-            <div id="scrollMobileScrollingTutorialDiv"><input type="checkbox" id="scrollMobileScrollingTutorial" onclick="checked = !checked">Scrollen Sie</div> 
-            <div id="zoomInTutorialDiv"><input type="checkbox" id="zoomInTutorial" onclick="checked = !checked">zoomen Sie rein (ohne Haken bei "scroll nicht möglich")</div> 
-            <div id="zoomOutTutorialDiv"><input type="checkbox" id="zoomOutTutorial" onclick="checked = !checked">zoomen Sie so weit raus wie möglich (ohne Haken bei "scroll nicht möglich")</div> 
-            <div id="unselectScrollScrollingTutorialDiv"><input type="checkbox" id="unselectScrollScrollingTutorial" onclick="checked = !checked">Wählen Sie "scroll" ab</div> 
+            <!-- TODO: speech bubble -->
+            <div id="selectScrollScrollingTutorialDiv"><input type="checkbox" id="selectScrollScrollingTutorial" onclick="checked = !checked">Select "scroll" on the top of your screen</div>
+            <div id="scrollMobileScrollingTutorialDiv"><input type="checkbox" id="scrollMobileScrollingTutorial" onclick="checked = !checked">Scroll</div>
+            <div id="zoomInTutorialDiv"><input type="checkbox" id="zoomInTutorial" onclick="checked = !checked">Zoom in (without ticking "scroll" not possible)</div>
+            <div id="zoomOutTutorialDiv"><input type="checkbox" id="zoomOutTutorial" onclick="checked = !checked">zoom out as far as possible (without checking "scroll" not possible)</div>
+            <div id="unselectScrollScrollingTutorialDiv"><input type="checkbox" id="unselectScrollScrollingTutorial" onclick="checked = !checked">unselect "scroll"</div>
           </div>
           <div id="autoScrollMobileTutorial"></div>
         </div>
         <div class="card cardGeneral section">
-          <h3>rotieren</h3>
-          <button onclick="goToTutorialIndex(this);">hier beginnen oder fortfahren</button>
+          <h3>rotate</h3>
+          <button onclick="goToTutorialIndex(this);">start here or continue</button>
           <div class="card cardGeneral">
-            <b>Informationen zum Teile drehen</b>
+            <b>Information on rotating pieces</b>
+            <!-- TODO: information: shift to rotate when already attached to other one -->
             <br>
-            Wenn es nicht in den Einstellungen geädert wird, müssen die Teile rotiert werden, um zu passen. Deshalb werden beim Laden eines Bildes oder Videos automatisch die Breite und Höhe angeglichen. Wenn Sie die Breite oder Höhe des Bildes bzw. Videos ändern, können Sie das Teil zwar immer noch drehen, jedoch nur noch an den logischen Seiten miteinander verbinden. 
+            If it is not edited in the settings, the pieces must be rotated to fit. Therefore, when loading an image or video, the width and height are automatically equalized. If you change the width or height of the image or video, you can still rotate the piece, but you can only connect it at the logical sides.
             <br>
-            Zudem können Sie nach Aktivieren der Rotierfunktion oben in der Leiste auch in der später erwähnten Teilleiste durch Anklicken der Teile rotieren, bis Sie die Funktion abgewählt haben. 
+            After activating the rotation function at the top of the bar, you can also rotate the pieces in the pieces bar mentioned later by clicking on the pieces until you have deselected the function.
           </div>
-          <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Rotieren nach links aktivieren.</div>
-          <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
-          <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts aktivieren.</div>
-          <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Teil(e) anklicken, die Sie rotieren wollen.</div>
-          <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Rotieren nach rechts deaktivieren.</div>
+          <div id="activateRotateLeftTutorialDiv"><input type="checkbox" id="activateRotateLeftTutorial" onclick="checked = !checked"> Activate rotation to the left.</div>
+          <div id="rotateLeftMobileTutorialDiv"><input type="checkbox" id="rotateLeftMobileTutorial" onclick="checked = !checked"> Click on the piece(s) you want to rotate.</div>
+          <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Activate rotate to the right.</div>
+          <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Click on the piece(s) you want to rotate.</div>
+          <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Deactivate rotation to the right.</div>
         </div>
       </div>
       <div id="tileSelectionBarMobileTutorial"></div>
     </div>
     <div id="completePuzzleTutorialDiv" class="section">
-      <input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Vervollständigen Sie das Puzzle.
+      <input type="checkbox" id="completePuzzleTutorial" onclick="checked = !checked">Complete the puzzle.
     </div>
 </div>
 <div id="exchangeTutorial" style="display: none;" class="cardGeneral">
   <div class="card cardGeneral section">
-    <h1>Teile austauschen</h1>
+    <h1>Exchange pieces</h1>
     <div class="card cardGeneral">
       <div id="moveStyleStandardExchangeDiv" class="card cardGeneral">
         <input type="radio" id="moveStyleStandardExchange" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
-      <b>Standard Steuerung</b>
-      <div id="selectFirstExchangeNormalTutorialDiv"><input type="checkbox" id="selectFirstExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
-      <div id="selectSecondExchangeNormalTutorialDiv"><input type="checkbox" id="selectSecondExchangeNormalTutorial" onclick="checked = !checked"> Klicken Sie das zweite Teil an, um es anzuwählen. und die beiden gewählten Teile auszutauschen. </div>
+      <b>Standard control</b>
+      <div id="selectFirstExchangeNormalTutorialDiv"><input type="checkbox" id="selectFirstExchangeNormalTutorial" onclick="checked = !checked"> Click on the first piece to be exchanged.</div>
+      <div id="selectSecondExchangeNormalTutorialDiv"><input type="checkbox" id="selectSecondExchangeNormalTutorial" onclick="checked = !checked"> Click on the second piece to select it and exchange the two selected pieces. </div>
     </div>
     <div id="moveStyleAlternativeExchange" class="card cardGeneral">
       <input type="radio" onclick="localStorage.setItem('swipeExchangePuzzleCreator', !checked);" name="moveStyle">
-      <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
-      <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
-      <div id="mouseMoveExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseMoveExchangeAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger zum Teil, mit dem Sie das zuerst angewählte austauschen wollen.</div>
-      <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Lassen Sie die Maustaste bzw. den Bildschirm los.</div>
+      <b>Alternative control (standard control can also be used or is included here)</b>
+      <div id="mouseDownSelectFirstExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseDownSelectFirstExchangeAlternativeTutorial" onclick="checked = !checked"> Press and hold the mouse button or finger on the screen.</div>
+      <div id="mouseMoveExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseMoveExchangeAlternativeTutorial" onclick="checked = !checked"> Move the mouse or finger to the piece with which you want to exchange the first selected piece.</div>
+      <div id="mouseUpExchangeAlternativeTutorialDiv"><input type="checkbox" id="mouseUpExchangeAlternativeTutorial" onclick="checked = !checked"> Release the mouse button or the screen.</div>
     </div>
-    <h1>Auswahl abwählen</h1>
+    <h1>Deselect the selection</h1>
     <div id="standardUnselectExchangeTutorial" class="card cardGeneral">
-      <b>Standard Steuerung</b>
-      <div id="selectTileUnselectStandardTutorialDiv"><input type="checkbox" id="selectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie das erste auszutauschende Teil an.</div>
-      <div id="unselectTileUnselectStandardTutorialDiv"><input type="checkbox" id="unselectTileUnselectStandardTutorial" onclick="checked = !checked"> Klicken Sie es erneut an, um es wieder abzuwählen. </div>
+      <b>Standard control</b>
+      <div id="selectTileUnselectStandardTutorialDiv"><input type="checkbox" id="selectTileUnselectStandardTutorial" onclick="checked = !checked"> Click on the first piece to be exchanged.</div>
+      <div id="unselectTileUnselectStandardTutorialDiv"><input type="checkbox" id="unselectTileUnselectStandardTutorial" onclick="checked = !checked"> Click on it again to unselect it. </div>
     </div>
     <div id="alternativeUnselectExchangeTutorial" class="card cardGeneral">
-      <b>Alternative Steuerung (hier Standard Steuerung auch nutzbar bzw. enthalten)</b>
-        <div id="mouseDownUnselectAlternativeTutorialDiv"><input type="checkbox" id="mouseDownUnselectAlternativeTutorial" onclick="checked = !checked"> Drücken Sie die Maustaste bzw. den Finger auf den Bildschirm und halten Sie gedrückt.</div>
-        <div id="moveMouseOutUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseOutUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf ein anderes Teil.</div>
-        <div id="moveMouseInUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseInUnselectAlternativeTutorial" onclick="checked = !checked"> Bewegen Sie die Maus bzw. den Finger auf das zuerst ausgewählte Teil.</div>
-        <div id="releaseMouseUnselectAlternativeTutorialDiv"><input type="checkbox" id="releaseMouseUnselectAlternativeTutorial" onclick="checked = !checked"> Lassen Sie auf dem Teil, auf dem Sie angefangen haben wieder los, um die Auswahl abzuwählen.</div>
+      <b>Alternative control (standard control can also be used or is included here)</b>
+        <div id="mouseDownUnselectAlternativeTutorialDiv"><input type="checkbox" id="mouseDownUnselectAlternativeTutorial" onclick="checked = !checked"> Press and hold the mouse button or finger on the screen.</div>
+        <div id="moveMouseOutUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseOutUnselectAlternativeTutorial" onclick="checked = !checked"> Move the mouse or finger to another piece.</div>
+        <div id="moveMouseInUnselectAlternativeTutorialDiv"><input type="checkbox" id="moveMouseInUnselectAlternativeTutorial" onclick="checked = !checked"> Move the mouse or finger to the first selected piece.</div>
+        <div id="releaseMouseUnselectAlternativeTutorialDiv"><input type="checkbox" id="releaseMouseUnselectAlternativeTutorial" onclick="checked = !checked"> Release on the piece you started on to unselect the selection.</div>
         <div class="card cardGeneral">
-          Wenn Sie sich noch auf dem als erstes ausgewählen Teil befinden, können Sie auch die Maustaste bzw. den Finger sofort loslassen und erneut klicken, um das Teil abzuwählen. 
+          If you are still on the piece you selected first, you can also release the mouse button or finger immediately and click again to unselect the piece.
         </div>
     </div>
   </div>
@@ -931,27 +937,27 @@ display: block;
 </div>
 <div id="schiebenTutorial" style="display: none;" class="cardGeneral">
   <div class="card cardGeneral section">
-    <h1>Teile schieben</h1>
+    <h1>Sliding pieces</h1>
     <div class="card cardGeneral">
-      <b>Schieben eine Option</b>
-      <div id="schiebenNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Klicken Sie ein Teil neben der Lücke an, um es in die Lücke zu schieben.</div>
+      <b>Moving an option</b>
+      <div id="moveNormalTurorialDiv"><input type="checkbox" id="schiebenNormalTurorial" onclick="checked = !checked"> Click on a piece next to the gap to move it into the gap.</div>
     </div>
     <div id="moveMultipleOptionsSchiebenTutorial" class="card cardGeneral">
-      <b>Schieben mehrere Optionen</b>
-      <div id="schiebenSelectTileMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectTileMoveMultipleTurorial" onclick="checked = !checked"> Wenn Sie ein Teil in mehrere Lücken verschieben können, müssen Sie <b>erneut zuerst das Teil anwählen</b>.</div>
-      <div id="schiebenSelectGapMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectGapMoveMultipleTurorial" onclick="checked = !checked"> Nun müssen Sie jedoch zusätzlich auf die Lücke klicken, in die das Teil geschoben werden soll.</div>
+      <b>Move multiple options</b>
+      <div id="schiebenSelectTileMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectTileMoveMultipleTurorial" onclick="checked = !checked"> If you can move a piece into several gaps, you must <b>select the piece again first</b>.</div>
+      <div id="schiebenSelectGapMoveMultipleTurorialDiv"><input type="checkbox" id="schiebenSelectGapMoveMultipleTurorial" onclick="checked = !checked"> However, you must now also click on the gap into which the piece is to be moved.</div>
     </div>
     <div class="card cardGeneral">
-      <b>Informationen Einstellungen</b>
+      <b>Information settings</b>
       <div class="card cardGeneral">
-        <b>Züge rückgängig machen</b>
+        <b>Undo moves</b>
         <br>
-        In den Einstellungen können Sie Ihre Züge rückgängig machen und zuvor wählen, ob die dafür notwendigen Züge für die Statistik zählen sollen. 
+        In the settings, you can undo your moves and choose beforehand whether the necessary moves should count for the statistics.
       </div>
       <div class="card cardGeneral">
-        <b>Züge des PC angucken</b>
+        <b>View the PC's moves</b>
         <br>
-        Zudem können Sie sich angucken, wie der PC das Puzzle löst. Er nimmt zwar nicht immer die kürzeste Route, aber immerhin weiß er eine. Wenn sie sich mit Ihrer überschneidet, können Sie sogar ab Ihrer Position im Spiel gucken, wie man das Puzzle lösen kann. 
+        You can also see how the PC solves the puzzle. It may not always take the shortest route, but at least it knows one. If it overlaps with yours, you can even see how to solve the puzzle from your position in the game.
       </div>
     </div>
   </div>
@@ -979,16 +985,16 @@ display: block;
     autoScrollMobileTutorial.appendChild(autoScrollTutorial);
     tileSelectionBarMobileTutorial.appendChild(tileSelectionBarTutorial);
     clippingInfosMobile.appendChild(clippingInfos);
-    MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger auf Teilliste legen";
-    moveMouseScrollTileSelectionBarTutorialDiv.innerHTML = moveMouseScrollTileSelectionBarTutorialDiv.innerHTML.split('>')[0] + ">Finger bewegen, um die Liste in die entsprechende Richtung zu bewegen ";
-    stopScrollingTileBarTutorialDiv.innerHTML = stopScrollingTileBarTutorialDiv.innerHTML.split('>')[0] + ">Finger vom Bildschirm entfernen";
-    scrollTilelistSwipeTutorial.innerHTML = "Scrollen durch Swipen";
+    MouseDownScrollTileBarTutorialDiv.innerHTML = MouseDownScrollTileBarTutorialDiv.innerHTML.split('>')[0] + ">put finger on pieces list";
+    moveMouseScrollTileSelectionBarTutorialDiv.innerHTML = moveMouseScrollTileSelectionBarTutorialDiv.innerHTML.split('>')[0] + ">move finger right/left to move the list, like when scrolling left/right";
+    stopScrollingTileBarTutorialDiv.innerHTML = stopScrollingTileBarTutorialDiv.innerHTML.split('>')[0] + ">release your finger from the screen";
+    scrollTilelistSwipeTutorial.innerHTML = "scroll by swiping";
     ScrollkeyTileBarTutorialDiv.remove();
   } else {
     var gerät = "PC"
     mouseSupported = true;
     console.log("PC");
-    swipeSteuerungP.innerHTML = swipeSteuerungP.innerHTML.replace('beginne Sipe bei erstem und beende ihn beim 2. Teil, um sie zu vertauschen', 'drücken Sie die Maustaste runter oder vollführen Sie einen Doppelklick beim ersten Teil und lassen Sie beim 2. Teil los. ');
+    swipeSteuerungP.innerHTML = swipeSteuerungP.innerHTML.replace('start Sipe at first part and end it at 2nd part to swap them', 'press the mouse button down or double click at first part and release at 2nd part.');
     scrollOnBlancP.style.display = "none";
     vibrateA.style.display = "none";
   }
@@ -1011,7 +1017,7 @@ display: block;
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
-  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('Sie haben dieses Spiel anscheinend noch nie gespielt. Sie können die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus "traditional" gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. Auch in den Einstellungen kann man zu den Tutorials zum jeweiligen Spielmodus gelangen. ')) {
+  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('You have apparently never played this game before. You can play the individual parts of the tutorial (not all parts available due to setting options) directly while playing your first puzzle in the order that suits you ("Show controls")! If you click on "OK" or similar, you will be taken to the complete tutorial for the "traditional" mode, if you click on "Cancel" or similar, you can play your puzzle. You can also access the tutorials for the respective game mode in the settings.')) {
     setTimeout(() => {
       setupTutorial();
     }, 100);
@@ -1230,10 +1236,10 @@ display: block;
   }
   function showInformation() {
     var puzzle = puzzles[selected.puzzle];
-    if (puzzle.fileName) alert('Das Puzzle nutzt das Bild "' + puzzle.fileName + '"');
-    else if (puzzle.URL) alert('Das Puzzle nutzt das Bild/Video von der Website "' + puzzle.URL + '"');
-    else alert('Das Bild nutzt die Live-Kamera "' + puzzle.liveCam + '"');
-    alert(`Dieses Puzzle nutzt den Modus "${puzzle.mode}". Sie haben bereits ${getTimeString(puzzle.completionTime)} Minuten mit dem Puzzle verbracht. Das Puzzle enthält ${puzzle.positions.wrong.length} Teile. `);
+    if (puzzle.fileName) alert('The puzzle uses the image "' + puzzle.fileName + '"');
+    else if (puzzle.URL) alert('The puzzle uses the image/video from the website "' + puzzle.URL + '"');
+    else alert('The image uses the live camera "' + puzzle.liveCam + '"');
+    alert(`This puzzle uses the mode "${puzzle.mode}". You have already spent ${getTimeString(puzzle.completionTime)} minutes on the puzzle. The puzzle contains ${puzzle.positions.wrong.length} pieces.`);
     document.getElementsByClassName('dropdown-content')[0].style.display = 'none';
   }
   function editPuzzleName() {
@@ -1381,11 +1387,11 @@ display: block;
     layout(true, true);
   }
   function showCurrentStats(mode) {
-    if (mode == "traditional") alert(`Ihre vorläufigen Daten: Sie haben ${stats.turns} Mal Teile verbunden (es ist mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen möglich) und ${stats.unclipped} Mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} Mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} Mal ein Teil gedreht.`);
-    if (mode == "exchange") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + (positions.wrong.length - stats.preOrdered) + "Zügen möglich! Werden Sie es wohl schaffen?)");
-    if (mode == "schieben") alert("Ihre Höchste Übereinstimmung mit dem Original beträgt " + stats.highestRight.right + " von " + positions.wrong.length + " Teilen nach " + stats.highestRight.turns + " Zügen (Es ist mit " + distinctMoves.length + "Zügen oder weniger möglich! Werden Sie es wohl schaffen?)");
-    if (mode != "traditional" && stats.preOrdered) alert(`Bedenken Sie jedoch, dass Sie von den ${stats.highestRight.right} Richtigen von Anfang an ${stats.preOrdered} Teile von den insgesamt ${positions.wrong.length} Teilen an der richtigen Position hatten!`);
-    if (stats.viewOriginal.times > 0) alert(`Zudem haben Sie bis jetzt ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} Minuten auf das Originalbild geguckt und bis jetzt insgesant ${stats.completionTime} mit diesem Puzzle verbracht.`.replace('undefined', '0'));
+    if (mode == "traditional") alert(`Your preliminary data: You have connected parts ${stats.turns} times (it is possible with at least ${numberX.value*numberY.value - 1} times) and unclipped parts ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. You have also rotated a part a total of ${stats.rotated} times.`);
+    if (mode == "exchange") alert("Your Highest match with the original is " + stats.highestRight.right + " from " + positions.wrong.length + "pieces after " + stats.highestRight.turns + " moves (It is possible with " + (positions.wrong.length - stats.preOrdered) + "moves! Will you make it?)");
+    if (mode == "schieben") alert("Your Highest match with the original is " + stats.highestRight.right + " from " + positions.wrong.length + " pieces after " + stats.highestRight.turns + " moves (It is possible with " + distinctMoves.length + "moves or less! Do you think you will make it?)");
+    if (mode != "traditional" && stats.preOrdered) alert(`Remember, however, that you had ${stats.highestRight.right} of the ${stats.preOrdered} parts of the total ${positions.wrong.length} parts in the right position from the get-go!`);
+    if (stats.viewOriginal.times > 0) alert(`In addition, you have looked at the original image ${stats.viewOriginal.times} times for a total of ${stats.viewOriginal.time} minutes and spent a total of ${stats.completionTime} minutes on this puzzle so far.`.replace('undefined', '0'));
   }
   function zuBildschirmgröße() {
     größeAnpassenX.value = window.innerWidth;
@@ -1506,9 +1512,9 @@ function drawTileGrid(doNotDrawPicture) {
     function create() {
       videoControlsInSettings.appendChild(videoControls);
       puzzleManager.style.display = "block";
-    if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream) alert('Bitte laden Sie ein Bild oder ein Video bevor Sie auf diesen Button klicken um ein Puzzel zu erstellen!') 
+    if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream && URLInfo.style.display == "none") alert('Please upload a picture or a video before you click on this button to create a puzzle!') 
     else if (!state.removeTile) {
-      if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('Sie haben diesen Spielmodus anscheinend noch nie gespielt. Wollen Sie das Tutorial zur Einführung spielen? Alternativ können Sie die einzelnen Bestandteile des Tutorials (wegen Einstellungsmöglichkeiten nicht alle Bestandteile vorhanden) direkt während Sie Ihr erstes Puzzle in diesem Modus spielen in der Reihenfolge spielen, in der es Ihnen passt ("Steuerung anzeigen")! Wenn Sie auf "OK" o.ä. klicken, werden Sie zu dem kompletten Tutorial zum Modus ' + modeSelection.value + ' gelangen, wenn Sie auf "abbrechen" o.ä. klicken, können Sie Ihr Puzzle spielen. ')) {
+      if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('You have apparently never played this game mode before. Do you want to play the tutorial as an introduction? Alternatively, you can play the individual parts of the tutorial (not all parts available due to setting options) directly while playing your first puzzle in this mode in the order that suits your needs ("Show controls")! If you click on "OK" or similar, you will be taken to the complete tutorial for the mode ' + modeSelection.value + ', if you click on "Cancel" or similar, you can play your own puzzle.')) {
         setupTutorial();
       }
       else {
@@ -1580,7 +1586,7 @@ function drawTileGrid(doNotDrawPicture) {
         //canvas.drawImage(document.getElementById('preview'), /*xFromPixture*/200, /*yFromPicture*/200, 200, 200, /*xFromPlacement*/0, /*yFromPlacement*/0, 200, 200);
         window.scroll(0, /*96 50*/32);
         if (modeSelection.value == "schieben") {
-          if (!state.restorePuzzle) alert("Bitte wählen Sie ein Teilstück aus, das entfernt wird. Im besten Fall ist es ein unwichtiger Teil des Bildes!");
+          if (!state.restorePuzzle) alert("Please select a piece to be removed. In the best case it is an unimportant part of the picture!");
           state.removeTile = true;
           layout(true, false, false, true);
         }
@@ -1683,7 +1689,7 @@ var pScrollY = scrollY;
   function shufflePuzzle() {
     var shuffleStyleBefore = shuffleStyle.value;
     if (emptyTileBar.checked)  shuffleStyle.value = shuffleStyleBar.value;
-    if (modeSelection.value == "schieben" && !selected.tiles.length && !state.restorePuzzle) alert("Sie müssen mindestens ein Teil ausgeählt haben, das wegfällt, damit Sie schieben können!");
+    if (modeSelection.value == "schieben" && !selected.tiles.length && !state.restorePuzzle) alert("You must have selected at least one part to be removed so that you can slide a piece!");
     else {
       localStorage.setItem('tutorialAskedPuzzleCreator' + modeSelection.value, "true");
       for (var i = 0; i < anzahlY.value; i++) {
@@ -2136,7 +2142,7 @@ function canvasClicked(calledBy) {
     sourceCheckboxes.style.display = 'none';
     var reader = new FileReader();
     stopLiveFeed();
-    if (!state.restorePuzzle || state.restorePuzzle.fileName == input.files[0].name || confirm("Sie haben wohl das falsche Puzzle ausgewählt. Wenn Sie trotzdem fortfahren wollen, klicken Sie auf OK o.ä. (andernfalls klicken Sie auf abbrechen o.ä. und erneut auf den Namen des Bildes, um das rictige Bild auszuwählen. )")) {
+    if (!state.restorePuzzle || state.restorePuzzle.fileName == input.files[0].name || confirm("You have probably selected the wrong puzzle. If you still want to continue, click on OK or similar (otherwise click on Cancel or similar and again on the name of the picture to select the correct picture). )")) {
       reader.onload = function (e) {
         if (sourceIsPicture.checked) {
           document.getElementById('preview').setAttribute("src", e.target.result);
@@ -2155,7 +2161,7 @@ function canvasClicked(calledBy) {
     if (input.files[0].type.includes('video')) sourceIsVideo.checked = true;
     else sourceIsPicture.checked = true;
     for (const puzzle of Object.keys(puzzles)) {
-      if (!state.restorePuzzle && puzzles[puzzle].fileName == input.files[0].name && confirm('Sie haben bereits ein Puzzle mit dieser Datei im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+      if (!state.restorePuzzle && puzzles[puzzle].fileName == input.files[0].name && confirm('You have already started a puzzle with this file in the mode "' + puzzles[puzzle].mode + '"! You have saved it under the name "' + puzzle + '". Would you like to load it?')) {
         restorePuzzleSource(puzzle, true);
         break;
       }
@@ -2202,7 +2208,7 @@ function canvasClicked(calledBy) {
   }
     stopLiveFeed();
     for (const puzzle of Object.keys(puzzles)) {
-      if (!state.restorePuzzle && sourceURL.value == puzzles[puzzle].URL && confirm('Sie haben bereits ein Puzzle mit diesem Link/dieser URL im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+      if (!state.restorePuzzle && sourceURL.value == puzzles[puzzle].URL && confirm('You have already started a puzzle with this link/URL in the mode "' + puzzles[puzzle].mode + '"! You have saved it under the name "' + puzzle + '". Would you like to load it?')) {
         restorePuzzleSource(puzzle, true);
         break;
       }
@@ -2374,7 +2380,7 @@ function stopLiveFeed() {
 // changes camera source
 async function changeCamera(index) {
   for (const puzzle of Object.keys(puzzles)) {
-    if (!state.restorePuzzle && index == puzzles[puzzle].liveCam && confirm('Sie haben bereits ein Puzzle mit dieser Kamera im Modus "' + puzzles[puzzle].mode + '" begonnen! Sie haben es unter dem Namen "' + puzzle + '" gespeichert. Wollen Sie dieses laden?')) {
+    if (!state.restorePuzzle && index == puzzles[puzzle].liveCam && confirm('You have already started a puzzle with this camera in "' + puzzles[puzzle].mode + '" mode! You have saved it under the name "' + puzzle + '". Would you like to load it?')) {
       restorePuzzleSource(puzzle, true);
       break;
     }
@@ -2440,7 +2446,7 @@ var puzzles = {};
     modeSelected(puzzle.mode);
     if (!sourceLoaded) {
       if (puzzle.fileName) {
-        alert('Bitte wählen Sie die von Ihnen genutzte Datei mit dem Namen "' + puzzle.fileName + '" aus.');
+        alert('Please select the file "' + puzzle.fileName + '". you were using');
         fileB.click();
       }
       if (puzzle.URL) {
@@ -2669,16 +2675,16 @@ var puzzles = {};
         selected.tiles = [];
         finished = true;
         if (pReturn) return "noChange!";
-        if (modeSelection.value == "schieben") alert("Sie haben es in " + stats.turns + " Zügen (man hätte es in " + distinctMoves.length + " Zügen oder weniger schaffen können) und insgesamt " + stats.completionTime + " Minuten geschafft! Zum Umschieben vom Originalbild hat der Computer " + movement.move.length + " Züge benötigt, um es zu zerwuseln. Ob Sie darauf jetzt stolz sein können, müssen Sie selber entscheiden ;)");
-        if (modeSelection.value == "exchange") alert(`Sie haben es in ${stats.turns} Zügen und insgesamt ${stats.completionTime} Minuten geschafft! (Sie hätten es in ${positions.wrong.length - stats.preOrdered} Zügen schaffen können.) Dabei haben Sie von Anfang an von den insgesamt ${positions.wrong.length} Teilen ${stats.preOrdered} Teile an der richtigen Position gehabt.`);
-        if (modeSelection.value == "traditional") alert(`Super! Sie haben das Puzzle in ${stats.completionTime} Minuten geschafft! Sie haben ${stats.turns} Mal Teile verbunden (man schafft es mit mindestens ${anzahlX.value*anzahlY.value - 1} Malen) und ${stats.unclipped} Mal welche wieder auseinandergezogen. Dabei haben Sie ${stats.wrongClipped} Mal Teile falsch verbunden. Außerdem haben Sie insgesamt ${stats.rotated} Mal ein Teil gedreht. Man hätte es mit mindestens ${stats.minimumRotations} Mal drehen schaffen können. `);
-        if (stats.viewOriginal.times > 0) alert(`Zudem haben Sie ${stats.viewOriginal.times} Mal für insgesamt ${stats.viewOriginal.time} Minuten auf das Originalbild geguckt.`.replace('undefined', '0'));
+        if (modeSelection.value == "schieben") alert("You did it in " + stats.turns + " moves (you could have done it in " + distinctMoves.length + " moves or less) and a total of " + stats.completionTime + " minutes! It took the computer " + movement.move.length + " moves to slide the original image into the formation you saw in the beginning. Whether you can be proud of that, you have to decide for yourself ;)");
+        if (modeSelection.value == "exchange") alert(`You made it in ${stats.turns} moves and a total of ${stats.completionTime} minutes! (You could have done it in ${positions.wrong.length - stats.preOrdered} moves). You had ${stats.preOrdered} parts of the total ${positions.wrong.length} parts in the right position from the start.`);
+        if (modeSelection.value == "traditional") alert(`Great! You have completed the puzzle in ${stats.completionTime} minutes! You have connected pieces ${stats.turns} times (you can do it with at least ${numberX.value*numberY.value - 1} times) and pulled pieces apart again ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. The sum of your piece rotations is ${stats.rotated}. You could have done it with at least ${stats.minimumRotations} times.`);
+        if (stats.viewOriginal.times > 0) alert(`You have also looked at the original image ${stats.viewOriginal.times} times for a total of ${stats.viewOriginal.time} minutes.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
             window.location.reload(false);
           }, 3000);
         }
-        else alert("Bitte laden Sie die Seite neu, wenn Sie ein weiteres Puzzle erstellen wollen!");
+        else alert("Please reload the page if you want to create another puzzle!");
         layout(true);
     }
   }
@@ -2802,7 +2808,7 @@ var puzzles = {};
         }
     });
   }
-  if (first && modeSelection.value != "schieben" && !state.restorePuzzle && tutorial.state == "") alert("Hier können Sie nun auf die Teile klicken, die Sie nicht im Puzzle haben wollen! Sie können gedrückt halten, um mehrere gleichzeitig anzuwählen!");
+  if (first && modeSelection.value != "schieben" && !state.restorePuzzle && tutorial.state == "") alert("Here you can now click on the pieces you don't want to have in the puzzle! You can hold down and swipe to select multiple!");
     layout(true, true, undefined, true);
     state.removeTile = true;
   }
@@ -3233,7 +3239,7 @@ var puzzles = {};
             tileSelectionBar.selectedTile = {i: i, tileI: tileI, byUser: true};
             if (rotatesLeft.checked) rotateTile(tileI, -90);
             if (rotatesRight.checked) rotateTile(tileI, 90);
-            if (["MouseDownScrollTileBarTutorial", "selectTileBarTileTutorial", "selectTileTileBarZurückInLeisteTutorial"].includes(tutorial.state)) goTutorialSteps(1);
+            if (["MouseDownScrollTileBarTutorial", "selectTileBarTileTutorial", "selectTileTileBarBackToBarTutorial"].includes(tutorial.state)) goTutorialSteps(1);
             layout();
           }
         });
@@ -3352,7 +3358,7 @@ var trackActivity = {mouseDown: {position: {x: 0, y: 0}}, unclipp: {counter: 0, 
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
-    if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked && Math.abs(trackActivity.mouseDown.position.x - mausx) > 7 && Math.abs(trackActivity.mouseDown.position.y - mausy) > 7 && confirm('Ihre Steuerung des Spiels weist darauf hin, dass Sie die drag and drop Steuerung nutzen wollen. Soll der Steuerungsmodus umgestellt werden? \n Sie können dies jederzeit in den Einstellungen ändern. Außerdem können Sie um die aktuell ausgewählte Steuerungsart zu verstehen auf Hilfe (Steuerung anzeigen)" klicken oder f1 drücken. ')) {
+    if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked && Math.abs(trackActivity.mouseDown.position.x - mausx) > 7 && Math.abs(trackActivity.mouseDown.position.y - mausy) > 7 && confirm('Your game controls indicate that you want to use the drag and drop controls. Do you want to change the control mode? \n You can change this at any time in the settings. You can also click on "Help (Show controls)" or press f1 to understand the currently selected control mode.')) {
       automaticTileSelectionReset.checked = true;
     }
     trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
@@ -3541,7 +3547,7 @@ layout(false, true);
           if (!event.changeElement) {
             state.helpTutorial = true;
             startTutorial(true);
-            showTutorialB.innerHTML = showTutorialB.innerHTML.replace('anzeigen', 'verstecken');
+            showTutorialB.innerHTML = showTutorialB.innerHTML.replace('show', 'hide');
           }
           if (shuffleStyle.value != "listTiles") tileSelectionBarTutorial.style.display = "none";
           // traditional mode: standard/alternative visibility
@@ -3580,13 +3586,13 @@ layout(false, true);
           // if (tutorialSteps.length) tutorial.state = tutorialSteps[tutorial.index].id;
         }
        else {
-        showTutorialB.innerHTML = showTutorialB.innerHTML.replace('verstecken', 'anzeigen');
+        showTutorialB.innerHTML = showTutorialB.innerHTML.replace('show', 'hide');
          tutorial.state = "";
          document.getElementById('tutorial').style.display = "none";
         }
         return false;
       }
-      if (event.key == "Shift") {
+      if (event.key == "shift") {
         state.shift = true;
         state.shiftBefore = true;
         selected.tiles = [];
@@ -4042,7 +4048,7 @@ function setupTutorial() {
     setTimeout(() => {
       if (!offline) startTutorial();
       else {
-        alert('Bitte importieren Sie ein Bild oder ein Video von diesem Gerät ("Datei (Foto oder Video) auswählen"), um das Tutorial mit dem Bild starten zu können. ');
+        alert('Please upload an image or a video from this device (for example select "file (photo or video)") in order to start the tutorial with the image.');
         state.waitForPictureSelection = true;
       }
       }, 777);
@@ -4055,7 +4061,7 @@ function setupTutorial() {
     }, 1000);
   }
 function startTutorial() {
-  showTutorialB.innerHTML = "Tutorial verstecken";
+  showTutorialB.innerHTML = "hide tutorial";
   var mode = modeSelection.value;
   document.getElementById('tutorial').style.display = "inline";
   // document.getElementById(mode + 'Tutorial').style.display = "inline";
@@ -4143,7 +4149,7 @@ function goTutorialSteps(steps) {
     }, 300);
     if (tutorial.state == "tileClickMoveTutorial" && !state.helpTutorial) automaticTileSelectionReset.checked = false;
     if (steps != 0) {
-      if (tutorial.state == "completePuzzleTutorial") alert("Wenn Sie nun aus einem eigenen Bild ein Puzzle erstellen wollen, laden Sie die Seite neu. ");
+      if (tutorial.state == "completePuzzleTutorial") alert("If you now want to create a puzzle from your own image/video, reload the page.");
       if (tutorial.state == "scrollArrowTileBarTutorial") window.scroll(0, 0);
       if (tutorial.state == "selectTileBarTileTutorial" && tileSelectionBar.selectedTile != undefined && steps == 1) goTutorialSteps(1);
       if (tutorial.state == "stopScrollingAutomaticScrollingTutorial") checkAutoscrollStop({x: scrollX, y: scrollY});
@@ -4163,7 +4169,7 @@ function goTutorialSteps(steps) {
         } catch (e) {}
       }
       if (tutorial.state == "pressShiftMobileUnclippTutorial") {
-        selectMultipleTitle.innerHTML = "Shift Taste";
+        selectMultipleTitle.innerHTML = "shift key";
         selectMultipleTitle.style.display = "inline";
       }
       else selectMultipleTitle.style.display = 'none';
