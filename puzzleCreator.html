@@ -3523,7 +3523,7 @@ layout(false, true);
     }
   }
   document.onkeyup = function(event) {
-    if (event.key == "shift" && state.shift) {
+    if (event.key == "Shift" && state.shift) {
       state.shift = false;
       if (automaticTileSelectionReset.checked) selected.tiles = [];
       if (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
@@ -3595,7 +3595,7 @@ layout(false, true);
         }
         return false;
       }
-      if (event.key == "shift") {
+      if (event.key == "Shift") {
         state.shift = true;
         state.shiftBefore = true;
         selected.tiles = [];
