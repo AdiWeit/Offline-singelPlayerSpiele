@@ -52,9 +52,9 @@
 <img onclick="if (tilesSizeDiv.style.display != 'none') tilesSizeDiv.style.display = 'none'; else {tilesSizeDiv.style.display = 'block';}" class="button" title="Anzahl der Puzzleteile" style=" outline-width: 2px; outline-color: black" draggable="false" src="https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/pieceAmount_V2.png">
 <div style="display: none;" id="tilesSizeDiv" onmouseover="tilesSizeDiv.appendChild(textur);" class="card cardGeneral">
   <h3>amount of puzzle pieces</h3>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> pieces x-axis
+  <input type="number" min="0" value="4" style="width: 44px;" id="amountX" onchange="anzahlVerschieben.value = value*anzahlY.value; anzahlRichtige.max = value*anzahlY.value - 2; drawTileGrid();"> pieces x-axis
   <br>
-  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = anzahlX.value*value; anzahlRichtige.max = anzahlX.value*value - 2; drawTileGrid();"> pieces y-axis
+  <input type="number" min="0" value="4" style="width: 44px;" id="anzahlY" onchange="anzahlVerschieben.value = amountX.value*value; anzahlRichtige.max = amountX.value*value - 2; drawTileGrid();"> pieces y-axis
   <br>
   <br>
   <a id="rotateTilesAdaptionSettings">
@@ -964,6 +964,7 @@ display: block;
 </div>
 </div>
 <script>
+  document.body.style.backgroundColor = "white";
     window.onbeforeunload = function(){
     console.log("Leave Website");
       return 'Are you sure you want to leave?';
@@ -1009,7 +1010,7 @@ display: block;
   expandRight.style.width = window.innerWidth/29;
   mobileControls.style.display = 'none';
   reloadWhenFinished.checked = JSON.parse(localStorage.getItem("reloadWhenFinished"));
-  anzahlVerschieben.value = anzahlX.value*anzahlY.value;
+  anzahlVerschieben.value = amountX.value*anzahlY.value;
   aufgebenId.style.display = "none";
   // schiebenSettings.style.display  = "inline"
   randSettings.style.display = "none";
@@ -1348,7 +1349,7 @@ display: block;
   }
     // back to bar to the right of the selected tile in the tileBar
     function generalBackToBar(elm) {
-    if (tileSelectionBar.tiles.length != anzahlX.value*anzahlY.value) {
+    if (tileSelectionBar.tiles.length != amountX.value*anzahlY.value) {
       if (elm.style.backgroundColor == 'red') {
         state.backToBar = false;
         elm.style.backgroundColor = '';
@@ -1387,7 +1388,7 @@ display: block;
     layout(true, true);
   }
   function showCurrentStats(mode) {
-    if (mode == "traditional") alert(`Your preliminary data: You have connected parts ${stats.turns} times (it is possible with at least ${numberX.value*numberY.value - 1} times) and unclipped parts ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. You have also rotated a part a total of ${stats.rotated} times.`);
+    if (mode == "traditional") alert(`Your preliminary data: You have connected parts ${stats.turns} times (it is possible with at least ${amountX.value*numberY.value - 1} times) and unclipped parts ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. You have also rotated a part a total of ${stats.rotated} times.`);
     if (mode == "exchange") alert("Your Highest match with the original is " + stats.highestRight.right + " from " + positions.wrong.length + "pieces after " + stats.highestRight.turns + " moves (It is possible with " + (positions.wrong.length - stats.preOrdered) + "moves! Will you make it?)");
     if (mode == "schieben") alert("Your Highest match with the original is " + stats.highestRight.right + " from " + positions.wrong.length + " pieces after " + stats.highestRight.turns + " moves (It is possible with " + distinctMoves.length + "moves or less! Do you think you will make it?)");
     if (mode != "traditional" && stats.preOrdered) alert(`Remember, however, that you had ${stats.highestRight.right} of the ${stats.preOrdered} parts of the total ${positions.wrong.length} parts in the right position from the get-go!`);
@@ -1461,10 +1462,10 @@ function drawTileGrid(doNotDrawPicture) {
     canvas.clearRect(0, 0, textur.width, textur.height);
     canvas.drawImage(preview, 0, 0, textur.width, textur.height);
   }
-  for (let i = 0; i < anzahlX.value; i++) {
+  for (let i = 0; i < amountX.value; i++) {
     canvas.beginPath();
-    canvas.moveTo((textur.width/anzahlX.value)*i, 0);
-    canvas.lineTo((textur.width/anzahlX.value)*i, textur.height);
+    canvas.moveTo((textur.width/amountX.value)*i, 0);
+    canvas.lineTo((textur.width/amountX.value)*i, textur.height);
     canvas.stroke();
   }  
   for (let i = 0; i < anzahlY.value; i++) {
@@ -1526,7 +1527,7 @@ function drawTileGrid(doNotDrawPicture) {
         if (screenIsMax.checked) preventAutomaticZoom.content = "width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0";
         positions = {right: [], wrong: []};
         if (modeSelection.value == "traditional") {
-          positions.layoutOrder = new Array(anzahlX.value*anzahlY.value);
+          positions.layoutOrder = new Array(amountX.value*anzahlY.value);
           for (var i = 0; i < positions.layoutOrder.length; i++) {
             positions.layoutOrder[i] = i;
           }
@@ -1544,11 +1545,11 @@ function drawTileGrid(doNotDrawPicture) {
         originalSize.height = preview.height;
         preview.width = größeAnpassenX.value;
         preview.height = größeAnpassenY.value;
-        textur.width = preview.width + 3*(anzahlX.value - 1) - 1// + 111;
+        textur.width = preview.width + 3*(amountX.value - 1) - 1// + 111;
         textur.height = preview.height + 3*(anzahlY.value - 1) - 1// + 111;
         videoPreview.width = größeAnpassenX.value;
         videoPreview.height = größeAnpassenY.value;
-        var pAnzahlX = anzahlX.value;
+        var pAnzahlX = amountX.value;
         var pAnzahlY = anzahlY.value;
         if (sourceIsPicture.checked) lengthPerTeil = {original: {x: Math.round(originalSize.width/pAnzahlX), y: Math.round(originalSize.height/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
         else lengthPerTeil = {original: {x: Math.round(video.videoWidth/pAnzahlX), y: Math.round(video.videoHeight/pAnzahlY)}, edit: {x: Math.round(preview.width/pAnzahlX), y: Math.round(preview.height/pAnzahlY)}};
@@ -1693,12 +1694,12 @@ var pScrollY = scrollY;
     else {
       localStorage.setItem('tutorialAskedPuzzleCreator' + modeSelection.value, "true");
       for (var i = 0; i < anzahlY.value; i++) {
-      for (var i1 = 0; i1 < anzahlX.value; i1++) {
-        positions.wrong[i*anzahlX.value + i1].edit.x -= 3*i1;
-        positions.wrong[i*anzahlX.value + i1].edit.y -= 3*i;
+      for (var i1 = 0; i1 < amountX.value; i1++) {
+        positions.wrong[i*amountX.value + i1].edit.x -= 3*i1;
+        positions.wrong[i*amountX.value + i1].edit.y -= 3*i;
       }
     }
-    textur.width -= 3*(anzahlX.value - 1);
+    textur.width -= 3*(amountX.value - 1);
     textur.height -= 3*(anzahlY.value - 1);
       var directionConverter = {top: 'bottom', left: 'right', bottom: 'top', right: 'left'};
       for (var i of selected.tiles) {
@@ -1774,7 +1775,7 @@ var pScrollY = scrollY;
     }
     if (shuffleStyle.value == "nextToEachOther") {
         if (isNaN(tilesGap.value) || tilesGap.value == '') tilesGap.value = 55;
-        if (isNaN(tilesXTileGap.value) || tilesXTileGap.value == '') tilesXTileGap.value = anzahlX.value;
+        if (isNaN(tilesXTileGap.value) || tilesXTileGap.value == '') tilesXTileGap.value = amountX.value;
         var pos = {x: lengthPerTeil.edit.x/2, y: lengthPerTeil.edit.y/2};
         for (let i = 0; i < positions.wrong.length; i++) {
           positions.wrong[i].edit = {x: pos.x, y: pos.y, degree: 0};
@@ -2174,6 +2175,7 @@ function canvasClicked(calledBy) {
     }, 1111);
   }
   function adaptVideoControlElements() {
+    if (!sourceIsVideo.checked) return;
     if (!useLiveCam.checked) videoControls.style.display = 'block';
     editCanvasDiv.style.display = "block";
     videoPosition.max = video.duration;
@@ -2234,9 +2236,6 @@ function canvasClicked(calledBy) {
     preview.height = video.videoHeight;
     originalSize.width = video.videoWidth;
     originalSize.height = video.videoHeight;
-    setTimeout(() => {
-      resetImageSize();
-    }, 500);
     selectSourceHeader.style.color = "green";
     createPuzzleButton.style.backgroundColor = "green";
     loadPuzzle();
@@ -2270,7 +2269,12 @@ function canvasClicked(calledBy) {
       try {
         canvas.drawImage(document.getElementById('preview'), 0, 0);
       } catch (err) {
-        if (useURLCheck.checked) URLInfo.style.display = 'block';
+        if (useURLCheck.checked) {
+          URLInfo.style.display = 'block';
+          selectSourceHeader.style.color = "red";
+          createPuzzleButton.style.backgroundColor = "red";
+        }
+        // TODO: kann auch passieren, wenn URL nicht auf Bild/Video zeigt
         offline = true;
       }
       if (aufgebenId.style.display != "inline") {
@@ -2278,7 +2282,6 @@ function canvasClicked(calledBy) {
         zuAngepassterBildschirmgröße();
       } 
       loadPuzzle();
-      resetImageSize();
     }, 500);
     selectSourceHeader.style.color = "green";
     createPuzzleButton.style.backgroundColor = "green";
@@ -2338,9 +2341,9 @@ function updateVideo(){
       }
     }
     else  if (state.removeTile) {
-      for (let i = 0; i < anzahlX.value; i++) {
+      for (let i = 0; i < amountX.value; i++) {
         for (let i1 = 0; i1 < anzahlY.value; i1++) {
-          canvas.drawImage(video, positions.wrong[i1*anzahlX.value + i].original.x, positions.wrong[i1*anzahlX.value + i].original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, i*lengthPerTeil.edit.x + 3*i, i1*lengthPerTeil.edit.y + 3*i1, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
+          canvas.drawImage(video, positions.wrong[i1*amountX.value + i].original.x, positions.wrong[i1*amountX.value + i].original.y, lengthPerTeil.original.x, lengthPerTeil.original.y, i*lengthPerTeil.edit.x + 3*i, i1*lengthPerTeil.edit.y + 3*i1, lengthPerTeil.edit.x, lengthPerTeil.edit.y);
         }
       }
     }
@@ -2441,7 +2444,7 @@ var puzzles = {};
   function restorePuzzleSource(name, sourceLoaded) {
     var puzzle = puzzles[name];
     state.restorePuzzle = true;
-    anzahlX.value = puzzle.tileAmount.x;
+    amountX.value = puzzle.tileAmount.x;
     anzahlY.value = puzzle.tileAmount.y;
     modeSelected(puzzle.mode);
     if (!sourceLoaded) {
@@ -2565,7 +2568,7 @@ var puzzles = {};
     if (modeSelection.value == 'traditional' && rotateTiles.checked) {
       var data = getSizeTileAmoutAdaption();
       if (data) {
-        anzahlX.value = data.x;
+        amountX.value = data.x;
         anzahlY.value = data.y;
       }
     }
@@ -2677,7 +2680,7 @@ var puzzles = {};
         if (pReturn) return "noChange!";
         if (modeSelection.value == "schieben") alert("You did it in " + stats.turns + " moves (you could have done it in " + distinctMoves.length + " moves or less) and a total of " + stats.completionTime + " minutes! It took the computer " + movement.move.length + " moves to slide the original image into the formation you saw in the beginning. Whether you can be proud of that, you have to decide for yourself ;)");
         if (modeSelection.value == "exchange") alert(`You made it in ${stats.turns} moves and a total of ${stats.completionTime} minutes! (You could have done it in ${positions.wrong.length - stats.preOrdered} moves). You had ${stats.preOrdered} parts of the total ${positions.wrong.length} parts in the right position from the start.`);
-        if (modeSelection.value == "traditional") alert(`Great! You have completed the puzzle in ${stats.completionTime} minutes! You have connected pieces ${stats.turns} times (you can do it with at least ${numberX.value*numberY.value - 1} times) and pulled pieces apart again ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. The sum of your piece rotations is ${stats.rotated}. You could have done it with at least ${stats.minimumRotations} times.`);
+        if (modeSelection.value == "traditional") alert(`Great! You have completed the puzzle in ${stats.completionTime} minutes! You have connected pieces ${stats.turns} times (you can do it with at least ${amountX.value*numberY.value - 1} times) and pulled pieces apart again ${stats.unclipped} times. You have connected parts incorrectly ${stats.wrongClipped} times. The sum of your piece rotations is ${stats.rotated}. You could have done it with at least ${stats.minimumRotations} times.`);
         if (stats.viewOriginal.times > 0) alert(`You have also looked at the original image ${stats.viewOriginal.times} times for a total of ${stats.viewOriginal.time} minutes.`.replace('undefined', '0'));
         if (reloadWhenFinished.checked) {
           setTimeout(function () {
@@ -3520,7 +3523,7 @@ layout(false, true);
     }
   }
   document.onkeyup = function(event) {
-    if (event.key == "Shift" && state.shift) {
+    if (event.key == "shift" && state.shift) {
       state.shift = false;
       if (automaticTileSelectionReset.checked) selected.tiles = [];
       if (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
@@ -3688,7 +3691,7 @@ layout(false, true);
     var puzzle = puzzles[puzzleName.value];
     if (!puzzle) puzzle = {};
     puzzle.settings = {};
-    puzzle.tileAmount = {x: anzahlX.value, y: anzahlY.value};
+    puzzle.tileAmount = {x: amountX.value, y: anzahlY.value};
     puzzle.positions = positions;
     puzzle.stats = stats;
     puzzle.mode = modeSelection.value;
@@ -3977,7 +3980,7 @@ layout(false, true);
   // returns the coordinates of a selected tile (schieben and exchange mode)
   function checkSelected(removeTile) {
     // try {
-        for (var i = 0; i < anzahlX.value; i++) {
+        for (var i = 0; i < amountX.value; i++) {
           for (var i1 = 0; i1 < anzahlY.value; i1++) {
             if ((removeTile && mausx > lengthPerTeil.edit.x*i + 3*i && mausx < lengthPerTeil.edit.x*(i + 1) + 3*(i + 1) && mausy > lengthPerTeil.edit.y*i1 + 3*(i1) && mausy < lengthPerTeil.edit.y*(i1 + 1) + 3*(i1 + 1)) || (lengthPerTeil.edit && !removeTile && mausx > lengthPerTeil.edit.x*i && mausx < lengthPerTeil.edit.x*(i + 1) && mausy > lengthPerTeil.edit.y*i1 && mausy < lengthPerTeil.edit.y*(i1 + 1))) {
               return {x: i, y: i1};
