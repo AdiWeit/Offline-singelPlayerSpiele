@@ -2237,9 +2237,9 @@ function canvasClicked(calledBy) {
     preview.height = video.videoHeight;
     originalSize.width = video.videoWidth;
     originalSize.height = video.videoHeight;
+    loadPuzzle();
     selectSourceHeader.style.color = "green";
     createPuzzleButton.style.backgroundColor = "green";
-    loadPuzzle();
     // TODO: kann weg? (KA wofür)
     // loadImage(video.videoWidth, video.videoHeight);
   }, false);
@@ -2283,9 +2283,9 @@ function canvasClicked(calledBy) {
         zuAngepassterBildschirmgröße();
       } 
       loadPuzzle();
+      selectSourceHeader.style.color = "green";
+      createPuzzleButton.style.backgroundColor = "green";
     }, 500);
-    selectSourceHeader.style.color = "green";
-    createPuzzleButton.style.backgroundColor = "green";
   }
   // end section 2
   // section 3: handle videos
