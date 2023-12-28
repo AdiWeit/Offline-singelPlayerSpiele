@@ -224,7 +224,7 @@
     <a id="shuffleHeadline" style="display: none;">
       <br>
       <br>
-      <b style="font-size: 25px;">settings to the shuffling of the pieces:</b>
+      <b style="font-size: 25px;">settings for the shuffling of the pieces:</b>
       <br>
     </a>
     <div style="display: none" class="card cardGeneral" id="EmptyTileBarDiv">
@@ -1612,22 +1612,23 @@ function drawTileGrid(doNotDrawPicture) {
       }
     }
     autoScroll = setInterval(function () {
-      if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile) {
+      if (!selected.position.manualScrolling &&  aufgebenId.style.display == "inline" && !state.removeTile && !scrollable.checked) {
         // top boundary: 
       // canvas.fillStyle = "blue";
       // canvas.fillRect(visualViewport.pageLeft - texturLeft, visualViewport.pageTop + state.upScroll - texturTop, visualViewport.width, 10);
   // up
-  if (!scrollable.checked && aufgebenId.style.display == "inline" && (((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll - texturTop && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll - texturTop && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
 }
 // right 
+// !scrollable.checked aus versehen nicht hier gewesen?
 if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX + scrollX + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width/* - texturLeft*/ && selected.tiles?.length) {
       // window.scroll(scrollX + 3, scrollY);
       fAutoScroll({x: 3, y: 0}, true);
-    }
-if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
+}
+if (!mirrorInput.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         // window.scroll(scrollX + 3, scrollY);
         // mausx += 3;
@@ -1638,22 +1639,22 @@ if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "
       // window.scroll(scrollX - 3, scrollY);
       fAutoScroll({x: -3, y: 0}, true);
     }
-  if (!scrollable.checked && !mirrorInput.checked && aufgebenId.style.display == "inline" && (mausx - visualViewport.pageLeft - state.rightScroll < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if (!mirrorInput.checked && (mausx - visualViewport.pageLeft - state.rightScroll < 50 && ((state.mouse == "down" && modeSelection.value == "traditional") || gerät == "handy"))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX - 3, scrollY);
     // mausx -= 3;
     fAutoScroll({x: -3, y: 0});
 }
-  }
 // down
 var pScrollY = scrollY;
-    if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
-    var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
-    if (ptexturTop < 0) ptexturTop = 0;
-    if (!scrollable.checked && aufgebenId.style.display == "inline" && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (['inline', ''].includes(tileSelectionCanvas.style.display) && positions.wrong[selected.tiles[0]].edit.y > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - texturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
-        // window.scroll(scrollX, scrollY + 3);
-        // mausy += 3;
-        fAutoScroll({x: 0, y: +3});
-      }
+if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
+var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
+if (ptexturTop < 0) ptexturTop = 0;
+if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (['inline', ''].includes(tileSelectionCanvas.style.display) && positions.wrong[selected.tiles[0]].edit.y > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - texturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
+  // window.scroll(scrollX, scrollY + 3);
+  // mausy += 3;
+  fAutoScroll({x: 0, y: +3});
+}
+}
 }, 10);
   }
   function fAutoScroll(direction, mirrored) {
@@ -2330,7 +2331,7 @@ function getTimeString(pTime) {
 // draw changes in the video on the canvas and changes the current position in the video
 function updateVideo(){
     videoPosition.value = video.currentTime;
-    timeText.innerHTML = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
+    timeText.textContent = getTimeString(video.currentTime) + ' / ' + getTimeString(video.duration);
     canvas.clearRect(-window.innerWidth, -window.innerHeight, textur.width + window.innerWidth*2, textur.height + window.innerHeight*2);
     if (aufgebenId.style.display == "inline") {
       for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
@@ -3271,12 +3272,12 @@ var trackActivity = {mouseDown: {position: {x: 0, y: 0}}, unclipp: {counter: 0, 
       state.tileChanged = true;
       if (["mouseMoveExchangeAlternativeTutorial", "moveMouseOutUnselectAlternativeTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     }
-    if (state.tileChanged && JSON.stringify(checkSelected()) == JSON.stringify(selected.coord) && tutorial.state == "moveMouseInUnselectAlternativeTutorial") goTutorialSteps(1);
+    if (tutorial.state == "moveMouseInUnselectAlternativeTutorial" && state.tileChanged && JSON.stringify(checkSelected()) == JSON.stringify(selected.coord)) goTutorialSteps(1);
     if ((["moveMouseMoveTutorialAlternative", "moveMouseMoveTutorial", "moveTileMobileTutorial", "moveTileShiftUnclippTutorial", "moveTileShiftMultipleUnclippTutorial", "moveTileTwoFingersUnclippTutorial"].includes(tutorial.state) || (tileSelectionBar.collidesMouse() && tutorial.state == "moveMouseScrollTileSelectionBarTutorial")) && (calledBy == "mousemove" || calledBy == "touchmove") ) {
       if ((tutorial.state == "moveMouseMoveTutorial" && rotateTileTutorial.checked) || (tutorial.state == "moveMouseMoveTutorialAlternative" && rotateTileTutorialAlternative.checked)) goTutorialSteps(1);
       goTutorialSteps(1);
     }
-    if (state.mouse == "down" && tileSelectionBar.collidesMouse() && tutorial.state == "MouseDownScrollTileBarTutorial" && calledBy != "mousedown") goTutorialSteps(1);
+    if (tutorial.state == "MouseDownScrollTileBarTutorial" && state.mouse == "down" && tileSelectionBar.collidesMouse() && calledBy != "mousedown") goTutorialSteps(1);
     if (tileSelectionBar.collidesMouse()) mausx = originalMausX;
     selected.clip = [];
     if (state.mouse == "down" && state.removeTile) canvasClicked(calledBy);
