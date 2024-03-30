@@ -6,6 +6,9 @@
 <html>
 
 <head>
+  <div id="deviceMotionControlRequestDiv" style="width: 200%; height: 200%; position: absolute; background-color: rgba(128, 128, 128, 0.389);  display: none;">
+    <button onclick="requestMotionControlPermission()" style="font-size: 10em; width: 100%; height: 100%; position: fixed; z-index: 2;" >configure device motion controls</button>
+  </div>
   <title>game of patience (Chinese puzzle)</title>
   <div>
     <h1 id="stopClockText" style="color: green; background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px;"></h1>
@@ -302,7 +305,29 @@ input[id='sensitivity']::-webkit-slider-thumb {
   </style>
   <script type="text/javascript">
   // in full screen mode black by default
-  document.body.style.backgroundColor = "white"
+  document.body.style.backgroundColor = "white";
+if ((typeof DeviceOrientationEvent.requestPermission === 'function' || typeof DeviceMotionEvent.requestPermission === 'function') && localStorage.getItem('motionControlGeduldspiel') == undefined) deviceMotionControlRequestDiv.style.display = "inline";
+function requestMotionControlPermission() {
+  alert("Please give the following permission to be able to play with motion control.");
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceMotionEvent.requestPermission().then(function(response) {
+      localStorage.setItem('motionControlGeduldspiel', response);
+      if (response != "granted") {
+        alert("You have to give permission to the motion control in order to be able to play with motion control!");
+      }
+      deviceMotionControlRequestDiv.style.display = "none";
+    });
+  }
+  if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+    DeviceOrientationEvent.requestPermission().then(function(response) {
+      localStorage.setItem('motionControlGeduldspiel', response);
+      if (response != "granted") {
+        alert("You have to give permission to the motion control in order to be able to play with motion control!");
+      }
+      deviceMotionControlRequestDiv.style.display = "none";
+    });
+  }
+}
   function selectTextBox(pThis) {
     setTimeout(() => {
       pThis.parentElement.querySelector('input').select();
