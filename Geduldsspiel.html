@@ -152,10 +152,10 @@
       <b>blue ball:</b> 
       <br>
       width: 
-      <input oninput="sphere1.style.width = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
+      <input id="ballWidthSlider" oninput="sphere1.style.width = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
       <br>
       height: 
-      <input oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
+      <input id="ballHeightSlider" oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
     </div>
   </div>
   <div class="card">
@@ -272,7 +272,9 @@ input[id='sensitivity']::-webkit-slider-thumb {
     <br>
   </div>
   <div id="oldMapCreatorPosition"></div>
-  <a id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> <a style="font-size: 50px;">show random level creator</a>
+  <div id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> 
+    <a style="font-size: 50px;">show random level creator</a>
+  </div>
   <br>
   <input type="checkbox" onchange="inOrAgainstDirection *= -1;" style="width: 50px; height: 50px" id="oppositeCheck"> <a style="font-size: 50px;">opposite movement direction</a>
   <p style="font-size: 50px;" id="joyStickPlayP"> <input style="width: 50px; height: 50px" type="checkbox" onchange="if (checked) {textur.style.touchAction = 'none'; level.currentsensitivity = currentLevel.joySticksensitivity} else level.currentsensitivity = currentLevel.sensitivity;" id="joyStickPlay"> joystick control </p>
@@ -1115,7 +1117,7 @@ function requestMotionControlPermission() {
     if (parseInt(canvasHeight.value) > parseInt(canvasWidth.value)) maxCircleSize.max = canvasWidth.value/2 - minimalDistance.value;
     else maxCircleSize.max = canvasHeight.value/2 - minimalDistance.value;
     maxTriangleWidth.max = canvasWidth.value - minimalDistance.value;
-    maxTriangleHeight.max = canvasHeight.value - minimalDistance.vlaue;
+    maxTriangleHeight.max = canvasHeight.value - minimalDistance.value;
     maxRectangleWidth.max = canvasWidth.value - minimalDistance.value;
     maxRectangleHeight.max = canvasHeight.value - minimalDistance.value;
     if (changeValue) {
@@ -1499,7 +1501,7 @@ var recursionCounter = 0;
       }, 777);
     }
     function showGameInstructions() {
-      alert("The browser Chrome is recommended. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
+      alert("The browser Chrome is recommended. If you are using an apple device and want to play with motion control, it might be needed to switch to Safari though. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
       localStorage.setItem("gameInstructionsGeduldspiel", true);
     }
     var highscores = {}
