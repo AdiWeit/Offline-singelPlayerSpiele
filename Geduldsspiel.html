@@ -64,16 +64,12 @@
     <button onclick="createRandomMap();">create/extend</button>
     <button onclick="deleteAllElements();">delete all objects</button>
     <button onclick="removeElement();">delete selected element</button>
-  </div>
-  <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
-  <div id="rotateSettings" class="card" style="display: none;">
-    <b>rotation settings</b>
+  <div class="card">
+    <b>import/export</b>
     <br>
-    <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sec. per rotation
-    <br>
-    scale in relation to the original object (%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number">
-    <br>
-    starting angle: <input oninput="changeRotateParam('angle', parseInt(value));" value="0" id="rotatingRandomObjStartingAngle" type="number">
+    <button onclick="exportLevel();"><b>export</b></button>
+    <input type="file" id="fileSelector" accept=".json" style="display: none;" onchange="importLevel(this);"></input>
+    <button onclick="fileSelector.click();"><b>import</b></button>
   </div>
   <div id="generalLevelSettings" class="card">
     <b>general level settings</b>
@@ -1085,6 +1081,47 @@ function requestMotionControlPermission() {
       maxRectangleHeight.value = canvasHeight.value;
     }
   }
+  function exportLevel() {
+    var level = {objects: objects, rotatingObj: rotatingObj, goalHitbox: goalHitbox, spawnPoint: checkpoint.position, width: textur.width, height: textur.height, ballWidth: sphere1.style.width, ballHeight: sphere1.style.height};
+    download(prompt("Wie soll die Datei heißen?") + '.json', JSON.stringify(level));
+  }
+  function importLevel(files) {
+    var file = files.files[0]
+    var reader = new FileReader();
+    reader.addEventListener('load', function() {
+      level = JSON.parse(reader.result);
+      objects = level.objects;
+      rotatingObj = level.rotatingObj;
+      for (const objType of Object.keys(objects)) {
+        for (const obj of objects[objType]) {
+          if (obj.path) obj.path = createPath(obj.path.data.points, true, obj.path.data.middle);
+        }
+      }
+      goalHitbox = level.goalHitbox;
+      checkpoint.position = level.spawnPoint;
+      textur.width = level.width;
+      textur.height = level.height;
+      canvasWidth.value = level.width;
+      canvasHeight.value = level.height;
+      sphere1.style.width = level.ballWidth;
+      sphere1.style.height = level.ballHeight;
+      ballWidthSlider.value = level.ballWidth.replace('px', '');
+      ballHeightSlider.value = level.ballHeight.replace('px', '');
+    }, false)
+    reader.readAsText(file);
+  }
+function download(filename, text) {
+  var element = document.createElement('a');
+  element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(text));
+  element.setAttribute('download', filename);
+
+  element.style.display = 'none';
+  document.body.appendChild(element);
+
+  element.click();
+
+  document.body.removeChild(element);
+}
   function createRandomMap(noNewSpawnpoint) {
     textur.width = canvasWidth.value;
     textur.height = canvasHeight.value;
@@ -1860,8 +1897,9 @@ function requestMotionControlPermission() {
       else path.lineTo(p.x - cx , p.y - cy);
     }
     path.closePath();
+    path.data = {points, middle};
     return path;
-}
+  }
 
     function boundingBoxCheck() {
       if (x1 < 0) {
