@@ -59,11 +59,49 @@
   </head>
   <div id="randomMapCreator" class="card" style="display: none;">
     <div class="card">
-    <b>edit elements</b>
+    <b>add/delete elements</b>
     <br>
     <button onclick="createRandomMap();">create/extend</button>
     <button onclick="deleteAllElements();">delete all objects</button>
     <button onclick="removeElement();">delete selected element</button>
+    <br>
+    <button id="addRectangle" onclick="exchange = {'rgb(0, 251, 255)': '', '': 'rgb(0, 251, 255)'}; style.backgroundColor = exchange[style.backgroundColor]; addCircle.style.backgroundColor = ''; addTriangle.style.backgroundColor = '';">add rectangles</button>
+    <button id="addTriangle" onclick="exchange = {'rgb(0, 251, 255)': '', '': 'rgb(0, 251, 255)'}; style.backgroundColor = exchange[style.backgroundColor]; addCircle.style.backgroundColor = ''; addRectangle.style.backgroundColor = ''">add triangles</button>
+    <button id="addCircle" onclick="exchange = {'rgb(0, 251, 255)': '', '': 'rgb(0, 251, 255)'}; style.backgroundColor = exchange[style.backgroundColor]; addRectangle.style.backgroundColor = ''; addTriangle.style.backgroundColor = ''">add circles</button>
+  </div>
+  <div class="card">
+    <b>edit elements</b>
+    <br>
+    <div id="rotateElement">
+      <button id="rotateLeft" onclick="rotateObj(-1);">↶</button>
+      <button id="rotateRight" onclick="rotateObj(1);">↷</button>
+    </div>
+    <div style="display: none;" id="rectangeSizeSetting">
+      <div class="form">
+        <input type="number" placeholder=" " style="width: 94px;" class="form_input" value="747" oninput="selected.obj.width = Number(value); selected.obj.hitbox = calculateHitbox('rectangle', selected.obj); selected.obj.middle = calculateMiddle('rectangle', selected.obj); selected.obj.path = calculatePath('rectangle', selected.obj); " id="elmWidth" min="0">
+        <label for="input" class="form_label" onclick="selectTextBox(this);">width</label>
+      </div>
+      <div class="form">
+        <input type="number" placeholder=" " style="width: 94px;" class="form_input" value="747" oninput="selected.obj.height = Number(value); selected.obj.hitbox = calculateHitbox('rectangle', selected.obj); selected.obj.middle = calculateMiddle('rectangle', selected.obj); selected.obj.path = calculatePath('rectangle', selected.obj);" id="elmHeight" min="0">
+        <label for="input" class="form_label" onclick="selectTextBox(this);">height</label>
+      </div>
+    </div>
+      <br>
+      <div id="elmRadius" class="form" style="display: none;">
+        <input type="number" placeholder=" " id="inputRadius" oninput="selected.obj.radius = Number(value); selected.obj.hitbox = calculateHitbox('circle', selected.obj);" style="width: 94px;" class="form_input" value="747" onchange="handleMaxSizeSlider();" min="0">
+        <label for="input" class="form_label" onclick="selectTextBox(this);">radius</label>
+      </div>
+    <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
+    <div id="rotateSettings" class="card" style="display: none;">
+      <b>rotation settings</b>
+      <br>
+      <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sec. per rotation
+      <br>
+      scale in relation to the original object (1 = 100%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number">
+      <br>
+      starting angle: <input oninput="changeRotateParam('angle', parseInt(value));" value="0" id="rotatingRandomObjStartingAngle" type="number">
+    </div>
+  </div>
   <div class="card">
     <b>import/export</b>
     <br>
@@ -409,7 +447,15 @@ function requestMotionControlPermission() {
     visible([
       ['app', "none"],
     ])
-
+  function rotateObj(direction) {
+    selected.obj.direction += direction; 
+    if (selected.obj.direction < 0) selected.obj.direction = 3; 
+    if (selected.obj.direction > 3) selected.obj.direction = 0;
+    var oldWidth = selected.obj.width;
+    selected.obj.width = selected.obj.height;
+    selected.obj.height = oldWidth;
+    selected.obj.path = calculatePath('triangle', selected.obj);
+  }
     var canvas = textur.getContext('2d'); //Dimension
     console.log(window.innerWidth + " - " + window.innerHeight);
     var RotatingWall;
@@ -1122,11 +1168,15 @@ function download(filename, text) {
 
   document.body.removeChild(element);
 }
+var objBefore;
+var recursionCounter = 0;
   function createRandomMap(noNewSpawnpoint) {
+    objBefore = {circles: Object.keys(objects.circles).length, triangles: Object.keys(objects.triangles).length, rectangles: Object.keys(objects.rectangles).length};
     textur.width = canvasWidth.value;
     textur.height = canvasHeight.value;
     goalSideChanged();
     collideCount = 0;
+    recursionCounter = 0;
     createCircles();
     createTriangles();
     createRectangles();
@@ -1134,56 +1184,112 @@ function download(filename, text) {
     if (!noNewSpawnpoint) setSpawnPoints();
   }
   var objNumber = 0;
-  function createCircles() {
-    for (let i = 0; i < circleAmount.value; i++) {
-      var radius = Math.round(Math.random()*(maxCircleSize.value - 5)) + 5;
-      var newObj = {x: Math.round(Math.random()*(textur.width - radius)), y: Math.round(Math.random()*(textur.height - radius)), radius: radius, number: objNumber};
-      newObj.hitbox = {x: newObj.x - newObj.radius, y: newObj.y - newObj.radius, width: newObj.radius*2, height: newObj.radius*2};
-      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
-      else if (collideCount >= 9999) break;
-      else {
+  function createCircles(
+    radius = Math.round(Math.random()*(maxCircleSize.value - 5)) + 5, 
+    x = Math.round(Math.random()*(textur.width - radius)),
+    y = Math.round(Math.random()*(textur.height - radius)),
+    manual,
+    ) {
+    if (circleAmount.value == 0) return;
+    var newObj = {x, y, radius: radius, number: objNumber};
+    newObj.hitbox = calculateHitbox("circle", newObj);
+    if (manual) {
+      objects.circles.push(newObj);
+      selected.obj = newObj;
+    }
+    else if (collideCount < 9999) {
+      if (!newCollidesOthers(newObj)) {
         objects.circles.push(newObj);
         objNumber++;
       }
-    }
-  }
-  function createTriangles() {
-    for (let i = 0; i < triangleAmount.value; i++) {
-      var width = Math.round(Math.random()*maxTriangleWidth.value);
-      var height = Math.round(Math.random()*maxTriangleHeight.value);
-      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, direction: Math.round(Math.random()*3), number: objNumber};
-      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
-      newObj.middle = {x: newObj.hitbox.x + newObj.hitbox.width/2, y: newObj.hitbox.y + newObj.hitbox.height/2};
-      if (!newObj.direction) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width/2, newObj.y + newObj.height)], true, newObj.middle);
-      // pointing left
-      if (newObj.direction == 1) newObj.path = createPath([point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height/2)], true, newObj.middle);
-      // pointing up
-      if (newObj.direction == 2) newObj.path = createPath([point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x + newObj.width/2, newObj.y)], true, newObj.middle);
-      // pointing right
-      if (newObj.direction == 3) newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x, newObj.y + newObj.height), point(newObj.x + newObj.width, newObj.y + newObj.height/2)], true, newObj.middle);
-      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
-      else if (collideCount >= 9999) break;
-      else {
-        objects.triangles.push(newObj);
-        objNumber++;
+      if (Object.keys(objects.circles).length < Number(circleAmount.value) + objBefore.circles) {
+        recursionCounter++;
+        if (recursionCounter % 1000 == 0) setTimeout(createCircles, 0);
+        else createCircles();
       }
     }
   }
-  function createRectangles() {
-    for (let i = 0; i < rectangleAmount.value; i++) {
-      var width = Math.round(Math.random()*maxTriangleWidth.value);
-      var height = Math.round(Math.random()*maxTriangleHeight.value);
-      var newObj = {x: Math.round(Math.random()*(textur.width - width)), y: Math.round(Math.random()*(textur.height - height)), width: width, height: height, number: objNumber};
-      newObj.hitbox = {x: newObj.x, y: newObj.y, width: newObj.width, height: newObj.height};
-      newObj.middle = {x: newObj.x + newObj.width/2, y: newObj.y + newObj.height/2};
-      newObj.path = createPath([point(newObj.x, newObj.y), point(newObj.x + newObj.width, newObj.y), point(newObj.x + newObj.width, newObj.y + newObj.height), point(newObj.x, newObj.y + newObj.height)], true, newObj.middle);
-      if (newCollidesOthers(newObj) && collideCount < 9999) i--;
-      else if (collideCount >= 9999) break;
-      else {
+  function createTriangles(
+      width = Math.round(Math.random()*maxTriangleWidth.value), 
+      height = Math.round(Math.random()*maxTriangleHeight.value),
+      x = Math.round(Math.random()*(textur.width - width)), 
+      y = Math.round(Math.random()*(textur.height - height)), 
+      direction = Math.round(Math.random()*3),
+      manual
+    ) {
+      if (triangleAmount.value == 0) return;
+    // for (let i = 0; i < triangleAmount.value; i++) {
+      var newObj = {x, y, width, height, direction, number: objNumber};
+      newObj.hitbox = calculateHitbox("triangle", newObj);
+      newObj.middle = calculateMiddle("triangle", newObj);
+      newObj.path = calculatePath("triangle", newObj);
+      if (manual) {
+        objects.triangles.push(newObj);
+        selected.obj = newObj;
+      }
+      else if (collideCount < 9999) {
+        if (!newCollidesOthers(newObj)) {
+          objects.triangles.push(newObj);
+          objNumber++;
+        }
+        if (Object.keys(objects.triangles).length < Number(triangleAmount.value) + objBefore.triangles) {
+          recursionCounter++;
+          if (recursionCounter % 1000 == 0) setTimeout(createTriangles, 0);
+          else createTriangles();
+        }
+      }
+    // }
+  }
+  function createRectangles(
+      width = Math.round(Math.random()*maxTriangleWidth.value), 
+      height = Math.round(Math.random()*maxTriangleHeight.value),
+      x = Math.round(Math.random()*maxTriangleWidth.value), 
+      y = Math.round(Math.random()*(textur.height - height)), 
+      manual
+    ) {
+    if (rectangleAmount.value == 0) return;
+    var newObj = {x, y, width: width, height: height, number: objNumber};
+    newObj.hitbox = calculateHitbox("rectangle", newObj)
+    newObj.middle = calculateMiddle("rectangle", newObj);
+    newObj.path = calculatePath("rectangle", newObj);
+    if (manual) {
+      objects.rectangles.push(newObj);
+      selected.obj = newObj;
+    }
+    else if (collideCount < 9999) {
+      if (!newCollidesOthers(newObj)) {
         objects.rectangles.push(newObj);
         objNumber++;
       }
+      if (Object.keys(objects.rectangles).length < Number(rectangleAmount.value) + objBefore.rectangles) {
+        recursionCounter++;
+        if (recursionCounter % 1000 == 0) setTimeout(createRectangles, 0);
+        else createRectangles();
+      }
     }
+  }
+  function calculateHitbox(type, obj) {
+    // cover "circles"...
+    if (type.includes("circle")) return {x: obj.x - obj.radius, y: obj.y - obj.radius, width: obj.radius*2, height: obj.radius*2};
+    if (type.includes("triangle")) return {x: obj.x, y: obj.y, width: obj.width, height: obj.height};
+    if (type.includes("rectangle")) return {x: obj.x, y: obj.y, width: obj.width, height: obj.height};
+  }
+  function calculateMiddle(type, obj) {
+    if (type.includes("triangle")) return {x: obj.hitbox.x + obj.hitbox.width/2, y: obj.hitbox.y + obj.hitbox.height/2};
+    if (type.includes("rectangle")) return {x: obj.x + obj.width/2, y: obj.y + obj.height/2};
+  }
+  function calculatePath(type, obj) {
+    if (type.includes("triangle")) {
+      // pointing down (?)
+      if (!obj.direction) return createPath([point(obj.x, obj.y), point(obj.x + obj.width, obj.y), point(obj.x + obj.width/2, obj.y + obj.height)], true, obj.middle);
+      // pointing left
+      if (obj.direction == 1) return createPath([point(obj.x + obj.width, obj.y), point(obj.x + obj.width, obj.y + obj.height), point(obj.x, obj.y + obj.height/2)], true, obj.middle);
+      // pointing up
+      if (obj.direction == 2) return createPath([point(obj.x, obj.y + obj.height), point(obj.x + obj.width, obj.y + obj.height), point(obj.x + obj.width/2, obj.y)], true, obj.middle);
+      // pointing right
+      if (obj.direction == 3) return createPath([point(obj.x, obj.y), point(obj.x, obj.y + obj.height), point(obj.x + obj.width, obj.y + obj.height/2)], true, obj.middle);
+    }
+    if (type.includes("rectangle")) return createPath([point(obj.x, obj.y), point(obj.x + obj.width, obj.y), point(obj.x + obj.width, obj.y + obj.height), point(obj.x, obj.y + obj.height)], true, obj.middle);
   }
   // function createSquares() {
     
@@ -1243,6 +1349,24 @@ function download(filename, text) {
             newSelection = true;
             layoutObjs();
             rotateTile.checked = false;
+            if (objType == "circles") {
+              elmRadius.style.display = "inline";
+              inputRadius.value = obj.radius;
+              rectangeSizeSetting.style.display = "none";
+              rotateElement.style.display = "none";
+            }
+            else {
+              rotateElement.style.display = "block";
+              // TODO: gleiche für Dreieck?
+              rectangeSizeSetting.style.display = "none";
+              elmRadius.style.display = "none";
+              if (objType == 'rectangles') {
+                rectangeSizeSetting.style.display = "inline";
+                elmWidth.value = obj.width;
+                elmHeight.value = obj.height;
+              }
+            }
+
           }
         }
       }
@@ -2002,9 +2126,70 @@ function download(filename, text) {
     function readMouseMove(e) {
       mausx = e.clientX + scrollX;
       mausy = e.clientY + scrollY;
+      folgenMouseMove();
       //  console.log(mausx + " - " + mausy);
     }
+    function folgenMouseMove() {
+      if (state.x) {
+        if (state.type == "rectangle") {
+          selected.obj.width = mausx - state.x;
+          selected.obj.height = mausy - state.y;
+          selected.obj.hitbox = calculateHitbox('rectangle', selected.obj); 
+          selected.obj.middle = calculateMiddle('rectangle', selected.obj); 
+          selected.obj.path = calculatePath('rectangle', selected.obj);
+        }
+        if (state.type == "triangle") {
+          selected.obj.width = mausx - state.x;
+          selected.obj.height = mausy - state.y;
+          selected.obj.hitbox = calculateHitbox('triangle', selected.obj); 
+          selected.obj.middle = calculateMiddle('triangle', selected.obj); 
+          selected.obj.path = calculatePath('triangle', selected.obj);
+        }
+        if (state.type == "circle") {
+          selected.obj.radius = Math.sqrt(Math.pow(mausx - state.x, 2) + Math.pow(mausy - state.y, 2));
+          selected.obj.hitbox = calculateHitbox('circle', selected.obj); 
+          selected.obj.middle = calculateMiddle('circle', selected.obj); 
+          selected.obj.path = calculatePath('circle', selected.obj);
+        }
+        if (state.type.includes("move")) {
+          selected.obj.x += mausx - state.x;
+          selected.obj.y += mausy - state.y;
+          state = {x: mausx, y: mausy, type: "moveDone"};
+          selected.obj.hitbox = calculateHitbox(selected.type, selected.obj); 
+          if (selected.type != "circle") {
+            selected.obj.middle = calculateMiddle(selected.type, selected.obj); 
+            selected.obj.path = calculatePath(selected.type, selected.obj);
+          }
+        }
+      }
+    }
     document.onmousemove = readMouseMove
+    var state = {}
+    textur.onmousedown = () => {
+      folgenMouseDown();
+    }
+    function folgenMouseDown() {
+      state = {x: mausx, y: mausy, type: "move"};
+      if (addRectangle.style.backgroundColor == "rgb(0, 251, 255)") {
+        createRectangles(0, 0, mausx, mausy, true)
+        state.type = "rectangle";
+      }
+      if (addTriangle.style.backgroundColor == "rgb(0, 251, 255)") {
+        createTriangles(0, 0, mausx, mausy, 0, true)
+        state.type = "triangle";
+      }
+      if (addCircle.style.backgroundColor == "rgb(0, 251, 255)") {
+        createCircles(0, mausx, mausy, true)
+        state.type = "circle";
+      }
+    }
+    textur.onmouseup = () => {
+      folgenMouseUp();
+    }
+    function folgenMouseUp() {
+      // addRectangle.style.backgroundColor = "";
+      state = {}
+    }
 
     var f = function() {
       var eventHandler = function(event) {
@@ -2036,14 +2221,24 @@ function download(filename, text) {
       mausx = joyStick.coordinates.x;
       mausy = joyStick.coordinates.y;
     }
+    if (ev.type == "touchend" && (state.type != "move")) {
+      folgenMouseUp();
+      delete selected.obj;
+    }
     if (ev.touches[0] != undefined) {
         mausx = ev.touches[0]["pageX"]// + scrollX;
         mausy = ev.touches[0]["pageY"]// + scrollY;
       }
+    if (ev.type == "touchmove") {
+      folgenMouseMove();
+    }
     if (joyStickPlay.checked && ev.type == "touchstart" && mausy < textur.getBoundingClientRect().bottom) {
       joyStick = {coordinates : {x: mausx, y: mausy}};
       // if (!ev.touches[1]) textur.style.touchAction = 'none';
       // else textur.style.touchAction = '';
+    }
+    if (ev.type == "touchstart") {
+      folgenMouseDown();
     }
   }
   function cssToNumber(string) {
