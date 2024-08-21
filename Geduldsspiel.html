@@ -1400,10 +1400,13 @@ var recursionCounter = 0;
     }
     var newSelection = false;
     if (randomMapCreatorVisable.checked) {
+      // select obj
       for (const objType of Object.keys(objects)) {
         for (const obj of objects[objType]) {
           if ((!selected.obj || JSON.stringify(selected.obj) != JSON.stringify(obj)) && mausx > obj.hitbox.x && mausx < obj.hitbox.x +  obj.hitbox.width && mausy > obj.hitbox.y && mausy < obj.hitbox.y +  obj.hitbox.height)  {
             selected.obj = obj;
+            // to be able to move object without scrolling
+            disableScroll();
             selected.type = objType;
             newSelection = true;
             layoutObjs();
@@ -2297,6 +2300,10 @@ function detectDeviceOrientation(event) {
             selected.obj.path = calculatePath(selected.type, selected.obj);
           }
         }
+        else if (state.type == "move") {
+          enableScroll();
+          state.type = "nothing"
+        }
       }
     }
     document.onmousemove = readMouseMove
@@ -2325,6 +2332,7 @@ function detectDeviceOrientation(event) {
     function folgenMouseUp() {
       // addRectangle.style.backgroundColor = "";
       state = {}
+      enableScroll();
     }
 
     // var f = function() {
@@ -2347,7 +2355,7 @@ function detectDeviceOrientation(event) {
       return string.charAt(0).toUpperCase() + string.slice(1);
     }
 
-    document.addEventListener('touchmove', touch);
+    document.addEventListener('touchmove', touch, {passive:false});
     document.addEventListener('touchstart', touch);
     document.addEventListener('touchend', touch);
     var joyStick;
@@ -2381,7 +2389,19 @@ function detectDeviceOrientation(event) {
   // cannon
 var bullets = [];
 
+function preventDefault(e) {
+  if (e.type == "touchmove" && e.cancelable) e.preventDefault();
+}
+
+// call this to Disable
+function disableScroll() {
+  window.addEventListener('touchmove', preventDefault, {passive: false}); // mobile
+}
+
+// call this to Enable
+function enableScroll() {
+  window.removeEventListener('touchmove', preventDefault, {passive: false});
+}
   </script>
 </body>
-
 </html>
