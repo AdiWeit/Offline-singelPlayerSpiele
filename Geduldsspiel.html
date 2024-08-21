@@ -1104,6 +1104,7 @@ function requestMotionControlPermission() {
       // refreshBallSize();
       courceSelection.style.display = "none";
       if (!Object.keys(objects).reduce((acc, val) => acc + objects[val].length, 0).length) createRandomMap();
+      window.scroll(0, 0);
       } 
       else {
         randomMapCreator.style.display = 'none';
@@ -1604,7 +1605,6 @@ var recursionCounter = 0;
       });
       courceSelection.value = value;
     }
-    var deathMarkers = [];
     function restartLevel() {
       vx1 = vx2 = vy1 = vy2 = 0;
       if (level.mode == "growing") {
@@ -2364,9 +2364,7 @@ function detectDeviceOrientation(event) {
     if (ev.touches[0] != undefined) {
         mausx = ev.touches[0]["pageX"]// + scrollX;
         mausy = ev.touches[0]["pageY"]// + scrollY;
-      }
-    if (ev.type == "touchmove") {
-      folgenMouseMove();
+        // console.log(ev.touches.length + " - " + ev.type);
     }
     if (joyStickPlay.checked && ev.type == "touchstart" && mausy < textur.getBoundingClientRect().bottom) {
       joyStick = {coordinates : {x: mausx, y: mausy}};
