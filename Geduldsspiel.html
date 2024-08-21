@@ -1243,6 +1243,7 @@ var recursionCounter = 0;
     if (circleAmount.value == 0) return;
     var newObj = {x, y, radius: radius, number: objNumber};
     newObj.hitbox = calculateHitbox("circle", newObj);
+    objNumber++;
     if (manual) {
       objects.circles.push(newObj);
       selected.obj = newObj;
@@ -1250,7 +1251,6 @@ var recursionCounter = 0;
     else if (collideCount < 9999) {
       if (!newCollidesOthers(newObj)) {
         objects.circles.push(newObj);
-        objNumber++;
       }
       if (Object.keys(objects.circles).length < Number(circleAmount.value) + objBefore.circles) {
         recursionCounter++;
@@ -1273,6 +1273,7 @@ var recursionCounter = 0;
       newObj.hitbox = calculateHitbox("triangle", newObj);
       newObj.middle = calculateMiddle("triangle", newObj);
       newObj.path = calculatePath("triangle", newObj);
+      objNumber++;
       if (manual) {
         objects.triangles.push(newObj);
         selected.obj = newObj;
@@ -1280,7 +1281,6 @@ var recursionCounter = 0;
       else if (collideCount < 9999) {
         if (!newCollidesOthers(newObj)) {
           objects.triangles.push(newObj);
-          objNumber++;
         }
         if (Object.keys(objects.triangles).length < Number(triangleAmount.value) + objBefore.triangles) {
           recursionCounter++;
@@ -1302,6 +1302,7 @@ var recursionCounter = 0;
     newObj.hitbox = calculateHitbox("rectangle", newObj)
     newObj.middle = calculateMiddle("rectangle", newObj);
     newObj.path = calculatePath("rectangle", newObj);
+    objNumber++;
     if (manual) {
       objects.rectangles.push(newObj);
       selected.obj = newObj;
@@ -1309,7 +1310,6 @@ var recursionCounter = 0;
     else if (collideCount < 9999) {
       if (!newCollidesOthers(newObj)) {
         objects.rectangles.push(newObj);
-        objNumber++;
       }
       if (Object.keys(objects.rectangles).length < Number(rectangleAmount.value) + objBefore.rectangles) {
         recursionCounter++;
