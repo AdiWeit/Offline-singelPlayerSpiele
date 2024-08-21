@@ -130,7 +130,7 @@
       <input class="mobileControlsElm" type="radio" onclick="rotateLeftModeChanged();" name="rotateB" id="rotatesLeft" name="button"><a1 onclick="showTitle(id, style.display);" id="rotateLeftSymbol">⟲</a1>
       <input class="mobileControlsElm" type="radio" onclick="rotateRightModeChanged();" name="rotateB" id="rotatesRight"  name="button"><a1 onclick="showTitle(id, style.display);" id="rotateRightSymbol">⟳</a1>
       <!-- <button class="mobileControlsElm" onclick="state.shift = true;"><==></button> -->
-      <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true; if (['pressShiftMobileUnclippTutorial', 'pressShiftMobileMultipleUnclippTutorial'].includes(tutorial.state)) {goTutorialSteps(1);} if (['selectTileMobileShiftUnclippTutorial', 'selectTileMobileShiftMultipleUnclippTutorial'].includes(tutorial.state) && !checked) goTutorialSteps(-1);"><a1 onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a1>
+      <input type="checkbox" id="selectMultiple" class="mobileControlsElm" onchange="state.shift = true; if (['pressShiftMobileUnclippTutorial', 'pressShiftMobileMultipleUnclippTutorial', 'pressShiftMobileRotateTutorial'].includes(tutorial.state)) {goTutorialSteps(1);} if (['selectTileMobileShiftUnclippTutorial', 'selectTileMobileShiftMultipleUnclippTutorial'].includes(tutorial.state) && !checked) goTutorialSteps(-1);"><a1 onclick="showTitle(id, style.display);" id="selectMultipleSymbol">⇧</a1>
     </a>
   </p>
     <input class="mobileControlsElm" type="checkbox" id="scrollable" onclick=" if ((tutorial.state == 'selectScrollScrollingTutorial' && checked) || (tutorial.state == 'unselectScrollScrollingTutorial' && !checked)) goTutorialSteps(1); if (tutorial.state == 'scrollMobileScrollingTutorial' && !checked) goTutorialSteps(-1); if (tutorial.state == 'zoomInTutorial' && !checked) goTutorialSteps(-2); if (tutorial.state == 'zoomOutTutorial' && !checked) goTutorialSteps(-3);" name="button"><a onclick="showTitle(id, style.display);" id="swipeSymbol">scroll</a>
@@ -701,6 +701,14 @@ display: block;
           <div id="releaseShiftAlternativeUnclippTutorialDiv"><input type="checkbox" id="releaseShiftAlternativeUnclippTutorial" onclick="checked = !checked"> Release the shift key. </div>
           <div id="unselectAlternativeUnclippTutorialDiv"><input type="checkbox" id="unselectAlternativeUnclippTutorial" onclick="checked = !checked"> Release the touchpad or mouse button to unselect the piece. </div>
         </div>
+        <div id="" class="card cardGeneral">
+          If you want to rotate a piece <b>without</b> detatching it, you can do the following: 
+          <div id="pressShiftRotateTutorialDiv"><input type="checkbox" id="pressShiftRotateTutorial" onclick="checked = !checked"> Press the shift key. </div>
+          <div id="selectTileRotateTutorialDiv"><input type="checkbox" id="selectTileRotateTutorial" onclick="checked = !checked"> Select a piece that is connected to another one</div>
+          <div id="RotateInPlaceTutorialDiv"><input type="checkbox" id="RotateInPlaceTutorial" onclick="checked = !checked"> Press the left or right arrow to rotate the piece. </div>
+          <div id="releaseShiftRotateTutorialDiv"><input type="checkbox" id="releaseShiftRotateTutorial" onclick="checked = !checked"> Release the shift key. </div>
+          <div id="unselectRotateTutorialDiv"><input type="checkbox" id="unselectRotateTutorial" onclick="checked = !checked"> Click on the piece again to unselect it </div>
+        </div>
       </div>
     </div>
     <div class="card cardGeneral section" id="generalSkills">
@@ -891,6 +899,16 @@ display: block;
           <div id="activateRotateRightTutorialDiv"><input type="checkbox" id="activateRotateRightTutorial" onclick="checked = !checked"> Activate rotate to the right.</div>
           <div id="rotateRightMobileTutorialDiv"><input type="checkbox" id="rotateRightMobileTutorial" onclick="checked = !checked"> Click on the piece(s) you want to rotate.</div>
           <div id="deactivateRotateRightTutorialDiv"><input type="checkbox" id="deactivateRotateRightTutorial" onclick="checked = !checked"> Deactivate rotation to the right.</div>
+          <div id="" class="card cardGeneral">
+            If you want to rotate a piece <b>without</b> detatching it, you can do the following: 
+            <div id="pressShiftMobileRotateTutorialDiv"><input type="checkbox" id="pressShiftMobileRotateTutorial" onclick="checked = !checked"> Press the "shift key". </div>
+            <div id="ActivateRotateInPlaceTutorialDiv"><input type="checkbox" id="ActivateRotateInPlaceTutorial" onclick="checked = !checked"> Activate rotation to the right </div>
+            <div id="RotateInPlaceMobileTutorialDiv"><input type="checkbox" id="RotateInPlaceMobileTutorial" onclick="checked = !checked"> click on the piece you want to rotate </div>
+            <div id="deactivateRotateRightInPlaceTutorialDiv"><input type="checkbox" id="deactivateRotateRightInPlaceTutorial" onclick="checked = !checked"> deactivate the rotation to the right. </div>
+            <div class="card cardGeneral">
+              If you want to rotate it once again, you have to activate the "shift key" again.
+            </div>
+          </div>
         </div>
       </div>
       <div id="tileSelectionBarMobileTutorial"></div>
@@ -1032,15 +1050,15 @@ display: block;
     if (state.rotateLeft) rotatesLeft.checked = false; 
     state.rotateLeft = JSON.parse(JSON.stringify(rotatesLeft.checked));
     state.rotateRight = false;
-    if ((tutorial.state == 'activateRotateLeftTutorial' && rotatesLeft.checked)) goTutorialSteps(1); 
+    if ((['activateRotateLeftTutorial'].includes(tutorial.state) && rotatesLeft.checked)) goTutorialSteps(1); 
     if (tutorial.state == 'rotateLeftMobileTutorial' && !rotatesLeft.checked) goTutorialSteps(-1);
   }
   function rotateRightModeChanged() {
     if (state.rotateRight) rotatesRight.checked = false;
     state.rotateRight = JSON.parse(JSON.stringify(rotatesRight.checked)); 
     state.rotateLeft = false;
-    if ((tutorial.state == 'activateRotateRightTutorial' && rotatesRight.checked) || (tutorial.state == 'deactivateRotateRightTutorial' && !rotatesRight.checked)) goTutorialSteps(1); 
-    if (tutorial.state == 'rotateRightMobileTutorial' && !rotatesRight.checked) goTutorialSteps(-1);
+    if ((['activateRotateRightTutorial', 'ActivateRotateInPlaceTutorial'].includes(tutorial.state) && rotatesRight.checked) || (['deactivateRotateRightTutorial', 'deactivateRotateRightInPlaceTutorial'].includes(tutorial.state) && !rotatesRight.checked)) goTutorialSteps(1); 
+    if (['rotateRightMobileTutorial', 'RotateInPlaceMobileTutorial'].includes(tutorial.state) && !rotatesRight.checked) goTutorialSteps(-1);
   }
   function hexTorgb(hex) {
     return ['0x' + hex[1] + hex[2] | 0, '0x' + hex[3] + hex[4] | 0, '0x' + hex[5] + hex[6] | 0];
@@ -3146,7 +3164,7 @@ var puzzles = {};
     if (((selected.tiles.length && !state.shift) || state.removeTile) && !automaticTileSelectionReset.checked && state.mouse != "downNow") {
       trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
       mouseUp(true);
-      if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || ["unselectUnclippStandardTutorial", "unselecTileAfterTileBarTilePlacementTutorial"].includes(tutorial.state)) {
+      if ((tutorial.state == "clickUnselectMoveTutorial" && !state.removeTile && selected.tiles.length) || ["unselectUnclippStandardTutorial", "unselectRotateTutorial", "unselecTileAfterTileBarTilePlacementTutorial"].includes(tutorial.state)) {
         goTutorialSteps(1);
         if (tutorial.state != "SecondPlaceTileTutorial" && !state.helpTutorial) automaticTileSelectionReset.checked = true;
       }
@@ -3201,13 +3219,13 @@ var puzzles = {};
               if (!selected.tiles.includes(i)) selected.tiles.push(i);
               positions.layoutOrder = positions.layoutOrder.filter(x => x != i);
               positions.layoutOrder.push(i);
-              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial", "selectTileMobileTurorial", "selectTileConnectTileMobileTutorial", "selectTileMobileTwoFingersUnclippTutorial"].includes(tutorial.state) || (["selectTileMobileShiftMultipleUnclippTutorial"].includes(tutorial.state) && selected.tiles.length >= 2 && getConnectedTiles(selected.tiles[0], true).length >= 3) || (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileMobileShiftUnclippTutorial"].includes(tutorial.state) && getConnectedTiles(selected.tiles[0], true).length >= 2)) {
+              if (["tileClickMoveTutorial", "holdMouseMoveTutorial", "moveMouseMoveTutorialAlternative", "selectTileConnectTileTutorial", "selectTileScrollingTutorial", "selectTileAutomaticScrollingTutorial", "selectTileMobileTurorial", "selectTileConnectTileMobileTutorial", "selectTileMobileTwoFingersUnclippTutorial"].includes(tutorial.state) || (["selectTileMobileShiftMultipleUnclippTutorial"].includes(tutorial.state) && selected.tiles.length >= 2 && getConnectedTiles(selected.tiles[0], true).length >= 3) || (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileMobileShiftUnclippTutorial", "selectTileRotateTutorial"].includes(tutorial.state) && getConnectedTiles(selected.tiles[0], true).length >= 2)) {
                 goTutorialSteps(1);
               }
               if (!elmCalled && !touchStart && rotateTiles.checked) {
                 if (rotatesRight.checked) {
                   rotateSelected(90);
-                  if (tutorial.state == "rotateRightMobileTutorial") goTutorialSteps(1);
+                  if (["rotateRightMobileTutorial", "RotateInPlaceMobileTutorial"].includes(tutorial.state)) goTutorialSteps(1);
                 }
                 if (rotatesLeft.checked) {
                   rotateSelected(-90);
@@ -3527,9 +3545,9 @@ layout(false, true);
     if (event.key == "Shift" && state.shift) {
       state.shift = false;
       if (automaticTileSelectionReset.checked) selected.tiles = [];
-      if (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
-      if (tutorial.state == "releaseShiftStandardUnclippTutorial") goTutorialSteps(1);
-      if (tutorial.state == "unclippTileAlternativeUnclippTutorial") goTutorialSteps(-2);
+      if (["selectTileStandardUnclippTutorial", "selectTileAlternativeUnclippTutorial", "selectTileRotateTutorial"].includes(tutorial.state)) goTutorialSteps(-1);
+      if (["releaseShiftStandardUnclippTutorial", "releaseShiftAlternativeUnclippTutorial","releaseShiftRotateTutorial"].includes(tutorial.state)) goTutorialSteps(1);
+      if (["unclippTileAlternativeUnclippTutorial", "RotateInPlaceTutorial"].includes(tutorial.state)) goTutorialSteps(-2);
       if (tutorial.state == "releaseShiftAlternativeUnclippTutorial") {
         goTutorialSteps(1);
         if (unselectAlternativeUnclippTutorial.checked) {
@@ -3600,7 +3618,7 @@ layout(false, true);
         state.shift = true;
         state.shiftBefore = true;
         selected.tiles = [];
-        if (["pressShiftStandardUnclippTutorial", "pressShiftAlternativeUnclippTutorial"].includes(tutorial.state)) goTutorialSteps(1);
+        if (["pressShiftStandardUnclippTutorial", "pressShiftAlternativeUnclippTutorial", "pressShiftRotateTutorial"].includes(tutorial.state)) goTutorialSteps(1);
       }
       var collidesTilesBar = tileSelectionBar.collidesMouse();
       if (rotateTiles.checked) {
@@ -3623,7 +3641,7 @@ layout(false, true);
   function rotateSelected(direction) {
     if (tutorial.state == "moveMouseMoveTutorial") rotateTileTutorial.checked = true;
     if (tutorial.state == "moveMouseMoveTutorialAlternative") rotateTileTutorialAlternative.checked = true;
-    if (["rotateTileTutorial", "rotateTileTutorialAlternative"].includes(tutorial.state)) goTutorialSteps(1);
+    if (["rotateTileTutorial", "rotateTileTutorialAlternative", "RotateInPlaceTutorial"].includes(tutorial.state)) goTutorialSteps(1);
     if (!state.removeTile) {
       if (selected.tiles.length == 1 && getConnectedTiles(selected.tiles[0], true).length > 1 && gerät == "PC") {
         rotateTile(selected.tiles[0], direction);
@@ -4229,5 +4247,6 @@ function goTutorialSteps(steps) {
       tutorial.state = "finished";
     }
   }
+  if (tutorial.state == "unselectRotateTutorial" && automaticTileSelectionReset.checked) goTutorialSteps(1);
 }
 </script>
