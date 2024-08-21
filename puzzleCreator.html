@@ -624,7 +624,7 @@ display: block;
     <div style="display: none;" id="traditionalTutorialPC">
     <div class="card cardGeneral section" id="moveTutorial">
       <h2>Move and rotate pieces</h2>
-      <button onclick="goToTutorialIndex(this);">start here or continue</button>
+      <button onclick="goToTutorialIndex(this);">start or continue from here</button>
       <div class="card cardGeneral">
         <!-- TODO: standardmäßig quadratische Teile oder Originalgröße einstellbar (ausversehen auf Originalgröße abgeändert) -->
         <b>Information on rotating pieces</b>
@@ -653,7 +653,7 @@ display: block;
       <h2>Connecting and disconnecting pieces</h2>
       <div class="card cardGeneral" id="connectTiles">
         <h3>Connect pieces</h3>
-        <button onclick="goToTutorialIndex(this);">start here or continue</button>
+        <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div id="clippingInfos">
             <div class="card cardGeneral">
               <b style="font-size: 15px;">Hitboxes</b>
@@ -682,7 +682,7 @@ display: block;
       </div>
       <div class="card cardGeneral section" id="disconnectTiles">
         <h3>Disconnect pieces</h3>
-        <button id="contineTutorialUnclippPC" onclick="goToTutorialIndex(this);">start here or continue</button>
+        <button id="contineTutorialUnclippPC" onclick="goToTutorialIndex(this);">start or continue from here</button>
         <div class="card cardGeneral">
           <b style="font-size: 15px;">Information shift button</b>
           <br>
@@ -716,7 +716,7 @@ display: block;
     </div>
     <div class="card cardGeneral section" id="generalSkills">
       <h2>General skills</h2>
-      <button onclick="goToTutorialIndex(this);">start here or continue</button>
+      <button onclick="goToTutorialIndex(this);">start or continue from here</button>
       <div class="card cardGeneral">
         <h3>zoom</h3>
         As on any other website, you can zoom in and out. The usual is Ctrl + "-" to zoom out and Ctrl + "+" to zoom in (you can also use the mouse wheel instead of plus and minus). This gives you a better overview of the "playing field", but you also have smaller pieces and vice versa.
@@ -753,7 +753,7 @@ display: block;
         </div>
         <div class="card cardGeneral" id="controlTileBarScrollTutorial">
           <h3>Scrolling in the pieces list</h3>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div id="scrollArrowTileBarTutorialDiv"><input type="checkbox" id="scrollArrowTileBarTutorial" onclick="checked = !checked">Scroll by clicking on the red (semi-transparent) arrows at the edges of the screen (become more visible when you touch them with the mouse)</div>
           <div class="card cardGeneral" id="scrollWithMouse">
             <h4 id="scrollTilelistSwipeTutorial">Scrolling with the mouse button</h4>
@@ -765,7 +765,7 @@ display: block;
         </div>
         <div class="card cardGeneral section" id="leaveTileBarTutorial">
           <h3>Move pieces to "playing field"</h3>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div class="card cardGeneral">
             <b style="font-size: 15px;">automatically select next piece</b>
             <br>
@@ -781,7 +781,7 @@ display: block;
         </div>
         <div class="card cardGeneral section" id="backToBarTutorial">
           <h3>Bring pieces back to the pieces list</h3>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div class="card cardGeneral" id="backToBarPlusBTutorial">
             <h4>with "+" button</h4>
             <div id="BackToTileBarTutorialDiv"><input type="checkbox" id="BackToTileBarTutorial" onclick="checked = !checked">Click on one of the "+" buttons</div>
@@ -805,7 +805,7 @@ display: block;
     <div id="traditionalTutorialHandy" style="display: none;">
       <div class="card cardGeneral section" id="moveTutorial">
         <h2>Move pieces</h2>
-        <button onclick="goToTutorialIndex(this);">start here or continue</button>
+        <button onclick="goToTutorialIndex(this);">start or continue from here</button>
         <div class="card cardGeneral">
           <div id="selectTileMobileTurorialDiv"><input type="checkbox" id="selectTileMobileTurorial" onclick="checked = !checked"> Place your finger on a piece. </div>
           <div id="moveTileMobileTutorialDiv"><input type="checkbox" id="moveTileMobileTutorial" onclick="checked = !checked"> Then move your finger to move the piece. </div>
@@ -816,7 +816,7 @@ display: block;
         <h2>Connecting and disconnecting pieces</h2>
         <div class="card cardGeneral" id="connectTiles">
           <h3>Connect tiles</h3>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div id="clippingInfosMobile"></div>
           <div class="card cardGeneral">
           <div id="selectTileConnectTileMobileTutorialDiv"><input type="checkbox" id="selectTileConnectTileMobileTutorial" onclick="checked = !checked"> Select a piece. </div>
@@ -847,7 +847,7 @@ display: block;
           <div class="card cardGeneral">
             <b>Multiple selection (also possible without detaching)</b>
             <br>
-            <button onclick="goToTutorialIndex(this);">start here or continue</button>
+            <button onclick="goToTutorialIndex(this);">start or continue from here</button>
             <br>
             <div id="pressShiftMobileMultipleUnclippTutorialDiv"><input type="checkbox" id="pressShiftMobileMultipleUnclippTutorial" onclick="checked = !checked"> Press the "shift key". </div>
             <div id="selectTileMobileShiftMultipleUnclippTutorialDiv"><input type="checkbox" id="selectTileMobileShiftMultipleUnclippTutorial" onclick="checked = !checked"> Click on two pieces that are connected to each other and have a connection to another piece (any number possible outside the tutorial) that you want to separate from the rest. </div>
@@ -868,7 +868,7 @@ display: block;
         <div id="scrollTutorial" class="card cardGeneral">
           <b style="font-size: 21px;">scroll and zoom</b>
           <br>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <br>
           <div class="card cardGeneral" id="manualScrollingTutorial">
             <h3>Manual scrolling and zooming</h3>
@@ -888,10 +888,9 @@ display: block;
         </div>
         <div class="card cardGeneral section">
           <h3>rotate</h3>
-          <button onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div class="card cardGeneral">
             <b>Information on rotating pieces</b>
-            <!-- TODO: information: shift to rotate when already attached to other one -->
             <br>
             If it is not edited in the settings, the pieces must be rotated to fit. Therefore, when loading an image or video, the width and height are automatically equalized. If you change the width or height of the image or video, you can still rotate the piece, but you can only connect it at the logical sides.
             <br>
@@ -1039,7 +1038,7 @@ display: block;
   größeAnpassenX.max = window.innerWidth
   größeAnpassenY.max = window.innerHeight
   var canvas = textur.getContext('2d');
-  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('You have apparently never played this game before. You can play the individual parts of the tutorial (not all parts available due to setting options) directly while playing your first puzzle in the order that suits you ("Show controls")! If you click on "OK" or similar, you will be taken to the complete tutorial for the "traditional" mode, if you click on "Cancel" or similar, you can play your puzzle. You can also access the tutorials for the respective game mode in the settings.')) {
+  if (localStorage.getItem('tutorialAskedPuzzleCreatortraditional') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorexchange') != "true" && localStorage.getItem('tutorialAskedPuzzleCreatorschieben') != "true" && confirm('You have apparently never played this game before. You can play the individual parts of the tutorial (not all parts available because of options that cant be changed after the creation of the puzzle) directly while playing your first puzzle in the order that suits you ("Show controls")! If you click on "OK" or similar, you will be taken to the complete tutorial for the "jigsaw" mode, if you click on "Cancel" or similar, you can play your puzzle. You can also access the tutorials for the respective game mode in the settings.')) {
     setTimeout(() => {
       setupTutorial();
     }, 100);
