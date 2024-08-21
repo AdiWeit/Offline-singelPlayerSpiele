@@ -1637,7 +1637,7 @@ function drawTileGrid(doNotDrawPicture) {
       // canvas.fillStyle = "blue";
       // canvas.fillRect(visualViewport.pageLeft - texturLeft, visualViewport.pageTop + state.upScroll - texturTop, visualViewport.width, 10);
   // up
-  if ((((modeSelection.value == "traditional" && positions.wrong[selected.tiles[0]]?.edit.y - lengthPerTeil.edit.y/2 < visualViewport.pageTop + state.upScroll - texturTop && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
+  if ((((modeSelection.value == "traditional" && mausy - visualViewport.pageTop - state.upScroll < 10 && mausy > 0 && selected.tiles.length) || (((modeSelection.value == "exchange" && selected.boolean.swipe) || (modeSelection.value == "schieben" && state.mouse == "down")) && mausy - scrollY < 30)))/* || (mausy - scrollY*2 < 160 && gerät == "Handy")*/) {
     // window.scroll(scrollX, scrollY - 3);
     // mausy -= 3;
     fAutoScroll({x: 0, y: -3});
@@ -1648,7 +1648,7 @@ if (modeSelection.value == "traditional" && mirrorInput.checked && originalMausX
       // window.scroll(scrollX + 3, scrollY);
       fAutoScroll({x: 3, y: 0}, true);
 }
-if (!mirrorInput.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && positions.wrong[selected.tiles[0]].edit.x + lengthPerTeil.edit.x/2 > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
+if (!mirrorInput.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && mausx > visualViewport.pageLeft + window.visualViewport.width + state.rightScroll - 170/* + scrollX*/) || (modeSelection.value != "traditional" && mausx + texturLeft > visualViewport.pageLeft + window.visualViewport.width  - 50))) && (modeSelection.value !=
       "traditional" || (state.mouse == "down" && modeSelection.value == "traditional")))) {
         // window.scroll(scrollX + 3, scrollY);
         // mausx += 3;
@@ -1669,7 +1669,7 @@ var pScrollY = scrollY;
 if (shuffleStyle.value == "listTiles") pScrollY -= tileSelectionCanvas.getBoundingClientRect().height;// lengthPerTeil.edit.y - 10;
 var ptexturTop = textur.getBoundingClientRect().top - visualViewport.offsetTop; 
 if (ptexturTop < 0) ptexturTop = 0;
-if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && ((positions.wrong[selected.tiles[0]].edit.y > visualViewport.pageTop + window.visualViewport.height + state.upScroll - ptexturTop - texturTop) || (['inline', ''].includes(tileSelectionCanvas.style.display) && positions.wrong[selected.tiles[0]].edit.y > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - texturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
+if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.tiles.length && ((mausy > visualViewport.pageTop + window.visualViewport.height + state.upScroll - 170) || (['inline', ''].includes(tileSelectionCanvas.style.display) && positions.wrong[selected.tiles[0]].edit.y > tileSelectionCanvas.getBoundingClientRect().top + scrollY + state.upScroll - texturTop /* + pScrollY - texturTop*/))) || (modeSelection.value != "traditional" && mausy + texturTop > visualViewport.pageTop + window.visualViewport.height  - 70))) && (selected.boolean.swipe || modeSelection.value != "exchange") && state.mouse == "down")) {
   // window.scroll(scrollX, scrollY + 3);
   // mausy += 3;
   fAutoScroll({x: 0, y: +3});
@@ -1678,6 +1678,7 @@ if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.
 }, 10);
   }
   function fAutoScroll(direction, mirrored) {
+    if (!keepScrolling.checked) return;
     pcScrolls = true;
     if (tutorial.state == "automaticScrollingTutorial" && state.scrollY != scrollY) goTutorialSteps(1);
     state.scrollY = scrollY;
