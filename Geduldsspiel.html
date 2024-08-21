@@ -1571,6 +1571,9 @@ var recursionCounter = 0;
     function folgenDbgetHighscores() {
       if (localStorage.getItem('geduldsspielHighscores')) highscores = JSON.parse(localStorage.getItem('geduldsspielHighscores'));
       if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
+      if (highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][true] && highscores.normal[joyStickPlay.checked][true][Object.keys(level.normal.easyMaps).length] != undefined) {
+        easyMaps.checked = false;
+      }
       showLevels();
       if (highscores.normal[joyStickPlay.checked][easyMaps.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked])[Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked]).length - 1]) + 1) + '. map';
       if (courceSelection.value == "") courceSelection.value = "1. map";
