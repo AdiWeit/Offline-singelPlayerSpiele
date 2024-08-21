@@ -2290,7 +2290,7 @@ function detectDeviceOrientation(event) {
           selected.obj.middle = calculateMiddle('circle', selected.obj); 
           selected.obj.path = calculatePath('circle', selected.obj);
         }
-        if (state.type.includes("move")) {
+        if (selected.obj && (state.type == "moveDone" || (state.type == "move" && collides({x: selected.obj.hitbox.x - 30, y: selected.obj.hitbox.y - 30, width: selected.obj.hitbox.width + 60, height: selected.obj.hitbox.height + 60}, {x: mausx, y: mausy, width: 1, height: 1})))) {
           selected.obj.x += mausx - state.x;
           selected.obj.y += mausy - state.y;
           state = {x: mausx, y: mausy, type: "moveDone"};
@@ -2331,6 +2331,21 @@ function detectDeviceOrientation(event) {
     }
     function folgenMouseUp() {
       // addRectangle.style.backgroundColor = "";
+      if (state.type == "triangle") {
+        obj = selected.obj
+        if (obj.width < 0) {
+          obj.x += obj.width;
+          obj.width *= -1;
+        }
+        if (obj.height < 0) {
+          obj.y += obj.height;
+          obj.height *= -1;
+          obj.direction = (obj.direction + 2) % 3
+        }
+        selected.obj.hitbox = calculateHitbox('triangle', selected.obj); 
+        selected.obj.middle = calculateMiddle('triangle', selected.obj); 
+        selected.obj.path = calculatePath('triangle', selected.obj);
+      }
       state = {}
       enableScroll();
     }
@@ -2359,15 +2374,12 @@ function detectDeviceOrientation(event) {
     document.addEventListener('touchstart', touch);
     document.addEventListener('touchend', touch);
     var joyStick;
+    var fingersUsed = 0;
   function touch(ev) {
     if (joyStickPlay.checked && ev.type == "touchend" && joyStick.coordinates) {
       //textur.style.touchAction = '';
       mausx = joyStick.coordinates.x;
       mausy = joyStick.coordinates.y;
-    }
-    if (ev.type == "touchend" && (state.type != "move")) {
-      folgenMouseUp();
-      delete selected.obj;
     }
     if (ev.touches[0] != undefined) {
         mausx = ev.touches[0]["pageX"]// + scrollX;
@@ -2381,6 +2393,14 @@ function detectDeviceOrientation(event) {
     }
     if (ev.type == "touchstart") {
       folgenMouseDown();
+    }
+    if (ev.type == "touchmove") {
+      folgenMouseMove();
+      fingersUsed = ev.touches.length;
+    }
+    if (ev.type == "touchend" && state.type != "move" && collides({x: mausx, y: mausy, width: 1, height: 1}, {x: 0, y: 0, width: textur.width, height: textur.height}) && fingersUsed == 1) {
+      folgenMouseUp();
+      delete selected.obj;
     }
   }
   function cssToNumber(string) {
