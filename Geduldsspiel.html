@@ -303,6 +303,7 @@ input[class='custom_small_slider']::-webkit-slider-thumb {
     <select style="font-size: 50px;" id="checkpointSelection" onchange="checkpointSelected(value);"></select>
     <button onclick="deleteCheckpoint();" style="font-size: 50px;">delete latest checkpoint</button>
     <br>
+    <input style="width: 50px; height: 50px;" id="ignoreCheckpoints" type="checkbox"> <a style="font-size: 50px;">ignore checkpoints (for better playing flow)</a>
   </div>
   <div id="oldMapCreatorPosition"></div>
   <div id="randomMapCreatorVisableA"><input type="checkbox" style="width: 50px; height: 50px" id="randomMapCreatorVisable" onchange="mapCreatorVisChanged(checked);"> 
@@ -1603,7 +1604,10 @@ var recursionCounter = 0;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       rotationStartTime = rotationTime;
       stopClockText.style.color = "green";
-      goToCheckpoint();
+      time = 0;
+      if (!ignoreCheckpoints.checked) {
+        goToCheckpoint();
+      }
     }
     function difficultyChanged(pEasyMaps, doNotSelectCource) {
       if (pEasyMaps) level.normal.levelType = 'easyMaps';
