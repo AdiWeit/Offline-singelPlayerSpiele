@@ -1730,7 +1730,12 @@ var recursionCounter = 0;
        }
       }
       screen.orientation.onchange = (event) => {
-        inOrAgainstDirection *= -1;
+        var sensitivityTemp = sensitivityAcc;
+        sensitivityAcc = {x: 50, y: 50};
+        calibrate(true);
+        setTimeout(() => {
+          sensitivityAcc = sensitivityTemp;
+        }, 755);
       }
       function goToCheckpoint() {
         if (checkpoint) {
