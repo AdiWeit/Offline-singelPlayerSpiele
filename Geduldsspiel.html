@@ -430,9 +430,12 @@ function requestMotionControlPermission() {
     if (levelCheckpoints.length > 1 && confirm('Are you sure you want to delete the latest checkpoint (' + (levelCheckpoints.length - 1) + '.) ?')) {
       levelCheckpoints.pop();
       document.getElementById('checkpointSelection').options[levelCheckpoints.length] = undefined;
-      if (!levelCheckpoints[level.checkpoint]) {
-        level.checkpoint--;
+      document.getElementById('checkpointSelection').value = (levelCheckpoints.length - 1) + ". checkpoint"
+      if (levelCheckpoints.length == 1) {
         checkpointManagement.style.display = "none";
+      }
+      else {
+        level.checkpoint--;
       }
       checkpoint = levelCheckpoints[level.checkpoint];
       localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
