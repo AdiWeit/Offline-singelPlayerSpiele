@@ -1697,7 +1697,9 @@ var recursionCounter = 0;
       if (level.type != "showScores" && currentLevel != undefined) {
       x1 = currentLevel.spawnPoint.x;
       y1 = currentLevel.spawnPoint.y;
-      goToCheckpoint();
+      setTimeout(() => {
+        goToCheckpoint();
+      }, 500);
     }
     if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
       Bild = new Image();
