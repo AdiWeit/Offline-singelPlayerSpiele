@@ -7,7 +7,7 @@
 
 <head>
   <div id="deviceMotionControlRequestDiv" style="width: 200%; height: 200%; position: absolute; background-color: rgba(128, 128, 128, 0.389);  display: none;">
-    <button onclick="requestMotionControlPermission()" style="font-size: 10em; width: 100%; height: 100%; position: fixed; z-index: 2;" >configure device motion controls</button>
+    <button onclick="requestMotionControlPermission()" style="font-size: 10em; width: 100%; height: 100%; position: fixed; z-index: 2;" >allow device motion controls</button>
   </div>
   <title>game of patience (Chinese puzzle)</title>
   <div>
@@ -949,7 +949,7 @@ function requestMotionControlPermission() {
           levelNr: 21
         },
         22: {
-          levelNr: 22
+          levelNr: 22,
         },
         23: {
           cannons: [
@@ -1179,7 +1179,7 @@ function requestMotionControlPermission() {
   }
   function exportLevel() {
     var level = {objects: objects, rotatingObj: rotatingObj, goalHitbox: goalHitbox, spawnPoint: checkpoint.position, width: textur.width, height: textur.height, ballWidth: sphere1.style.width, ballHeight: sphere1.style.height};
-    download(prompt("Wie soll die Datei heißen?") + '.json', JSON.stringify(level));
+    download(prompt("Please enter a name for the file") + '.json', JSON.stringify(level));
   }
   function importLevel(files) {
     var file = files.files[0]
@@ -1518,15 +1518,8 @@ var recursionCounter = 0;
         if (!wall.changing) wall.changing = wall.start;
       }
     }
-    var calibratedDirection = 1;
-    if ([null, "undefined", "null"].includes(localStorage.getItem("calibratedDirection")) && gerät == "Handy") {
-      calibrate();
-    }
-    else {
-      calibratedDirection = Number(localStorage.getItem("calibratedDirection"));
-    }
     if ([0, 180].includes(window.orientation)) {
-      if (confirm('Please hold your device horizontally (in landscape mode) to start playing. If you have trouble with the detection of the screen orientation, you can click on "cancel". Otherwise please change the orientation and click on "OK')) {
+      if (confirm('Please hold your device horizontally (in landscape mode) to start playing. If you have trouble with the detection of the screen orientation or you want to play the game in portrait mode (although this is not recommended), you can click on "cancel". Otherwise please change the orientation and click on "OK')) {
         window.location.reload()
       }
     }
@@ -1548,7 +1541,7 @@ var recursionCounter = 0;
       calibrating = true;
     }
     function showGameInstructions() {
-      alert("The browser Chrome is recommended. If you are using an apple device and want to play with motion control, it might be needed to switch to Safari though. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
+      alert('The browser Chrome is recommended. If you are using an apple device and want to play with motion control, it might be needed to switch to Safari though. Also, you may have to "request mobile website" on Safari. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen or pressing p will pause the game. ');
       localStorage.setItem("gameInstructionsGeduldspiel", true);
       if (gerät == "Handy") startTutorial();
     }
@@ -1652,8 +1645,8 @@ var recursionCounter = 0;
             wall.changing = wall.start;
           }
         }
-        else if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
-          alert('every level finished! That was the last one :(  If you can not get enough of this game you can try out the random level creator, increase the sensitivity or check out the game "transport the ball", which is pretty similar but a bit more complicated and difficult. ');
+        if (level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
+          alert('This is the last level :(  If you can not get enough of this game you can try out the random level creator, increase the sensitivity or check out the game "transport the ball", which is pretty similar but a bit more complicated and difficult. ');
           if (easyMaps.checked) {
             alert('But first, you can try to beat the hard version of the levels now, if you did not do so already! Just uncheck "easy level versions". ');
             difficultyChanged(false, true);
@@ -1927,7 +1920,7 @@ var recursionCounter = 0;
       y1 = 0;
       courceSelection.options[level.normal.number - 1].innerHTML = "✅ " +  level.normal.number + ". map";
       if (document.getElementById('courceSelection').value == "" && level[level.mode].number > Object.keys(level[level.mode].vorgefertigt).length) {
-        alert("every level finished! That was the last one :(  )");
+        alert("That was the last level :(");
       }
       if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
         if (sensitivityAcc.x == currentLevel.sensitivity) {
@@ -1953,6 +1946,17 @@ var recursionCounter = 0;
     x1 = currentLevel.spawnPoint.x;
     y1 = currentLevel.spawnPoint.y;
   }
+  }
+var calibratedDirection = 1;
+if ([null, "undefined", "null"].includes(localStorage.getItem("calibratedDirection")) && gerät == "Handy") {
+  setTimeout(() => {
+    calibrate();
+  }, 1000);
+}
+else {
+  calibratedDirection = Number(localStorage.getItem("calibratedDirection"));
+  if (!localStorage.getItem('gameInstructionsGeduldspiel')) showGameInstructions();
+}
 // "tutorial"
 var tutorial = false;
 function startTutorial() {
@@ -2168,7 +2172,7 @@ function detectDeviceOrientation(event) {
         vy2 = -vy2;
       }
     }
-
+    var deathMarkers = [];
     function Layout(calledByRotateLoop) {
       if (!randomMapCreatorVisable.checked) {
         // if (["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) {
@@ -2300,14 +2304,14 @@ function detectDeviceOrientation(event) {
       state = {}
     }
 
-    var f = function() {
-      var eventHandler = function(event) {
-        //  console.log(window.scrollX + " - " + window.scrollY);
-        console.log("scroll - " + scrollY);
-      };
-      window.addEventListener('scroll', eventHandler, false)
-    };
-    window.addEventListener('DOMContentLoaded', f, false)
+    // var f = function() {
+    //   var eventHandler = function(event) {
+    //     //  console.log(window.scrollX + " - " + window.scrollY);
+    //     console.log("scroll - " + scrollY);
+    //   };
+    //   window.addEventListener('scroll', eventHandler, false)
+    // };
+    // window.addEventListener('DOMContentLoaded', f, false)
 
     function visible(list) {
       for (var i = 0; i < list.length; i++) {
