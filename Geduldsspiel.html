@@ -1179,7 +1179,7 @@ function requestMotionControlPermission() {
     }
   }
   function exportLevel() {
-    var level = {objects: objects, rotatingObj: rotatingObj, goalHitbox: goalHitbox, spawnPoint: checkpoint.position, width: textur.width, height: textur.height, ballWidth: sphere1.style.width, ballHeight: sphere1.style.height};
+    var level = {objects: objects, rotatingObj: rotatingObj, rotatingProp: currentLevel.rotating, goalHitbox: goalHitbox, spawnPoint: checkpoint.position, width: textur.width, height: textur.height, ballWidth: sphere1.style.width, ballHeight: sphere1.style.height};
     download(prompt("Please enter a name for the file") + '.json', JSON.stringify(level));
   }
   function importLevel(files) {
@@ -1189,11 +1189,16 @@ function requestMotionControlPermission() {
       level = JSON.parse(reader.result);
       objects = level.objects;
       rotatingObj = level.rotatingObj;
+      currentLevel.rotating = level.rotatingProp;
       for (const objType of Object.keys(objects)) {
         for (const obj of objects[objType]) {
           if (obj.path) obj.path = createPath(obj.path.data.points, true, obj.path.data.middle);
         }
       }
+      for (const obj of currentLevel.rotating) {
+          if (obj.path) obj.path = createPath(obj.path.data.points, true, obj.path.data.middle);
+      }
+      requestAnimationFrame(renderLoop)
       goalHitbox = level.goalHitbox;
       checkpoint.position = level.spawnPoint;
       textur.width = level.width;
