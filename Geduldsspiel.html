@@ -76,30 +76,40 @@
       <button id="rotateLeft" onclick="rotateObj(-1);">↶</button>
       <button id="rotateRight" onclick="rotateObj(1);">↷</button>
     </div>
-    <div style="display: none;" id="rectangeSizeSetting">
-      <div class="form">
+    <div style="display: none;" id="objSizeSetting">
+      <!-- TODO: ausgewählte slider (oninput beachtet Klicken nicht) sticky, sodass er unten im Screen bleibt -->
+      width <input type="range" id="elmWidth" class="custom_small_slider" oninput="changeObjSize('width', value);" min="5"> 
+      <!-- <div class="form">
         <input type="number" placeholder=" " style="width: 94px;" class="form_input" value="747" oninput="selected.obj.width = Number(value); selected.obj.hitbox = calculateHitbox('rectangle', selected.obj); selected.obj.middle = calculateMiddle('rectangle', selected.obj); selected.obj.path = calculatePath('rectangle', selected.obj); " id="elmWidth" min="0">
         <label for="input" class="form_label" onclick="selectTextBox(this);">width</label>
-      </div>
-      <div class="form">
+      </div> -->
+      height <input type="range" id="elmHeight" class="custom_small_slider" oninput="changeObjSize('height', value)" min="5">
+      <!-- <div class="form">
         <input type="number" placeholder=" " style="width: 94px;" class="form_input" value="747" oninput="selected.obj.height = Number(value); selected.obj.hitbox = calculateHitbox('rectangle', selected.obj); selected.obj.middle = calculateMiddle('rectangle', selected.obj); selected.obj.path = calculatePath('rectangle', selected.obj);" id="elmHeight" min="0">
         <label for="input" class="form_label" onclick="selectTextBox(this);">height</label>
-      </div>
+      </div> -->
     </div>
       <br>
       <div id="elmRadius" class="form" style="display: none;">
-        <input type="number" placeholder=" " id="inputRadius" oninput="selected.obj.radius = Number(value); selected.obj.hitbox = calculateHitbox('circle', selected.obj);" style="width: 94px;" class="form_input" value="747" onchange="handleMaxSizeSlider();" min="0">
-        <label for="input" class="form_label" onclick="selectTextBox(this);">radius</label>
+        radius <input type="range" id="inputRadius" class="custom_small_slider" oninput="selected.obj.radius = Number(value); selected.obj.hitbox = calculateHitbox('circle', selected.obj);" min="5">
+        <!-- <input type="number" placeholder=" " id="inputRadius" oninput="selected.obj.radius = Number(value); selected.obj.hitbox = calculateHitbox('circle', selected.obj);" style="width: 94px;" class="form_input" value="747" onchange="handleMaxSizeSlider();" min="0">
+        <label for="input" class="form_label" onclick="selectTextBox(this);">radius</label> -->
       </div>
     <a id="rotateTileA" style="display: none;"><input id="rotateTile" onchange="if (selected.type != 'circles') changeIfRotates(checked);" type="checkbox"> rotate tile</a>
     <div id="rotateSettings" class="card" style="display: none;">
       <b>rotation settings</b>
       <br>
-      <input min="1000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" style="width: 66px;" type="number"> Mili Sec. per rotation
+      rotation speed 
       <br>
-      scale in relation to the original object (1 = 100%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number">
+      <input min="1000" max="60000" id="miliSecPerRotationNumber" oninput="changeRotateParam('miliSecsPerRotation', parseInt(value));" value="10000" type="range" class="custom_small_slider">
+      <!-- <br> -->
+      <!-- TODO: reaktivieren bei Objekten bestehend aus Punkten -->
+      <a style="display: none;">scale in relation to the original object (1 = 100%): <input oninput="changeRotateParam('sizeRelationToOriginal', parseFloat(value));" value="1" step="0.01" id="rotatingRandomObjScale" type="number"></a>
+      <!-- <br> -->
+      starting angle: 
       <br>
-      starting angle: <input oninput="changeRotateParam('angle', parseInt(value));" value="0" id="rotatingRandomObjStartingAngle" type="number">
+      <!-- TODO: reset and pause level for a short time -->
+      <input oninput="changeRotateParam('angle', parseInt(value));" class="custom_small_slider" min="0" max="360" value="0" id="rotatingRandomObjStartingAngle" type="range">
     </div>
   </div>
   <div class="card">
@@ -203,16 +213,22 @@
   <button style="font-size: 50px;" onclick="restartLevel();">kill (respawn at last checkpoint or start)</button>
   <h2 style="font-size: 50px;">sensitivity: </h2>
   <style>
-    input[id='sensitivity'] {
+    input[class='custom_slider'] {
     /* Override the default appearance */
     -webkit-appearance: none;
     appearance: none;
     width: 100%; /* Full-width */
     height: 150px; /* Specified height */
+    }
+    input[class='custom_small_slider'] {
+    /* Override the default appearance */
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%; /* Full-width */
+    height: 50px; /* Specified height */
+    }
 
-}
-
-input[id='sensitivity']::-webkit-slider-runnable-track {
+input[class='custom_slider']::-webkit-slider-runnable-track {
     width: 90%;
     height: 150px;
     cursor: pointer;
@@ -221,8 +237,25 @@ input[id='sensitivity']::-webkit-slider-runnable-track {
     border: 0.2px solid #010101;
 }
 
-input[id='sensitivity']::-webkit-slider-thumb {
+input[class='custom_slider']::-webkit-slider-thumb {
     height: 150px;
+    width: 100px;
+    /* border-radius: 50%; */
+    background: #0000FF;
+    cursor: pointer;
+    -webkit-appearance: none;
+    margin-top: 0px; /* You need to specify a margin for Chrome, but we want to set it to 0 */
+  }
+  input[class='custom_small_slider']::-webkit-slider-runnable-track {
+    height: 50px;
+    cursor: pointer;
+    background: #d3d3d3;
+    border-radius: 1.3px;
+    border: 0.2px solid #010101;
+}
+
+input[class='custom_small_slider']::-webkit-slider-thumb {
+    height: 50px;
     width: 100px;
     /* border-radius: 50%; */
     background: #0000FF;
@@ -232,7 +265,7 @@ input[id='sensitivity']::-webkit-slider-thumb {
   }
   
   </style>
-  <input style="height: 50px;" type="range" min="1" onchange="sensitivity(document.getElementById('sensitivity').value)" max="25" value="5" class="slider" id="sensitivity">
+  <input style="height: 50px;" type="range" min="1" onchange="sensitivity(document.getElementById('sensitivity').value)" max="25" value="5" class="custom_slider" id="sensitivity">
   <br>
   <br>
   <br>
@@ -460,6 +493,8 @@ function requestMotionControlPermission() {
     selected.obj.width = selected.obj.height;
     selected.obj.height = oldWidth;
     selected.obj.path = calculatePath('triangle', selected.obj);
+    elmWidth.value = selected.obj.width;
+    elmHeight.value = selected.obj.height;
   }
     var canvas = textur.getContext('2d'); //Dimension
     console.log(window.innerWidth + " - " + window.innerHeight);
@@ -1076,6 +1111,16 @@ function requestMotionControlPermission() {
         courceSelection.style.display = "inline";
       }
   }
+  function changeObjSize(sizeType, value) {
+    selected.obj[sizeType] = Number(value); 
+    selected.obj.hitbox = calculateHitbox(selected.type, selected.obj); 
+    selected.obj.middle = calculateMiddle(selected.type, selected.obj); 
+    selected.obj.path = calculatePath(selected.type, selected.obj);
+    if (rotateTile.checked) {
+      changeIfRotates(false);
+      changeIfRotates(true);
+    }
+  }
   function changeIfRotates(checked) {
     if (checked) {
       if (!selected.obj.rotated) showPresetRotationSettings();
@@ -1356,20 +1401,19 @@ var recursionCounter = 0;
             rotateTile.checked = false;
             if (objType == "circles") {
               elmRadius.style.display = "inline";
+              inputRadius.max = Math.max(canvasWidth.value/2, canvasHeight.value/2);
               inputRadius.value = obj.radius;
-              rectangeSizeSetting.style.display = "none";
+              objSizeSetting.style.display = "none";
               rotateElement.style.display = "none";
             }
             else {
               rotateElement.style.display = "block";
-              // TODO: gleiche für Dreieck?
-              rectangeSizeSetting.style.display = "none";
+              objSizeSetting.style.display = "inline";
               elmRadius.style.display = "none";
-              if (objType == 'rectangles') {
-                rectangeSizeSetting.style.display = "inline";
+                elmWidth.max = canvasWidth.value;
                 elmWidth.value = obj.width;
+                elmHeight.max = canvasHeight.value;
                 elmHeight.value = obj.height;
-              }
             }
 
           }
