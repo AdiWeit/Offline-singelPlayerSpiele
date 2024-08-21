@@ -801,6 +801,8 @@ display: block;
         </div>
       </div>
     </div>
+    <!-- TODO: Info-Nachricht: ab ca. 24x24 kann es laggen -->
+    <!-- TODO: tile list optimieren (Teile bewegen laggy) mit weniger Teilen als sonst-->
     <!-- Handy -->
     <div id="traditionalTutorialHandy" style="display: none;">
       <div class="card cardGeneral section" id="moveTutorial">
@@ -827,7 +829,7 @@ display: block;
         </div>
         <div class="card cardGeneral section" id="disconnectTiles">
           <h3>Disconnect tiles</h3>
-          <button id="contineTutorialUnclippMobile" onclick="goToTutorialIndex(this);">start here or continue</button>
+          <button id="contineTutorialUnclippMobile" onclick="goToTutorialIndex(this);">start or continue from here</button>
           <div class="card cardGeneral">
             <b style="font-size: 15px;">General note</b>
             <br>
@@ -1558,7 +1560,6 @@ function drawTileGrid(doNotDrawPicture) {
         imageSettings.style.display = "none";
         modeSelection.style.display = "none";
         schiebenSettings.style.display = "none";
-        rotateTilesP.style.display = "none";
         missing = [];
         if (gerät == "Handy") mobileControls.style.display = "inline";
         originalSize.width = preview.width;
@@ -1828,9 +1829,7 @@ if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.
     aufgebenId.style.display = "inline";
   showOriginalP.style.display = 'inline';
   showTutorialB.style.display = "inline"
-  shuffleStyle.style.display = 'none';
   tileStatusOptions.style.display = 'none';
-  shuffleStyleLable.style.display = 'none';
   if (modeSelection.value == "schieben") turnsHistoryS.style.display = 'inline';
   // expand textur buttons
   if (modeSelection.value == "traditional") { 
@@ -1924,6 +1923,7 @@ if (!scrollable.checked && ((((modeSelection.value == "traditional" && selected.
       scrollTileSelection(-1);
     }
   }, 100);
+  puzzleCreationSettings.style.display = "none";
 }
 function setDefaultSelectionBarHeight() {
   var pTileBarHeight = lengthPerTeil.edit.y + 10;
@@ -2192,7 +2192,7 @@ function canvasClicked(calledBy) {
     if (!cancelLoading && sourceIsPicture.checked) loadImage();
     fileName = input.files[0].name;
     setTimeout(() => {
-      if (state.waitForPictureSelection) startTutorial();
+      if (state.waitForPictureSelection && !sourceIsVideo.checked) startTutorial();
       editCanvasDiv.insertBefore(textur, videoControls)
     }, 1111);
   }
@@ -2261,6 +2261,7 @@ function canvasClicked(calledBy) {
     loadPuzzle();
     selectSourceHeader.style.color = "green";
     createPuzzleButton.style.backgroundColor = "green";
+    if (state.waitForPictureSelection) startTutorial();
     // TODO: kann weg? (KA wofür)
     // loadImage(video.videoWidth, video.videoHeight);
   }, false);
@@ -2673,14 +2674,15 @@ var puzzles = {};
         if (showRemovedTiles.checked) drawPictureSegment(position, position, removeTilesScreen, null, null, null, 0.5);
       }
     }
+    var i;
     for (var i1 = 0; i1 < positions.wrong?.length; i1++) {
-      var i = i1;
+      i = i1;
       if (modeSelection.value == "traditional" && !state.removeTile) i = positions.layoutOrder[i1];
       if (!tileSelectionBar.tiles.includes(i)) drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i);
     }
     for (var i1 = 0; i1 < tileSelectionBar.tiles.length; i1++) {
-      var i = tileSelectionBar.tiles[i1];
-      drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas, i1);
+     i = tileSelectionBar.tiles[i1];
+     drawPictureSegment(positions.wrong[i], positions.right[i], removeTilesScreen, i, tileSelectionBar.canvas, i1);
     }
     showClippingOptions();
     showSelected();
@@ -3053,7 +3055,9 @@ var puzzles = {};
       selected.position = {x: mausx, y: mausy};
       selected.position.manualScrolling = false;
     }
-    if (gerät != "Handy") originalMausX = e.clientX;
+    if (gerät != "Handy") {
+      originalMausX = e.clientX;
+    }
     if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width) - mausx; // - scrollX;
     // /*96*/32// - 43;
     // if (scrollY > 32) mausy += 32;
@@ -3094,7 +3098,9 @@ var puzzles = {};
       mausy = ev.touches[0]["pageY"] - texturTop + state.upScroll;// - 32;
       if (mirrorInput.checked && (shuffleStyle.value != "listTiles" || !tileSelectionBar.collidesMouse())) mausx = (textur.width + scrollX) - mausx;
       // TODO: if statement needed?
-      if (tileSelectionBar.collidesMouse() || gerät == "Handy") originalMausX = ev.touches[0]["pageX"];
+      if (tileSelectionBar.collidesMouse() || gerät == "Handy") {
+        originalMausX = ev.touches[0]["pageX"];
+      }
     }
     if (!scrollable.checked) {
     if (ev.type == "touchstart" && !ev.touches[2] && !collides({x: mausx, y: mausy + texturTop, width: 1, height: 1}, selectBackToBarB.getBoundingClientRect()).boolean) {
@@ -3474,7 +3480,7 @@ var trackActivity = {mouseDown: {position: {x: 0, y: 0}}, unclipp: {counter: 0, 
       new Audio('https://adi.nicolaiweitkemper.de/Sounds/helpTheTrain/weiche.mp3').play();
       console.log("clipping...");
       if ((["clipTileTutorial", "clipTileMobileTutorial"].includes(tutorial.state)) || (tutorial.state == "clippSecondTutorial" && getConnectedTiles(selected.tiles[0], true).length >= 4) || (tutorial.state == "clippSecondMobileTutorial" && getConnectedTiles(selected.tiles[0], true).length >= 5)) {
-        if (!tutorial.state.includes('Mobile') && !state.helpTutorial) automaticTileSelectionReset.checked = false;
+        if (!tutorial.state.includes('Mobile') && !state.helpTutorial && tutorial.state != "clipTileTutorial") automaticTileSelectionReset.checked = false;
         goTutorialSteps(1);
       }
       stats.turns++;
@@ -4068,7 +4074,7 @@ function getSectionElm(elm) {
   return elm;
 }
 function setupTutorial() {
-  sourceURL.value = "https://adi.nicolaiweitkemper.de/Bilder/puzzleCreatorLogo.png";
+  sourceURL.value = "https://adi.nicolaiweitkemper.de/Bilder/puzzleCreator/puzzleCreatorLogo.jpeg";
   if (!offline && !confirm('Do you want to play the tutorial with your own media? If so, please click on"OK". Otherwise, click on "cancel"')) {
     useURL();
     setTimeout(() => {
@@ -4079,7 +4085,6 @@ function setupTutorial() {
         alert('Please upload an image or a video from this device (for example select "file (photo or video)") in order to start the tutorial with the image.');
         state.waitForPictureSelection = true;
       }
-      }, 777);
   }
   var tutorialSteps = [];
   function showUnclippTutorial() {
