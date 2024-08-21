@@ -1533,7 +1533,7 @@ function drawTileGrid(doNotDrawPicture) {
     function create() {
       videoControlsInSettings.appendChild(videoControls);
       puzzleManager.style.display = "block";
-    if (document.getElementById('preview').src == '' && video.src == '' && !pMediaStream && URLInfo.style.display == "none") alert('Please upload a picture or a video before you click on this button to create a puzzle!') 
+    if ((document.getElementById('preview').src == '' && video.src == '' && !pMediaStream && URLInfo.style.display == "none") || createPuzzleButton.style.backgroundColor == "red") alert('Please upload a picture or a video before you click on this button to create a puzzle!') 
     else if (!state.removeTile) {
       if (tutorial.state == "" && localStorage.getItem('tutorialAskedPuzzleCreator' + modeSelection.value) != "true" && confirm('You have apparently never played this game mode before. Do you want to play the tutorial as an introduction? Alternatively, you can play the individual parts of the tutorial (not all parts available due to setting options) directly while playing your first puzzle in this mode in the order that suits your needs ("Show controls")! If you click on "OK" or similar, you will be taken to the complete tutorial for the mode ' + modeSelection.value + ', if you click on "Cancel" or similar, you can play your own puzzle.')) {
         setupTutorial();
