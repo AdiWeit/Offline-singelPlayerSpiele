@@ -175,9 +175,9 @@
   <h2 id="modeHeadline">mode: </h2>
   <div id="modeDiv" class="card cardGeneral">
   <select onchange="modeSelected(value);" id="modeSelection">
-    <option value="traditional">traditionel</option>
-    <option value="exchange">exchange</option>
+    <option value="traditional">jigsaw</option>
     <option value="schieben">sliding</option>
+    <option value="exchange">exchange</option>
   </select>
   <br>
   <p id="traditionalDescription">The pieces are spread out. It is your task to put them back together to form the image/video you put in! 
@@ -199,6 +199,54 @@
   <div id="futureModeSettingsHeader"></div>
   <div class="card cardGeneral" id="traditionalSettings">
     <b style="font-size: 25px;" id="modeSettingsHeading">mode specific settings: <br> </b>
+    <div style="font-size: 250x;" id="puzzleCreationSettings" class="card cardGeneral">
+      <b>puzzle creation settings</b>
+      <p style="margin-bottom: 6px;" id="rotateTilesP">
+        <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'block';}" checked="true" type="checkbox"> rotate pieces randomly
+      </p>
+      <a id="shuffleStyleLable">
+        type of shuffling: 
+      </a>
+      <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
+        <option value="overlapTiles">spread pieces and let them overlap</option>
+        <option value="listTiles">list pieces next to each other (pieces list)</option>
+        <option value="nextToEachOther">put pieces next to each other with some distance</option>
+      </select>
+      <a id="shuffleHeadline" style="display: none;">
+        <br>
+        <br>
+        <b style="font-size: 25px;">settings for the shuffling of the pieces:</b>
+        <br>
+      </a>
+      <div style="display: none" class="card cardGeneral" id="EmptyTileBarDiv">
+        <br>
+        <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">start with empty list
+        <div style="display: none;" id="emptyTileBarSettings">
+          shuffle the pieces in the following way: 
+          <select onchange="emptyTileBarShuffleStyleSelected(value);" id="shuffleStyleBar">
+            <option value="overlapTiles">spread pieces and let them overlap</option>
+            <option value="nextToEachOther">put pieces next to each other with some distance</option>
+          </select>
+        </div>
+        <div id="emptyTilebarTileGap"></div>
+        <div id="tilesGapS" class="card cardGeneral" style="display: none;">
+          <br>
+          distance (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
+          <br>
+          <br>
+          <canvas id="gapCanvas"></canvas>
+          <br>
+          <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> fill screen
+          <br>
+          <a style="display: none" id="aScrollXTileGap">
+            <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> tiles next to each other
+            <br>
+          </a>
+        </div>
+        <br>
+      </div>
+      <div id="shuffleStyleTileGap"></div>
+    </div>
     <br>
     <input id="clipOptionsSound" checked="true" type="checkbox"> acoustic feedback (play audio when an new option to connect puzzle peaces is suggested)
     <a id="vibrateA">
@@ -206,55 +254,10 @@
       <input id="vibrate" type="checkbox"> haptic Feedback (vibrate when an new option to connect puzzle peaces is suggested)
     </a>
     <br>
-    <input id="automaticTileSelectionReset" onclick=" tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> drag and drop control (release pieces when mouse button is released; <b>"alternative"</b>)
+    <input id="automaticTileSelectionReset" onchange="console.err('debug!!');" onclick="tutorial.state = ''; document.onkeydown({key: 'F1', changeElement: true}); document.getElementById('tutorial').style.display = 'none'; localStorage.setItem('automaticTileSelectionResetPuzzleCreator', checked);" type="checkbox"> drag and drop control (release pieces when mouse button is released; <b>"alternative"</b>)
     <br>
-    <p style="margin-bottom: 6px;" id="rotateTilesP">
-    <input id="rotateTiles" onchange="if (checked) rotateTilesAdaptionSettings.style.display = 'none'; else {rotateTilesAdaptionSettings.style.display = 'block';}" checked="true" type="checkbox"> drehe Teile
-    </p>
     <input id="markWrong" style="accent-color: red;" type="checkbox" > mark wrong connection suggestions
-    <a id="shuffleStyleLable">
-      <br>
-      type of shuffling: 
-    </a>
-    <select onchange="shuffleStyleVisibilities(value);";  id="shuffleStyle">
-      <option value="overlapTiles">spread pieces and let them overlap</option>
-      <option value="listTiles">list pieces next to each other (pieces list)</option>
-      <option value="nextToEachOther">put pieces next to each other with some distance</option>
-    </select>
-    <a id="shuffleHeadline" style="display: none;">
-      <br>
-      <br>
-      <b style="font-size: 25px;">settings for the shuffling of the pieces:</b>
-      <br>
-    </a>
-    <div style="display: none" class="card cardGeneral" id="EmptyTileBarDiv">
-      <br>
-      <input id="emptyTileBar" onchange="if (checked) emptyTileBarSettings.style.display = 'block'; else emptyTileBarSettings.style.display = 'none'; emptyTileBarShuffleStyleSelected(shuffleStyleBar.value);" type="checkbox">start with empty list
-      <div style="display: none;" id="emptyTileBarSettings">
-        shuffle the pieces in the following way: 
-        <select onchange="emptyTileBarShuffleStyleSelected(value);" id="shuffleStyleBar">
-          <option value="overlapTiles">spread pieces and let them overlap</option>
-          <option value="nextToEachOther">put pieces next to each other with some distance</option>
-        </select>
-      </div>
-      <div id="emptyTilebarTileGap"></div>
-      <div id="tilesGapS" class="card cardGeneral" style="display: none;">
-        <br>
-        distance (in px): <input min="0" id="tilesGap" oninput="gapSizeChanged(value);" value="55" style="width: 55px;" type="number">
-        <br>
-        <br>
-        <canvas id="gapCanvas"></canvas>
-        <br>
-        <input id="fillScreenTileGap" onchange="if (checked) aScrollXTileGap.style.display = 'none'; else aScrollXTileGap.style.display = 'inline';" checked="true" type="checkbox"> fill screen
-        <br>
-        <a style="display: none" id="aScrollXTileGap">
-          <input id="tilesXTileGap" min="1" value="4" style="width: 55px;" type="number"> tiles next to each other
-          <br>
-        </a>
-      </div>
-      <br>
-    </div>
-    <div id="shuffleStyleTileGap"></div>
+    <br>
       <a id="hitboxCheckbox" style="display: none;"><input onchange="if (checked) tileColliderSettings.style.display = 'block'; else tileColliderSettings.style.display = 'none'; adaptExpandButtonPosition(); showHitboxes();" type="checkbox"> <b>show setting to edit hitboxes between pieces (to connect them)</b></a>
       <a id="tileColliderSettings" style="display: none;">
         <br>
