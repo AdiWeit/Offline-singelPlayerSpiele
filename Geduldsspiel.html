@@ -1268,8 +1268,8 @@ var recursionCounter = 0;
     }
   }
   function createTriangles(
-      width = Math.round(Math.random()*maxTriangleWidth.value), 
-      height = Math.round(Math.random()*maxTriangleHeight.value),
+      width = Math.round(Math.random()*(maxTriangleWidth.value - 15)) + 15, 
+      height = Math.round(Math.random()*(maxTriangleHeight.value - 15)) + 15,
       x = Math.round(Math.random()*(textur.width - width)), 
       y = Math.round(Math.random()*(textur.height - height)), 
       direction = Math.round(Math.random()*3),
@@ -1299,8 +1299,8 @@ var recursionCounter = 0;
     // }
   }
   function createRectangles(
-      width = Math.round(Math.random()*maxTriangleWidth.value), 
-      height = Math.round(Math.random()*maxTriangleHeight.value),
+      width = Math.round(Math.random()*(maxTriangleWidth.value - 10)) + 10, 
+      height = Math.round(Math.random()*(maxTriangleHeight.value - 10)) + 10,
       x = Math.round(Math.random()*maxTriangleWidth.value), 
       y = Math.round(Math.random()*(textur.height - height)), 
       manual
