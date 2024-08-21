@@ -162,10 +162,10 @@
       <b>blue ball:</b> 
       <br>
       width: 
-      <input id="ballWidthSlider" oninput="sphere1.style.width = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
+      <input id="ballWidthSlider" oninput="sphere1.style.width = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY; ballWidthText.innerHTML = value;" type="range" min="1" max="100"> <a id="ballWidthText">51</a>
       <br>
       height: 
-      <input id="ballHeightSlider" oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY;" type="range" min="1" max="100">
+      <input id="ballHeightSlider" oninput="sphere1.style.height = value + 'px'; y1 = ballSizeSettings.getBoundingClientRect().top + scrollY; ballHeightText.innerHTML = value;" type="range" min="1" max="100"> <a id="ballHeightText">51</a>
     </div>
   </div>
   <div class="card">
@@ -1204,6 +1204,8 @@ function requestMotionControlPermission() {
       sphere1.style.height = level.ballHeight;
       ballWidthSlider.value = level.ballWidth.replace('px', '');
       ballHeightSlider.value = level.ballHeight.replace('px', '');
+      ballWidthText.innerHTML = ballWidthSlider.value;
+      ballHeightText.innerHTML = ballHeightSlider.value;
     }, false)
     reader.readAsText(file);
   }
