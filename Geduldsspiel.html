@@ -1503,6 +1503,7 @@ var recursionCounter = 0;
     function showGameInstructions() {
       alert("The browser Chrome is recommended. If you are using an apple device and want to play with motion control, it might be needed to switch to Safari though. Hold your device flat like it is lying on a table and tilt it to move! Holding the device horizontally (in landscape mode) is recommended. Do not touch the black and try to reach the yellow goal! If you want to change settings like the sensitivity, scroll down. Clicking on the screen will pause the game. ");
       localStorage.setItem("gameInstructionsGeduldspiel", true);
+      if (gerät == "Handy") startTutorial();
     }
     var highscores = {}
     var AblageListe = [];
@@ -1676,7 +1677,7 @@ var recursionCounter = 0;
     sphere1.style.height = 50 + "px";
     if ((window.DeviceMotionEvent != undefined || joyStick.coordinates)) {
       window.ondevicemotion = function(e) {
-        if (!pause) {
+        if (!pause && !tutorial) {
           if (tabletPositionModeSelection.value.split(' (')[0] == "flat") ax1 = inOrAgainstDirection * calibratedDirection * event.accelerationIncludingGravity.x * sensitivityAcc.x;
           else if (tabletPositionModeSelection.value.split(' (')[0] == "almost on end") ax1 = inOrAgainstDirection * calibratedDirection * (event.accelerationIncludingGravity.z - 1) * (-sensitivityAcc.x);
           else ax1 = inOrAgainstDirection * calibratedDirection * (event.accelerationIncludingGravity.z + 1.7) * (-sensitivityAcc.x);
@@ -1704,7 +1705,7 @@ var recursionCounter = 0;
           }
         }
         // else if (gerät == "Handy") var nextCoordinates = {x: parseInt(x1 + vx1 / cssToNumber(sphere1.style.width)), y: parseInt(y1 + vy1 / cssToNumber(sphere1.style.height))}
-        if (!pause) {
+        if (!pause && !tutorial) {
         var landscapeOrientation = window.innerWidth / window.innerHeight > 1;
         if (landscapeOrientation) {
           vx1 = vx1 + ay1;
@@ -1890,7 +1891,51 @@ var recursionCounter = 0;
     x1 = currentLevel.spawnPoint.x;
     y1 = currentLevel.spawnPoint.y;
   }
+// "tutorial"
+var tutorial = false;
+function startTutorial() {
+  alert("Bring the blue circle into the yellow one for 3 seconds by tilting your device. By doing this you can understand how to hold the device");
+  mapBefore = Bild.src
+  Bild = new Image();
+  Bild.src = "https://adi.nicolaiweitkemper.de/Bilder/Gelduldspiel/tutorial.png";
+  Layout();
+  setTimeout(() => {
+    Layout();
+    canvas.beginPath();
+    canvas.arc(textur.width/2, textur.height/2, 50, 0, 2 * Math.PI, false);
+    canvas.fillStyle = 'rgb(255, 242, 0)';
+    canvas.fill();
+  }, 500);
+  window.scroll(0, 0);
+  tutorial = true;
+  inCircle = false;
+  window.addEventListener("deviceorientation", detectDeviceOrientation);
+}
+var inCircle;
+var inYellowTime;
+function detectDeviceOrientation(event) {
+  diff = {x: (event.beta/90)*(textur.width/2), y: (event.gamma/90)*(textur.height/2)}
+  sphere1.style.top = textur.height/2 + diff.y - textur.getBoundingClientRect().top + "px";
+  sphere1.style.left = textur.width/2 - diff.x - textur.getBoundingClientRect().left + "px";
+  if (diff.x < 25 && diff.y < 25 && !inCircle) {
+    inYellowTime = time;
+    inCircle = true;
+    // console.log("in");
   }
+  if (diff.x > 25 || diff.y > 25) {
+    inYellowTime = time;
+    inCircle = false;
+    // console.log("out");
+  }
+  if ((time - inYellowTime)*100 > 3000) {
+    alert("You did it! So now try to reach the yellow again , but this time you also have to avoid anything black. ");
+    Bild.src = mapBefore;
+    restartLevel();
+    Layout();
+    tutorial = false;
+    window.removeEventListener("deviceorientation", detectDeviceOrientation);
+  }
+}
     function showScores() {
       var pHighscores = highscores[level.mode][joyStickPlay.checked][easyMaps.checked];
       for (var i = 0; i < 11; i++) {
