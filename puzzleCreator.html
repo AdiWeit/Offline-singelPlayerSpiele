@@ -3382,7 +3382,7 @@ var trackActivity = {mouseDown: {position: {x: 0, y: 0}}, unclipp: {counter: 0, 
   var nearestTile = {};
   // #importantUserImput
   function mouseUp(byUnselection) {
-    if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked && Math.abs(trackActivity.mouseDown.position.x - mausx) > 7 && Math.abs(trackActivity.mouseDown.position.y - mausy) > 7 && confirm('Your game controls indicate that you want to use the drag and drop controls. Do you want to change the control mode? \n You can change this at any time in the settings. You can also click on "Help (Show controls)" or press f1 to understand the currently selected control mode.')) {
+    if (selected.tiles.length > 0 && !automaticTileSelectionReset.checked && Math.abs(trackActivity.mouseDown.position.x - mausx) > 7 && Math.abs(trackActivity.mouseDown.position.y - mausy) > 7 && document.getElementById("tutorial").style.display != "inline" && confirm('Your game controls indicate that you want to use the drag and drop controls. Do you want to change the control mode? \n You can change this at any time in the settings. You can also click on "Help (Show controls)" or press f1 to understand the currently selected control mode.')) {
       automaticTileSelectionReset.checked = true;
     }
     trackActivity.mouseDown = {position: {x: mausx, y: mausy}};
