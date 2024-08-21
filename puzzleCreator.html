@@ -4068,9 +4068,12 @@ function getSectionElm(elm) {
 }
 function setupTutorial() {
   sourceURL.value = "https://adi.nicolaiweitkemper.de/Bilder/puzzleCreatorLogo.png";
+  if (!offline && !confirm('Do you want to play the tutorial with your own media? If so, please click on"OK". Otherwise, click on "cancel"')) {
     useURL();
     setTimeout(() => {
-      if (!offline) startTutorial();
+      startTutorial();
+    }, 777);
+      }
       else {
         alert('Please upload an image or a video from this device (for example select "file (photo or video)") in order to start the tutorial with the image.');
         state.waitForPictureSelection = true;
