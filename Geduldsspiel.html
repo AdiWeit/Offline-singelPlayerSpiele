@@ -673,6 +673,48 @@ function requestMotionControlPermission() {
             {x: 1520 + 100, y: 145, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}}
           ],
         },
+        25: {
+          spawnPoint: {
+            x: 690,
+            y: 330
+          },
+          rotatingWall: [{
+            x: 685,
+            y: 264,
+            width: 1066,
+            height: 17,
+            angle: 0,
+            timeFor360GradRotation: 11500
+          }]
+        }, 
+        26: {
+          spawnPoint: {
+            x: 600,
+            y: 330
+          },
+          rotatingWall: [{
+            x: 730,
+            y: 354,
+            width: 1166,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 8500
+          }]
+        },
+        27: {
+          spawnPoint: {
+            x: 50,
+            y: 700
+          },
+          rotatingDreieck: [{
+            x: 700,
+            y: 370,
+            size: 140,
+            // timeFor360GradRotation: 8000,
+            timeFor360GradRotation: 10000,
+            angle: 0
+          }],
+        }
       },
       vorgefertigt: {
         1: {
@@ -967,6 +1009,50 @@ function requestMotionControlPermission() {
           ],
           levelNr: 24
         },
+        25: {
+          levelNr: 25,
+          spawnPoint: {
+            x: 690,
+            y: 310
+          },
+          rotatingWall: [{
+            x: 685,
+            y: 264,
+            width: 1766,
+            height: 17,
+            angle: 0,
+            timeFor360GradRotation: 10000
+          }]
+        },
+        26: {
+          levelNr: 26,
+          spawnPoint: {
+            x: 690,
+            y: 330
+          },
+          rotatingWall: [{
+            x: 760,
+            y: 354,
+            width: 1166,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          }]
+        },
+        27: {
+          levelNr: 27,
+          spawnPoint: {
+            x: 53,
+            y: 700
+          },
+          rotatingDreieck: [{
+            x: 700,
+            y: 370,
+            size: 140,
+            timeFor360GradRotation: 8000,
+            angle: 0
+          }],
+        }
       },
       editLevel: {
         selectedLevel: 1
@@ -1578,6 +1664,7 @@ var recursionCounter = 0;
       if (localStorage.getItem('checkpointsGeduldspiel')) checkpoints = JSON.parse(localStorage.getItem('checkpointsGeduldspiel'));
       if (highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][true] && highscores.normal[joyStickPlay.checked][true][Object.keys(level.normal.easyMaps).length] != undefined) {
         easyMaps.checked = false;
+        level.normal.levelType = "vorgefertigt";
       }
       showLevels();
       if (highscores.normal[joyStickPlay.checked][easyMaps.checked]) courceSelection.value = (parseInt(Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked])[Object.keys(highscores.normal[joyStickPlay.checked][easyMaps.checked]).length - 1]) + 1) + '. map';
@@ -1618,10 +1705,10 @@ var recursionCounter = 0;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       rotationStartTime = rotationTime;
       stopClockText.style.color = "green";
-      time = 0;
       if (!ignoreCheckpoints.checked) {
         goToCheckpoint();
       }
+      else time = 0;
     }
     function difficultyChanged(pEasyMaps, doNotSelectCource) {
       if (pEasyMaps) level.normal.levelType = 'easyMaps';
@@ -1729,8 +1816,9 @@ var recursionCounter = 0;
       document.getElementById('sensitivity').value = level.currentsensitivity;
       sensitivityAcc = {x: level.currentsensitivity, y: level.currentsensitivity};
     }
-    if (currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) requestAnimationFrame(renderLoop);
-    if (currentLevel.rotatingWall && !levelBefore?.rotatingWall) requestAnimationFrame(renderLoop);
+    if ((currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) || (currentLevel.rotatingWall && !levelBefore?.rotatingWall)) {
+      requestAnimationFrame(renderLoop);
+    }
     }
 
     sphere1.style.width = 50 + "px";
@@ -1881,7 +1969,7 @@ var recursionCounter = 0;
                     deleteAllElements();
                     automaticallyCreateNewRandomMap(0);
                   }
-                  else alert("You reached the goal!");
+                  else alert(`You reached the goal! in ${stopClockText.innerText}`);
                 }
                 else zielErreicht();
                 i = 4;
@@ -2095,6 +2183,7 @@ function detectDeviceOrientation(event) {
     var rotationStartTime = 0;
     var rotationTime = 0;
     function renderLoop(time) {
+      if (calibrating) return;
       if (pause) rotationStartTime += (time - rotationTime);
       rotationTime = time;
       time -= rotationStartTime;
@@ -2225,7 +2314,7 @@ function detectDeviceOrientation(event) {
     function startPause() {
       if (running == 0) {
         running = 1;
-        time = 0;
+        // time = 0;
         increment();
       } else {
         running = 0;
