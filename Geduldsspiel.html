@@ -714,6 +714,57 @@ function requestMotionControlPermission() {
             timeFor360GradRotation: 10000,
             angle: 0
           }],
+        },
+        28: {
+          rotatingWall: [{
+            x: 760,
+            y: 354,
+            width: 566,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+          {
+            x: 1360,
+            y: 454,
+            width: 50,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+          {
+            x: 1230,
+            y: 354,
+            width: 50,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+          {
+            x: 1490,
+            y: 354,
+            width: 50,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+          {
+            x: 1230,
+            y: 554,
+            width: 50,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+          {
+            x: 1490,
+            y: 554,
+            width: 50,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 9000
+          },
+        ]
         }
       },
       vorgefertigt: {
@@ -1052,6 +1103,58 @@ function requestMotionControlPermission() {
             timeFor360GradRotation: 8000,
             angle: 0
           }],
+        },
+        28: {
+          levelNr: 28,
+          rotatingWall: [{
+            x: 760,
+            y: 354,
+            width: 566,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+          {
+            x: 1360,
+            y: 454,
+            width: 84,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+          {
+            x: 1260,
+            y: 354,
+            width: 84,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+          {
+            x: 1460,
+            y: 354,
+            width: 84,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+          {
+            x: 1260,
+            y: 554,
+            width: 84,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+          {
+            x: 1460,
+            y: 554,
+            width: 84,
+            height: 17,
+            angle: 120,
+            timeFor360GradRotation: 7500
+          },
+        ]
         }
       },
       editLevel: {
@@ -1442,10 +1545,10 @@ var recursionCounter = 0;
   function setSpawnPoints(time, startDistance) {
     if (!time) time = 0;
     if (!startDistance) startDistance = 50;
-    if (goalLeft.checked) checkpoint = {position: {x: textur.width - Math.round(Math.random()*(startDistance)), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
-    if (goalTop.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: textur.height - Math.round(Math.random()*(startDistance))}, timeNeededToReach: 0};
-    if (goalRight.checked) checkpoint = {position: {x: Math.round(Math.random()*startDistance), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
-    if (goalBottom.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*startDistance)}, timeNeededToReach: 0};
+    if (goalLeft.checked) checkpoint = {position: {x: textur.width - Math.round(Math.random()*(startDistance)), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0, accurateTime: 0};
+    if (goalTop.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: textur.height - Math.round(Math.random()*(startDistance))}, timeNeededToReach: 0, accurateTime: 0};
+    if (goalRight.checked) checkpoint = {position: {x: Math.round(Math.random()*startDistance), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0, accurateTime: 0};
+    if (goalBottom.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*startDistance)}, timeNeededToReach: 0, accurateTime: 0};
     // checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
     currentLevel.spawnPoint = checkpoint.position;
     sphere1.style.left = checkpoint.position.x + "px";
@@ -1478,7 +1581,7 @@ var recursionCounter = 0;
   function canvasClicked() {
     var newSpawnpoint = false;
     if (setSchieberSpawnPoint.style.backgroundColor != "") {
-      checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, timeNeededToReach: 0};
+      checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, timeNeededToReach: 0, accurateTime: 0};
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
       restartLevel();
@@ -1743,7 +1846,7 @@ var recursionCounter = 0;
           if (joyStickPlay.checked) level.currentsensitivity = currentLevel.joySticksensitivity;
           if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
           if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [];
-          checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0};
+          checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0, accurateTime: 0};
           // start blinkWalls
           for (let i = 0; i < currentLevel.blinkWall?.length; i++) {
             var wall = currentLevel.blinkWall[i];
@@ -1846,6 +1949,7 @@ var recursionCounter = 0;
           x1 = checkpoint.position.x;
           y1 = checkpoint.position.y;
           time = checkpoint.timeNeededToReach;
+          if (checkpoint.accurateTime) rotationStartTime -= checkpoint.accurateTime;
         }
       }
       setInterval(function() {
@@ -1918,7 +2022,7 @@ var recursionCounter = 0;
             if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
             if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
             if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) {
-              checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0}];
+              checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0, accurateTime: 0}];
               levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked];
             }
             var newCheckpoint = 0;
@@ -1936,7 +2040,7 @@ var recursionCounter = 0;
           });
           if (newCheckpoint == levelCheckpoints.length && (red == 168 && green == 230 && blue == 29)) {
             console.log("checkpoint!!!");
-            levelCheckpoints.push({position: {x: x1, y: y1}, timeNeededToReach: time})
+            levelCheckpoints.push({position: {x: x1, y: y1}, timeNeededToReach: time, accurateTime: computedTime})
             level.checkpoint++;
             checkpoint = levelCheckpoints[level.checkpoint];
             localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
@@ -2182,11 +2286,13 @@ function detectDeviceOrientation(event) {
     }
     var rotationStartTime = 0;
     var rotationTime = 0;
+    var computedTime = 0;
     function renderLoop(time) {
       if (calibrating) return;
       if (pause) rotationStartTime += (time - rotationTime);
       rotationTime = time;
       time -= rotationStartTime;
+      computedTime = time;
       Layout(true);
       canvas.fillStyle = "black";
       drawJoystick();
@@ -2197,7 +2303,7 @@ function detectDeviceOrientation(event) {
     if (currentLevel.rotatingDreieck) {
       for (const dreieck of currentLevel.rotatingDreieck) {
         drawPath_V2(triangle, dreieck.x, dreieck.y, dreieck.size / 10 /*dreieck.size*/ ,
-          time / (dreieck.timeFor360GradRotation/2) * Math.PI + dreieck.angle*Math.PI/180 /*dreieck.angle*/ , "black", "black", i);
+        time / (dreieck.timeFor360GradRotation/2) * Math.PI + dreieck.angle*Math.PI/180 /*dreieck.angle*/ , "black", "black", i);
       }
     }
     if (currentLevel.rotatingWall) {
