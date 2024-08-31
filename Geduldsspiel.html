@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <script src="https://adi.nicolaiweitkemper.de/Database2/js.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue@2"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.5/angular.min.js"></script>
 <html>
 
@@ -10,8 +10,6 @@
     <button onclick="requestMotionControlPermission()" style="font-size: 10em; width: 100%; height: 100%; position: fixed; z-index: 2;" >allow device motion controls</button>
   </div>
   <title>game of patience (Chinese puzzle)</title>
-  <div>
-    <h1 id="stopClockText" style="color: green; background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px;"></h1>
   </div>
   <canvas id="textur" style="border-width: 3px; border-style: solid; border-color: orange;" onclick="canvasClicked();"></canvas>
   <meta name="viewport" id="scaleControler">
@@ -293,6 +291,7 @@ input[class='custom_small_slider']::-webkit-slider-thumb {
   <br>
   <br>
   <div id="app">
+    <h1 id="stopClockText" style="background-color: rgba(205, 218, 199, 0.27); border-radius: 5px; position: absolute; left: 13px; top: 13px;">{{ formattedTime }}</h1>
     <li v-for="title in db" id="levelNames">
       {{ title }}
     </li>
@@ -1321,7 +1320,6 @@ function requestMotionControlPermission() {
       if (!currentLevel.rotating) currentLevel.rotating = [];
         var newRotating = {shape: "randomMapCreator", path: selected.obj.path, position: selected.obj.middle, miliSecsPerRotation: parseInt(miliSecPerRotationNumber.value), sizeRelationToOriginal: parseFloat(rotatingRandomObjScale.value), angle: parseInt(rotatingRandomObjStartingAngle.value), objType: selected.type, objNumber: selected.obj.number};
         currentLevel.rotating.push(newRotating);
-        if (currentLevel.rotating.length == 1) requestAnimationFrame(renderLoop);
       objects[selected.type] = objects[selected.type].filter(x => JSON.stringify(x) != JSON.stringify(selected.obj));
       layoutObjs();
     }
@@ -1388,7 +1386,6 @@ function requestMotionControlPermission() {
       for (const obj of currentLevel.rotating) {
           if (obj.path) obj.path = createPath(obj.path.data.points, true, obj.path.data.middle);
       }
-      requestAnimationFrame(renderLoop)
       goalHitbox = level.goalHitbox;
       checkpoint.position = level.spawnPoint;
       textur.width = level.width;
@@ -1641,7 +1638,7 @@ var recursionCounter = 0;
   }
     if (!newSelection) {
       if (!newSpawnpoint) {
-        if (!selected.obj && gerät == "Handy") togglePause();
+        if (!selected.obj && gerät == "Handy") pause = !pause;
         if ((!selected.obj || !randomMapCreatorVisable.checked) && /*joyStick == "place" && */gerät == "PC" && setSchieberSpawnPoint.style.backgroundColor == "") {
           joyStick = {coordinates : {x: mausx - scrollX, y: mausy - scrollY}};
         }
@@ -1774,15 +1771,8 @@ var recursionCounter = 0;
       if (courceSelection.value == "") courceSelection.value = "1. map";
       setTimeout(() => {
         courceSelected();
-        startPause();
       }, 777);
     }
-    var app = new Vue({
-      el: '#app',
-      data: {
-        db: []
-      }
-    })
     function showLevels() {
       var value = courceSelection.value;
       while (courceSelection.options.length > 0) {
@@ -1802,7 +1792,6 @@ var recursionCounter = 0;
       vx1 = vx2 = vy1 = vy2 = 0;
       if (level.mode == "growing") {
         modeSelected("growing");
-        startPause();
       }
       x1 = currentLevel.spawnPoint.x;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
@@ -1811,7 +1800,6 @@ var recursionCounter = 0;
       if (!ignoreCheckpoints.checked) {
         goToCheckpoint();
       }
-      else time = 0;
     }
     function difficultyChanged(pEasyMaps, doNotSelectCource) {
       if (pEasyMaps) level.normal.levelType = 'easyMaps';
@@ -1821,7 +1809,26 @@ var recursionCounter = 0;
       easyMaps.checked = pEasyMaps;
       checkpointSelected(checkpointSelection.value);
     }
-    var currentLevel;
+    var app = new Vue({
+      el: '#app',
+      data: {
+        db: [],
+        computedTime: 0
+      },
+      // stop clock logic:
+      computed: {
+          formattedTime() {
+            mins = Math.floor((this.computedTime / (1000 * 60)) % 60);
+            secs = Math.floor((this.computedTime / 1000) % 60);
+            milliSecs = Math.floor(this.computedTime % 1000);
+            if (!randomMapCreatorVisable.checked && stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(milliSecs).padStart(3, '0')}`) {
+              stopClockText.style.color = "red";
+              new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
+            }
+            return `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(milliSecs).padStart(3, '0')}`;
+          }
+      },
+    })
     function courceSelected() {
       bullets = [];
       if (currentLevel) var levelBefore = JSON.parse(JSON.stringify(currentLevel));
@@ -1837,7 +1844,7 @@ var recursionCounter = 0;
         document.getElementById('levelEditTool').style.display = "none";
         level[level.mode].levelType = "showScores";      
       } else {
-        time = 0;
+        rotationStartTime = rotationTime;
         stopClockText.style.color = "green";
         if (document.getElementById('courceSelection').value != "") {
           level[level.mode].number = JSON.parse(document.getElementById('courceSelection').value.toString().split('.')[0]);
@@ -1884,9 +1891,7 @@ var recursionCounter = 0;
         setTimeout(function() {
           Layout();
         }, 500);
-        // startPause();
         window.scroll(0, 0)
-    if (level && currentLevel.cannons && !levelBefore?.cannons) requestAnimationFrame(renderLoop);
       }
       if (!["vorgefertigt", "easyMaps"].includes(level[level.mode].levelType)) document.getElementById('textur').style.display = "none";
       if (level[level.mode].levelType != "showScores") document.getElementById('scores').style.display = "none";
@@ -1918,9 +1923,6 @@ var recursionCounter = 0;
     if (automaticResetsensitivity.checked) {
       document.getElementById('sensitivity').value = level.currentsensitivity;
       sensitivityAcc = {x: level.currentsensitivity, y: level.currentsensitivity};
-    }
-    if ((currentLevel.rotatingDreieck && !levelBefore?.rotatingDreieck) || (currentLevel.rotatingWall && !levelBefore?.rotatingWall)) {
-      requestAnimationFrame(renderLoop);
     }
     }
 
@@ -2040,7 +2042,7 @@ var recursionCounter = 0;
           });
           if (newCheckpoint == levelCheckpoints.length && (red == 168 && green == 230 && blue == 29)) {
             console.log("checkpoint!!!");
-            levelCheckpoints.push({position: {x: x1, y: y1}, timeNeededToReach: time, accurateTime: computedTime})
+            levelCheckpoints.push({position: {x: x1, y: y1}, accurateTime: app._data.computedTime, bullets: bullets})
             level.checkpoint++;
             checkpoint = levelCheckpoints[level.checkpoint];
             localStorage.setItem('checkpointsGeduldspiel', JSON.stringify(checkpoints));
@@ -2068,7 +2070,7 @@ var recursionCounter = 0;
                 if (randomMapCreatorVisable.checked) {
                   x1 = checkpoint.position.x;
                   y1 = checkpoint.position.y;
-                  time = 0;
+                  rotationStartTime = rotationTime;
                   if (newRandomLevelAfterGoal.checked) {
                     deleteAllElements();
                     automaticallyCreateNewRandomMap(0);
@@ -2110,15 +2112,9 @@ var recursionCounter = 0;
         }
     }
     document.onkeydown = (event) => {
-      if (event.key == "p") togglePause();
+      if (event.key == "p") pause = !pause;
     }
     var pause = false;
-    function togglePause() {
-      pause = !pause;
-      if (!pause) {
-        increment();
-      }
-    }
     function blinkWall() {
       for (const wall of currentLevel.blinkWall) {
         if (!pause) {
@@ -2144,9 +2140,9 @@ var recursionCounter = 0;
         if (sensitivityAcc.x == currentLevel.sensitivity) {
           if (!highscores[level.mode][joyStickPlay.checked]) highscores[level.mode][joyStickPlay.checked] = {};
           if (!highscores[level.mode][joyStickPlay.checked][easyMaps.checked]) highscores[level.mode][joyStickPlay.checked][easyMaps.checked] = {};
-          if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] > mins + ":" + secs + ":" + "0" + tenths) {
+          if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] == undefined || highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] > `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(milliSecs).padStart(3, '0')}`) {
             if (highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr]) new Audio('https://adi.nicolaiweitkemper.de/Sounds/old-victory-sound-roblox-youtubemp3free.org.mp3').play();
-            highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] = mins + ":" + secs + ":" + "0" + tenths;
+            highscores[level.mode][joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}.${String(milliSecs).padStart(3, '0')}`;
             localStorage.setItem("geduldsspielHighscores", JSON.stringify(highscores));
           }
         }
@@ -2292,7 +2288,7 @@ function detectDeviceOrientation(event) {
       if (pause) rotationStartTime += (time - rotationTime);
       rotationTime = time;
       time -= rotationStartTime;
-      computedTime = time;
+      app._data.computedTime = time;
       Layout(true);
       canvas.fillStyle = "black";
       drawJoystick();
@@ -2323,23 +2319,25 @@ function detectDeviceOrientation(event) {
       if (currentLevel.cannons) {
         for (var cannon of currentLevel.cannons) {
           canvas.fillRect(cannon.x, cannon.y, cannon.width, cannon.height);
-          cannon.timeGone += 16;
-          if (cannon.timeGone == 16 || cannon.timeGone >= cannon.speed) {
-            cannon.timeGone = 1;
-            bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction});
+          if (time - cannon.startAt >= 0 && Math.floor((time - cannon.startAt) % cannon.speed) <= 200 && !cannon.shot) {
+            cannon.shot = true;
+            console.log("cannon shot!");
+            bullets.push({speed: cannon.bulletSpeed, x: cannon.x + 1*Math.abs(cannon.direction.y), y: cannon.y + 1*Math.abs(cannon.direction.x), width: cannon.width - 2*Math.abs(cannon.direction.y), height: cannon.height - 2*Math.abs(cannon.direction.x), direction: cannon.direction, shotAt: time});
+            bullets[bullets.length - 1].startX = bullets[bullets.length - 1].x;
+            bullets[bullets.length - 1].startY = bullets[bullets.length - 1].y;
           }
+          if (Math.floor((time - cannon.startAt) % cannon.speed) > 200) cannon.shot = false;
         }
+        for (var bullet of bullets) {
+          bullet.x = bullet.startX + ((time-bullet.shotAt)/100)*bullet.speed*bullet.direction.x;
+          bullet.y = bullet.startY + ((time-bullet.shotAt)/100)*bullet.speed*bullet.direction.y
+          canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
+        }
+        bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height + 101 && b.y >= -(b.height) && b.x >= -(b.width));
       }
-      for (var bullet of bullets) {
-        bullet.x += bullet.speed*bullet.direction.x;
-        bullet.y += bullet.speed*bullet.direction.y;
-        canvas.fillRect(bullet.x, bullet.y, bullet.width, bullet.height);
-      }
-      bullets = bullets.filter(b => b.x < window.innerWidth + 101 && b.y < textur.height && b.y >= -(b.height) && b.x >= -(b.width));
-      if (currentLevel.cannons || currentLevel.rotatingDreieck || currentLevel.rotatingWall || currentLevel.rotating) {
         requestAnimationFrame(renderLoop);
-      }
     }
+    requestAnimationFrame(renderLoop);
     function createPath(points, randomMapCreator, middle) {
     var cx = 0; cy = 0;
     for (const p of points) {
@@ -2413,49 +2411,6 @@ function detectDeviceOrientation(event) {
       }
       deathMarkers = deathMarkers.filter(x => x.visibility > 0);
     }
-    // stopWatch:
-    var time = 0;
-    var running = 0;
-
-    function startPause() {
-      if (running == 0) {
-        running = 1;
-        // time = 0;
-        increment();
-      } else {
-        running = 0;
-      }
-    }
-
-    function reset() {
-      running = 0;
-      timer = 0;
-    }
-
-    function increment() {
-      if (running == 1) {
-        setTimeout(function() {
-          time++;
-          mins = Math.floor(time / 10 / 60);
-          secs = Math.floor(time / 10);
-          secs -= 60 * mins;
-          tenths = time % 10;
-          if (mins < 10) {
-            mins = "0" + mins
-          }
-          if (secs < 10) {
-            secs = "0" + secs;
-          }
-          stopClockText.innerHTML = mins + ":" + secs + ":" + "0" + tenths;
-          if (!randomMapCreatorVisable.checked && stopClockText.style.color != "red" && highscores.normal[joyStickPlay.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked] && highscores.normal[joyStickPlay.checked][easyMaps.checked][currentLevel.levelNr] < mins + ":" + secs + ":" + "0" + tenths) {
-            new Audio('https://adi.nicolaiweitkemper.de/Sounds/deep%20Fail%20-%20N%c3%b6%c3%b6t.mp3').play();
-            stopClockText.style.color = "red";
-          }
-          if (!pause) increment();
-        }, 100);
-      }
-    }
-
 
     function readMouseMove(e) {
       mausx = e.clientX + scrollX;
