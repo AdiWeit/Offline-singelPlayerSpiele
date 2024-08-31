@@ -1833,6 +1833,7 @@ var recursionCounter = 0;
       easyMaps.checked = pEasyMaps;
       checkpointSelected(checkpointSelection.value);
     }
+    var currentLevel = {levelNr: 1};
     var app = new Vue({
       el: '#app',
       data: {
@@ -1853,6 +1854,7 @@ var recursionCounter = 0;
           }
       },
     })
+    var levelCheckpoints = [];
     function courceSelected() {
       bullets = [];
       if (currentLevel) var levelBefore = JSON.parse(JSON.stringify(currentLevel));
