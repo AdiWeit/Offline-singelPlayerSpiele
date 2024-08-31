@@ -1565,11 +1565,11 @@ var recursionCounter = 0;
   function setSpawnPoints(time, startDistance) {
     if (!time) time = 0;
     if (!startDistance) startDistance = 50;
-    if (goalLeft.checked) checkpoint = {position: {x: textur.width - Math.round(Math.random()*(startDistance)), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0, accurateTime: 0};
-    if (goalTop.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: textur.height - Math.round(Math.random()*(startDistance))}, timeNeededToReach: 0, accurateTime: 0};
-    if (goalRight.checked) checkpoint = {position: {x: Math.round(Math.random()*startDistance), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0, accurateTime: 0};
-    if (goalBottom.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*startDistance)}, timeNeededToReach: 0, accurateTime: 0};
-    // checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}, timeNeededToReach: 0};
+    if (goalLeft.checked) checkpoint = {position: {x: textur.width - Math.round(Math.random()*(startDistance)), y: Math.round(Math.random()*textur.height)}, accurateTime: 0};
+    if (goalTop.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: textur.height - Math.round(Math.random()*(startDistance))}, accurateTime: 0};
+    if (goalRight.checked) checkpoint = {position: {x: Math.round(Math.random()*startDistance), y: Math.round(Math.random()*textur.height)}, accurateTime: 0};
+    if (goalBottom.checked) checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*startDistance)}, accurateTime: 0};
+    // checkpoint = {position: {x: Math.round(Math.random()*textur.width), y: Math.round(Math.random()*textur.height)}};
     currentLevel.spawnPoint = checkpoint.position;
     sphere1.style.left = checkpoint.position.x + "px";
     sphere1.style.top = checkpoint.position.y + "px";
@@ -1601,7 +1601,7 @@ var recursionCounter = 0;
   function canvasClicked() {
     var newSpawnpoint = false;
     if (setSchieberSpawnPoint.style.backgroundColor != "") {
-      checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, timeNeededToReach: 0, accurateTime: 0};
+      checkpoint = {position: {x: mausx, y: mausy - (textur.getBoundingClientRect().top + scrollY)}, accurateTime: 0};
       setSchieberSpawnPoint.style.backgroundColor = "";
       level.checkpoint = 0;
       restartLevel();
@@ -1877,7 +1877,7 @@ var recursionCounter = 0;
           if (joyStickPlay.checked) level.currentsensitivity = currentLevel.joySticksensitivity;
           if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
           if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [];
-          checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0, accurateTime: 0};
+          checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked][0] = {position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, accurateTime: 0};
           // start blinkWalls
           for (let i = 0; i < currentLevel.blinkWall?.length; i++) {
             var wall = currentLevel.blinkWall[i];
@@ -2048,7 +2048,7 @@ var recursionCounter = 0;
             if (!checkpoints[level.mode]) checkpoints[level.mode] = [];
             if (!checkpoints[level.mode][currentLevel.levelNr]) checkpoints[level.mode][currentLevel.levelNr] = {};
             if (!checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked]) {
-              checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, timeNeededToReach: 0, accurateTime: 0}];
+              checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked] = [{position: {x: currentLevel.spawnPoint.x, y: currentLevel.spawnPoint.y}, accurateTime: 0}];
               levelCheckpoints = checkpoints[level.mode][currentLevel.levelNr][easyMaps.checked];
             }
             var newCheckpoint = 0;
@@ -2314,8 +2314,8 @@ function detectDeviceOrientation(event) {
       time -= rotationStartTime;
       app._data.computedTime = time;
       Layout(true);
-      canvas.fillStyle = "black";
       drawJoystick();
+      canvas.fillStyle = "black";
       //  canvas.clearRect(0, 0, textur.width, textur.height);
       const scale = Math.sin(time / 500) * 0.2 + 1.0;
       const scale2 = Math.cos(time / 1000) * 0.4 + 1.0;
