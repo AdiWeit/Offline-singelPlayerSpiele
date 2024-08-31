@@ -663,13 +663,13 @@ function requestMotionControlPermission() {
         },
         23: {
           cannons: [
-            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 14000, bulletSpeed: 7, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 8888, bulletSpeed: 50, direction: {x: -1, y: 0}, startAt: 0}
           ],
         },
         24: {
           cannons: [
-            {x: 1520 + 100, y: -17, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}},
-            {x: 1520 + 100, y: 145, width: 100, height: 50, speed: 7000, bulletSpeed: 3, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: -17, width: 100, height: 50, speed: 7000, bulletSpeed: 35, direction: {x: -1, y: 0}, startAt: 0},
+            {x: 1520 + 100, y: 145, width: 100, height: 50, speed: 7000, bulletSpeed: 35, direction: {x: -1, y: 0}, startAt: 0}
           ],
         },
         25: {
@@ -764,6 +764,17 @@ function requestMotionControlPermission() {
             timeFor360GradRotation: 9000
           },
         ]
+        },
+        29: {
+          cannons: [
+            {x: 200, y: 500, width: 100, height: 100, speed: 2700, bulletSpeed: 30, direction: {x: 0, y: -1}, startAt: 0},
+            {x: 330, y: 500, width: 100, height: 100, speed: 2700, bulletSpeed: 30, direction: {x: 0, y: -1}, startAt: 1000},
+            {x: 440, y: 500, width: 100, height: 100, speed: 2700, bulletSpeed: 30, direction: {x: 0, y: -1}, startAt: 2000},
+            
+            {x: 1270, y: 250, width: 100, height: 100, speed: 2000, bulletSpeed: 30, direction: {x: -1, y: 0}, startAt: 0},
+           
+            {x: 870, y: 40, width: 100, height: 100, speed: 2700, bulletSpeed: 20, direction: {x: 0, y: 1}, startAt: 3000},
+          ],
         }
       },
       vorgefertigt: {
@@ -1046,7 +1057,7 @@ function requestMotionControlPermission() {
         },
         23: {
           cannons: [
-            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 9999, bulletSpeed: 7, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: 45, width: 100, height: 100, speed: 5000, bulletSpeed: 50, direction: {x: -1, y: 0}, startAt: 0}
           ],
           levelNr: 23
         },
@@ -1054,8 +1065,8 @@ function requestMotionControlPermission() {
           sensitivity: 7,
           joySticksensitivity: 4,
           cannons: [
-            {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}},
-            {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 10, timeGone: 0, direction: {x: -1, y: 0}}
+            {x: 1520 + 100, y: 10, width: 100, height: 50, speed: 7000, bulletSpeed: 50, direction: {x: -1, y: 0}, startAt: 0},
+            {x: 1520 + 100, y: 137, width: 100, height: 50, speed: 7000, bulletSpeed: 50, direction: {x: -1, y: 0}, startAt: 0}
           ],
           levelNr: 24
         },
@@ -1154,6 +1165,18 @@ function requestMotionControlPermission() {
             timeFor360GradRotation: 7500
           },
         ]
+        },
+        29: {
+          levelNr: 29,
+          cannons: [
+            {x: 200, y: 500, width: 100, height: 100, speed: 2000, bulletSpeed: 50, direction: {x: 0, y: -1}, startAt: 0},
+            {x: 330, y: 500, width: 100, height: 100, speed: 2000, bulletSpeed: 50, direction: {x: 0, y: -1}, startAt: 1000},
+            {x: 440, y: 500, width: 100, height: 100, speed: 2000, bulletSpeed: 50, direction: {x: 0, y: -1}, startAt: 2000},
+            
+            {x: 1270, y: 250, width: 100, height: 100, speed: 2000, bulletSpeed: 50, direction: {x: -1, y: 0}, startAt: 0},
+           
+            {x: 870, y: 40, width: 100, height: 100, speed: 1000, bulletSpeed: 27, direction: {x: 0, y: 1}, startAt: 3000},
+          ],
         }
       },
       editLevel: {
@@ -1796,6 +1819,7 @@ var recursionCounter = 0;
       x1 = currentLevel.spawnPoint.x;
       y1 = currentLevel.spawnPoint.y; //AblageListe[5] - 150 + 3;
       rotationStartTime = rotationTime;
+      bullets = [];
       stopClockText.style.color = "green";
       if (!ignoreCheckpoints.checked) {
         goToCheckpoint();
@@ -1950,8 +1974,8 @@ var recursionCounter = 0;
         if (checkpoint) {
           x1 = checkpoint.position.x;
           y1 = checkpoint.position.y;
-          time = checkpoint.timeNeededToReach;
           if (checkpoint.accurateTime) rotationStartTime -= checkpoint.accurateTime;
+          if (checkpoint.bullets) bullets = checkpoint.bullets;
         }
       }
       setInterval(function() {
